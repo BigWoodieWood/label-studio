@@ -113,7 +113,7 @@ class FileUpload(models.Model):
     def read_task_from_uploaded_file(self):
         logger.debug('Read 1 task from uploaded file {}'.format(self.filepath))
         if settings.CLOUD_FILE_STORAGE_ENABLED:
-            tasks = [{'data': {settings.DATA_UNDEFINED_NAME: self.filepath}}]
+            tasks = [{'data': {settings.DATA_UNDEFINED_NAME: self.file.storage.url(self.file.name)}}]
         else:
             tasks = [{'data': {settings.DATA_UNDEFINED_NAME: self.url}}]
         return tasks

@@ -66,7 +66,10 @@ class StorageProxyMixin:
 
 
 class CustomS3Boto3Storage(StorageProxyMixin, S3Boto3Storage):
-    pass
+    def url(self, name, storage_url=False, *args, **kwargs):
+        if storage_url is True:
+            return super().url(name, *args, **kwargs)
+        return f"s3://{settings.AWS_STORAGE_BUCKET_NAME}/{name}"
 
 
 class CustomAzureStorage(StorageProxyMixin, AzureStorage):
