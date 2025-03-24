@@ -77,7 +77,7 @@ export const LabelingSettings = () => {
     setEssentialDataChanged(validation.config_essential_data_has_changed);
   }, []);
 
-  if (!project.id) {
+  if (!project.id || project.label_config?.replace(/\s/g, "") === "<View></View>") {
     return (
       <EmptyState
         icon={<IconCode style={{ width: 80, height: 80 }} />}
