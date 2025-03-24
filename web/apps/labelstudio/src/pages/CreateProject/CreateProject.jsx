@@ -83,7 +83,7 @@ export const CreateProject = ({ onClose, redirect = true }) => {
   const [step, _setStep] = React.useState("name"); // name | import | config
   const [waiting, setWaitingStatus] = React.useState(false);
 
-  const project = useDraftProject();
+  const { project, setProject: updateProject } = useDraftProject();
   const history = useHistory();
   const api = useAPI();
 
@@ -107,7 +107,7 @@ export const CreateProject = ({ onClose, redirect = true }) => {
     setError(null);
   }, [name]);
 
-  const { columns, uploading, uploadDisabled, finishUpload, pageProps } = useImportPage(project, sample);
+  const { columns, uploading, uploadDisabled, finishUpload, pageProps, uploadSample } = useImportPage(project, sample);
 
   const rootClass = cn("create-project");
   const tabClass = rootClass.elem("tab");
@@ -125,21 +125,9 @@ export const CreateProject = ({ onClose, redirect = true }) => {
     () => ({
       title: name,
       description,
-      label_config: sample && sample.label_config ? sample.label_config : config,
+      label_config: sample && sample.label_config ? sample.label_config : project?.label_config ?? EMPTY_CONFIG,
     }),
-    [name, description, config, sample],
-  );
-  const uploadSample = useCallback(
-    async (sample) => {
-      const url = sample.url;
-      const body = new URLSearchParams({ url });
-      await importFiles({
-        files: [{ name: url }],
-        body,
-        project,
-      });
-    },
-    [project],
+    [name, description, project?.label_config, sample],
   );
 
   const onCreate = React.useCallback(async () => {
@@ -238,12 +226,15 @@ export const CreateProject = ({ onClose, redirect = true }) => {
               setConfig(selectedSample.label_config);
             }
           }}
+          openLabelingConfig={() => setStep("config")}
           hasLabelConfig={config && config !== EMPTY_CONFIG}
           {...pageProps}
         />
         <ConfigPage
           project={project}
-          onUpdate={setConfig}
+          onUpdate={(config) => {
+            updateProject({ ...project, label_config: config });
+          }}
           show={step === "config"}
           columns={columns}
           disableSaveButton={true}

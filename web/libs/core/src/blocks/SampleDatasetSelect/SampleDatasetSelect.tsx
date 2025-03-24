@@ -33,22 +33,22 @@ export function SampleDatasetSelect({
 
   return (
     <div className="flex flex-row items-start gap-4">
-      <div className="flex gap-3 items-center">
-        <span className="text-lsNeutralContentSubtler">or use a sample dataset</span>
-        <Select value={sample?.url ?? undefined} onValueChange={onSelect}>
-          <SelectTrigger className="h-10 min-w-52 rounded-sm border-lsNeutralBorderBold data-[placeholder]:text-[#000] text-[16px] [&_svg]:stroke-[#000]">
-            {title}
-          </SelectTrigger>
-          <SelectContent className="z-99999 min-w-90">
-            {samples.map((sample) => (
-              <SelectItem value={sample.url} key={sample.url}>
-                <div className=" font-bold">{sample.title}</div>
-                <div className="mt-2">{sample.description}</div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="flex gap-3 items-center">
+          <span className="text-lsNeutralContentSubtler">or use a sample dataset</span>
+          <Select value={sample?.url ?? undefined} onValueChange={onSelect}>
+            <SelectTrigger className="h-10 min-w-52 rounded-sm border-lsNeutralBorderBold data-[placeholder]:text-[#000] text-[16px] [&_svg]:stroke-[#000]">
+              {title}
+            </SelectTrigger>
+            <SelectContent className="z-99999 min-w-90">
+              {samples.map((sample) => (
+                <SelectItem value={sample.url} key={sample.url}>
+                  <div className=" font-bold">{sample.title}</div>
+                  <div className="mt-2">{sample.description}</div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
       {warningMessage && (
         <div className="flex items-start gap-2 p-2 text-red-600 bg-red-50 border border-red-200 rounded-sm max-w-xs">
