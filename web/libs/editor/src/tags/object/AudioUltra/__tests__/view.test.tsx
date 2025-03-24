@@ -11,11 +11,11 @@ jest.mock("@humansignal/core/lib/hooks/usePersistentState", () => ({
   usePersistentJSONState: jest.fn().mockReturnValue([{}, jest.fn()]),
 }));
 
-jest.mock("../../../components/Timeline/Context", () => ({
+jest.mock("../../../../components/Timeline/Context", () => ({
   TimelineContextProvider: ({ children }) => children,
 }));
 
-jest.mock("../../../lib/AudioUltra/react", () => ({
+jest.mock("../../../../lib/AudioUltra/react", () => ({
   useWaveform: jest.fn().mockReturnValue({
     waveform: { current: { on: jest.fn(), load: jest.fn() } },
     currentTime: 0,
