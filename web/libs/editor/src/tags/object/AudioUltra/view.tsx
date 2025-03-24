@@ -92,6 +92,9 @@ const AudioUltraView: FC<AudioUltraProps> = ({ item }) => {
     };
 
     const selectRegion = (region: Region | Segment, event: MouseEvent) => {
+      // Guard against null or undefined region
+      if (!region) return;
+      
       const annotation = item.annotation;
 
       const growSelection = event.metaKey || event.ctrlKey;
@@ -101,7 +104,7 @@ const AudioUltraView: FC<AudioUltraProps> = ({ item }) => {
       // to select or unselect region
       const itemRegion = item.regs.find((obj: any) => obj.id === region.id);
       // to select or unselect unlabeled segments
-      const targetInWave = item._ws.regions.findRegion(region.id);
+      const targetInWave = item._ws?.regions.findRegion(region.id);
 
       if (annotation.isLinkingMode && itemRegion) {
         annotation.addLinkedRegion(itemRegion);
@@ -118,9 +121,9 @@ const AudioUltraView: FC<AudioUltraProps> = ({ item }) => {
       }
 
       // deselect all other segments if not changing multiselection
-      if (!growSelection) {
+      if (!growSelection && item._ws?.regions?.regions) {
         item._ws.regions.regions.forEach((obj: any) => {
-          if (obj.id !== region.id) {
+          if (obj && obj.id !== region.id) {
             obj.handleSelected(false);
           }
         });

@@ -64,6 +64,9 @@ const SelectionMap = types
         });
       },
       select(region) {
+        // Check if region is defined before trying to put it in the map
+        if (!region) return;
+        
         self.selected.put(region);
         region.selectRegion && region.selectRegion();
 
@@ -126,6 +129,9 @@ const SelectionMap = types
         }
       },
       highlight(region) {
+        // Only attempt to highlight if region is defined
+        if (!region) return;
+        
         self.clear();
         self.select(region);
       },
