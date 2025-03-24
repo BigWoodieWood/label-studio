@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Button, Columns } from "../../../components";
+import { Button, Columns, EmptyState, Spinner } from "../../../components";
 import { confirm, modal } from "../../../components/Modal/Modal";
-import { Spinner } from "../../../components/Spinner/Spinner";
+import { IconDatasets } from "@humansignal/icons";
 import { ApiContext } from "../../../providers/ApiProvider";
 import { useProject } from "../../../providers/ProjectProvider";
 import { StorageCard } from "./StorageCard";
@@ -135,7 +135,25 @@ export const StorageSet = ({ title, target, rootClass, buttonLabel }) => {
         <div className={rootClass.elem("empty")}>
           <Spinner size={32} />
         </div>
-      ) : storages.length === 0 ? null : (
+      ) : storages.length === 0 ? (
+        <EmptyState
+          icon={<IconDatasets style={{ width: 80, height: 80 }} />}
+          title={target === "export" ? "No export storages configured" : "No import storages configured"}
+          description={target === "export" ? 
+            "Configure where to export completed annotations, such as Amazon S3, Google Cloud Storage, or Microsoft Azure." : 
+            "Configure where to import data from, such as Amazon S3, Google Cloud Storage, or Microsoft Azure."}
+          action={<Button onClick={() => showStorageFormModal()}>{buttonLabel}</Button>}
+          footer={
+            <div>
+              Need help?
+              <br />
+              <a href="https://labelstud.io/guide/storage.html" target="_blank" rel="noreferrer">
+                Learn more about storage integrations in our documentation
+              </a>
+            </div>
+          }
+        />
+      ) : (
         storages.map((storage) => (
           <StorageCard
             key={storage.id}

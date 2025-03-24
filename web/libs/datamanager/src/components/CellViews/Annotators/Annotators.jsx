@@ -21,7 +21,11 @@ export const Annotators = (cell) => {
 
   return (
     <div className={annotatorsCN.toString()}>
-      {renderable.map((item, index) => {
+      {renderable.length === 0 ? (
+        <div className={annotatorsCN.elem("empty").toString()}>
+          No annotators assigned
+        </div>
+      ) : renderable.map((item, index) => {
         const user = item.user ?? item;
         const { annotated, reviewed, review } = item;
 

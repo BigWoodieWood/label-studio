@@ -125,7 +125,11 @@ export const ActionsButton = injector(
       );
     };
 
-    const actionButtons = actions.map(ActionButton);
+    const actionButtons = actions.length ? actions.map(ActionButton) : [
+      <Menu.Item key="no-actions" disabled>
+        No actions available
+      </Menu.Item>
+    ];
     const recordTypeLabel = isFFLOPSE3 && store.SDK.type === "DE" ? "Record" : "Task";
 
     return (

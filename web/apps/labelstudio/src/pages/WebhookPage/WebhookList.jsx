@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { Button } from "../../components";
-import { IconCross, IconPencil } from "@humansignal/icons";
+import { Button, EmptyState } from "../../components";
+import { IconCross, IconPencil, IconWebhook } from "@humansignal/icons";
 import { Toggle } from "@humansignal/ui";
 import { Block, Elem } from "../../utils/bem";
 import "./WebhookPage.scss";
@@ -34,7 +34,23 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
         <Button onClick={onAddWebhook}>Add Webhook</Button>
       </Elem>
       <Elem>
-        {webhooks.length === 0 ? null : (
+        {webhooks.length === 0 ? (
+          <EmptyState
+            icon={<IconWebhook style={{ width: 80, height: 80 }} />}
+            title="No webhooks configured"
+            description="Webhooks let you notify external systems when annotations are created or updated. Set up your first webhook to start integrating with other systems."
+            action={<Button onClick={onAddWebhook}>Add Webhook</Button>}
+            footer={
+              <div>
+                Need help?
+                <br />
+                <a href="https://labelstud.io/guide/webhooks.html" target="_blank" rel="noreferrer">
+                  Learn more about webhooks in our documentation
+                </a>
+              </div>
+            }
+          />
+        ) : (
           <Block name="webhook-list">
             {webhooks.map((obj) => (
               <Elem key={obj.id} name="item">

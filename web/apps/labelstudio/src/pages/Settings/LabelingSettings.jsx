@@ -1,4 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
+import { Button, EmptyState } from "../../components";
+import { IconCode } from "@humansignal/icons";
 import { useAPI } from "../../providers/ApiProvider";
 import { useProject } from "../../providers/ProjectProvider";
 import { FF_UNSAVED_CHANGES, isFF } from "../../utils/feature-flags";
@@ -75,7 +77,25 @@ export const LabelingSettings = () => {
     setEssentialDataChanged(validation.config_essential_data_has_changed);
   }, []);
 
-  if (!project.id) return null;
+  if (!project.id) {
+    return (
+      <EmptyState
+        icon={<IconCode style={{ width: 80, height: 80 }} />}
+        title="Labeling interface not configured"
+        description="The labeling interface defines what elements you'll use to annotate your data. You'll need to set this up to start labeling."
+        action={<Button onClick={() => onUpdate('<View></View>')}>Set up labeling interface</Button>}
+        footer={
+          <div>
+            Need help?
+            <br />
+            <a href="https://labelstud.io/guide/setup_project.html" target="_blank" rel="noreferrer">
+              Learn more about configuring the labeling interface
+            </a>
+          </div>
+        }
+      />
+    );
+  }
 
   return (
     <ConfigPage

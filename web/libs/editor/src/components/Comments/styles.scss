@@ -1,0 +1,50 @@
+.comments {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  
+  &__list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 15px;
+  }
+}
+
+.comments-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  &_empty {
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+  }
+}
+
+.comments-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 240px;
+  gap: 8px;
+  color: #585858;
+  
+  &__icon {
+    margin-bottom: 4px;
+  }
+  
+  &__title {
+    font-weight: 500;
+    font-size: 16px;
+    color: #1F1F1F;
+  }
+  
+  &__description {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
