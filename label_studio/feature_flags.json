@@ -975,7 +975,7 @@
     },
     "fflag_all_feat_dia_1777_ls_homepage_short": {
       "key": "fflag_all_feat_dia_1777_ls_homepage_short",
-      "on": true,
+      "on": false,
       "prerequisites": [],
       "targets": [],
       "contextTargets": [],
