@@ -18,7 +18,7 @@ import {
   FF_DEV_2887,
   FF_DEV_3034,
   FF_LSDV_4620_3_ML,
-  FF_OPTIC_2,
+  FF_REGION_VISIBILITY_FROM_URL,
   isFF,
 } from "../utils/feature-flags";
 import { isDefined } from "../utils/utils";
@@ -140,6 +140,9 @@ export class LSFWrapper {
         "annotations:tabs",
         "predictions:tabs",
       );
+      if (isFF(FF_REGION_VISIBILITY_FROM_URL)) {
+        interfaces.push("annotations:copy-link");
+      }
     }
 
     if (this.datamanager.hasInterface("instruction")) {
@@ -345,7 +348,7 @@ export class LSFWrapper {
     this.setLSFTask(task, annotationID, fromHistory);
   }
 
-  setLSFTask(task, annotationID, fromHistory) {
+  setLSFTask(task, annotationID, fromHistory, selectPrediction = false) {
     if (!this.lsf) return;
 
     const hasChangedTasks = this.lsf?.task?.id !== task?.id && task?.id;
@@ -390,12 +393,12 @@ export class LSFWrapper {
     this.lsf.toggleInterface("topbar:task-counter", true);
     this.lsf.assignTask(task);
     this.lsf.initializeStore(lsfTask);
-    this.setAnnotation(annotationID, fromHistory || isRejectedQueue);
+    this.setAnnotation(annotationID, fromHistory || isRejectedQueue, selectPrediction);
     this.setLoading(false);
   }
 
   /** @private */
-  setAnnotation(annotationID, selectAnnotation = false) {
+  setAnnotation(annotationID, selectAnnotation = false, selectPrediction = false) {
     const id = annotationID ? annotationID.toString() : null;
     const { annotationStore: cs } = this.lsf;
     let annotation;
@@ -459,7 +462,10 @@ export class LSFWrapper {
         annotation = cs.createAnnotation();
       }
     } else {
-      if (this.annotations.length === 0 && this.predictions.length > 0 && !this.isInteractivePreannotations) {
+      if (selectPrediction) {
+        annotation = this.predictions.find((p) => p.pk === id);
+        annotation ??= first; // if prediction not found, select first annotation and resume existing behaviour
+      } else if (this.annotations.length === 0 && this.predictions.length > 0 && !this.isInteractivePreannotations) {
         const predictionByModelVersion = this.predictions.find((p) => p.createdBy === this.project.model_version);
         annotation = cs.addAnnotationFromPrediction(predictionByModelVersion ?? this.predictions[0]);
       } else if (this.annotations.length > 0 && id && id !== "auto") {
@@ -472,7 +478,14 @@ export class LSFWrapper {
     }
 
     if (annotation) {
-      cs.selectAnnotation(annotation.id);
+      // We want to be sure this is explicitly understood to be a prediction and the
+      // user wants to select it directly
+      if (selectPrediction && annotation.type === "prediction") {
+        cs.selectPrediction(annotation.id);
+      } else {
+        // Otherwise we default the behaviour to being as was before
+        cs.selectAnnotation(annotation.id);
+      }
       this.datamanager.invoke("annotationSet", annotation);
     }
   }
@@ -727,6 +740,8 @@ export class LSFWrapper {
   };
 
   onSubmitDraft = async (studio, annotation, params = {}) => {
+    // It should be preserved as soon as possible because each `await` will allow it to be changed
+    const taskId = this.task.id;
     const annotationDoesntExist = !annotation.pk;
     const data = { body: this.prepareData(annotation, { isNewDraft: true }) }; // serializedAnnotation
     const hasChanges = this.needsDraftSave(annotation);
@@ -749,11 +764,11 @@ export class LSFWrapper {
     let response;
 
     if (annotationDoesntExist) {
-      response = await this.datamanager.apiCall("createDraftForTask", { taskID: this.task.id }, data);
+      response = await this.datamanager.apiCall("createDraftForTask", { taskID: taskId }, data);
     } else {
       response = await this.datamanager.apiCall(
         "createDraftForAnnotation",
-        { taskID: this.task.id, annotationID: annotation.pk },
+        { taskID: taskId, annotationID: annotation.pk },
         data,
       );
     }
@@ -867,7 +882,7 @@ export class LSFWrapper {
     if (window.APP_SETTINGS.read_only_quick_view_enabled && !this.labelStream) {
       prevAnnotation?.setEditable(false);
     }
-    if (isFF(FF_OPTIC_2) && !!nextAnnotation?.history?.undoIdx) {
+    if (nextAnnotation?.history?.undoIdx) {
       this.saveDraft(nextAnnotation).then(() => {
         this.datamanager.invoke("onSelectAnnotation", prevAnnotation, nextAnnotation, options, this);
       });
@@ -877,11 +892,11 @@ export class LSFWrapper {
   };
 
   onNextTask = async (nextTaskId, nextAnnotationId) => {
-    if (isFF(FF_OPTIC_2)) this.saveDraft();
+    this.saveDraft();
     this.loadTask(nextTaskId, nextAnnotationId, true);
   };
   onPrevTask = async (prevTaskId, prevAnnotationId) => {
-    if (isFF(FF_OPTIC_2)) this.saveDraft();
+    this.saveDraft();
     this.loadTask(prevTaskId, prevAnnotationId, true);
   };
   async submitCurrentAnnotation(eventName, submit, includeId = false, loadNext = true) {

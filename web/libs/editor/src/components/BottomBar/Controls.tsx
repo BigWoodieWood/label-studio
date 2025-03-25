@@ -8,7 +8,7 @@ import { observer } from "mobx-react";
 import type React from "react";
 import { useCallback, useState } from "react";
 
-import { IconBan, LsChevron } from "../../assets/icons";
+import { IconBan, IconChevron } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
 import { Dropdown } from "../../common/Dropdown/Dropdown";
 import type { CustomButtonType } from "../../stores/CustomButton";
@@ -41,23 +41,31 @@ type ControlButtonProps = {
   onClick: (e: React.MouseEvent) => void;
 };
 
+export const EMPTY_SUBMIT_TOOLTIP = "Empty annotations denied in this project";
+
 /**
  * Custom action button component, rendering buttons from store.customButtons
  */
 const ControlButton = observer(({ button, disabled, onClick }: ControlButtonProps) => {
   const look = button.disabled || disabled ? "disabled" : button.look;
 
+  const result = (
+    <Button
+      {...button.props}
+      aria-label={button.ariaLabel}
+      disabled={button.disabled || disabled}
+      look={look}
+      onClick={onClick}
+    >
+      {button.title}
+    </Button>
+  );
+  if (!button.tooltip) {
+    return result;
+  }
   return (
-    <ButtonTooltip title={button.tooltip ?? ""}>
-      <Button
-        {...button.props}
-        aria-label={button.ariaLabel}
-        disabled={button.disabled || disabled}
-        look={look}
-        onClick={onClick}
-      >
-        {button.title}
-      </Button>
+    <ButtonTooltip title={button.tooltip}>
+      <Elem name="tooltip-wrapper">{result}</Elem>
     </ButtonTooltip>
   );
 });
@@ -224,7 +232,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
       };
 
       if (userGenerate || (store.explore && !userGenerate && store.hasInterface("submit"))) {
-        const title = submitDisabled ? "Empty annotations denied in this project" : "Save results: [ Ctrl+Enter ]";
+        const title = submitDisabled ? EMPTY_SUBMIT_TOOLTIP : "Save results: [ Ctrl+Enter ]";
 
         buttons.push(
           <ButtonTooltip key="submit" title={title}>
@@ -250,7 +258,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
                       content={<SubmitOption onClickMethod={store.submitAnnotation} isUpdate={false} />}
                     >
                       <div>
-                        <LsChevron />
+                        <IconChevron />
                       </div>
                     </Dropdown.Trigger>
                   ) : undefined
@@ -291,7 +299,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
                     content={<SubmitOption onClickMethod={store.updateAnnotation} isUpdate={isUpdate} />}
                   >
                     <div>
-                      <LsChevron />
+                      <IconChevron />
                     </div>
                   </Dropdown.Trigger>
                 ) : undefined

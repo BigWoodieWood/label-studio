@@ -126,7 +126,7 @@ export const AppStore = types
     },
 
     get currentFilter() {
-      return self.currentView.filterSnposhot;
+      return self.currentView.filterSnapshot;
     },
   }))
   .volatile(() => ({
@@ -245,14 +245,16 @@ export const AppStore = types
 
         if (isFF(FF_REGION_VISIBILITY_FROM_URL)) {
           const { annotation: annIDFromUrl, region: regionIDFromUrl } = History.getParams();
-          if (annIDFromUrl) {
-            const lsfAnnotation = self.LSF.lsf.annotationStore.annotations.find((a) => {
+          const annotationStore = self.LSF?.lsf?.annotationStore;
+
+          if (annIDFromUrl && annotationStore) {
+            const lsfAnnotation = [...annotationStore.annotations, ...annotationStore.predictions].find((a) => {
               return a.pk === annIDFromUrl || a.id === annIDFromUrl;
             });
 
             if (lsfAnnotation) {
               const annID = lsfAnnotation.pk ?? lsfAnnotation.id;
-              self.LSF?.setLSFTask(self.taskStore.selected, annID);
+              self.LSF?.setLSFTask(self.taskStore.selected, annID, undefined, lsfAnnotation.type === "prediction");
             }
           }
           if (regionIDFromUrl) {
@@ -481,10 +483,11 @@ export const AppStore = types
 
       try {
         const newProject = yield self.apiCall("project", params);
-        const projectLength = Object.entries(self.project ?? {}).length;
+        const hasExistingProjectData = Object.entries(self.project ?? {}).length > 0;
+        const hasNewProjectData = Object.entries(newProject ?? {}).length > 0;
 
         self.needsDataFetch =
-          options.force !== true && projectLength > 0
+          options.force !== true && hasExistingProjectData && hasNewProjectData
             ? self.project.task_count !== newProject.task_count ||
               self.project.task_number !== newProject.task_number ||
               self.project.annotation_count !== newProject.annotation_count ||
@@ -492,7 +495,7 @@ export const AppStore = types
             : false;
 
         if (options.interaction === "timer") {
-          self.project = Object.assign(self.project ?? {}, newProject);
+          self.project = Object.assign(self.project ?? {}, newProject ?? {});
         } else if (JSON.stringify(newProject ?? {}) !== JSON.stringify(self.project ?? {})) {
           self.project = newProject;
         }
@@ -502,7 +505,15 @@ export const AppStore = types
           self.SDK.invoke(`${itemType}Updated`, self.project);
         }
       } catch {
-        self.crash();
+        // When in timer (polling project counts) mode, we can still continue
+        // but we need to crash for non-polling interactions
+        // because we can't display the app without the project itself and will need to redirect
+        if (options.interaction !== "timer") {
+          self.crash({
+            error: `Project ID: ${self.SDK.projectId} does not exist or is no longer available`,
+            redirect: true,
+          });
+        }
         return false;
       }
       self.projectFetch = false;
@@ -620,7 +631,9 @@ export const AppStore = types
         result.isCanceled = signal.aborted;
         self.requestsInFlight.delete(requestKey);
       }
-      if (result.error && result.status !== 404 && !signal.aborted) {
+      // We don't want to show errors when loading data in polling mode
+      // we will just allow it to try again later
+      if (result.error && result.status !== 404 && !signal.aborted && params.interaction !== "timer") {
         if (options?.errorHandler?.(result)) {
           return result;
         }
@@ -737,10 +750,12 @@ export const AppStore = types
       return result;
     }),
 
-    crash() {
-      self.destroy();
-      self.crashed = true;
-      self.SDK.invoke("crash");
+    crash(options = {}) {
+      if (options.redirect !== true) {
+        self.destroy();
+        self.crashed = true;
+      }
+      self.SDK.invoke("crash", options);
     },
 
     destroy() {

@@ -1,90 +1,113 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type FormEventHandler, useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import { InputFile, useToast } from "@humansignal/ui";
-import { Input } from "/apps/labelstudio/src/components/Form/Elements";
-import { Userpic } from "/apps/labelstudio/src/components/Userpic/Userpic";
-import { useCurrentUser } from "/apps/labelstudio/src/providers/CurrentUser";
-import { Button } from "/apps/labelstudio/src/components/Button/Button";
-import { useAPI } from "apps/labelstudio/src/providers/ApiProvider";
+import { InputFile, ToastType, useToast, Userpic } from "@humansignal/ui";
+import { API } from "apps/labelstudio/src/providers/ApiProvider";
 import styles from "../AccountSettings.module.scss";
+import { useCurrentUserAtom } from "@humansignal/core/lib/hooks/useCurrentUser";
+import { atomWithMutation } from "jotai-tanstack-query";
+import { useAtomValue } from "jotai";
 
-export const PersonalInfo = () => {
-  const api = useAPI();
-  const toast = useToast();
-  const { user, fetch, isInProgress: userInProgress } = useCurrentUser();
-  const [fname, setFName] = useState("");
-  const [lname, setLName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [isInProgress, setIsInProgress] = useState(false);
-  const userInfoForm = useRef();
-  const userAvatarForm = useRef();
-  const avatarRef = useRef();
-  const fileChangeHandler = () => userAvatarForm.current.requestSubmit();
-  const avatarFormSubmitHandler = useCallback(
-    async (e, isDelete = false) => {
-      e.preventDefault();
-      const response = await api.callApi(isDelete ? "deleteUserAvatar" : "updateUserAvatar", {
-        params: {
-          pk: user?.id,
-        },
-        body: {
-          avatar: avatarRef.current.files[0],
-        },
+/**
+ * FIXME: This is legacy imports. We're not supposed to use such statements
+ * each one of these eventually has to be migrated to core or ui
+ */
+import { Input } from "apps/labelstudio/src/components/Form/Elements";
+import { Button } from "apps/labelstudio/src/components/Button/Button";
+
+const updateUserAvatarAtom = atomWithMutation(() => ({
+  mutationKey: ["update-user"],
+  async mutationFn({
+    userId,
+    body,
+    isDelete,
+  }: { userId: number; body: FormData; isDelete?: never } | { userId: number; isDelete: true; body?: never }) {
+    const method = isDelete ? "deleteUserAvatar" : "updateUserAvatar";
+    const response = await API.invoke(
+      method,
+      {
+        pk: userId,
+      },
+      {
+        body,
         headers: {
           "Content-Type": "multipart/form-data",
         },
         errorFilter: () => true,
+      },
+    );
+    return response;
+  },
+}));
+
+export const PersonalInfo = () => {
+  const toast = useToast();
+  const { user, fetch: refetchUser, isInProgress: userInProgress, updateAsync: updateUser } = useCurrentUserAtom();
+  const updateUserAvatar = useAtomValue(updateUserAvatarAtom);
+  const [isInProgress, setIsInProgress] = useState(false);
+  const [fname, setFname] = useState(user?.first_name);
+  const [lname, setLname] = useState(user?.last_name);
+  const [phone, setPhone] = useState(user?.phone);
+  const avatarRef = useRef<HTMLInputElement>();
+  const fileChangeHandler: FormEventHandler<HTMLInputElement> = useCallback(
+    async (e) => {
+      if (!user) return;
+
+      const input = e.currentTarget as HTMLInputElement;
+      const body = new FormData();
+      body.append("avatar", input.files?.[0] ?? "");
+      const response = await updateUserAvatar.mutateAsync({
+        body,
+        userId: user.id,
       });
-      if (!isDelete && response?.status) {
-        toast.show({ message: response?.response?.detail ?? "Error updating avatar", type: "error" });
+
+      if (!response.$meta.ok) {
+        toast.show({ message: response?.response?.detail ?? "Error updating avatar", type: ToastType.error });
       } else {
-        fetch();
+        refetchUser();
       }
-      userAvatarForm.current.reset();
+      input.value = "";
     },
-    [user?.id, fetch],
+    [user?.id],
   );
-  const userFormSubmitHandler = useCallback(
+
+  const deleteUserAvatar = async () => {
+    if (!user) return;
+    await updateUserAvatar.mutateAsync({ userId: user.id, isDelete: true });
+    refetchUser();
+  };
+
+  const userFormSubmitHandler: FormEventHandler = useCallback(
     async (e) => {
       e.preventDefault();
-      const response = await api.callApi("updateUser", {
-        params: {
-          pk: user?.id,
-        },
-        body: {
-          first_name: fname,
-          last_name: lname,
-          phone,
-        },
-        errorFilter: () => true,
-      });
-      if (response?.status) {
-        toast.show({ message: response?.response?.detail ?? "Error updating user", type: "error" });
-      } else {
-        fetch();
+      if (!user) return;
+      const body = new FormData(e.currentTarget as HTMLFormElement);
+      const json = Object.fromEntries(body.entries());
+      const response = await updateUser(json);
+
+      refetchUser();
+      if (!response?.$meta.ok) {
+        toast.show({ message: response?.response?.detail ?? "Error updating user", type: ToastType.error });
       }
     },
-    [fname, lname, phone, user?.id],
+    [user?.id],
   );
 
   useEffect(() => {
-    if (userInProgress) return;
-    setFName(user?.first_name);
-    setLName(user?.last_name);
-    setEmail(user?.email);
-    setPhone(user?.phone);
     setIsInProgress(userInProgress);
-  }, [user, userInProgress]);
+  }, [userInProgress]);
 
-  useEffect(() => setIsInProgress(userInProgress), [userInProgress]);
+  useEffect(() => {
+    setFname(user?.first_name);
+    setLname(user?.last_name);
+    setPhone(user?.phone);
+  }, [user]);
 
   return (
     <div className={styles.section} id="personal-info">
       <div className={styles.sectionContent}>
         <div className={styles.flexRow}>
           <Userpic user={user} isInProgress={userInProgress} size={92} style={{ flex: "none" }} />
-          <form ref={userAvatarForm} className={styles.flex1} onSubmit={(e) => avatarFormSubmitHandler(e)}>
+          <form className={styles.flex1}>
             <InputFile
               name="avatar"
               onChange={fileChangeHandler}
@@ -93,34 +116,42 @@ export const PersonalInfo = () => {
             />
           </form>
           {user?.avatar && (
-            <form onSubmit={(e) => avatarFormSubmitHandler(e, true)}>
-              <button type="submit" look="danger">
-                Delete
-              </button>
-            </form>
+            <Button type="submit" look="danger" onClick={deleteUserAvatar}>
+              Delete
+            </Button>
           )}
         </div>
-        <form ref={userInfoForm} className={styles.sectionContent} onSubmit={userFormSubmitHandler}>
+        <form onSubmit={userFormSubmitHandler} className={styles.sectionContent}>
           <div className={styles.flexRow}>
             <div className={styles.flex1}>
-              <Input label="First Name" value={fname} onChange={(e) => setFName(e.target.value)} />
+              <Input
+                label="First Name"
+                value={fname}
+                onChange={(e: React.KeyboardEvent<HTMLInputElement>) => setFname(e.currentTarget.value)}
+                name="first_name"
+              />
             </div>
             <div className={styles.flex1}>
-              <Input label="Last Name" value={lname} onChange={(e) => setLName(e.target.value)} />
+              <Input
+                label="Last Name"
+                value={lname}
+                onChange={(e: React.KeyboardEvent<HTMLInputElement>) => setLname(e.currentTarget.value)}
+                name="last_name"
+              />
             </div>
           </div>
           <div className={styles.flexRow}>
             <div className={styles.flex1}>
-              <Input
-                label="E-mail"
-                type="email"
-                readOnly={true}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <Input label="E-mail" type="email" readOnly={true} value={user?.email} />
             </div>
             <div className={styles.flex1}>
-              <Input label="Phone" type="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <Input
+                label="Phone"
+                type="phone"
+                onChange={(e: React.KeyboardEvent<HTMLInputElement>) => setPhone(e.currentTarget.value)}
+                value={phone}
+                name="phone"
+              />
             </div>
           </div>
           <div className={clsx(styles.flexRow, styles.flexEnd)}>

@@ -4,9 +4,8 @@ import { PersonalAccessToken, PersonalAccessTokenDescription } from "./PersonalA
 import { MembershipInfo } from "./MembershipInfo";
 import type React from "react";
 import { PersonalJWTToken } from "./PersonalJWTToken";
-import "./index.raw.css";
 import type { AuthTokenSettings } from "../types";
-import { FF_AUTH_TOKENS, isFF } from "@humansignal/core/lib/utils/feature-flags";
+import { ff } from "@humansignal/core";
 
 type SectionType = {
   title: string;
@@ -33,17 +32,15 @@ export const accountSettingsSections = (settings: AuthTokenSettings): SectionTyp
       component: MembershipInfo,
     },
     settings.api_tokens_enabled &&
-      isFF(FF_AUTH_TOKENS) && {
+      ff.isActive(ff.FF_AUTH_TOKENS) && {
         title: "Personal Access Token",
         id: "personal-access-token",
-        // component: PersonalAccessToken,
         component: PersonalJWTToken,
         description: PersonalAccessTokenDescription,
       },
     settings.legacy_api_tokens_enabled && {
-      title: isFF(FF_AUTH_TOKENS) ? "Legacy Token" : "Access Token",
-      id: "personal-access-token",
-      // component: PersonalAccessToken,
+      title: ff.isActive(ff.FF_AUTH_TOKENS) ? "Legacy Token" : "Access Token",
+      id: "legacy-token",
       component: PersonalAccessToken,
       description: PersonalAccessTokenDescription,
     },

@@ -105,8 +105,10 @@ const ConfigureControl = ({ control, template }) => {
       <form className={configClass.elem("add-labels")} action="">
         <h4>{tagname === "Choices" ? "Add choices" : "Add label names"}</h4>
         <span>Use new line as a separator to add multiple labels</span>
-        <textarea name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress} />
-        <input type="button" value="Add" onClick={onAddLabels} />
+        <textarea name="labels" id="" cols="50" rows="5" ref={refLabels} onKeyPress={onKeyPress} className="p-2 px-3" />
+        <Button type="button" size="compact" onClick={onAddLabels}>
+          Add
+        </Button>
       </form>
       <div className={configClass.elem("current-labels")}>
         <h3>
@@ -164,7 +166,7 @@ const ConfigureSettings = ({ template }) => {
           <li key={key}>
             <label>
               {options.title}{" "}
-              <select value={value} onChange={onChange}>
+              <select className="border" value={value} onChange={onChange}>
                 {options.type.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -282,7 +284,7 @@ const ConfigureColumn = ({ template, obj, columns }) => {
       {template.objects > 1 && ` for ${obj.getAttribute("name")}`}
       {" from "}
       {columns?.length > 0 && columns[0] !== DEFAULT_COLUMN && "field "}
-      <select onChange={selectValue} value={isManual ? "-" : value}>
+      <select className="border" onChange={selectValue} value={isManual ? "-" : value}>
         {columns?.map((column) => (
           <option key={column} value={column}>
             {column === DEFAULT_COLUMN ? "<imported file>" : `$${column}`}
@@ -355,41 +357,44 @@ const Configurator = ({
     return () => window.clearTimeout(debounceTimer.current);
   }, [config]);
 
-  React.useEffect(async () => {
-    if (!configToCheck) return;
+  React.useEffect(() => {
+    const validate = async () => {
+      if (!configToCheck) return;
 
-    setLoading(true);
+      setLoading(true);
 
-    const validation = await api.callApi("validateConfig", {
-      params: { pk: project.id },
-      body: { label_config: configToCheck },
-      errorFilter: () => true,
-    });
+      const validation = await api.callApi("validateConfig", {
+        params: { pk: project.id },
+        body: { label_config: configToCheck },
+        errorFilter: () => true,
+      });
 
-    if (validation?.error) {
-      setError(validation.response);
+      if (validation?.error) {
+        setError(validation.response);
+        setLoading(false);
+        return;
+      }
+
+      setError(null);
+      onValidate?.(validation);
+
+      const sample = await api.callApi("createSampleTask", {
+        params: { pk: project.id },
+        body: { label_config: configToCheck },
+        errorFilter: () => true,
+      });
+
       setLoading(false);
-      return;
-    }
-
-    setError(null);
-    onValidate?.(validation);
-
-    const sample = await api.callApi("createSampleTask", {
-      params: { pk: project.id },
-      body: { label_config: configToCheck },
-      errorFilter: () => true,
-    });
-
-    setLoading(false);
-    if (sample && !sample.error) {
-      setData(sample.sample_task);
-      setConfigToDisplay(configToCheck);
-    } else {
-      // @todo validation can be done in this place,
-      // @todo but for now it's extremely slow in /sample-task endpoint
-      setError(sample?.response);
-    }
+      if (sample && !sample.error) {
+        setData(sample.sample_task);
+        setConfigToDisplay(configToCheck);
+      } else {
+        // @todo validation can be done in this place,
+        // @todo but for now it's extremely slow in /sample-task endpoint
+        setError(sample?.response);
+      }
+    };
+    validate();
   }, [configToCheck]);
 
   // code should be reloaded on every render because of uncontrolled codemirror
@@ -468,9 +473,9 @@ const Configurator = ({
       <div className={configClass.elem("container")}>
         <h1>Labeling Interface{hasChanges ? " *" : ""}</h1>
         <header>
-          <button type="button" data-leave={true} onClick={onBrowse}>
+          <Button type="button" data-leave={true} onClick={onBrowse} size="compact">
             Browse Templates
-          </button>
+          </Button>
           <ToggleItems items={{ code: "Code", visual: "Visual" }} active={configure} onSelect={onSelect} />
         </header>
         <div className={configClass.elem("editor")}>
@@ -599,18 +604,21 @@ export const ConfigPage = ({
 
   const [warning, setWarning] = React.useState();
 
-  React.useEffect(async () => {
-    if (externalColumns) return; // we are in Create Project dialog, so this request is useless
-    if (!project || columns) return;
-    const res = await api.callApi("dataSummary", {
-      params: { pk: project.id },
-      // 404 is ok, and errors here don't matter
-      errorFilter: () => true,
-    });
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (!externalColumns || (project && !columns)) {
+        const res = await api.callApi("dataSummary", {
+          params: { pk: project.id },
+          // 404 is ok, and errors here don't matter
+          errorFilter: () => true,
+        });
 
-    if (res?.common_data_columns) {
-      setColumns(res.common_data_columns);
-    }
+        if (res?.common_data_columns) {
+          setColumns(res.common_data_columns);
+        }
+      }
+      fetchData();
+    };
   }, [columns, project]);
 
   const onSelectRecipe = React.useCallback((recipe) => {
@@ -618,12 +626,12 @@ export const ConfigPage = ({
       setSelectedRecipe(null);
       setMode("list");
       __lsa("labeling_setup.view.empty");
-      return;
+    } else {
+      setTemplate(recipe.config);
+      setSelectedRecipe(recipe);
+      setMode("view");
+      __lsa(`labeling_setup.view.${toSnakeCase(recipe.group)}.${toSnakeCase(recipe.title)}`);
     }
-    setTemplate(recipe.config);
-    setSelectedRecipe(recipe);
-    setMode("view");
-    __lsa(`labeling_setup.view.${toSnakeCase(recipe.group)}.${toSnakeCase(recipe.title)}`);
   });
 
   const onCustomTemplate = React.useCallback(() => {

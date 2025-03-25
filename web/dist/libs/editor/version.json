@@ -1,6 +1,6 @@
 {
-  "message": "feat: block sentry in frontend side (#6615)",
-  "commit": "560e33091fa392bec906ca43f082afb1657b11a7",
-  "date": "2025-02-13T23:13:39.000Z",
+  "message": "fix: OPTIC-1850: 'n is not a function' RUNTIME error occur on ls-develop when user tries to create a project (#7273)",
+  "commit": "1114b3b93eb948368f830f9ad0c10225ca288a39",
+  "date": "2025-03-25T10:21:16.000Z",
   "branch": "develop"
 }

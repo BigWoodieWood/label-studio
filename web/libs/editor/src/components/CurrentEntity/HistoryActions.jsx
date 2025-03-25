@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
-import { LsRedo, LsRemove, LsUndo } from "../../assets/icons";
 import { Button } from "../../common/Button/Button";
-import { Tooltip } from "../../common/Tooltip/Tooltip";
+import { IconRedo, IconRemove, IconUndo } from "@humansignal/icons";
+import { Tooltip } from "@humansignal/ui";
 import { Block, Elem } from "../../utils/bem";
 import "./HistoryActions.scss";
 import { Hotkey } from "../../core/Hotkey";
@@ -19,7 +19,7 @@ export const HistoryActions = observer(({ annotation }) => {
           aria-label="Undo"
           disabled={!history?.canUndo}
           onClick={() => annotation.undo()}
-          icon={<LsUndo />}
+          icon={<IconUndo />}
         />
       </Hotkey.Tooltip>
       <Hotkey.Tooltip name="annotation:redo">
@@ -30,7 +30,7 @@ export const HistoryActions = observer(({ annotation }) => {
           aria-label="Redo"
           disabled={!history?.canRedo}
           onClick={() => annotation.redo()}
-          icon={<LsRedo />}
+          icon={<IconRedo />}
         />
       </Hotkey.Tooltip>
       <Tooltip title="Reset">
@@ -42,7 +42,7 @@ export const HistoryActions = observer(({ annotation }) => {
           aria-label="Reset"
           disabled={!history?.canUndo}
           onClick={() => history?.reset()}
-          icon={<LsRemove />}
+          icon={<IconRemove />}
         />
       </Tooltip>
     </Block>

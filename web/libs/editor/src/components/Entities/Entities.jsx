@@ -11,9 +11,9 @@ import { Block, Elem } from "../../utils/bem";
 import { RadioGroup } from "../../common/RadioGroup/RadioGroup";
 import "./Entities.scss";
 import { Button } from "../../common/Button/Button";
-import { LsInvisible, LsTrash, LsVisible } from "../../assets/icons";
 import { confirm } from "../../common/Modal/Modal";
-import { Tooltip } from "../../common/Tooltip/Tooltip";
+import { IconInvisible, IconTrash, IconVisible } from "@humansignal/icons";
+import { Tooltip } from "@humansignal/ui";
 
 export default observer(({ regionStore, annotation }) => {
   const { classifications, regions, view } = regionStore;
@@ -48,7 +48,7 @@ export default observer(({ regionStore, annotation }) => {
                 look="danger"
                 type="text"
                 aria-label="Delete All Regions"
-                icon={<LsTrash />}
+                icon={<IconTrash />}
                 style={{
                   height: 36,
                   width: 36,
@@ -93,7 +93,7 @@ export default observer(({ regionStore, annotation }) => {
                   onClick={toggleVisibility}
                   mod={{ hidden: regionStore.isAllHidden }}
                 >
-                  {regionStore.isAllHidden ? <LsInvisible /> : <LsVisible />}
+                  {regionStore.isAllHidden ? <IconInvisible /> : <IconVisible />}
                 </Elem>
               ) : null}
             </Space>

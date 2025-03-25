@@ -3,7 +3,7 @@ import { Spinner } from "../../../components";
 import { useAPI } from "../../../providers/ApiProvider";
 import { cn } from "../../../utils/bem";
 import "./Config.scss";
-import { IconInfo } from "../../../assets/icons";
+import { IconInfo } from "@humansignal/icons";
 
 const listClass = cn("templates-list");
 
@@ -37,14 +37,17 @@ export const TemplatesList = ({ selectedGroup, selectedRecipe, onCustomTemplate,
   const [templates, setTemplates] = React.useState();
   const api = useAPI();
 
-  React.useEffect(async () => {
-    const res = await api.callApi("configTemplates");
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const res = await api.callApi("configTemplates");
 
-    if (!res) return;
-    const { templates, groups } = res;
+      if (!res) return;
+      const { templates, groups } = res;
 
-    setTemplates(templates);
-    setGroups(groups);
+      setTemplates(templates);
+      setGroups(groups);
+    };
+    fetchData();
   }, []);
 
   const selected = selectedGroup || groups[0];
@@ -75,13 +78,15 @@ export const TemplatesList = ({ selectedGroup, selectedRecipe, onCustomTemplate,
         {!templates && <Spinner style={{ width: "100%", height: 200 }} />}
         <TemplatesInGroup templates={templates || []} group={selected} onSelectRecipe={onSelectRecipe} />
       </main>
-      <footer>
+      <footer className="flex items-center justify-center gap-1">
         <IconInfo className={listClass.elem("info-icon")} width="20" height="20" />
-        See the documentation to{" "}
-        <a href="https://labelstud.io/guide" target="_blank" rel="noreferrer">
-          contribute a template
-        </a>
-        .
+        <span>
+          See the documentation to{" "}
+          <a href="https://labelstud.io/guide" target="_blank" rel="noreferrer">
+            contribute a template
+          </a>
+          .
+        </span>
       </footer>
     </div>
   );

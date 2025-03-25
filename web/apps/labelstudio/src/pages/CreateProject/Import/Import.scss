@@ -44,7 +44,6 @@
     }
 
     & + span {
-      margin: 0 16px;
       color: var(--sand_600);
     }
   }
@@ -114,12 +113,11 @@
   }
 
   &__upload-icon {
-    height: 16px;
-    margin-right: 8px;
+    height: 20px;
+    width: 20px;
   }
 
   &__info-icon {
-    margin-right: 8px;
     vertical-align: -5px;
     height: 20px;
   }
@@ -189,7 +187,7 @@
   }
 
   &__icon {
-    height: 64px;
+    color: var(--grape_500);
   }
 
   label {
@@ -251,6 +249,13 @@
 #import-tasks .loading h4,
 #import-tasks .loading p {
   margin-bottom: 24px;
+}
+
+.import-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem
 }
 
 @keyframes reveal {

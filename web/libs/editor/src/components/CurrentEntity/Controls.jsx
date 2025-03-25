@@ -6,17 +6,15 @@ import { inject, observer } from "mobx-react";
 import { Button } from "../../common/Button/Button";
 import { Block, Elem } from "../../utils/bem";
 import { isDefined } from "../../utils/utilities";
-import { IconBan } from "../../assets/icons";
+import { IconBan } from "@humansignal/ui";
 
 import "./Controls.scss";
 import { Hotkey } from "../../core/Hotkey";
 
-const TOOLTIP_DELAY = 0.8;
-
 const ButtonTooltip = inject("store")(
   observer(({ store, name, title, children }) => {
     return (
-      <Hotkey.Tooltip name={name} title={title} enabled={store.settings.enableTooltips} mouseEnterDelay={TOOLTIP_DELAY}>
+      <Hotkey.Tooltip name={name} title={title} enabled={store.settings.enableTooltips}>
         {children}
       </Hotkey.Tooltip>
     );

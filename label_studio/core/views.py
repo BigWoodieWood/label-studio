@@ -6,14 +6,13 @@ import logging
 import mimetypes
 import os
 import posixpath
-import sys
 from pathlib import Path
 from wsgiref.util import FileWrapper
 
 import pandas as pd
 import requests
 from core import utils
-from core.feature_flags import all_flags, get_feature_file_path
+from core.feature_flags import all_flags, flag_set, get_feature_file_path
 from core.label_config import generate_time_series_json
 from core.utils.common import collect_versions
 from core.utils.io import find_file
@@ -24,11 +23,9 @@ from django.http import (
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotFound,
-    HttpResponseServerError,
     JsonResponse,
 )
-from django.shortcuts import redirect, reverse
-from django.template import loader
+from django.shortcuts import redirect, render, reverse
 from django.utils._os import safe_join
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -55,7 +52,11 @@ def main(request):
             return redirect(reverse('user-login'))
 
         # business mode access
-        return redirect(reverse('projects:project-index'))
+        if flag_set('fflag_all_feat_dia_1777_ls_homepage_short', user):
+            print('redirect to home page')
+            return render(request, 'home/home.html')
+        else:
+            return redirect(reverse('projects:project-index'))
 
     # not authenticated
     return redirect(reverse('user-login'))
@@ -112,13 +113,6 @@ def editor_files(request):
     """Get last editor files"""
     response = utils.common.find_editor_files()
     return HttpResponse(json.dumps(response), status=200)
-
-
-def custom_500(request):
-    """Custom 500 page"""
-    t = loader.get_template('500.html')
-    type_, value, tb = sys.exc_info()
-    return HttpResponseServerError(t.render({'exception': value}))
 
 
 def samples_time_series(request):

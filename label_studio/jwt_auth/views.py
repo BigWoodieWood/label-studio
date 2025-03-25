@@ -12,6 +12,7 @@ from jwt_auth.serializers import (
     TokenRefreshResponseSerializer,
 )
 from rest_framework import generics, status
+from rest_framework.exceptions import APIException
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -20,6 +21,12 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 from rest_framework_simplejwt.views import TokenRefreshView, TokenViewBase
 
 logger = logging.getLogger(__name__)
+
+
+class TokenExistsError(APIException):
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = 'You already have a valid token. Please revoke it before creating a new one.'
+    default_code = 'token_exists'
 
 
 @method_decorator(
@@ -40,15 +47,25 @@ logger = logging.getLogger(__name__)
 )
 class JWTSettingsAPI(CreateAPIView):
     queryset = JWTSettings.objects.all()
-    permission_required = all_permissions.organizations_change
     serializer_class = JWTSettingsSerializer
+    permission_required = all_permissions.organizations_view
 
     def get(self, request, *args, **kwargs):
         jwt_settings = request.user.active_organization.jwt
+        # Check if user has view permission
+        if not jwt_settings.has_view_permission(request.user):
+            return Response(
+                {'detail': 'You do not have permission to view JWT settings'}, status=status.HTTP_403_FORBIDDEN
+            )
         return Response(self.get_serializer(jwt_settings).data)
 
     def post(self, request, *args, **kwargs):
         jwt_settings = request.user.active_organization.jwt
+        # Check if user has modify permission
+        if not jwt_settings.has_modify_permission(request.user):
+            return Response(
+                {'detail': 'You do not have permission to modify JWT settings'}, status=status.HTTP_403_FORBIDDEN
+            )
         serializer = self.get_serializer(data=request.data, instance=jwt_settings)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -131,6 +148,11 @@ class LSAPITokenView(generics.ListCreateAPIView):
         return LSAPITokenListSerializer
 
     def perform_create(self, serializer):
+        # Check for existing valid tokens
+        existing_tokens = self.get_queryset()
+        if existing_tokens.exists():
+            raise TokenExistsError()
+
         token = self.token_class.for_user(self.request.user)
         serializer.instance = token
 
@@ -154,6 +176,7 @@ class LSTokenBlacklistView(TokenViewBase):
             # .blacklist() on the token under the hood
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
-            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            logger.error('Token error occurred while trying to blacklist a token: %s', str(e), exc_info=True)
+            return Response({'detail': 'Token is invalid or already blacklisted.'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
