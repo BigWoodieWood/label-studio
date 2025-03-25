@@ -210,14 +210,14 @@
       }
     },
     {
-      "title": "TODO Bulk labelling",
-      "description": "TODO",
+      "title": "New Enterprise Feature!",
+      "description": "Save time by labeling many tasks at once with Bulk Labeling",
       "link": {
         "label": "Learn more",
-        "url": "https://labelstud.io",
+        "url": "https://docs.humansignal.com/guide/labeling.html#Bulk-labeling",
         "params": {
           "experiment": "login_revamp",
-          "treatment": "bulk_labelling_live"
+          "treatment": "bulk_labeling_live"
         }
       }
     },
