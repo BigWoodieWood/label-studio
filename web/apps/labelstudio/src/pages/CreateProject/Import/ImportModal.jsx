@@ -70,7 +70,7 @@ export const Inner = () => {
     }
 
     backToDM();
-  }, [backToDM, finishUpload, sample, api, project]);
+  }, [backToDM, finishUpload, sample, api, project.id]);
 
   return (
     <Modal
