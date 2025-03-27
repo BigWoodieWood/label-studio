@@ -1,6 +1,6 @@
 {
-  "message": "trigger rebuild",
-  "commit": "9a8c491e8ae4c6b24020bbdf8b58395266eda969",
-  "date": "2025-03-21T23:10:50.000Z",
+  "message": "Ls release 1.17.0 optic 1858 (#7293)",
+  "commit": "379f399d5cb6082072c470f3cbd09362de3000c2",
+  "date": "2025-03-26T22:07:32.000Z",
   "branch": "ls-release/1.17.0"
 }
