@@ -7,4 +7,4 @@ Structured Data Parsing
 Time Series Analysis
 Videos
 Generative AI
-Powered by Community
+Community Contributions
