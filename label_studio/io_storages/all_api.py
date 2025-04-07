@@ -127,7 +127,7 @@ class AllImportStorageListAPI(generics.ListAPIView):
             response = view(request._request, *args, **kwargs)
             payload = response.data
             if not isinstance(payload, list):
-                raise ValueError('Response is not list')
+                raise ValueError(f'Response is not list: {payload}')
             return response.data
         except Exception:
             logger.error(f"Can't process {api.__class__.__name__}", exc_info=True)
@@ -163,7 +163,11 @@ class AllExportStorageListAPI(generics.ListAPIView):
         return response.data
 
     def list(self, request, *args, **kwargs):
+        responses = [self._get_response(s['export_list_api'], request, *args, **kwargs) for s in _common_storage_list]
+        logger.warning(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        logger.warning(f">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {responses}")
+        logger.warning(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         list_responses = sum(
-            [self._get_response(s['export_list_api'], request, *args, **kwargs) for s in _common_storage_list], []
+            responses, []
         )
         return Response(list_responses)
