@@ -285,7 +285,7 @@ const ChoicesSelectLayout = observer(({ item }) => {
 
 const HtxChoices = observer(({ item }) => {
   const isHidden = !item.isVisible || !item.perRegionVisible();
-  const className = `dm-choices dm-choices_layout_${item.layout} ${isHidden ? "dm-choices_hidden" : ""}`;
+  const className = `lsf-choices lsf-choices_layout_${item.layout} ${isHidden ? "lsf-choices_hidden" : ""}`;
 
   return (
     <div className={className} ref={item.elementRef}>

@@ -125,11 +125,11 @@ export const Seeker: FC<SeekerProps> = ({
   );
 
   return (
-    <div className="dm-seeker" ref={rootRef} onMouseDown={onDrag}>
-      <div className="dm-seeker__track" />
-      {showIndicator && <div className="dm-seeker__indicator" ref={viewRef} style={{ left: windowOffset, width }} />}
-      <div className="dm-seeker__position" ref={seekerRef} style={{ left: `${seekerOffset}%` }} />
-      <div className="dm-seeker__minimap">{minimap}</div>
+    <div className="lsf-seeker" ref={rootRef} onMouseDown={onDrag}>
+      <div className="lsf-seeker__track" />
+      {showIndicator && <div className="lsf-seeker__indicator" ref={viewRef} style={{ left: windowOffset, width }} />}
+      <div className="lsf-seeker__position" ref={seekerRef} style={{ left: `${seekerOffset}%` }} />
+      <div className="lsf-seeker__minimap">{minimap}</div>
     </div>
   );
 };

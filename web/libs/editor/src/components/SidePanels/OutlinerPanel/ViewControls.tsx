@@ -105,7 +105,7 @@ export const ViewControls: FC<ViewControlsProps> = observer(
     const renderOrderingDirectionIcon = orderingDirection === "asc" ? <IconSortUp /> : <IconSortDown />;
 
     return (
-      <div className={`dm-view-controls ${context.locked ? "dm-view-controls_collapsed" : ""}`}>
+      <div className={`lsf-view-controls ${context.locked ? "lsf-view-controls_collapsed" : ""}`}>
         <Grouping
           value={grouping}
           options={["manual", "type", "label"]}
@@ -113,7 +113,7 @@ export const ViewControls: FC<ViewControlsProps> = observer(
           readableValueForKey={getGroupingLabels}
         />
         {grouping === "manual" && (
-          <div className="dm-view-controls__sort">
+          <div className="lsf-view-controls__sort">
             <Grouping
               value={ordering}
               direction={orderingDirection}
@@ -230,7 +230,7 @@ interface GroupingMenuItemProps<T extends string> {
 const GroupingMenuItem = <T extends string>({ value, name, label, direction, onChange }: GroupingMenuItemProps<T>) => {
   return (
     <Menu.Item name={name} onClick={() => onChange(name)}>
-      <div className="dm-view-controls__label">
+      <div className="lsf-view-controls__label">
         {label.label}
         <DirectionIndicator direction={direction} name={name} value={value} />
       </div>
@@ -276,7 +276,7 @@ const ToggleRegionsVisibilityButton = observer<FC<ToggleRegionsVisibilityButton>
       type="text"
       disabled={isDisabled}
       onClick={toggleRegionsVisibility}
-      className={isAllHidden ? "dm-view-controls__button_hidden" : ""}
+      className={isAllHidden ? "lsf-view-controls__button_hidden" : ""}
       aria-label={isAllHidden ? "Show all regions" : "Hide all regions"}
       icon={
         isAllHidden ? (

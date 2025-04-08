@@ -10,7 +10,7 @@ export const FramesControl: FC<TimelineSideControlProps> = ({ position = 0, leng
   }, [length]);
 
   return (
-    <div className="dm-frames-control" onClick={() => setInputMode(true)}>
+    <div className="lsf-frames-control" onClick={() => setInputMode(true)}>
       {inputMode ? (
         <FrameInput
           length={duration}

@@ -542,19 +542,19 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
             setViewportSizeMatch(el.clientWidth <= maxWindowWidth);
           }
         }}
-        className={`dm-sidepanels ${panelBreakPoint ? "dm-sidepanels_collapsed" : ""}`}
+        className={`lsf-sidepanels ${panelBreakPoint ? "lsf-sidepanels_collapsed" : ""}`}
         style={{ ...padding }}
       >
         {initialized && (
           <>
             <div
-              className={`dm-sidepanels__content ${lockPanelContents || positioning ? "dm-sidepanels__content_resizing" : ""}`}
+              className={`lsf-sidepanels__content ${lockPanelContents || positioning ? "lsf-sidepanels__content_resizing" : ""}`}
             >
               {children}
             </div>
             {panelsHidden !== true && panelBreakPoint ? (
               <>
-                <div className="dm-sidepanels__wrapper">
+                <div className="lsf-sidepanels__wrapper">
                   <PanelTabsBase {...emptyBaseProps}>
                     <Tabs {...emptyBaseProps} />
                   </PanelTabsBase>
@@ -579,7 +579,7 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
                   return (
                     <div
                       key={panelType}
-                      className={`dm-sidepanels__wrapper dm-sidepanels__wrapper_align_${panelType} ${snap === panelType ? "dm-sidepanels__wrapper_snap" : ""}`}
+                      className={`lsf-sidepanels__wrapper lsf-sidepanels__wrapper_align_${panelType} ${snap === panelType ? "lsf-sidepanels__wrapper_snap" : ""}`}
                     >
                       {content}
                     </div>

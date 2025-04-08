@@ -24,8 +24,8 @@ export default observer(({ regionStore, annotation }) => {
   };
 
   return (
-    <div className="dm-entities">
-      <div className="dm-entities__source">
+    <div className="lsf-entities">
+      <div className="lsf-entities__source">
         <Space spread>
           <RadioGroup
             size="small"
@@ -36,7 +36,7 @@ export default observer(({ regionStore, annotation }) => {
             }}
           >
             <RadioGroup.Button value="regions">
-              Regions{count ? <span className="dm-entities__counter">&nbsp;{count}</span> : null}
+              Regions{count ? <span className="lsf-entities__counter">&nbsp;{count}</span> : null}
             </RadioGroup.Button>
             <RadioGroup.Button value="labels">Labels</RadioGroup.Button>
           </RadioGroup>
@@ -68,12 +68,12 @@ export default observer(({ regionStore, annotation }) => {
       </div>
 
       {count ? (
-        <div className="dm-entities__header">
+        <div className="lsf-entities__header">
           <Space spread align={view === "regions" ? null : "end"}>
             {view === "regions" && (
               <Dropdown overlay={<SortMenu regionStore={regionStore} />} placement="bottomLeft">
-                <div className="dm-entities__sort" onClick={(e) => e.preventDefault()}>
-                  <div className="dm-entities__sort-icon">
+                <div className="lsf-entities__sort" onClick={(e) => e.preventDefault()}>
+                  <div className="lsf-entities__sort-icon">
                     <SortMenuIcon sortKey={regionStore.sort} />
                   </div>{" "}
                   {`Sorted by ${regionStore.sort[0].toUpperCase()}${regionStore.sort.slice(1)}`}
@@ -84,7 +84,7 @@ export default observer(({ regionStore, annotation }) => {
             <Space size="small" align="end">
               {regions.length > 0 ? (
                 <Button
-                  className={`dm-entities__visibility ${regionStore.isAllHidden ? "dm-entities__visibility_hidden" : ""}`}
+                  className={`lsf-entities__visibility ${regionStore.isAllHidden ? "lsf-entities__visibility_hidden" : ""}`}
                   size="small"
                   type="link"
                   style={{ padding: 0 }}
@@ -99,18 +99,18 @@ export default observer(({ regionStore, annotation }) => {
       ) : null}
 
       <Oneof value={view}>
-        <div className="dm-entities__regions" case="regions">
+        <div className="lsf-entities__regions" case="regions">
           {count ? (
             <RegionTree regionStore={regionStore} />
           ) : (
-            <div className="dm-entities__empty">No Regions created yet</div>
+            <div className="lsf-entities__empty">No Regions created yet</div>
           )}
         </div>
-        <div className="dm-entities__labels" case="labels">
+        <div className="lsf-entities__labels" case="labels">
           {count ? (
             <LabelList regionStore={regionStore} />
           ) : (
-            <div className="dm-entities__empty">No Labeled Regions created yet</div>
+            <div className="lsf-entities__empty">No Labeled Regions created yet</div>
           )}
         </div>
       </Oneof>

@@ -144,7 +144,7 @@ const LabelsModel = types.compose(
 );
 
 const HtxLabels = observer(({ item }) => {
-  const classes = ["dm-labels", !item.visible ? "dm-labels_hidden" : "", item.showinline ? "dm-labels_inline" : ""]
+  const classes = ["lsf-labels", !item.visible ? "lsf-labels_hidden" : "", item.showinline ? "lsf-labels_inline" : ""]
     .filter(Boolean)
     .join(" ");
 

@@ -125,13 +125,13 @@ export default observer(({ store, annotation }) => {
     </Hotkey.Tooltip>,
   );
 
-  const entityStatesClassName = "dm-entity-states";
-  const entityButtonsClassName = "dm-entity-buttons";
+  const entityStatesClassName = "lsf-entity-states";
+  const entityButtonsClassName = "lsf-entity-buttons";
 
   return (
-    <div className="dm-entity">
-      <Space spread className="dm-entity__info">
-        <div className="dm-entity__node">
+    <div className="lsf-entity">
+      <Space spread className="lsf-entity__info">
+        <div className="lsf-entity__node">
           {node ? (
             <>
               <Node node={node} /> (ID: {node.id})
@@ -169,9 +169,9 @@ export default observer(({ store, annotation }) => {
       </div>
 
       {node?.isDrawing && (
-        <div className="dm-entity__warning">
+        <div className="lsf-entity__warning">
           <IconWarning />
-          <div className="dm-entity__warning-text">Incomplete {node.type.replace("region", "")}</div>
+          <div className="lsf-entity__warning-text">Incomplete {node.type.replace("region", "")}</div>
         </div>
       )}
 

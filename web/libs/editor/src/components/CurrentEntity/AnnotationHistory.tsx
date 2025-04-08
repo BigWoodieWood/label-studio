@@ -75,16 +75,16 @@ const DraftState: FC<{
       date={annotation.draftSaved}
       extra={
         annotation.isDraftSaving ? (
-          <div className="dm-history-item__saving">
-            <div className="dm-history-item__spin" />
+          <div className="lsf-history-item__saving">
+            <div className="lsf-history-item__spin" />
           </div>
         ) : hasUnsavedChanges ? (
-          <div className="dm-history-item__saving">
-            <div className="dm-history-item__dot" />
+          <div className="lsf-history-item__saving">
+            <div className="lsf-history-item__dot" />
           </div>
         ) : hasChanges ? (
-          <div className="dm-history-item__saving">
-            <IconCheck className="dm-history-item__saved" />
+          <div className="lsf-history-item__saving">
+            <IconCheck className="lsf-history-item__saved" />
           </div>
         ) : null
       }
@@ -119,7 +119,7 @@ const AnnotationHistoryComponent: FC<any> = ({
     !annotationStore.selectedHistory && (annotation.draftSelected || (!annotation.versions.draft && hasChanges));
 
   return (
-    <div className={`dm-annotation-history ${inline ? "dm-annotation-history_inline" : ""}`}>
+    <div className={`lsf-annotation-history ${inline ? "lsf-annotation-history_inline" : ""}`}>
       <DraftState annotation={annotation} isSelected={isDraftSelected} inline={inline} />
 
       {enabled &&
@@ -230,10 +230,10 @@ const HistoryItemComponent: FC<{
   );
 
   const historyItemClasses = [
-    "dm-history-item",
-    inline ? "dm-history-item_inline" : "",
-    selected ? "dm-history-item_selected" : "",
-    disabled ? "dm-history-item_disabled" : "",
+    "lsf-history-item",
+    inline ? "lsf-history-item_inline" : "",
+    selected ? "lsf-history-item_selected" : "",
+    disabled ? "lsf-history-item_disabled" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -244,20 +244,20 @@ const HistoryItemComponent: FC<{
         <Space size="small" truncated>
           <Userpic
             user={user}
-            className={`dm-history-item__userpic ${isPrediction ? "dm-history-item__userpic_prediction" : ""}`}
+            className={`lsf-history-item__userpic ${isPrediction ? "lsf-history-item__userpic_prediction" : ""}`}
             showUsername
             username={isPrediction ? entity.createdBy : null}
           >
             {isPrediction && <IconSparks style={{ width: 16, height: 16 }} />}
           </Userpic>
-          <span className="dm-history-item__name">{isPrediction ? entity.createdBy : userDisplayName(user)}</span>
+          <span className="lsf-history-item__name">{isPrediction ? entity.createdBy : userDisplayName(user)}</span>
         </Space>
 
         {!infoIsHidden && (
           <Space size="small">
-            {extra && <div className="dm-history-item__date">{extra}</div>}
+            {extra && <div className="lsf-history-item__date">{extra}</div>}
             {date && (
-              <div className="dm-history-item__date">
+              <div className="lsf-history-item__date">
                 <Tooltip alignment="top-right" title={new Date(date).toLocaleString()}>
                   <>{humanDateDiff(date)}</>
                 </Tooltip>
@@ -267,7 +267,7 @@ const HistoryItemComponent: FC<{
         )}
       </Space>
       {(reason || comment) && (
-        <Space className="dm-history-item__action" size="small">
+        <Space className="lsf-history-item__action" size="small">
           {acceptedState && <HistoryIcon type={acceptedState} />}
           <HistoryComment comment={comment} reason={reason} />
         </Space>
@@ -295,17 +295,17 @@ const HistoryComment: FC<{
     }
   }, []);
 
-  const commentClasses = `dm-history-item__comment ${collapsed ? "dm-history-item__comment_collapsed" : ""}`;
+  const commentClasses = `lsf-history-item__comment ${collapsed ? "lsf-history-item__comment_collapsed" : ""}`;
 
   return (
     <div className={commentClasses} ref={commentRef}>
-      <div className="dm-history-item__comment-content" data-reason={`${reason}${comment ? ": " : ""}`}>
+      <div className="lsf-history-item__comment-content" data-reason={`${reason}${comment ? ": " : ""}`}>
         {comment}
       </div>
 
       {collapsible && (
         <div
-          className={`dm-history-item__collapse-comment ${collapsed ? "dm-history-item__collapse-comment_collapsed" : ""}`}
+          className={`lsf-history-item__collapse-comment ${collapsed ? "lsf-history-item__collapse-comment_collapsed" : ""}`}
           onClick={(e: any) => {
             e.stopPropagation();
             setCollapsed((v) => !v);
@@ -348,7 +348,7 @@ const HistoryIcon: FC<{ type: HistoryItemType }> = ({ type }) => {
     }
   }, [type]);
 
-  return icon && <div className="dm-history-item__history-icon">{icon}</div>;
+  return icon && <div className="lsf-history-item__history-icon">{icon}</div>;
 };
 
 const HistoryItem = observer(HistoryItemComponent);

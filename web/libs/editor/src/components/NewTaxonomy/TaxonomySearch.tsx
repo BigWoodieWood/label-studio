@@ -118,7 +118,7 @@ const TaxonomySearch = React.forwardRef<TaxonomySearchRef, TaxonomySearchProps>(
     <input
       ref={inputRef as React.RefObject<HTMLInputElement>}
       value={inputValue}
-      className="dm-taxonomy-search"
+      className="lsf-taxonomy-search"
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
         handleSearch(e);

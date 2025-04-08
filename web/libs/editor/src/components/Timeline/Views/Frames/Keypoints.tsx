@@ -70,22 +70,22 @@ export const Keypoints: FC<KeypointsProps> = ({ idx, region, startOffset, render
   const range = timeline ? sequence.map((s) => s.frame) : [];
 
   const keypointClasses = [
-    "dm-keypoints",
-    selected ? "dm-keypoints_selected" : "",
-    timeline ? "dm-keypoints_timeline" : "",
+    "lsf-keypoints",
+    selected ? "lsf-keypoints_selected" : "",
+    timeline ? "lsf-keypoints_timeline" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   return (
     <div className={keypointClasses} style={styles} data-id={region.id} data-start={range[0]} data-end={range[1]}>
-      <div className="dm-keypoints__label" onClick={onSelectRegionHandler}>
-        <div className="dm-keypoints__name">{label}</div>
-        <div className="dm-keypoints__data">
-          <div className="dm-keypoints__data-item dm-keypoints__data-item_faded">{idx}</div>
+      <div className="lsf-keypoints__label" onClick={onSelectRegionHandler}>
+        <div className="lsf-keypoints__name">{label}</div>
+        <div className="lsf-keypoints__data">
+          <div className="lsf-keypoints__data-item lsf-keypoints__data-item_faded">{idx}</div>
         </div>
       </div>
-      <div className="dm-keypoints__keypoints" onClick={(e: any) => onSelectRegionHandler(e, true)}>
+      <div className="lsf-keypoints__keypoints" onClick={(e: any) => onSelectRegionHandler(e, true)}>
         <LifespansList lifespans={lifespans} step={step} visible={visible} offset={offset} />
       </div>
     </div>
@@ -144,9 +144,9 @@ const LifespanItem: FC<LifespanItemProps> = memo(
     }, [left, right, finalWidth]);
 
     const lifespanClasses = [
-      "dm-keypoints__lifespan",
-      !visible ? "dm-keypoints__lifespan_hidden" : "",
-      !width ? "dm-keypoints__lifespan_instant" : "",
+      "lsf-keypoints__lifespan",
+      !visible ? "lsf-keypoints__lifespan_hidden" : "",
+      !width ? "lsf-keypoints__lifespan_instant" : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -155,7 +155,7 @@ const LifespanItem: FC<LifespanItemProps> = memo(
       <div className={lifespanClasses} style={style}>
         {points.map((frame, i) => {
           const left = (frame - start) * step;
-          const pointClasses = ["dm-keypoints__point", !!left ? "dm-keypoints__point_last" : ""]
+          const pointClasses = ["lsf-keypoints__point", !!left ? "lsf-keypoints__point_last" : ""]
             .filter(Boolean)
             .join(" ");
 

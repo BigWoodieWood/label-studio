@@ -6,7 +6,7 @@ import { IconOutlinerEyeClosed, IconOutlinerEyeOpened, IconSortUp, IconSortDown 
 
 const RelationsControlsComponent: FC<any> = ({ relationStore }) => {
   return (
-    <div className="dm-relation-controls">
+    <div className="lsf-relation-controls">
       <ToggleRelationsVisibilityButton relationStore={relationStore} />
       <ToggleRelationsOrderButton relationStore={relationStore} />
     </div>
@@ -35,7 +35,7 @@ const ToggleRelationsVisibilityButton = observer<FC<ToggleRelationsVisibilityBut
       type="text"
       disabled={isDisabled}
       onClick={toggleRelationsVisibility}
-      className={isAllHidden ? "dm-relation-controls_hidden" : ""}
+      className={isAllHidden ? "lsf-relation-controls_hidden" : ""}
       aria-label={isAllHidden ? "Show all" : "Hide all"}
       icon={
         isAllHidden ? (
@@ -72,7 +72,7 @@ const ToggleRelationsOrderButton = observer<FC<ToggleRelationsOrderButtonProps>>
       type="text"
       onClick={toggleRelationsOrder}
       disabled={isDisabled}
-      className={`dm-relation-controls_order_${relationStore.order}`}
+      className={`lsf-relation-controls_order_${relationStore.order}`}
       aria-label={isAsc ? "Order by oldest" : "Order by newest"}
       icon={isAsc ? <IconSortUp /> : <IconSortDown />}
       tooltip={isAsc ? "Order by oldest" : "Order by newest"}

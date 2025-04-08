@@ -111,20 +111,20 @@ export const PanelTabsBase: FC<BaseProps> = ({
   }, [detached, relativeTop, relativeLeft, locked]);
 
   const panelClasses = useMemo(() => {
-    const classes = ["dm-tabs-panel"];
+    const classes = ["lsf-tabs-panel"];
 
-    if (locked ? false : detached) classes.push("dm-tabs-panel_detached");
-    if (!visible) classes.push("dm-tabs-panel_hidden");
+    if (locked ? false : detached) classes.push("lsf-tabs-panel_detached");
+    if (!visible) classes.push("lsf-tabs-panel_hidden");
 
     const alignmentValue = detached ? "left" : (alignment ?? "left");
-    classes.push(`dm-tabs-panel_alignment_${alignmentValue}`);
+    classes.push(`lsf-tabs-panel_alignment_${alignmentValue}`);
 
-    if (locked) classes.push("dm-tabs-panel_disabled");
-    if (collapsed) classes.push("dm-tabs-panel_collapsed");
+    if (locked) classes.push("lsf-tabs-panel_disabled");
+    if (collapsed) classes.push("lsf-tabs-panel_collapsed");
 
-    if (dragTop && attachedKeys && attachedKeys[0] === key) classes.push("dm-tabs-panel_dragTop");
+    if (dragTop && attachedKeys && attachedKeys[0] === key) classes.push("lsf-tabs-panel_dragTop");
     if (dragBottom && attachedKeys && attachedKeys[attachedKeys.length - 1] === key)
-      classes.push("dm-tabs-panel_dragBottom");
+      classes.push("lsf-tabs-panel_dragBottom");
 
     return classes;
   }, [alignment, visible, detached, locked, collapsed, dragTop, dragBottom, attachedKeys, key]);
@@ -291,13 +291,13 @@ export const PanelTabsBase: FC<BaseProps> = ({
 
   return (
     <div ref={panelRef} className={panelClasses.join(" ")} style={{ ...style, ...coordinates }}>
-      <div className="dm-tabs-panel__content">
+      <div className="lsf-tabs-panel__content">
         {!locked && collapsedHeader && (
           <>
             {isChildOfGroup && visible && (
               <div
-                className={`dm-tabs-panel__grouped-top ${
-                  "grouped-top" === resizing ? "dm-tabs-panel__grouped-top_drag" : ""
+                className={`lsf-tabs-panel__grouped-top ${
+                  "grouped-top" === resizing ? "lsf-tabs-panel__grouped-top_drag" : ""
                 }`}
                 ref={resizeGroup}
                 data-resize={"grouped-top"}
@@ -309,20 +309,20 @@ export const PanelTabsBase: FC<BaseProps> = ({
                 if (collapsed) handleGroupPanelToggle();
               }}
               id={key}
-              className={`dm-tabs-panel__header ${collapsed ? "dm-tabs-panel__header_collapsed" : ""}`}
+              className={`lsf-tabs-panel__header ${collapsed ? "lsf-tabs-panel__header_collapsed" : ""}`}
             >
-              <div className="dm-tabs-panel__header-left">
-                {!collapsed && <IconOutlinerDrag className="dm-tabs-panel__icon" style={{ pointerEvents: "none" }} />}
+              <div className="lsf-tabs-panel__header-left">
+                {!collapsed && <IconOutlinerDrag className="lsf-tabs-panel__icon" style={{ pointerEvents: "none" }} />}
                 {!visible && !collapsed && (
-                  <div className="dm-tabs-panel__title">{panelViews.map((view) => view.title).join(" ")}</div>
+                  <div className="lsf-tabs-panel__title">{panelViews.map((view) => view.title).join(" ")}</div>
                 )}
               </div>
-              <div className="dm-tabs-panel__header-right">
+              <div className="lsf-tabs-panel__header-right">
                 {(!detached || collapsed) && (
                   <div
-                    className={`dm-tabs-panel__toggle ${detached ? "dm-tabs-panel__toggle_detached" : ""} ${
-                      collapsed ? "dm-tabs-panel__toggle_collapsed" : ""
-                    } ${alignment ? `dm-tabs-panel__toggle_alignment_${alignment}` : ""}`}
+                    className={`lsf-tabs-panel__toggle ${detached ? "lsf-tabs-panel__toggle_detached" : ""} ${
+                      collapsed ? "lsf-tabs-panel__toggle_collapsed" : ""
+                    } ${alignment ? `lsf-tabs-panel__toggle_alignment_${alignment}` : ""}`}
                     onClick={handleGroupPanelToggle}
                     data-tooltip={`${tooltipText} Group`}
                   >
@@ -331,9 +331,9 @@ export const PanelTabsBase: FC<BaseProps> = ({
                 )}
                 {!collapsed && (
                   <div
-                    className={`dm-tabs-panel__toggle ${detached ? "dm-tabs-panel__toggle_detached" : ""} ${
-                      collapsed ? "dm-tabs-panel__toggle_collapsed" : ""
-                    } ${alignment ? `dm-tabs-panel__toggle_alignment_${alignment}` : ""}`}
+                    className={`lsf-tabs-panel__toggle ${detached ? "lsf-tabs-panel__toggle_detached" : ""} ${
+                      collapsed ? "lsf-tabs-panel__toggle_collapsed" : ""
+                    } ${alignment ? `lsf-tabs-panel__toggle_alignment_${alignment}` : ""}`}
                     onClick={handlePanelToggle}
                     data-tooltip={tooltipText}
                   >
@@ -345,15 +345,15 @@ export const PanelTabsBase: FC<BaseProps> = ({
           </>
         )}
         {visible && !collapsed && (
-          <div className="dm-tabs-panel__body">
-            {lockPanelContents && <div className="dm-tabs-panel__shield" />}
+          <div className="lsf-tabs-panel__body">
+            {lockPanelContents && <div className="lsf-tabs-panel__shield" />}
             {children}
           </div>
         )}
       </div>
       {visible && !positioning && !locked && (
         <div
-          className={`dm-tabs-panel__resizers ${positioning || locked ? "dm-tabs-panel__resizers_locked" : ""}`}
+          className={`lsf-tabs-panel__resizers ${positioning || locked ? "lsf-tabs-panel__resizers_locked" : ""}`}
           ref={resizerRef}
         >
           {resizers.map((res) => {
@@ -364,7 +364,7 @@ export const PanelTabsBase: FC<BaseProps> = ({
             return shouldRender ? (
               <div
                 key={res}
-                className={`dm-tabs-panel__resizer ${res === resizing ? "dm-tabs-panel__resizer_drag" : ""}`}
+                className={`lsf-tabs-panel__resizer ${res === resizing ? "lsf-tabs-panel__resizer_drag" : ""}`}
                 data-resize={res}
               />
             ) : null;

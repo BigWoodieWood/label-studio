@@ -113,22 +113,22 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
     useHotkey(hotkey, rest.onClick as unknown as Keymaster.KeyHandler, hotkeyScope);
 
     // Build class names based on modifiers
-    const buttonClasses = ["dm-button"];
+    const buttonClasses = ["lsf-button"];
 
     // Add modifier classes
-    if (mods.size) buttonClasses.push(`dm-button_size_${mods.size}`);
-    if (mods.waiting) buttonClasses.push("dm-button_waiting");
-    if (mods.type) buttonClasses.push(`dm-button_type_${mods.type}`);
-    if (mods.danger) buttonClasses.push("dm-button_danger");
-    if (mods.nopadding) buttonClasses.push("dm-button_nopadding");
-    if (mods.withIcon) buttonClasses.push("dm-button_with-icon");
-    if (mods.withExtra) buttonClasses.push("dm-button_with-extra");
+    if (mods.size) buttonClasses.push(`lsf-button_size_${mods.size}`);
+    if (mods.waiting) buttonClasses.push("lsf-button_waiting");
+    if (mods.type) buttonClasses.push(`lsf-button_type_${mods.type}`);
+    if (mods.danger) buttonClasses.push("lsf-button_danger");
+    if (mods.nopadding) buttonClasses.push("lsf-button_nopadding");
+    if (mods.withIcon) buttonClasses.push("lsf-button_with-icon");
+    if (mods.withExtra) buttonClasses.push("lsf-button_with-extra");
 
     // Handle look modifier which can be an array or string
     if (Array.isArray(mods.look)) {
-      mods.look.forEach((look) => buttonClasses.push(`dm-button_look_${look}`));
+      mods.look.forEach((look) => buttonClasses.push(`lsf-button_look_${look}`));
     } else if (mods.look) {
-      buttonClasses.push(`dm-button_look_${mods.look}`);
+      buttonClasses.push(`lsf-button_look_${mods.look}`);
     }
 
     // Add custom class names
@@ -139,9 +139,9 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
     const buttonBody = (
       <Tag className={buttonClasses.join(" ")} ref={ref} type={type} {...rest}>
         <>
-          {iconElem && <span className="dm-button__icon">{iconElem}</span>}
+          {iconElem && <span className="lsf-button__icon">{iconElem}</span>}
           {iconElem && children ? <span>{children}</span> : children}
-          {extra !== undefined ? <div className="dm-button__extra">{extra}</div> : null}
+          {extra !== undefined ? <div className="lsf-button__extra">{extra}</div> : null}
         </>
       </Tag>
     );
@@ -169,9 +169,9 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
 Button.displayName = "Button";
 
 const Group: FC<ButtonGroupProps> = ({ className, children, collapsed }) => {
-  const groupClasses = ["dm-button-group"];
+  const groupClasses = ["lsf-button-group"];
 
-  if (collapsed) groupClasses.push("dm-button-group_collapsed");
+  if (collapsed) groupClasses.push("lsf-button-group_collapsed");
   if (className) groupClasses.push(className);
 
   return <div className={groupClasses.join(" ")}>{children}</div>;

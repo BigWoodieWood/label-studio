@@ -66,25 +66,25 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
     };
 
     // Build class names for pagination component
-    const paginationClasses = ["dm-pagination"];
+    const paginationClasses = ["lsf-pagination"];
 
     // Add modifier classes
-    if (size) paginationClasses.push(`dm-pagination_size_${size}`);
-    if (outline) paginationClasses.push("dm-pagination_outline");
-    if (align) paginationClasses.push(`dm-pagination_align_${align}`);
-    if (noPadding) paginationClasses.push("dm-pagination_no-padding");
-    if (disabled) paginationClasses.push("dm-pagination_disabled");
+    if (size) paginationClasses.push(`lsf-pagination_size_${size}`);
+    if (outline) paginationClasses.push("lsf-pagination_outline");
+    if (align) paginationClasses.push(`lsf-pagination_align_${align}`);
+    if (noPadding) paginationClasses.push("lsf-pagination_no-padding");
+    if (disabled) paginationClasses.push("lsf-pagination_disabled");
 
     return (
       <div className={paginationClasses.join(" ")}>
-        <div className="dm-pagination__navigation">
+        <div className="lsf-pagination__navigation">
           <>
             <NavigationButton
               mod={["arrow-left", "arrow-left-double"]}
               onClick={() => onChange?.(1)}
               disabled={currentPage === 1 || disabled}
             />
-            <div className="dm-pagination__divider" />
+            <div className="lsf-pagination__divider" />
           </>
           <NavigationButton
             mod={["arrow-left"]}
@@ -92,7 +92,7 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
             hotkey={hotkey?.prev}
             disabled={currentPage === 1 || disabled}
           />
-          <div className="dm-pagination__input">
+          <div className="lsf-pagination__input">
             {inputMode ? (
               <input
                 type="text"
@@ -127,7 +127,7 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
               />
             ) : (
               <div
-                className="dm-pagination__page-indicator"
+                className="lsf-pagination__page-indicator"
                 onClick={() => {
                   setInputMode(true);
                 }}
@@ -148,7 +148,7 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
             hotkey={hotkey?.next}
           />
           <>
-            <div className="dm-pagination__divider" />
+            <div className="lsf-pagination__divider" />
             <NavigationButton
               mod={["arrow-right", "arrow-right-double"]}
               onClick={() => onChange?.(totalPages)}
@@ -157,7 +157,7 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
           </>
         </div>
         {pageSizeSelectable && (
-          <div className="dm-pagination__page-size">
+          <div className="lsf-pagination__page-size">
             <select value={pageSize} onChange={handleChangeSelect}>
               {renderOptions()}
             </select>
@@ -183,15 +183,15 @@ const NavigationButton: FC<NavigationButtonProps> = ({ mod, disabled, hotkey, on
   useHotkey(hotkey, actionHandler);
 
   // Build button class names
-  const buttonClasses = ["dm-pagination__btn"];
+  const buttonClasses = ["lsf-pagination__btn"];
 
   // Add all modifiers from the array
   mod.forEach((modifier) => {
-    buttonClasses.push(`dm-pagination__btn_${modifier}`);
+    buttonClasses.push(`lsf-pagination__btn_${modifier}`);
   });
 
   // Add disabled state if needed
-  if (disabled) buttonClasses.push("dm-pagination__btn_disabled");
+  if (disabled) buttonClasses.push("lsf-pagination__btn_disabled");
 
   const buttonElement = (
     <button className={buttonClasses.join(" ")} onClick={actionHandler} disabled={disabled} type="button" />

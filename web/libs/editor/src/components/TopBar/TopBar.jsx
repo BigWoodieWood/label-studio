@@ -25,9 +25,9 @@ export const TopBar = observer(({ store }) => {
   if (isFF(FF_DEV_3873) && isBulkMode) return null;
 
   return store ? (
-    <div className={`dm-topbar ${isFF(FF_DEV_3873) ? "dm-topbar_newLabelingUI" : ""}`}>
+    <div className={`lsf-topbar ${isFF(FF_DEV_3873) ? "lsf-topbar_newLabelingUI" : ""}`}>
       {isFF(FF_DEV_3873) ? (
-        <div className="dm-topbar__group">
+        <div className="lsf-topbar__group">
           <CurrentTask store={store} />
           {store.hasInterface("annotations:view-all") && (
             <Tooltip title="Compare all annotations">
@@ -80,22 +80,22 @@ export const TopBar = observer(({ store }) => {
         </div>
       ) : (
         <>
-          <div className="dm-topbar__group">
+          <div className="lsf-topbar__group">
             {!isBulkMode && <CurrentTask store={store} />}
             {!isViewAll && !isBulkMode && (
               <Annotations store={store} annotationStore={store.annotationStore} commentStore={store.commentStore} />
             )}
             <Actions store={store} />
           </div>
-          <div className="dm-topbar__group">
+          <div className="lsf-topbar__group">
             {!isViewAll && (
-              <div className="dm-topbar__section">
+              <div className="lsf-topbar__section">
                 <DynamicPreannotationsToggle />
               </div>
             )}
             {!isViewAll && store.hasInterface("controls") && (store.hasInterface("review") || !isPrediction) && (
               <div
-                className="dm-topbar__section dm-topbar__section_flat"
+                className="lsf-topbar__section lsf-topbar__section_flat"
                 style={{ width: 320, boxSizing: "border-box" }}
               >
                 <Controls annotation={entity} />

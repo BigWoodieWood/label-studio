@@ -98,9 +98,9 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
           onAnnotationSelect?.(ent, ent.type === "prediction");
         }}
         extra={
-          <div className="dm-annotations-list__icons">
-            <div className="dm-annotations-list__icon-column">{renderCommentIcon(ent)}</div>
-            <div className="dm-annotations-list__icon-column">
+          <div className="lsf-annotations-list__icons">
+            <div className="lsf-annotations-list__icon-column">{renderCommentIcon(ent)}</div>
+            <div className="lsf-annotations-list__icon-column">
               {groundTruthEnabled && <GroundTruth entity={ent} disabled />}
             </div>
           </div>
@@ -123,16 +123,16 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
 
     return (
       <>
-        <div className="dm-annotations-list__draft">{_drafts}</div>
-        <div className="dm-annotations-list__annotation">{_annotations}</div>
+        <div className="lsf-annotations-list__draft">{_drafts}</div>
+        <div className="lsf-annotations-list__annotation">{_annotations}</div>
       </>
     );
   };
 
   return enableAnnotations || enablePredictions || enableCreateAnnotation ? (
-    <div className="dm-topbar__section dm-topbar__section_flat">
-      <div className="dm-annotations-list" ref={dropdownRef}>
-        <div className="dm-annotations-list__selected">
+    <div className="lsf-topbar__section lsf-topbar__section_flat">
+      <div className="lsf-annotations-list" ref={dropdownRef}>
+        <div className="lsf-annotations-list__selected">
           <Annotation
             aria-label="Annotations List Toggle"
             entity={annotationStore.selected}
@@ -143,11 +143,11 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
             extra={
               entities.length > 0 ? (
                 <Space size="none" style={{ marginRight: -8, marginLeft: 8 }}>
-                  <div className="dm-annotations-list__counter">
+                  <div className="lsf-annotations-list__counter">
                     {entities.indexOf(annotationStore.selected) + 1}/{entities.length}
                   </div>
                   <div
-                    className={`dm-annotations-list__toggle ${opened ? "dm-annotations-list__toggle_opened" : ""}`}
+                    className={`lsf-annotations-list__toggle ${opened ? "lsf-annotations-list__toggle_opened" : ""}`}
                   />
                 </Space>
               ) : null
@@ -156,7 +156,7 @@ export const Annotations = observer(({ store, annotationStore, commentStore }) =
         </div>
 
         {opened && (
-          <div className="dm-annotations-list__list">
+          <div className="lsf-annotations-list__list">
             {store.hasInterface("annotations:add-new") && (
               <CreateAnnotation annotationStore={annotationStore} onClick={() => setOpened(false)} />
             )}
@@ -178,9 +178,9 @@ const CreateAnnotation = observer(({ annotationStore, onClick }) => {
   }, [annotationStore, onClick]);
 
   return (
-    <div className="dm-annotations-list__create" aria-label="Create Annotation" onClick={onCreateAnnotation}>
+    <div className="lsf-annotations-list__create" aria-label="Create Annotation" onClick={onCreateAnnotation}>
       <Space size="small">
-        <Userpic className="dm-annotations-list__userpic dm-annotations-list__userpic_prediction">
+        <Userpic className="lsf-annotations-list__userpic lsf-annotations-list__userpic_prediction">
           <IconPlusCircle />
         </Userpic>
         Create Annotation
@@ -200,13 +200,13 @@ const Annotation = observer(({ entity, selected, onClick, extra, ...props }) => 
   return (
     <div
       {...props}
-      className={`dm-annotations-list__entity ${selected ? "dm-annotations-list__entity_selected" : ""}`}
+      className={`lsf-annotations-list__entity ${selected ? "lsf-annotations-list__entity_selected" : ""}`}
       onClick={onClick}
     >
       <Space spread>
         <Space size="small">
           <Userpic
-            className={`dm-annotations-list__userpic ${isPrediction ? "dm-annotations-list__userpic_prediction" : ""}`}
+            className={`lsf-annotations-list__userpic ${isPrediction ? "lsf-annotations-list__userpic_prediction" : ""}`}
             showUsername
             username={isPrediction ? entity.createdBy : null}
             user={entity.user ?? { username }}
@@ -214,18 +214,18 @@ const Annotation = observer(({ entity, selected, onClick, extra, ...props }) => 
             {isPrediction && <IconSparks color="#944BFF" style={{ width: 18, height: 18 }} />}
           </Userpic>
           <Space direction="vertical" size="none">
-            <div className="dm-annotations-list__user">
-              <span className="dm-annotations-list__name">{username}</span>
-              <span className="dm-annotations-list__entity-id">#{entity.pk ?? entity.id}</span>
+            <div className="lsf-annotations-list__user">
+              <span className="lsf-annotations-list__name">{username}</span>
+              <span className="lsf-annotations-list__entity-id">#{entity.pk ?? entity.id}</span>
             </div>
 
             {isDefined(entity.acceptedState) ? (
-              <div className={`dm-annotations-list__review dm-annotations-list__review_state_${entity.acceptedState}`}>
+              <div className={`lsf-annotations-list__review lsf-annotations-list__review_state_${entity.acceptedState}`}>
                 {entity.acceptedState}
               </div>
             ) : (
-              <div className="dm-annotations-list__created">
-                created, <TimeAgo className="dm-annotations-list__date" date={entity.createdDate} />
+              <div className="lsf-annotations-list__created">
+                created, <TimeAgo className="lsf-annotations-list__date" date={entity.createdDate} />
               </div>
             )}
           </Space>

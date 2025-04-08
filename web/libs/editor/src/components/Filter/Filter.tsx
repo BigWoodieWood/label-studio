@@ -73,7 +73,7 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
 
   const renderFilterList = useMemo(() => {
     return filterList.map(({ field, operation, logic, value }, index) => (
-      <div key={index} className="dm-filter-item">
+      <div key={index} className="lsf-filter-item">
         <FilterRow
           index={index}
           availableFilters={availableFilters}
@@ -90,8 +90,8 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
 
   const renderFilter = useMemo(() => {
     return (
-      <div className="dm-filter">
-        {filterList.length > 0 ? renderFilterList : <div className="dm-filter__empty">No filters applied</div>}
+      <div className="lsf-filter">
+        {filterList.length > 0 ? renderFilterList : <div className="lsf-filter__empty">No filters applied</div>}
         <Button look="alt" size="small" type={"text"} onClick={addNewFilterListItem}>
           Add {filterList.length ? "Another Filter" : "Filter"}
         </Button>
@@ -104,17 +104,17 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
   }, []);
 
   // Build filter button classes
-  const filterButtonClasses = ["dm-filter-button"];
-  if (active) filterButtonClasses.push("dm-filter-button_active");
+  const filterButtonClasses = ["lsf-filter-button"];
+  if (active) filterButtonClasses.push("lsf-filter-button_active");
 
   return (
     <Dropdown.Trigger content={renderFilter} dataTestId={"dropdown"} animated={animated} onToggle={onToggle}>
       <div data-testid={"filter-button"} className={filterButtonClasses.join(" ")}>
-        <div className="dm-filter-button__icon">
+        <div className="lsf-filter-button__icon">
           <IconFilter />
         </div>
         <div
-          className="dm-filter-button__text"
+          className="lsf-filter-button__text"
           style={{
             fontSize: isFF(FF_DEV_3873) && 12,
             fontWeight: isFF(FF_DEV_3873) && 500,
@@ -124,7 +124,7 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
           Filter
         </div>
         {filterList.length > 0 && (
-          <div className="dm-filter-button__filter-length" data-testid={"filter-length"}>
+          <div className="lsf-filter-button__filter-length" data-testid={"filter-length"}>
             {filterList.length}
           </div>
         )}

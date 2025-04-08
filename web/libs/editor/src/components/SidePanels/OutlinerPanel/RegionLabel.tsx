@@ -17,7 +17,7 @@ export const RegionLabel = observer(({ item }: RegionLabelProps) => {
     const labels: any[] = [].concat(...labelsInResults);
 
     return (
-      <div className="dm-labels-list">
+      <div className="lsf-labels-list">
         {labels.map((label, index) => {
           const color = label.background || "#000000";
 

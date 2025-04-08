@@ -54,7 +54,7 @@ export const Comments: FC<{ annotationStore: any; commentStore: any; cacheKey?: 
     }, [commentStore.hasUnsaved]);
 
     return (
-      <div className="dm-comments">
+      <div className="lsf-comments">
         <CommentForm commentStore={commentStore} annotationStore={annotationStore} inline />
         <CommentsList commentStore={commentStore} />
       </div>

@@ -115,7 +115,7 @@ export const Controls: FC<TimelineControlsProps> = memo(
 
     const renderControls = () => {
       return (
-        <Space className="dm-timeline-controls__group" size="small" style={{ gridAutoColumns: "auto" }}>
+        <Space className="lsf-timeline-controls__group" size="small" style={{ gridAutoColumns: "auto" }}>
           <ConfigControl
             onSetModal={onSetConfigModal}
             onAmpChange={props.onAmpChange}
@@ -169,11 +169,11 @@ export const Controls: FC<TimelineControlsProps> = memo(
     };
 
     return (
-      <Space className="dm-timeline-controls" spread style={{ gridAutoColumns: "auto" }}>
+      <Space className="lsf-timeline-controls" spread style={{ gridAutoColumns: "auto" }}>
         {isFF(FF_DEV_2715) && mediaType === "audio" ? (
           renderControls()
         ) : (
-          <Space className="dm-timeline-controls__group" size="small" style={{ gridAutoColumns: "auto" }}>
+          <Space className="lsf-timeline-controls__group" size="small" style={{ gridAutoColumns: "auto" }}>
             {props.controls &&
               Object.entries(props.controls).map(([name, enabled]) => {
                 if (enabled === false) return;
@@ -196,11 +196,11 @@ export const Controls: FC<TimelineControlsProps> = memo(
             {customControls?.left}
           </Space>
         )}
-        <div className="dm-timeline-controls__main-controls">
-          <Space className="dm-timeline-controls__group" collapsed>
+        <div className="lsf-timeline-controls__main-controls">
+          <Space className="lsf-timeline-controls__group" collapsed>
             {extraControls}
           </Space>
-          <Space className="dm-timeline-controls__group" collapsed>
+          <Space className="lsf-timeline-controls__group" collapsed>
             {customControls?.leftCenter}
             <AltControls
               showAlterantive={altControlsMode && !disableFrames}
@@ -291,7 +291,7 @@ export const Controls: FC<TimelineControlsProps> = memo(
             />
             {customControls?.rightCenter}
           </Space>
-          <Space className="dm-timeline-controls__group" collapsed>
+          <Space className="lsf-timeline-controls__group" collapsed>
             {!disableFrames && allowViewCollapse && (
               <ControlButton tooltip="Toggle Timeline" onClick={() => onToggleCollapsed?.(!collapsed)}>
                 {collapsed ? <IconExpand /> : <IconCollapse />}
@@ -305,7 +305,7 @@ export const Controls: FC<TimelineControlsProps> = memo(
           </Space>
         </div>
 
-        <Space className="dm-timeline-controls__group" size="small">
+        <Space className="lsf-timeline-controls__group" size="small">
           {isFF(FF_DEV_2715) && mediaType === "audio" ? (
             <>
               {customControls?.right}
@@ -363,11 +363,11 @@ const TimeDisplay: FC<TimeDisplay> = ({ currentTime, position, duration, framera
   const totalTimeFormatted = formatter({ time: duration, ...commonOptions });
 
   return (
-    <div className="dm-timeline-controls__time">
-      <div className="dm-timeline-controls__time-section">
+    <div className="lsf-timeline-controls__time">
+      <div className="lsf-timeline-controls__time-section">
         <Time time={currentTime} position={currentTimeFormatted} />
       </div>
-      <div className="dm-timeline-controls__time-section">
+      <div className="lsf-timeline-controls__time-section">
         <Time time={Math.max(duration, 0)} position={totalTimeFormatted} />
       </div>
     </div>

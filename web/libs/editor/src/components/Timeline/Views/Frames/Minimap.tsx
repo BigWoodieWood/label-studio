@@ -26,16 +26,16 @@ export const Minimap: FC<any> = () => {
   }, [length]);
 
   return (
-    <div ref={root} className="dm-minimap">
+    <div ref={root} className="lsf-minimap">
       {visualization.slice(0, 5).map(({ id, color, lifespans }) => {
         return (
-          <div key={id} className="dm-minimap__region" style={{ "--color": color } as React.CSSProperties}>
+          <div key={id} className="lsf-minimap__region" style={{ "--color": color } as React.CSSProperties}>
             {lifespans.map((connection, i) => {
               const isLast = i + 1 === lifespans.length;
               const left = connection.start * step;
               const width = isLast && connection.enabled ? "100%" : connection.width;
 
-              return <div key={`${id}${i}`} className="dm-minimap__connection" style={{ left, width }} />;
+              return <div key={`${id}${i}`} className="lsf-minimap__connection" style={{ left, width }} />;
             })}
           </div>
         );

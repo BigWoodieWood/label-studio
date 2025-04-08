@@ -30,7 +30,7 @@ const DetailsComponent: FC<DetailsPanelProps> = ({ currentEntity, regions }) => 
   const selectedRegions = regions.selection;
 
   return (
-    <div className="dm-details-tab">
+    <div className="lsf-details-tab">
       <Content selection={selectedRegions} currentEntity={currentEntity} />
     </div>
   );
@@ -45,9 +45,9 @@ const CommentsTab: FC<any> = inject("store")(
     return (
       <>
         {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
-          <div className="dm-comments-panel">
-            <div className="dm-comments-panel__section-tab">
-              <div className="dm-comments-panel__section-content">
+          <div className="lsf-comments-panel">
+            <div className="lsf-comments-panel__section-tab">
+              <div className="lsf-comments-panel__section-content">
                 <CommentsComponent
                   annotationStore={store.annotationStore}
                   commentStore={store.commentStore}
@@ -68,13 +68,13 @@ const RelationsTab: FC<any> = inject("store")(
 
     return (
       <>
-        <div className="dm-relations">
-          <div className="dm-relations__section-tab">
-            <div className="dm-relations__view-control">
-              <div className="dm-relations__section-head">Relations ({relationStore.size})</div>
+        <div className="lsf-relations">
+          <div className="lsf-relations__section-tab">
+            <div className="lsf-relations__view-control">
+              <div className="lsf-relations__section-head">Relations ({relationStore.size})</div>
               <RelationsControls relationStore={relationStore} />
             </div>
-            <div className="dm-relations__section-content">
+            <div className="lsf-relations__section-content">
               <RelationsComponent relationStore={relationStore} />
             </div>
           </div>
@@ -90,13 +90,13 @@ const HistoryTab: FC<any> = inject("store")(
 
     return (
       <>
-        <div className="dm-history">
-          <div className="dm-history__section-tab">
-            <div className="dm-history__section-head">
+        <div className="lsf-history">
+          <div className="lsf-history__section-tab">
+            <div className="lsf-history__section-head">
               Annotation History
               <span>#{currentEntity.pk ?? currentEntity.id}</span>
             </div>
-            <div className="dm-history__section-content">
+            <div className="lsf-history__section-content">
               <AnnotationHistory inline enabled={showAnnotationHistory} />
             </div>
           </div>
@@ -110,9 +110,9 @@ const InfoTab: FC<any> = inject("store")(
   observer(({ selection }) => {
     return (
       <>
-        <div className="dm-info">
-          <div className="dm-info__section-tab">
-            <div className="dm-info__section-head">Selection Details</div>
+        <div className="lsf-info">
+          <div className="lsf-info__section-tab">
+            <div className="lsf-info__section-head">Selection Details</div>
             <RegionsPanel regions={selection} />
           </div>
         </div>
@@ -127,28 +127,28 @@ const GeneralPanel: FC<any> = inject("store")(
     const showAnnotationHistory = store.hasInterface("annotations:history");
     return (
       <>
-        <div className="dm-details__section">
-          <div className="dm-details__section-head">
+        <div className="lsf-details__section">
+          <div className="lsf-details__section-head">
             Annotation History
             <span>#{currentEntity.pk ?? currentEntity.id}</span>
           </div>
-          <div className="dm-details__section-content">
+          <div className="lsf-details__section-content">
             <AnnotationHistory inline enabled={showAnnotationHistory} />
           </div>
         </div>
-        <div className="dm-details__section">
-          <div className="dm-details__view-control">
-            <div className="dm-details__section-head">Relations ({relationStore.size})</div>
+        <div className="lsf-details__section">
+          <div className="lsf-details__view-control">
+            <div className="lsf-details__section-head">Relations ({relationStore.size})</div>
             <RelationsControls relationStore={relationStore} />
           </div>
-          <div className="dm-details__section-content">
+          <div className="lsf-details__section-content">
             <RelationsComponent relationStore={relationStore} />
           </div>
         </div>
         {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
-          <div className="dm-details__section">
-            <div className="dm-details__section-head">Comments</div>
-            <div className="dm-details__section-content">
+          <div className="lsf-details__section">
+            <div className="lsf-details__section-head">Comments</div>
+            <div className="lsf-details__section-content">
               <CommentsComponent
                 annotationStore={store.annotationStore}
                 commentStore={store.commentStore}

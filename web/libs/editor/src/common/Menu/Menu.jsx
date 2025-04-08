@@ -14,7 +14,7 @@ export const Menu = forwardRef(
 
     const clickHandler = useCallback(
       (e) => {
-        const elem = e.target.closest(".dm-menu__item");
+        const elem = e.target.closest(".lsf-menu__item");
 
         if (dropdown && elem && closeDropdownOnItemClick !== false) {
           dropdown.close();
@@ -31,9 +31,9 @@ export const Menu = forwardRef(
       return { selected, allowClickSelected };
     }, [selected, allowClickSelected]);
 
-    const menuClasses = ["dm-menu"];
-    if (size) menuClasses.push(`dm-menu_size_${size}`);
-    if (collapsed) menuClasses.push("dm-menu_collapsed");
+    const menuClasses = ["lsf-menu"];
+    if (size) menuClasses.push(`lsf-menu_size_${size}`);
+    if (collapsed) menuClasses.push("lsf-menu_collapsed");
     if (className) menuClasses.push(className);
 
     return (
@@ -47,8 +47,8 @@ export const Menu = forwardRef(
 );
 
 Menu.Item = MenuItem;
-Menu.Spacer = () => <li className="dm-menu__spacer" />;
-Menu.Divider = () => <li className="dm-menu__divider" />;
+Menu.Spacer = () => <li className="lsf-menu__spacer" />;
+Menu.Divider = () => <li className="lsf-menu__divider" />;
 Menu.Builder = (url, menuItems) => {
   return (menuItems ?? []).map((item, index) => {
     if (item === "SPACER") return <Menu.Spacer key={index} />;
@@ -66,13 +66,13 @@ Menu.Builder = (url, menuItems) => {
 };
 
 Menu.Group = ({ children, title, className, style }) => {
-  const classes = ["dm-menu-group"];
+  const classes = ["lsf-menu-group"];
   if (className) classes.push(className);
 
   return (
     <li className={classes.join(" ")} style={style}>
-      <div className="dm-menu-group__title">{title}</div>
-      <ul className="dm-menu-group__list">{children}</ul>
+      <div className="lsf-menu-group__title">{title}</div>
+      <ul className="lsf-menu-group__list">{children}</ul>
     </li>
   );
 };

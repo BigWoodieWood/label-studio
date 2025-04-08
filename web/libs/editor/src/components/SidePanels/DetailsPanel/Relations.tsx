@@ -19,7 +19,7 @@ const RealtionsComponent: FC<any> = ({ relationStore }) => {
   const relations = relationStore.orderedRelations;
 
   return (
-    <div className="dm-relations">
+    <div className="lsf-relations">
       <RelationsList relations={relations} />
     </div>
   );
@@ -77,20 +77,20 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
 
   return (
     <div
-      className={`dm-relations__item ${!relation.visible ? "dm-relations__item_hidden" : ""}`}
+      className={`lsf-relations__item ${!relation.visible ? "lsf-relations__item_hidden" : ""}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="dm-relations__content">
-        <div className="dm-relations__icon" onClick={relation.rotateDirection}>
-          <div className="dm-relations__direction">{directionIcon}</div>
+      <div className="lsf-relations__content">
+        <div className="lsf-relations__icon" onClick={relation.rotateDirection}>
+          <div className="lsf-relations__direction">{directionIcon}</div>
         </div>
-        <div className="dm-relations__nodes">
+        <div className="lsf-relations__nodes">
           <RegionItem compact withActions={false} withIds={false} region={relation.node1} />
           <RegionItem compact withActions={false} withIds={false} region={relation.node2} />
         </div>
-        <div className="dm-relations__actions">
-          <div className="dm-relations__action">
+        <div className="lsf-relations__actions">
+          <div className="lsf-relations__action">
             {(hovered || relation.showMeta) && relation.hasRelations && (
               <Button
                 primary={relation.showMeta}
@@ -103,7 +103,7 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
               </Button>
             )}
           </div>
-          <div className="dm-relations__action">
+          <div className="lsf-relations__action">
             {(hovered || !relation.visible) && (
               <Button
                 type="text"
@@ -118,7 +118,7 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
               </Button>
             )}
           </div>
-          <div className="dm-relations__action">
+          <div className="lsf-relations__action">
             {hovered && (
               <Button
                 type="text"
@@ -159,7 +159,7 @@ const RelationMeta: FC<any> = observer(({ relation }) => {
   );
 
   return (
-    <div className="dm-relation-meta">
+    <div className="lsf-relation-meta">
       <Select
         mode={selectionMode}
         style={{ width: "100%" }}

@@ -19,8 +19,8 @@ export const RadioGroup = ({ size, value, defaultValue, onChange, children, ...p
         defaultValue,
       }}
     >
-      <div className={`dm-radio-group ${size ? `dm-radio-group_size_${size}` : ""}`} style={props.style}>
-        <div className="dm-radio-group__buttons">{children}</div>
+      <div className={`lsf-radio-group ${size ? `lsf-radio-group_size_${size}` : ""}`} style={props.style}>
+        <div className="lsf-radio-group__buttons">{children}</div>
       </div>
     </RadioContext.Provider>
   );
@@ -30,14 +30,14 @@ const RadioButton = ({ value, disabled, children }) => {
   const { onChange, value: currentValue } = React.useContext(RadioContext);
   const checked = value === currentValue;
 
-  const buttonClasses = ["dm-radio-group__button"];
-  if (checked) buttonClasses.push("dm-radio-group__button_checked");
-  if (disabled) buttonClasses.push("dm-radio-group__button_disabled");
+  const buttonClasses = ["lsf-radio-group__button"];
+  if (checked) buttonClasses.push("lsf-radio-group__button_checked");
+  if (disabled) buttonClasses.push("lsf-radio-group__button_disabled");
 
   return (
     <label className={buttonClasses.join(" ")}>
       <input
-        className="dm-radio-group__input"
+        className="lsf-radio-group__input"
         type="radio"
         value={value}
         checked={value === currentValue}

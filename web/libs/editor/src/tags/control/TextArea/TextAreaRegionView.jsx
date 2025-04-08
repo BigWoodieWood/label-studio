@@ -72,15 +72,15 @@ const HtxTextAreaResultLine = forwardRef(
     };
 
     return (
-      <div className="dm-textarea-tag__item">
+      <div className="lsf-textarea-tag__item">
         {isTextarea ? (
-          <TextArea {...inputProps} className={`dm-textarea-tag__input ${inputProps.className}`} ref={ref} />
+          <TextArea {...inputProps} className={`lsf-textarea-tag__input ${inputProps.className}`} ref={ref} />
         ) : (
-          <Input {...inputProps} className={`dm-textarea-tag__input ${inputProps.className}`} ref={ref} />
+          <Input {...inputProps} className={`lsf-textarea-tag__input ${inputProps.className}`} ref={ref} />
         )}
         {canDelete && !collapsed && !readOnly && (
           <Button
-            className="dm-textarea-tag__action"
+            className="lsf-textarea-tag__action"
             aria-label="Delete Region"
             icon={<IconTrash />}
             size="small"
@@ -250,7 +250,7 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
   return (
     (result || showSubmit) && (
       <div
-        className={`dm-textarea-tag dm-textarea-tag_mode_${item.mode} ${outliner ? "dm-textarea-tag_outliner" : ""}`}
+        className={`lsf-textarea-tag lsf-textarea-tag_mode_${item.mode} ${outliner ? "lsf-textarea-tag_outliner" : ""}`}
         style={styles}
       >
         {result ? (
@@ -266,7 +266,7 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
 
         {showSubmit && (
           <Form
-            className="dm-textarea-tag__form"
+            className="lsf-textarea-tag__form"
             onFinish={() => {
               if (item.allowsubmit && item._value && !item.annotation.isReadOnly()) {
                 submitValue();
@@ -279,7 +279,7 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
           >
             {isTextArea ? (
               <TextArea
-                className="dm-textarea-tag__input"
+                className="lsf-textarea-tag__input"
                 {...props}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -287,7 +287,7 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
               />
             ) : (
               <Input
-                className="dm-textarea-tag__input"
+                className="lsf-textarea-tag__input"
                 {...props}
                 onClick={(e) => {
                   e.stopPropagation();

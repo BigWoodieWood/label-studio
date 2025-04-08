@@ -3,7 +3,7 @@ import "./Icon.scss";
 
 export const Icon = React.forwardRef(({ icon, ...props }, ref) => {
   return (
-    <span className="dm-icon" ref={ref}>
+    <span className="lsf-icon" ref={ref}>
       {React.createElement(icon, props)}
     </span>
   );

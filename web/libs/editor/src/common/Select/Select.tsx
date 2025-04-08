@@ -61,19 +61,19 @@ const SelectContext = createContext<SelectContextProps>({
 
 // Helper functions for building class names
 const buildSelectClasses = (size?: string, surface?: string) => {
-  const classes = ["dm-select"];
+  const classes = ["lsf-select"];
 
-  if (size) classes.push(`dm-select_size_${size}`);
-  if (surface) classes.push(`dm-select_surface_${surface}`);
+  if (size) classes.push(`lsf-select_size_${size}`);
+  if (surface) classes.push(`lsf-select_surface_${surface}`);
 
   return classes.join(" ");
 };
 
 const buildOptionClasses = (isSelected?: boolean, isFocused?: boolean) => {
-  const classes = ["dm-select__option"];
+  const classes = ["lsf-select__option"];
 
-  if (isSelected) classes.push("dm-select__option_selected");
-  if (isFocused) classes.push("dm-select__option_focused");
+  if (isSelected) classes.push("lsf-select__option_selected");
+  if (isFocused) classes.push("lsf-select__option_focused");
 
   return classes.join(" ");
 };
@@ -229,15 +229,15 @@ export const Select: SelectComponent<SelectProps> = ({
       >
         <Dropdown.Trigger
           ref={dropdown}
-          className={`dm-select__dropdown${variant ? ` dm-select__dropdown_variant_${variant}` : ""}`}
-          content={<div className="dm-select__list">{children}</div>}
+          className={`lsf-select__dropdown${variant ? ` lsf-select__dropdown_variant_${variant}` : ""}`}
+          content={<div className="lsf-select__list">{children}</div>}
           onToggle={(visible: boolean) => {
             if (!visible) setFocused(null);
           }}
         >
-          <div className="dm-select__selected" data-testid={dataTestid}>
-            <div className="dm-select__value">{selected ?? placeholder}</div>
-            <div className="dm-select__icon" />
+          <div className="lsf-select__selected" data-testid={dataTestid}>
+            <div className="lsf-select__value">{selected ?? placeholder}</div>
+            <div className="lsf-select__icon" />
           </div>
         </Dropdown.Trigger>
       </div>
@@ -291,9 +291,9 @@ interface SelectioOptGroupProps {
 
 const SelectOptGroup: FC<SelectioOptGroupProps> = ({ label, children, style }) => {
   return (
-    <div className="dm-select__optgroup" style={style}>
-      <div className="dm-select__optgroup-label">{label}</div>
-      <div className="dm-select__optgroup-list">{children}</div>
+    <div className="lsf-select__optgroup" style={style}>
+      <div className="lsf-select__optgroup-label">{label}</div>
+      <div className="lsf-select__optgroup-list">{children}</div>
     </div>
   );
 };

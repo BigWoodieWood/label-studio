@@ -403,27 +403,27 @@ export const Frames: FC<TimelineViewProps> = ({
   };
 
   return (
-    <div className="dm-timeline-frames" style={styles as any}>
-      <div className="dm-timeline-frames__controls">
+    <div className="lsf-timeline-frames" style={styles as any}>
+      <div className="lsf-timeline-frames__controls">
         <div
-          className="dm-timeline-frames__indicator"
+          className="lsf-timeline-frames__indicator"
           onMouseDown={handleMovement}
           style={{ left: clamp(seekerOffset - step, timelineStartOffset - step, viewWidth) }}
         />
 
         {isDefined(hoverOffset) && hoverEnabled && (
           <div
-            className="dm-timeline-frames__hover"
+            className="lsf-timeline-frames__hover"
             style={{ left: roundToStep(hoverOffset, step), marginLeft: timelineStartOffset }}
             data-frame={toSteps(currentOffsetX + hoverOffset, step) + 1}
           />
         )}
       </div>
 
-      <div className="dm-timeline-frames__labels-bg" style={{ width: timelineStartOffset }} />
+      <div className="lsf-timeline-frames__labels-bg" style={{ width: timelineStartOffset }} />
 
       <div
-        className="dm-timeline-frames__scroll"
+        className="lsf-timeline-frames__scroll"
         ref={scrollable as any}
         onWheel={scrollHandler}
         onMouseMove={hoverHandler}
@@ -431,7 +431,7 @@ export const Frames: FC<TimelineViewProps> = ({
         onClickCapture={scrollClickHandler}
         onMouseDown={onFrameScrub}
       >
-        <div className="dm-timeline-frames__filler">
+        <div className="lsf-timeline-frames__filler">
           <KeypointsVirtual
             regions={regions}
             scrollTop={currentOffsetY}
@@ -442,7 +442,7 @@ export const Frames: FC<TimelineViewProps> = ({
         </div>
       </div>
 
-      <div className="dm-timeline-frames__background" style={{ backgroundImage: background }} />
+      <div className="lsf-timeline-frames__background" style={{ backgroundImage: background }} />
     </div>
   );
 };
@@ -466,7 +466,7 @@ const KeypointsVirtual: FC<KeypointsVirtualProps> = ({ regions, startOffset, scr
   }, [scrollTop, regions.length]);
 
   return (
-    <div className="dm-timeline-frames__keypoints" style={{ height: regions.length * height }}>
+    <div className="lsf-timeline-frames__keypoints" style={{ height: regions.length * height }}>
       {regions.map((region, i) => {
         return region.sequence.length > 0 || region.timeline ? (
           <Keypoints

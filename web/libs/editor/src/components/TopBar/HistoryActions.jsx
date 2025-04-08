@@ -8,10 +8,10 @@ export const EditingHistory = observer(({ entity }) => {
   const { history } = entity;
 
   return (
-    <div className="dm-history-buttons">
+    <div className="lsf-history-buttons">
       <Tooltip title="Undo">
         <Button
-          className="dm-history-buttons__action"
+          className="lsf-history-buttons__action"
           type="text"
           aria-label="Undo"
           disabled={!history?.canUndo}
@@ -21,7 +21,7 @@ export const EditingHistory = observer(({ entity }) => {
       </Tooltip>
       <Tooltip title="Redo">
         <Button
-          className="dm-history-buttons__action"
+          className="lsf-history-buttons__action"
           type="text"
           aria-label="Redo"
           disabled={!history?.canRedo}
@@ -31,7 +31,7 @@ export const EditingHistory = observer(({ entity }) => {
       </Tooltip>
       <Tooltip title="Reset">
         <Button
-          className="dm-history-buttons__action dm-history-buttons__action_delete"
+          className="lsf-history-buttons__action lsf-history-buttons__action_delete"
           look="danger"
           type="text"
           aria-label="Reset"

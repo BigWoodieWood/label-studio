@@ -36,12 +36,12 @@ export const AnnotationTab = observer(({ store }) => {
       {hasSegmentation && <Relations store={store} item={annotation} />}
 
       {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
-        <div className="dm-comments-section">
-          <div className="dm-comments-section__header">
-            <div className="dm-comments-section__title">Comments</div>
+        <div className="lsf-comments-section">
+          <div className="lsf-comments-section__header">
+            <div className="lsf-comments-section__title">Comments</div>
           </div>
 
-          <div className="dm-comments-section__content">
+          <div className="lsf-comments-section__content">
             <Comments annotationStore={as} commentStore={store.commentStore} cacheKey={`task.${store.task.id}`} />
           </div>
         </div>

@@ -41,11 +41,11 @@ export const TextArea: FC<TextAreaProps> = ({
   const inlineAction = !!onSubmit;
 
   // Build class names
-  const classes = ["dm-textarea"];
+  const classes = ["lsf-textarea"];
 
   // Add modifier classes
-  if (inlineAction) classes.push("dm-textarea_inline");
-  if (autoSize) classes.push("dm-textarea_autosize");
+  if (inlineAction) classes.push("lsf-textarea_inline");
+  if (autoSize) classes.push("lsf-textarea_autosize");
 
   // Add custom class if provided
   if (className) classes.push(className);

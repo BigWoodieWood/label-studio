@@ -137,24 +137,24 @@ export const Range: FC<RangeProps> = ({
   const sizeProperty = align === "horizontal" ? "minWidth" : "minHeight";
 
   // Building the range classes
-  const rangeClasses = ["dm-range"];
-  if (align) rangeClasses.push(`dm-range_align_${align}`);
+  const rangeClasses = ["lsf-range"];
+  if (align) rangeClasses.push(`lsf-range_align_${align}`);
 
   return (
     <div className={rangeClasses.join(" ")} style={{ [sizeProperty]: size }}>
       {reverse
         ? maxIcon && (
-            <div className="dm-range__icon" onMouseDown={increase}>
+            <div className="lsf-range__icon" onMouseDown={increase}>
               {maxIcon}
             </div>
           )
         : minIcon && (
-            <div className="dm-range__icon" onMouseDown={decrease}>
+            <div className="lsf-range__icon" onMouseDown={decrease}>
               {minIcon}
             </div>
           )}
-      <div className="dm-range__body" onClick={onClick}>
-        <div className="dm-range__line" />
+      <div className="lsf-range__body" onClick={onClick}>
+        <div className="lsf-range__line" />
         <RangeIndicator align={align} reverse={reverse} value={currentValue} valueConvert={valueToPercentage} />
         {isMultiArray ? (
           arrayReverse(currentValue, reverse).map((value, i) => {
@@ -202,12 +202,12 @@ export const Range: FC<RangeProps> = ({
       </div>
       {reverse
         ? minIcon && (
-            <div className="dm-range__icon" onMouseDown={decrease}>
+            <div className="lsf-range__icon" onMouseDown={decrease}>
               {minIcon}
             </div>
           )
         : maxIcon && (
-            <div className="dm-range__icon" onMouseDown={increase}>
+            <div className="lsf-range__icon" onMouseDown={increase}>
               {maxIcon}
             </div>
           )}
@@ -280,7 +280,7 @@ const RangeHandle: FC<RangeHandleProps> = ({
 
   return (
     <div
-      className="dm-range__range-handle"
+      className="lsf-range__range-handle"
       style={{ [offsetProperty]: `${valueConvert(value)}%` }}
       onMouseDownCapture={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -321,5 +321,5 @@ const RangeIndicator: FC<RangeIndicatorProps> = ({ value, valueConvert, align, r
     if (reverse && !multi) [style.top, style.bottom] = [style.bottom, style.top];
   }
 
-  return <div className="dm-range__indicator" style={style} />;
+  return <div className="lsf-range__indicator" style={style} />;
 };

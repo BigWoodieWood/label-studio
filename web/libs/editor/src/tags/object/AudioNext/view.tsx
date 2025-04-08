@@ -92,7 +92,7 @@ const AudioNextView: FC<AudioNextProps> = ({ item }) => {
   return (
     <ObjectTag item={item}>
       <Timeline
-        className="dm-audio dm-audio_wave"
+        className="lsf-audio lsf-audio_wave"
         framerate={1000}
         hopSize={1000}
         playing={playing}

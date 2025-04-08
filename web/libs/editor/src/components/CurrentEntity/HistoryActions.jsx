@@ -9,10 +9,10 @@ export const HistoryActions = observer(({ annotation }) => {
   const { history } = annotation;
 
   return (
-    <div className="dm-history-buttons">
+    <div className="lsf-history-buttons">
       <Hotkey.Tooltip name="annotation:undo">
         <Button
-          className="dm-history-buttons__action"
+          className="lsf-history-buttons__action"
           type="text"
           aria-label="Undo"
           disabled={!history?.canUndo}
@@ -22,7 +22,7 @@ export const HistoryActions = observer(({ annotation }) => {
       </Hotkey.Tooltip>
       <Hotkey.Tooltip name="annotation:redo">
         <Button
-          className="dm-history-buttons__action"
+          className="lsf-history-buttons__action"
           type="text"
           aria-label="Redo"
           disabled={!history?.canRedo}
@@ -32,7 +32,7 @@ export const HistoryActions = observer(({ annotation }) => {
       </Hotkey.Tooltip>
       <Tooltip title="Reset">
         <Button
-          className="dm-history-buttons__action"
+          className="lsf-history-buttons__action"
           look="danger"
           type="text"
           aria-label="Reset"

@@ -44,10 +44,10 @@ export const Tag: FC<TagProps> = ({ className, style, size, color, solid = false
 
   const styles = { ...(style ?? {}), ...finalColor };
 
-  const classes = ["dm-tag"];
+  const classes = ["lsf-tag"];
 
   // Add size modifier if present
-  if (size) classes.push(`dm-tag_size_${size}`);
+  if (size) classes.push(`lsf-tag_size_${size}`);
 
   // Add custom class if provided
   if (className) classes.push(className);

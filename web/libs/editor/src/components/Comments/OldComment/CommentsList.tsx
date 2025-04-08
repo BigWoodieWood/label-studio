@@ -4,7 +4,7 @@ import { CommentItem } from "./CommentItem";
 
 export const CommentsList: FC<{ commentStore: any }> = observer(({ commentStore }) => {
   return (
-    <div className="dm-comments-list">
+    <div className="lsf-comments-list">
       {commentStore.comments.map((comment: any) => (
         <CommentItem key={comment.id} comment={comment} listComments={commentStore.listComments} />
       ))}

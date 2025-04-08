@@ -11,11 +11,11 @@ export const CurrentEntity = injector(
     useRegionsCopyPaste(entity);
 
     return entity ? (
-      <div className="dm-annotation" onClick={(e) => e.stopPropagation()}>
+      <div className="lsf-annotation" onClick={(e) => e.stopPropagation()}>
         {showHistory && (
-          <Space spread className="dm-annotation__title">
+          <Space spread className="lsf-annotation__title">
             Annotation History
-            <div className="dm-annotation__id">#{entity.pk ?? entity.id}</div>
+            <div className="lsf-annotation__id">#{entity.pk ?? entity.id}</div>
           </Space>
         )}
         <AnnotationHistory enabled={showHistory} />

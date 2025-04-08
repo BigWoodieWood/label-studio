@@ -56,7 +56,7 @@ const RegionEditorComponent: FC<RegionEditorProps> = ({ region }) => {
   const Component = isTimelineRegion ? TimelineRegionEditor : isAudioRegion ? AudioRegionProperties : RegionProperties;
 
   return (
-    <div className={`dm-region-editor ${region.isReadOnly() ? "dm-region-editor_disabled" : ""}`}>
+    <div className={`lsf-region-editor ${region.isReadOnly() ? "lsf-region-editor_disabled" : ""}`}>
       <Component region={region} />
     </div>
   );
@@ -66,7 +66,7 @@ const RegionProperties = ({ region }: RegionEditorProps) => {
   const fields = region.editableFields ?? [];
 
   return (
-    <div className="dm-region-editor__wrapper">
+    <div className="lsf-region-editor__wrapper">
       {region.editorEnabled &&
         fields.map((field, i) => {
           return (
@@ -92,7 +92,7 @@ const AudioRegionProperties = ({ region }: { region: any }) => {
   };
 
   return (
-    <div className="dm-region-editor__wrapper-time-control">
+    <div className="lsf-region-editor__wrapper-time-control">
       <TimeDurationControl
         startTime={region.start}
         endTime={region.end}
@@ -172,10 +172,10 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
   }, [region]);
 
   return (
-    <label className="dm-region-editor__property">
+    <label className="lsf-region-editor__property">
       {isBoolean ? (
         <Checkbox
-          className="dm-region-editor__input"
+          className="lsf-region-editor__input"
           checked={value}
           onChange={(e) => onChangeHandler(e.target.checked)}
         />
@@ -187,7 +187,7 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
           onChange={(v) => onChangeHandler(Number(v))}
         />
       ) : options ? (
-        <select value={value} onChange={(e) => onChangeHandler(e.target.value)} className="dm-region-editor__select">
+        <select value={value} onChange={(e) => onChangeHandler(e.target.value)} className="lsf-region-editor__select">
           {options.map((value, i) => (
             <option key={`${value}-${i}`} value={value}>
               {value}
@@ -272,7 +272,7 @@ const RegionInput: FC<RegionInputProps> = ({ onChange: onChangeValue, type, valu
   return (
     <input
       {...props}
-      className="dm-region-editor__input"
+      className="lsf-region-editor__input"
       type="text"
       step={step}
       onChange={onChangeHandler}
@@ -293,7 +293,7 @@ const PropertyLabel: FC<{ label: string }> = ({ label }) => {
     return null;
   }, [label]);
 
-  return <span className="dm-region-editor__text">{IconComponent ? <IconComponent /> : label}</span>;
+  return <span className="lsf-region-editor__text">{IconComponent ? <IconComponent /> : label}</span>;
 };
 
 export const RegionEditor = observer(RegionEditorComponent);

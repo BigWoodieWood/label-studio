@@ -22,35 +22,35 @@ export const CurrentTask = observer(({ store }) => {
     store.hasInterface("postpone");
 
   return (
-    <div className="dm-bottombar__section">
-      <div className={`dm-current-task ${historyEnabled ? "dm-current-task_with-history" : ""}`}>
-        <div className="dm-current-task__task-id">
+    <div className="lsf-bottombar__section">
+      <div className={`lsf-current-task ${historyEnabled ? "lsf-current-task_with-history" : ""}`}>
+        <div className="lsf-current-task__task-id">
           {store.task.id ?? guidGenerator()}
           {historyEnabled &&
             (isFF(FF_TASK_COUNT_FIX) ? (
-              <div className="dm-current-task__task-count">
+              <div className="lsf-current-task__task-count">
                 {store.queuePosition} of {store.queueTotal}
               </div>
             ) : (
-              <div className="dm-current-task__task-count">
+              <div className="lsf-current-task__task-count">
                 {currentIndex} of {store.taskHistory.length}
               </div>
             ))}
         </div>
         {historyEnabled && (
-          <div className="dm-current-task__history-controls">
+          <div className="lsf-current-task__history-controls">
             <Button
-              className={`dm-current-task__prevnext ${!store.canGoPrevTask ? "dm-current-task__prevnext_disabled" : ""} dm-current-task__prevnext_prev`}
+              className={`lsf-current-task__prevnext ${!store.canGoPrevTask ? "lsf-current-task__prevnext_disabled" : ""} lsf-current-task__prevnext_prev`}
               type="link"
               disabled={!historyEnabled || !store.canGoPrevTask}
               onClick={store.prevTask}
               style={{ background: "none", backgroundColor: "none" }}
             />
             <Button
-              className={`dm-current-task__prevnext 
-                ${!store.canGoNextTask && !canPostpone ? "dm-current-task__prevnext_disabled" : ""}
-                ${!store.canGoNextTask && canPostpone ? "dm-current-task__prevnext_postpone" : ""}
-                dm-current-task__prevnext_next`}
+              className={`lsf-current-task__prevnext
+                ${!store.canGoNextTask && !canPostpone ? "lsf-current-task__prevnext_disabled" : ""}
+                ${!store.canGoNextTask && canPostpone ? "lsf-current-task__prevnext_postpone" : ""}
+                lsf-current-task__prevnext_next`}
               data-testid="next-task"
               type="link"
               disabled={!store.canGoNextTask && !canPostpone}

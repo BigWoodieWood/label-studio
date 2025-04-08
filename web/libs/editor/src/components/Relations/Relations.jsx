@@ -137,10 +137,10 @@ const RelationsComponent = ({ store }) => {
   const relationsUIVisible = annotation.relationStore.showConnections;
 
   return (
-    <div className="dm-relations">
+    <div className="lsf-relations">
       {/* override LS styles' height */}
-      <div className="dm-relations__header">
-        <div className="dm-relations__title">Relations ({relations.length})</div>
+      <div className="lsf-relations__header">
+        <div className="lsf-relations__title">Relations ({relations.length})</div>
         {hasRelations && (
           <Button
             size="small"
@@ -152,7 +152,7 @@ const RelationsComponent = ({ store }) => {
         )}
       </div>
 
-      <div className="dm-relations__content">
+      <div className="lsf-relations__content">
         {hasRelations ? (
           <List
             size="small"

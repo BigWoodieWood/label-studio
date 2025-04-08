@@ -9,19 +9,19 @@ export const CommentFormButtons = ({
   linking,
   onLinkTo,
 }: { region: any; linking: boolean; onLinkTo?: MouseEventHandler<HTMLElement> }) => (
-  <div className="dm-comment-form-buttons">
-    <div className="dm-comment-form-buttons__buttons">
+  <div className="lsf-comment-form-buttons">
+    <div className="lsf-comment-form-buttons__buttons">
       {onLinkTo && !region && (
         <Tooltip title="Link to...">
           <button
-            className={`dm-comment-form-buttons__action ${linking ? "dm-comment-form-buttons__action_highlight" : ""}`}
+            className={`lsf-comment-form-buttons__action ${linking ? "lsf-comment-form-buttons__action_highlight" : ""}`}
             onClick={onLinkTo}
           >
             <IconCommentLinkTo />
           </button>
         </Tooltip>
       )}
-      <button className="dm-comment-form-buttons__action" type="submit">
+      <button className="lsf-comment-form-buttons__action" type="submit">
         <IconSend />
       </button>
     </div>

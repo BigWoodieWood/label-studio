@@ -41,28 +41,28 @@ export const RegionItem: FC<RegionItemProps> = observer(
     }, [region.background, region.style]);
 
     return (
-      <div className={`dm-detailed-region ${compact ? "dm-detailed-region_compact" : ""}`}>
-        <div className="dm-detailed-region__head" style={{ color: color.css() }}>
-          <div className="dm-detailed-region__title">
-            <div className="dm-detailed-region__icon">
+      <div className={`lsf-detailed-region ${compact ? "lsf-detailed-region_compact" : ""}`}>
+        <div className="lsf-detailed-region__head" style={{ color: color.css() }}>
+          <div className="lsf-detailed-region__title">
+            <div className="lsf-detailed-region__icon">
               <NodeIcon node={region} />
             </div>
-            <div className="dm-detailed-region__index">
-              <span className="dm-detailed-region__index_value">{region.region_index}</span>
+            <div className="lsf-detailed-region__index">
+              <span className="lsf-detailed-region__index_value">{region.region_index}</span>
             </div>
             <RegionLabels region={region} />
           </div>
           {withIds && <span>{region.cleanId}</span>}
         </div>
         {MainDetails && (
-          <div className="dm-detailed-region__content">
+          <div className="lsf-detailed-region__content">
             <MainDetails region={region} />
           </div>
         )}
         {region.isDrawing && (
-          <div className="dm-detailed-region__warning">
+          <div className="lsf-detailed-region__warning">
             <IconWarning />
-            <div className="dm-detailed-region__warning-text">
+            <div className="lsf-detailed-region__warning-text">
               Incomplete {region.type?.replace("region", "") ?? "region"}
             </div>
           </div>
@@ -77,7 +77,7 @@ export const RegionItem: FC<RegionItemProps> = observer(
           />
         )}
         {MetaDetails && (
-          <div className="dm-detailed-region__content">
+          <div className="lsf-detailed-region__content">
             <MetaDetails
               region={region}
               editMode={editMode}
@@ -125,11 +125,11 @@ const RegionAction: FC<any> = observer(({ region, annotation, editMode, onEditMo
   );
 
   return (
-    <div className="dm-region-actions">
-      <div className="dm-region-actions__group dm-region-actions__group_align_left">
+    <div className="lsf-region-actions">
+      <div className="lsf-region-actions__group lsf-region-actions__group_align_left">
         {!region.isReadOnly() && entityButtons}
       </div>
-      <div className="dm-region-actions__group dm-region-actions__group_align_right">
+      <div className="lsf-region-actions__group lsf-region-actions__group_align_right">
         <LockButton
           item={region}
           annotation={region?.annotation}

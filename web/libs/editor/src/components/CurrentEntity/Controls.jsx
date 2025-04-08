@@ -55,7 +55,7 @@ export const Controls = controlsInjector(
       );
     } else if (annotation.skipped) {
       buttons.push(
-        <div className="dm-controls__skipped-info" key="skipped">
+        <div className="lsf-controls__skipped-info" key="skipped">
           <IconBan color="#d00" /> Annotation skipped
         </div>,
       );
@@ -76,7 +76,7 @@ export const Controls = controlsInjector(
 
         buttons.push(
           <ButtonTooltip key="submit" name="annotation:submit" title={title}>
-            <div className="dm-controls__tooltip-wrapper">
+            <div className="lsf-controls__tooltip-wrapper">
               <Button disabled={disabled || submitDisabled} look="primary" onClick={store.submitAnnotation}>
                 Submit
               </Button>
@@ -96,6 +96,6 @@ export const Controls = controlsInjector(
       }
     }
 
-    return <div className="dm-controls">{buttons}</div>;
+    return <div className="lsf-controls">{buttons}</div>;
   }),
 );

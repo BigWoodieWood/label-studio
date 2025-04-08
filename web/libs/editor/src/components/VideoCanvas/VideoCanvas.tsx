@@ -541,14 +541,14 @@ export const VideoCanvas = memo(
     }, []);
 
     return (
-      <div ref={rootRef} className="dm-video-canvas">
+      <div ref={rootRef} className="lsf-video-canvas">
         {loading && (
-          <div className="dm-video-canvas__loading">
-            <div className="dm-spinner" />
+          <div className="lsf-video-canvas__loading">
+            <div className="lsf-spinner" />
           </div>
         )}
         <div
-          className="dm-video-canvas__view"
+          className="lsf-video-canvas__view"
           onClick={props.onClick}
           style={{
             width: canvasWidth,
@@ -565,7 +565,7 @@ export const VideoCanvas = memo(
             width={canvasWidth}
             height={canvasHeight}
           />
-          {!loading && buffering && <div className="dm-video-canvas__buffering" />}
+          {!loading && buffering && <div className="lsf-video-canvas__buffering" />}
         </div>
 
         <VirtualVideo

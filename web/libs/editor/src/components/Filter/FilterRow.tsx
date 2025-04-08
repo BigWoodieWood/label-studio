@@ -50,10 +50,10 @@ export const FilterRow: FC<FilterRowInterface> = ({
   }, [_selectedOperation, _selectedField]);
 
   return (
-    <div className="dm-filter-row" data-testid={"filter-row"}>
-      <div className="dm-filter-row__column">
+    <div className="lsf-filter-row" data-testid={"filter-row"}>
+      <div className="lsf-filter-row__column">
         {index === 0 ? (
-          <div className="dm-filter-row__title-row">Where</div>
+          <div className="lsf-filter-row__title-row">Where</div>
         ) : (
           <FilterDropdown
             value={logic}
@@ -66,7 +66,7 @@ export const FilterRow: FC<FilterRowInterface> = ({
           />
         )}
       </div>
-      <div className="dm-filter-row__column">
+      <div className="lsf-filter-row__column">
         <FilterDropdown
           value={field}
           items={availableFilters}
@@ -79,7 +79,7 @@ export const FilterRow: FC<FilterRowInterface> = ({
           }}
         />
       </div>
-      <div className="dm-filter-row__column">
+      <div className="lsf-filter-row__column">
         <FilterDropdown
           value={operation}
           items={FilterInputs?.[availableFilters[_selectedField].type]}
@@ -90,7 +90,7 @@ export const FilterRow: FC<FilterRowInterface> = ({
           }}
         />
       </div>
-      <div className="dm-filter-row__column">
+      <div className="lsf-filter-row__column">
         {_inputComponent && operation !== "empty" && (
           <_inputComponent
             value={value}
@@ -100,9 +100,9 @@ export const FilterRow: FC<FilterRowInterface> = ({
           />
         )}
       </div>
-      <div className="dm-filter-row__column">
+      <div className="lsf-filter-row__column">
         <div
-          className="dm-filter-row__delete"
+          className="lsf-filter-row__delete"
           onClick={() => {
             onDelete(index);
           }}

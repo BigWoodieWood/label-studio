@@ -14,8 +14,8 @@ export const DynamicPreannotationsToggle = inject("store")(
     }, [enabled]);
 
     return enabled ? (
-      <div className="dm-dynamic-preannotations">
-        <div className="dm-dynamic-preannotations__wrapper">
+      <div className="lsf-dynamic-preannotations">
+        <div className="lsf-dynamic-preannotations__wrapper">
           <Space spread>
             <Toggle
               checked={store.autoAnnotation}

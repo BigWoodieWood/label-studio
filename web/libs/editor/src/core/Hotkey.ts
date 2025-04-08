@@ -10,14 +10,14 @@ import defaultKeymap from "./settings/keymap.json";
 
 // Temporary utility components to replace Block and Elem from bem.ts
 const createKeyElem = (key: string) => {
-  return createElement("kbd", { className: "dm-key-group__key" }, key);
+  return createElement("kbd", { className: "lsf-key-group__key" }, key);
 };
 
 const createKeyGroup = (keys: JSX.Element[]) => {
   return createElement(
     "span",
     {
-      className: "dm-key-group",
+      className: "lsf-key-group",
       style: { marginLeft: 5 },
     },
     ...keys,

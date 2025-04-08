@@ -71,7 +71,7 @@ export const CommentItem: FC<any> = observer(
 
       if (isPersisted && time)
         return (
-          <div className="dm-comment-item__date">
+          <div className="lsf-comment-item__date">
             <Tooltip alignment="top-right" title={new Date(time).toLocaleString()}>
               <>{`${isEdited ? "updated" : ""} ${humanDateDiff(time)}`}</>
             </Tooltip>
@@ -81,24 +81,24 @@ export const CommentItem: FC<any> = observer(
     };
 
     return (
-      <div className={`dm-comment-item ${resolved ? "dm-comment-item_resolved" : ""}`}>
+      <div className={`lsf-comment-item ${resolved ? "lsf-comment-item_resolved" : ""}`}>
         <Space spread size="medium" truncated>
           <Space size="small" truncated>
-            <Userpic user={createdBy} className="dm-comment-item__userpic" showUsername username={createdBy} />
-            <span className="dm-comment-item__name">{userDisplayName(createdBy)}</span>
+            <Userpic user={createdBy} className="lsf-comment-item__userpic" showUsername username={createdBy} />
+            <span className="lsf-comment-item__name">{userDisplayName(createdBy)}</span>
           </Space>
 
           <Space size="small">
-            <IconCheck className="dm-comment-item__resolved" />
-            <div className={`dm-comment-item__saving ${isPersisted ? "dm-comment-item__saving_hide" : ""}`}>
-              <div className="dm-comment-item__dot" />
+            <IconCheck className="lsf-comment-item__resolved" />
+            <div className={`lsf-comment-item__saving ${isPersisted ? "lsf-comment-item__saving_hide" : ""}`}>
+              <div className="lsf-comment-item__dot" />
             </div>
             <TimeTracker />
           </Space>
         </Space>
 
-        <div className="dm-comment-item__content">
-          <div className="dm-comment-item__text">
+        <div className="lsf-comment-item__content">
+          <div className="lsf-comment-item__text">
             {isEditMode ? (
               <CommentFormBase
                 value={currentComment}
@@ -109,9 +109,9 @@ export const CommentItem: FC<any> = observer(
                 }}
               />
             ) : isConfirmDelete ? (
-              <div className="dm-comment-item__confirmForm">
-                <div className="dm-comment-item__question">Are you sure?</div>
-                <div className="dm-comment-item__controls">
+              <div className="lsf-comment-item__confirmForm">
+                <div className="lsf-comment-item__question">Are you sure?</div>
+                <div className="lsf-comment-item__controls">
                   <Button onClick={() => deleteComment()} size="compact" look="danger" autoFocus>
                     Yes
                   </Button>
@@ -126,7 +126,7 @@ export const CommentItem: FC<any> = observer(
           </div>
 
           <div
-            className="dm-comment-item__actions"
+            className="lsf-comment-item__actions"
             onClick={(e: any) => {
               e.stopPropagation();
               e.preventDefault();

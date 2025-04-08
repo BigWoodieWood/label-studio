@@ -17,18 +17,18 @@ export const SortMenuIcon = ({ sortKey }) => {
 
 export const SortMenu = observer(({ regionStore }) => {
   return (
-    <Menu className="dm-sort-menu" selectedKeys={[regionStore.sort]}>
+    <Menu className="lsf-sort-menu" selectedKeys={[regionStore.sort]}>
       <Menu.Item key="date">
         <div
-          className="dm-sort-menu__option-inner"
+          className="lsf-sort-menu__option-inner"
           onClick={(ev) => {
             regionStore.setSort("date");
             ev.preventDefault();
             return false;
           }}
         >
-          <div className="dm-sort-menu__title">
-            <span className="dm-sort-menu__icon">
+          <div className="lsf-sort-menu__title">
+            <span className="lsf-sort-menu__icon">
               <SortMenuIcon sortKey="date" />
             </span>{" "}
             Date
@@ -38,15 +38,15 @@ export const SortMenu = observer(({ regionStore }) => {
       </Menu.Item>
       <Menu.Item key="score">
         <div
-          className="dm-sort-menu__option-inner"
+          className="lsf-sort-menu__option-inner"
           onClick={(ev) => {
             regionStore.setSort("score");
             ev.preventDefault();
             return false;
           }}
         >
-          <div className="dm-sort-menu__title">
-            <span className="dm-sort-menu__icon">
+          <div className="lsf-sort-menu__title">
+            <span className="lsf-sort-menu__icon">
               <SortMenuIcon sortKey="score" />
             </span>{" "}
             Score

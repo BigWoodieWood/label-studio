@@ -53,44 +53,44 @@ export const CurrentTask = observer(({ store }) => {
   }
 
   return (
-    <div className="dm-topbar__section">
+    <div className="lsf-topbar__section">
       <div
-        className={`dm-current-task ${historyEnabled ? "dm-current-task_with-history" : ""}`}
+        className={`lsf-current-task ${historyEnabled ? "lsf-current-task_with-history" : ""}`}
         style={{
           padding: isFF(FF_DEV_3873) && 0,
           width: isFF(FF_DEV_3873) && "auto",
         }}
       >
-        <div className="dm-current-task__task-id" style={{ fontSize: isFF(FF_DEV_3873) ? 12 : 14 }}>
+        <div className="lsf-current-task__task-id" style={{ fontSize: isFF(FF_DEV_3873) ? 12 : 14 }}>
           {store.task.id ?? guidGenerator()}
           {historyEnabled &&
             showCounter &&
             (isFF(FF_TASK_COUNT_FIX) ? (
-              <div className="dm-current-task__task-count">
+              <div className="lsf-current-task__task-count">
                 {store.queuePosition} of {store.queueTotal}
               </div>
             ) : (
-              <div className="dm-current-task__task-count">
+              <div className="lsf-current-task__task-count">
                 {currentIndex} of {store.taskHistory.length}
               </div>
             ))}
         </div>
         {historyEnabled && (
           <div
-            className={`dm-current-task__history-controls ${isFF(FF_DEV_3873) ? "dm-current-task__history-controls_newui" : ""}`}
+            className={`lsf-current-task__history-controls ${isFF(FF_DEV_3873) ? "lsf-current-task__history-controls_newui" : ""}`}
           >
             <Button
-              className={`dm-current-task__prevnext dm-current-task__prevnext_prev ${!store.canGoPrevTask ? "dm-current-task__prevnext_disabled" : ""} ${isFF(FF_DEV_3873) ? "dm-current-task__prevnext_newui" : ""}`}
+              className={`lsf-current-task__prevnext lsf-current-task__prevnext_prev ${!store.canGoPrevTask ? "lsf-current-task__prevnext_disabled" : ""} ${isFF(FF_DEV_3873) ? "lsf-current-task__prevnext_newui" : ""}`}
               type="link"
               disabled={!historyEnabled || !store.canGoPrevTask}
               onClick={store.prevTask}
               style={{ background: !isFF(FF_DEV_3873) && "none", backgroundColor: isFF(FF_DEV_3873) && "none" }}
             />
             <Button
-              className={`dm-current-task__prevnext dm-current-task__prevnext_next 
-                ${!store.canGoNextTask && !canPostpone ? "dm-current-task__prevnext_disabled" : ""} 
-                ${!store.canGoNextTask && canPostpone ? "dm-current-task__prevnext_postpone" : ""} 
-                ${isFF(FF_DEV_3873) ? "dm-current-task__prevnext_newui" : ""}`}
+              className={`lsf-current-task__prevnext lsf-current-task__prevnext_next
+                ${!store.canGoNextTask && !canPostpone ? "lsf-current-task__prevnext_disabled" : ""}
+                ${!store.canGoNextTask && canPostpone ? "lsf-current-task__prevnext_postpone" : ""}
+                ${isFF(FF_DEV_3873) ? "lsf-current-task__prevnext_newui" : ""}`}
               data-testid="next-task"
               type="link"
               disabled={!store.canGoNextTask && !canPostpone}

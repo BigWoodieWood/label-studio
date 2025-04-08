@@ -14,7 +14,7 @@ const shortcutView = (shortcut) => {
   const combos = shortcut.split(",").map((s) => s.trim());
 
   return (
-    <div className="dm-flyoutmenu__shortcut">
+    <div className="lsf-flyoutmenu__shortcut">
       {combos.map((combo, index) => {
         const keys = combo.split("+");
 
@@ -22,7 +22,7 @@ const shortcutView = (shortcut) => {
           <Fragment key={`${keys.join("-")}-${index}`}>
             {keys.map((key) => {
               return (
-                <kbd className="dm-flyoutmenu__key" key={key}>
+                <kbd className="lsf-flyoutmenu__key" key={key}>
                   {keysDictionary[key] ?? key}
                 </kbd>
               );
@@ -87,22 +87,22 @@ export const FlyoutMenu = ({ items, icon }) => {
 
   return (
     <div
-      className={`dm-flyoutmenu ${isClicked ? "hovered" : ""}`}
+      className={`lsf-flyoutmenu ${isClicked ? "hovered" : ""}`}
       onClick={(e) => {
         e.stopPropagation();
         setClicked(!isClicked);
       }}
     >
       <div
-        className={`dm-flyoutmenu__icon ${isClicked ? "isClicked" : ""}`}
+        className={`lsf-flyoutmenu__icon ${isClicked ? "isClicked" : ""}`}
         title="Zoom presets (click to see options)"
       >
         {icon}
       </div>
-      <div className="dm-tooltips">
+      <div className="lsf-tooltips">
         {items.map((childItem, index) => (
           <div
-            className="dm-tooltips__tooltip"
+            className="lsf-tooltips__tooltip"
             key={index}
             onClick={(e) => {
               e.stopPropagation();
@@ -110,8 +110,8 @@ export const FlyoutMenu = ({ items, icon }) => {
               setClicked(false);
             }}
           >
-            <div className="dm-tooltips__tooltip-body">
-              <div className="dm-tooltips__label">{childItem.label}</div>
+            <div className="lsf-tooltips__tooltip-body">
+              <div className="lsf-tooltips__label">{childItem.label}</div>
               {shortcutView(childItem.shortcut)}
             </div>
           </div>

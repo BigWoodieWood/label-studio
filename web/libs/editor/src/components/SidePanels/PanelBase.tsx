@@ -309,12 +309,12 @@ export const PanelBase: FC<PanelBaseProps> = ({
   );
 
   // Build class names based on modifiers
-  const panelClasses = ["dm-panel", name];
-  if (mods.detached) panelClasses.push("dm-panel_detached");
-  if (mods.resizing) panelClasses.push("dm-panel_resizing");
-  if (mods.hidden) panelClasses.push("dm-panel_hidden");
-  if (mods.alignment) panelClasses.push(`dm-panel_alignment_${mods.alignment}`);
-  if (mods.disabled) panelClasses.push("dm-panel_disabled");
+  const panelClasses = ["lsf-panel", name];
+  if (mods.detached) panelClasses.push("lsf-panel_detached");
+  if (mods.resizing) panelClasses.push("lsf-panel_resizing");
+  if (mods.hidden) panelClasses.push("lsf-panel_hidden");
+  if (mods.alignment) panelClasses.push(`lsf-panel_alignment_${mods.alignment}`);
+  if (mods.disabled) panelClasses.push("lsf-panel_disabled");
   if (mix) {
     if (Array.isArray(mix)) {
       panelClasses.push(...mix);
@@ -325,13 +325,13 @@ export const PanelBase: FC<PanelBaseProps> = ({
 
   return (
     <div ref={panelRef} className={panelClasses.join(" ")} style={{ ...style, ...coordinates }}>
-      <div className="dm-panel__content">
+      <div className="lsf-panel__content">
         {!locked && (
-          <div ref={headerRef} className="dm-panel__header" onClick={!detached ? handleExpand : undefined}>
-            {(visible || detached) && <div className="dm-panel__title">{title}</div>}
+          <div ref={headerRef} className="lsf-panel__header" onClick={!detached ? handleExpand : undefined}>
+            {(visible || detached) && <div className="lsf-panel__title">{title}</div>}
 
             <div
-              className={`dm-panel__toggle ${visible ? "dm-panel__toggle_enabled" : ""}`}
+              className={`lsf-panel__toggle ${visible ? "lsf-panel__toggle_enabled" : ""}`}
               onClick={detached && !visible ? handleExpand : handleCollapse}
               data-tooltip={tooltipText}
             >
@@ -340,7 +340,7 @@ export const PanelBase: FC<PanelBaseProps> = ({
           </div>
         )}
         {visible && (
-          <div className="dm-panel__body">
+          <div className="lsf-panel__body">
             <div
               className={`${name}${Array.isArray(mix) && mix.length > 0 ? " " + mix.join(" ") : mix ? " " + mix : ""}`}
             >
@@ -352,7 +352,7 @@ export const PanelBase: FC<PanelBaseProps> = ({
 
       {visible && !positioning && !locked && (
         <div
-          className={`dm-panel__resizers ${positioning || locked ? "dm-panel__resizers_locked" : ""}`}
+          className={`lsf-panel__resizers ${positioning || locked ? "lsf-panel__resizers_locked" : ""}`}
           ref={resizerRef}
         >
           {resizers.map((res) => {
@@ -361,7 +361,7 @@ export const PanelBase: FC<PanelBaseProps> = ({
             return shouldRender ? (
               <div
                 key={res}
-                className={`dm-panel__resizer ${res === resizing ? "dm-panel__resizer_drag" : ""}`}
+                className={`lsf-panel__resizer ${res === resizing ? "lsf-panel__resizer_drag" : ""}`}
                 data-resize={res}
               />
             ) : null;

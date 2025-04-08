@@ -64,7 +64,7 @@ const ControlButton = observer(({ button, disabled, onClick }: ControlButtonProp
   }
   return (
     <ButtonTooltip title={button.tooltip}>
-      <div className="dm-controls__tooltip-wrapper">{result}</div>
+      <div className="lsf-controls__tooltip-wrapper">{result}</div>
     </ButtonTooltip>
   );
 });
@@ -75,7 +75,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
     const isNotQuickView = store.hasInterface("topbar:prevnext");
     const historySelected = isDefined(store.annotationStore.selectedHistory);
     const { userGenerate, sentUserGenerate, versions, results, editable: annotationEditable } = annotation;
-    const dropdownTrigger = "dm-dropdown__trigger";
+    const dropdownTrigger = "lsf-dropdown__trigger";
     const customButtons: CustomButtonsField = store.customButtons;
     const buttons = [];
 
@@ -181,7 +181,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
       buttons.push(<AcceptButton key="review-accept" disabled={disabled} history={history} store={store} />);
     } else if (annotation.skipped) {
       buttons.push(
-        <div className="dm-controls__skipped-info" key="skipped">
+        <div className="lsf-controls__skipped-info" key="skipped">
           <IconBan color="#d00" /> Was skipped
         </div>,
       );
@@ -235,7 +235,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
 
         buttons.push(
           <ButtonTooltip key="submit" title={title}>
-            <div className="dm-controls__tooltip-wrapper">
+            <div className="lsf-controls__tooltip-wrapper">
               <Button
                 aria-label="submit"
                 name="submit"
@@ -313,6 +313,6 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
       }
     }
 
-    return <div className="dm-controls">{buttons}</div>;
+    return <div className="lsf-controls">{buttons}</div>;
   }),
 );

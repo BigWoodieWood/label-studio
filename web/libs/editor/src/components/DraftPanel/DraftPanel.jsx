@@ -10,18 +10,18 @@ export const DraftPanel = observer(({ item }) => {
 
   if (!item.selected) {
     if (!item.draft) return null;
-    return <div className="dm-draft-panel">draft{saved}</div>;
+    return <div className="lsf-draft-panel">draft{saved}</div>;
   }
   if (!item.versions.result || !item.versions.result.length) {
-    return <div className="dm-draft-panel">{saved ? `draft${saved}` : "not submitted draft"}</div>;
+    return <div className="lsf-draft-panel">{saved ? `draft${saved}` : "not submitted draft"}</div>;
   }
   return (
-    <div className="dm-draft-panel">
+    <div className="lsf-draft-panel">
       <Tooltip
         alignment="top-left"
         title={item.draftSelected ? "switch to original result" : "switch to current draft"}
       >
-        <button type="button" onClick={() => item.toggleDraft()} className="dm-draft-panel__toggle">
+        <button type="button" onClick={() => item.toggleDraft()} className="lsf-draft-panel__toggle">
           {item.draftSelected ? "draft" : "original"}
         </button>
       </Tooltip>

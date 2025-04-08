@@ -147,16 +147,16 @@ export const CommentForm: FC<CommentFormProps> = observer(({ commentStore, annot
   );
 
   const formClasses = [
-    "dm-comment-form-new",
-    inline ? "dm-comment-form-new_inline" : "",
-    !!region ? "dm-comment-form-new_linked" : "",
+    "lsf-comment-form-new",
+    inline ? "lsf-comment-form-new_inline" : "",
+    !!region ? "lsf-comment-form-new_linked" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   return (
     <form ref={formRef} className={formClasses} onSubmit={onSubmit}>
-      <div className="dm-comment-form-new__text-row">
+      <div className="lsf-comment-form-new__text-row">
         <TextArea
           actionRef={actionRef}
           name="comment"
@@ -173,8 +173,8 @@ export const CommentForm: FC<CommentFormProps> = observer(({ commentStore, annot
         )}
       </div>
       {classificationsItems.length > 0 && (
-        <div className="dm-comment-form-new__classifications-row">
-          <div className="dm-comment-form-new__category-selector">
+        <div className="lsf-comment-form-new__classifications-row">
+          <div className="lsf-comment-form-new__category-selector">
             <Taxonomy
               selected={selections}
               items={classificationsItems}
@@ -187,12 +187,12 @@ export const CommentForm: FC<CommentFormProps> = observer(({ commentStore, annot
         </div>
       )}
       {hasLinkState && (
-        <div className="dm-comment-form-new__link-state">
+        <div className="lsf-comment-form-new__link-state">
           <LinkState linking={linking} region={region} result={result} onUnlink={currentComment?.unsetLink} />
         </div>
       )}
       {commentStore.tooltipMessage && (
-        <div className="dm-comment-form-new__tooltipMessage">{commentStore.tooltipMessage}</div>
+        <div className="lsf-comment-form-new__tooltipMessage">{commentStore.tooltipMessage}</div>
       )}
     </form>
   );

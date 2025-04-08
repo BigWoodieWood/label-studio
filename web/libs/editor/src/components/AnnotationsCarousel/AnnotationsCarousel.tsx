@@ -65,11 +65,11 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
 
   return enableAnnotations || enablePredictions || enableCreateAnnotation ? (
     <div
-      className="dm-annotations-carousel"
+      className="lsf-annotations-carousel"
       style={{ "--carousel-left": `${currentPosition}px` } as React.CSSProperties}
     >
-      <div ref={containerRef as React.RefObject<HTMLDivElement>} className="dm-annotations-carousel__container">
-        <div ref={carouselRef as React.RefObject<HTMLDivElement>} className="dm-annotations-carousel__carosel">
+      <div ref={containerRef as React.RefObject<HTMLDivElement>} className="lsf-annotations-carousel__container">
+        <div ref={carouselRef as React.RefObject<HTMLDivElement>} className="lsf-annotations-carousel__carosel">
           {sortAnnotations(entities).map((entity) => (
             <AnnotationButton
               key={entity?.id}
@@ -87,22 +87,22 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
         </div>
       </div>
       {(!isLeftDisabled || !isRightDisabled) && (
-        <div className="dm-annotations-carousel__carousel-controls">
+        <div className="lsf-annotations-carousel__carousel-controls">
           <Button
-            className={`dm-annotations-carousel__nav ${isLeftDisabled ? "dm-annotations-carousel__nav_disabled" : ""} dm-annotations-carousel__nav_left`}
+            className={`lsf-annotations-carousel__nav ${isLeftDisabled ? "lsf-annotations-carousel__nav_disabled" : ""} lsf-annotations-carousel__nav_left`}
             disabled={isLeftDisabled}
             aria-label="Carousel left"
             onClick={(e: any) => !isLeftDisabled && updatePosition(e, true)}
           >
-            <IconChevron className="dm-annotations-carousel__arrow dm-annotations-carousel__arrow_left" />
+            <IconChevron className="lsf-annotations-carousel__arrow lsf-annotations-carousel__arrow_left" />
           </Button>
           <Button
-            className={`dm-annotations-carousel__nav ${isRightDisabled ? "dm-annotations-carousel__nav_disabled" : ""} dm-annotations-carousel__nav_right`}
+            className={`lsf-annotations-carousel__nav ${isRightDisabled ? "lsf-annotations-carousel__nav_disabled" : ""} lsf-annotations-carousel__nav_right`}
             disabled={isRightDisabled}
             aria-label="Carousel right"
             onClick={(e: any) => !isRightDisabled && updatePosition(e, false)}
           >
-            <IconChevron className="dm-annotations-carousel__arrow dm-annotations-carousel__arrow_right" />
+            <IconChevron className="lsf-annotations-carousel__arrow lsf-annotations-carousel__arrow_right" />
           </Button>
         </div>
       )}

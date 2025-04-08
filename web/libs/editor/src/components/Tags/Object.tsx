@@ -15,7 +15,7 @@ const ObjectTagView: FC<ObjectTagViewProps> = ({ item, style, className, childre
 
   return (
     <div
-      className={["dm-object", className].join(" ")}
+      className={["lsf-object", className].join(" ")}
       data-needs-update={item._needsUpdate}
       style={style}
       {...moreProps}

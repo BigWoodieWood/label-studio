@@ -34,18 +34,18 @@ export const Label = React.forwardRef(
       };
     }, [color]);
 
-    const labelClasses = ["dm-label"];
-    if (empty) labelClasses.push("dm-label_empty");
-    if (hidden) labelClasses.push("dm-label_hidden");
-    if (selected) labelClasses.push("dm-label_selected");
-    if (onClick) labelClasses.push("dm-label_clickable");
-    if (margins) labelClasses.push("dm-label_margins");
+    const labelClasses = ["lsf-label"];
+    if (empty) labelClasses.push("lsf-label_empty");
+    if (hidden) labelClasses.push("lsf-label_hidden");
+    if (selected) labelClasses.push("lsf-label_selected");
+    if (onClick) labelClasses.push("lsf-label_clickable");
+    if (margins) labelClasses.push("lsf-label_margins");
     if (className) labelClasses.push(className);
 
     return (
       <span ref={ref} className={labelClasses.join(" ")} style={styles} onClick={onClick} {...rest}>
-        <span className="dm-label__text">{children}</span>
-        {hotkey ? <span className="dm-label__hotkey">{hotkey}</span> : null}
+        <span className="lsf-label__text">{children}</span>
+        {hotkey ? <span className="lsf-label__hotkey">{hotkey}</span> : null}
       </span>
     );
   },

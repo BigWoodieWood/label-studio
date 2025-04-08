@@ -38,7 +38,7 @@ export const CommentsList: FC<{ commentStore: any }> = observer(({ commentStore 
 
 export const CommentsListInner: FC<{ commentStore: any }> = observer(({ commentStore }) => {
   return (
-    <div className="dm-comments-list">
+    <div className="lsf-comments-list">
       {commentStore.comments.map((comment: any) => (
         <CommentItem
           key={comment.id}

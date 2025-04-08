@@ -15,9 +15,9 @@ export const LabelItem = observer(({ item, regions, regionStore }) => {
   const count = Object.values(regions).length;
 
   return (
-    <List.Item className="dm-list-item" key={item.id} style={vars}>
+    <List.Item className="lsf-list-item" key={item.id} style={vars}>
       <Space spread>
-        <div className="dm-list-item__title">
+        <div className="lsf-list-item__title">
           {!item.isNotLabel ? (
             <Label color={color} empty={item.isEmpty}>
               {item._value}
@@ -25,10 +25,10 @@ export const LabelItem = observer(({ item, regions, regionStore }) => {
           ) : (
             <>Not labeled</>
           )}
-          <div className="dm-list-item__counter">{`${count} Region${count === 0 || count > 1 ? "s" : ""}`}</div>
+          <div className="lsf-list-item__counter">{`${count} Region${count === 0 || count > 1 ? "s" : ""}`}</div>
         </div>
         <Button
-          className={`dm-list-item__visibility ${isHidden ? "dm-list-item__visibility_hidden" : ""}`}
+          className={`lsf-list-item__visibility ${isHidden ? "lsf-list-item__visibility_hidden" : ""}`}
           type="text"
           icon={isHidden ? <IconInvisible /> : <IconVisible />}
           onClick={() => regionStore.setHiddenByLabel(!isHidden, item)}

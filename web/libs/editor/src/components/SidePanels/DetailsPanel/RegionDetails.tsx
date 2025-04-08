@@ -38,9 +38,9 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
   const content = useMemo(() => {
     if (type === "rating") {
       return (
-        <div className="dm-region-meta__result">
+        <div className="lsf-region-meta__result">
           <Text>Rating: </Text>
-          <div className="dm-region-meta__value">
+          <div className="lsf-region-meta__value">
             <RatingResult mainValue={mainValue} />
           </div>
         </div>
@@ -48,9 +48,9 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     }
     if (type === "textarea") {
       return (
-        <div className="dm-region-meta__result">
+        <div className="lsf-region-meta__result">
           <Text>Text: </Text>
-          <div className="dm-region-meta__value">
+          <div className="lsf-region-meta__value">
             <TextResult mainValue={mainValue} />
           </div>
         </div>
@@ -58,9 +58,9 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     }
     if (type === "choices") {
       return (
-        <div className="dm-region-meta__result">
+        <div className="lsf-region-meta__result">
           <Text>Choices: </Text>
-          <div className="dm-region-meta__value">
+          <div className="lsf-region-meta__value">
             <ChoicesResult mainValue={mainValue} />
           </div>
         </div>
@@ -68,9 +68,9 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     }
     if (type === "taxonomy") {
       return (
-        <div className="dm-region-meta__result">
+        <div className="lsf-region-meta__result">
           <Text>Taxonomy: </Text>
-          <div className="dm-region-meta__value">
+          <div className="lsf-region-meta__value">
             <ChoicesResult mainValue={mainValue.map((v: string[]) => v.join("/"))} />
           </div>
         </div>
@@ -78,20 +78,20 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     }
   }, [type, mainValue]);
 
-  return content ? <div className="dm-region-meta">{content}</div> : null;
+  return content ? <div className="lsf-region-meta">{content}</div> : null;
 });
 
 export const RegionDetailsMain: FC<{ region: any }> = observer(({ region }) => {
   return (
     <>
-      <div className="dm-detailed-region__result">
+      <div className="lsf-detailed-region__result">
         {(region?.results as any[]).map((res) => (
           <ResultItem key={res.pid} result={res} />
         ))}
         {region?.text ? (
-          <div className="dm-region-meta">
-            <div className="dm-region-meta__item">
-              <div className="dm-region-meta__content dm-region-meta__content_type_text">
+          <div className="lsf-region-meta">
+            <div className="lsf-region-meta__item">
+              <div className="lsf-region-meta__content lsf-region-meta__content_type_text">
                 {region.text.replace(/\\n/g, "\n")}
               </div>
             </div>
@@ -133,7 +133,7 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
           <textarea
             ref={(el) => (input.current = el)}
             placeholder="Meta"
-            className="dm-detailed-region__meta-text"
+            className="lsf-detailed-region__meta-text"
             value={region.meta.text}
             onChange={(e) => saveMeta(e.target.value)}
             onBlur={(e) => {
@@ -150,7 +150,7 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
           />
         ) : (
           region.meta?.text && (
-            <div className="dm-detailed-region__meta-text" onClick={() => enterEditMode?.()}>
+            <div className="lsf-detailed-region__meta-text" onClick={() => enterEditMode?.()}>
               {region.meta?.text}
             </div>
           )

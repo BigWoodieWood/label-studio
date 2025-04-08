@@ -52,7 +52,7 @@ export const AudioControl: FC<AudioControlProps> = ({ volume, onVolumeChange, on
 
   const renderModal = () => {
     return (
-      <div className="dm-audio-control__modal">
+      <div className="lsf-audio-control__modal">
         <Slider
           min={0}
           max={MAX_VOL}
@@ -68,8 +68,8 @@ export const AudioControl: FC<AudioControlProps> = ({ volume, onVolumeChange, on
 
   const renderMuteButton = () => {
     return (
-      <div className="dm-audio-control__mute">
-        <div className="dm-audio-control__mute-button" onClick={handleSetMute}>
+      <div className="lsf-audio-control__mute">
+        <div className="lsf-audio-control__mute-button" onClick={handleSetMute}>
           {isMuted ? "Unmute" : "Mute"}
         </div>
       </div>
@@ -77,7 +77,7 @@ export const AudioControl: FC<AudioControlProps> = ({ volume, onVolumeChange, on
   };
 
   return (
-    <div className="dm-audio-control" onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
+    <div className="lsf-audio-control" onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
       <ControlButton look={audioModal ? "active" : undefined} onClick={onSetModal}>
         {isMuted ? <IconSoundMutedConfig /> : <IconSoundConfig />}
       </ControlButton>

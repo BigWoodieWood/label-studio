@@ -59,8 +59,8 @@ export const Slider: FC<SliderProps> = ({ description, info, max, min, value, st
       valueError !== undefined && (typeof valueError === "string" || valueError > max || valueError < min);
 
     return (
-      <div className="dm-audio-slider__control">
-        <div className="dm-audio-slider__info">
+      <div className="lsf-audio-slider__control">
+        <div className="lsf-audio-slider__info">
           {description}
           {info && (
             <Tooltip title={info}>
@@ -69,7 +69,7 @@ export const Slider: FC<SliderProps> = ({ description, info, max, min, value, st
           )}
         </div>
         <input
-          className={`dm-audio-slider__input ${hasError ? "dm-audio-slider__input_error_control" : ""}`}
+          className={`lsf-audio-slider__input ${hasError ? "lsf-audio-slider__input_error_control" : ""}`}
           type="text"
           min={min}
           max={max}
@@ -81,10 +81,10 @@ export const Slider: FC<SliderProps> = ({ description, info, max, min, value, st
   };
 
   return (
-    <div className="dm-audio-slider">
+    <div className="lsf-audio-slider">
       <input
         ref={sliderRef as React.RefObject<HTMLInputElement>}
-        className="dm-audio-slider__range"
+        className="lsf-audio-slider__range"
         type="range"
         min={min}
         max={max}

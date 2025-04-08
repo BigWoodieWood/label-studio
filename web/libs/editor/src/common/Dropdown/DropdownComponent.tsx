@@ -178,7 +178,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
 
       if (ch.props && ch.props.type === "Menu") {
         // Create menu class names
-        const menuClasses = ["dm-dropdown__menu"];
+        const menuClasses = ["lsf-dropdown__menu"];
         if (ch.props.className) menuClasses.push(ch.props.className);
 
         return cloneElement(ch, {
@@ -216,7 +216,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     }, [props.style, dropdownIndex, minIndex, offset]);
 
     // Build dropdown classes
-    const dropdownClasses = ["dm-dropdown"];
+    const dropdownClasses = ["lsf-dropdown"];
 
     // Add visibility classes
     if (visibilityClasses) dropdownClasses.push(visibilityClasses);

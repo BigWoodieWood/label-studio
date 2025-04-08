@@ -3,10 +3,10 @@ import Label from "../Label/Label";
 import "./Input.scss";
 
 const Input = forwardRef(({ label, className, required, labelProps, ghost, waiting, ...props }, ref) => {
-  const classList = ["dm-input", ghost ? "dm-input_ghost" : "", className].filter(Boolean).join(" ");
+  const classList = ["lsf-input", ghost ? "lsf-input_ghost" : "", className].filter(Boolean).join(" ");
 
   const input = useMemo(() => {
-    return waiting ? <div className="dm-input__spinner" /> : <input {...props} ref={ref} className={classList} />;
+    return waiting ? <div className="lsf-input__spinner" /> : <input {...props} ref={ref} className={classList} />;
   }, [props, ref, classList, waiting]);
 
   return label ? (

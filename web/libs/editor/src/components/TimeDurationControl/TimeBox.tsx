@@ -76,7 +76,7 @@ export const TimeBox: FC<TimerProps> = ({ sidepanel = false, value, readonly = f
   const renderInputTime = () => {
     return (
       <input
-        className="dm-time-box__input-time"
+        className="lsf-time-box__input-time"
         maxLength={12}
         ref={inputRef}
         type="text"
@@ -90,8 +90,8 @@ export const TimeBox: FC<TimerProps> = ({ sidepanel = false, value, readonly = f
   };
 
   // Build time box classes
-  const timeBoxClasses = ["dm-time-box"];
-  if (sidepanel) timeBoxClasses.push("dm-time-box_sidepanel");
+  const timeBoxClasses = ["lsf-time-box"];
+  if (sidepanel) timeBoxClasses.push("lsf-time-box_sidepanel");
 
   const timeBoxContent = (
     <div className={timeBoxClasses.join(" ")} {...props}>

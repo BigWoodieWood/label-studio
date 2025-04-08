@@ -27,13 +27,13 @@ export const LinkState: FC<LinkStateProps> = ({ linking, region, result, onUnlin
   if (!isVisible) return null;
 
   // Build link state classes
-  const linkStateClasses = ["dm-link-state"];
-  if (mod?.action) linkStateClasses.push("dm-link-state_action");
-  if (mod?.display) linkStateClasses.push("dm-link-state_display");
+  const linkStateClasses = ["lsf-link-state"];
+  if (mod?.action) linkStateClasses.push("lsf-link-state_action");
+  if (mod?.display) linkStateClasses.push("lsf-link-state_display");
 
   return (
     <div className={linkStateClasses.join(" ")}>
-      <div className="dm-link-state__prefix">
+      <div className="lsf-link-state__prefix">
         <IconCommentLinkTo />
       </div>
       {mod?.action && "Select an object to link it to this comment."}
@@ -78,8 +78,8 @@ const LinkedRegion: FC<LinkedRegionProps> = observer(({ region, result, interact
   }, [itemColor]);
 
   // Build link state region classes
-  const linkStateRegionClasses = ["dm-link-state-region"];
-  if (interactive) linkStateRegionClasses.push("dm-link-state-region_interactive");
+  const linkStateRegionClasses = ["lsf-link-state-region"];
+  if (interactive) linkStateRegionClasses.push("lsf-link-state-region_interactive");
 
   return (
     <div
@@ -91,26 +91,26 @@ const LinkedRegion: FC<LinkedRegionProps> = observer(({ region, result, interact
     >
       {!isClassification && (
         <>
-          <div className="dm-link-state-region__icon">
+          <div className="lsf-link-state-region__icon">
             <NodeIcon node={region} />
           </div>
-          <div className="dm-link-state-region__index">{region.region_index}</div>
+          <div className="lsf-link-state-region__index">{region.region_index}</div>
         </>
       )}
       {result ? (
-        <div className="dm-link-state-region__title">
+        <div className="lsf-link-state-region__title">
           <ResultText result={result} />
         </div>
       ) : (
-        <div className="dm-link-state-region__title">
-          <div className="dm-link-state-region__label">
+        <div className="lsf-link-state-region__title">
+          <div className="lsf-link-state-region__label">
             <RegionLabel item={region} />
           </div>
-          {region?.text && <div className="dm-link-state-region__text">{region.text.replace(/\\n/g, "\n")}</div>}
+          {region?.text && <div className="lsf-link-state-region__text">{region.text.replace(/\\n/g, "\n")}</div>}
         </div>
       )}
       {onUnlink && (
-        <div className="dm-link-state-region__close">
+        <div className="lsf-link-state-region__close">
           <Button size="small" type="text" icon={<IconClose />} onClick={onUnlink} />
         </div>
       )}

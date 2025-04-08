@@ -71,7 +71,7 @@ export const CommentForm: FC<CommentFormProps> = observer(
     const value = commentStore.currentComment[annotationStore.selected.id] || "";
 
     return (
-      <form ref={formRef} className={`dm-comment-form ${inline ? "dm-comment-form_inline" : ""}`} onSubmit={onSubmit}>
+      <form ref={formRef} className={`lsf-comment-form ${inline ? "lsf-comment-form_inline" : ""}`} onSubmit={onSubmit}>
         <TextArea
           actionRef={actionRef}
           name="comment"
@@ -84,13 +84,13 @@ export const CommentForm: FC<CommentFormProps> = observer(
           onSubmit={inline ? onSubmit : undefined}
           onBlur={clearTooltipMessage}
         />
-        <div className="dm-comment-form__primary-action">
+        <div className="lsf-comment-form__primary-action">
           <button type="submit">
             <IconSend />
           </button>
         </div>
         {commentStore.tooltipMessage && (
-          <div className="dm-comment-form__tooltipMessage">{commentStore.tooltipMessage}</div>
+          <div className="lsf-comment-form__tooltipMessage">{commentStore.tooltipMessage}</div>
         )}
       </form>
     );

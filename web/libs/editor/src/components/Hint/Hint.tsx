@@ -12,7 +12,7 @@ interface HintProps {
  */
 const Hint: FC<HintProps> = (props) => {
   // Combine classes
-  const classes = ["dm-hint"];
+  const classes = ["lsf-hint"];
   if (props.className) classes.push(props.className);
 
   return (

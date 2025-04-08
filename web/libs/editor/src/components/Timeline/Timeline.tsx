@@ -119,7 +119,7 @@ const TimelineComponent: FC<TimelineProps> = ({
   }, [position, length]);
 
   const controls = (
-    <div className="dm-timeline__topbar">
+    <div className="lsf-timeline__topbar">
       <Controls
         length={length}
         position={currentPosition}
@@ -176,7 +176,7 @@ const TimelineComponent: FC<TimelineProps> = ({
   regions.map((reg) => fixMobxObserve(reg.sequence));
 
   const view = !viewCollapsed && !disableView && (
-    <div className="dm-timeline__view">
+    <div className="lsf-timeline__view">
       <View.View
         step={step}
         length={length}
@@ -211,7 +211,7 @@ const TimelineComponent: FC<TimelineProps> = ({
 
   return (
     <TimelineContextProvider value={contextValue}>
-      <div className={`dm-timeline ${className || ""}`}>
+      <div className={`lsf-timeline ${className || ""}`}>
         {controlsOnTop ? (
           <>
             {controls}

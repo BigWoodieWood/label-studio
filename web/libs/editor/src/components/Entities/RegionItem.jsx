@@ -27,7 +27,7 @@ const RegionItemDesc = observer(({ item, setDraggable }) => {
 
   return (
     <div
-      className={`dm-region-item__desc ${collapsed ? "dm-region-item__desc_collapsed" : ""} ${!(controls?.length > 0) ? "dm-region-item__desc_empty" : ""}`}
+      className={`lsf-region-item__desc ${collapsed ? "lsf-region-item__desc_collapsed" : ""} ${!(controls?.length > 0) ? "lsf-region-item__desc_empty" : ""}`}
       onMouseEnter={() => {
         setDraggable?.(false);
       }}
@@ -35,7 +35,7 @@ const RegionItemDesc = observer(({ item, setDraggable }) => {
         setDraggable?.(true);
       }}
     >
-      <div className="dm-region-item__controls">
+      <div className="lsf-region-item__controls">
         {controls.map((tag, idx) => {
           const View = Registry.getPerRegionView(tag.type, PER_REGION_MODES.REGION_LIST);
 
@@ -44,7 +44,7 @@ const RegionItemDesc = observer(({ item, setDraggable }) => {
           ) : null;
         })}
       </div>
-      <Button className="dm-region-item__collapse" size="small" type="text" onClick={toggleCollapsed}>
+      <Button className="lsf-region-item__collapse" size="small" type="text" onClick={toggleCollapsed}>
         {collapsed ? <IconExpandTool /> : <IconCollapse />}
       </Button>
     </div>
@@ -67,20 +67,20 @@ const RegionItemContent = observer(({ idx, item, setDraggable }) => {
   return (
     <div
       ref={itemElRef}
-      className={`dm-region-item ${item.hidden ? "dm-region-item_hidden" : ""}`}
+      className={`lsf-region-item ${item.hidden ? "lsf-region-item_hidden" : ""}`}
       data-testid={`regionitem:selected=${item.selected}`}
     >
-      <div className="dm-region-item__header">
-        <div className="dm-region-item__counter">{isDefined(idx) ? idx + 1 : ""}</div>
+      <div className="lsf-region-item__header">
+        <div className="lsf-region-item__counter">{isDefined(idx) ? idx + 1 : ""}</div>
 
-        <Node className="dm-region-item__title" node={item} mix={styles.node} />
+        <Node className="lsf-region-item__title" node={item} mix={styles.node} />
 
         <Space size="small">
-          <span className="dm-region-item__id">
+          <span className="lsf-region-item__id">
             <NodeIcon node={item} />
           </span>
 
-          <div className="dm-region-item__prediction">
+          <div className="lsf-region-item__prediction">
             {item.origin === "prediction" && <IconSparks style={{ width: 16, height: 16 }} />}
           </div>
 
@@ -88,7 +88,7 @@ const RegionItemContent = observer(({ idx, item, setDraggable }) => {
 
           {item.score && (
             <span
-              className="dm-region-item__score"
+              className="lsf-region-item__score"
               style={{
                 color: Utils.Colors.getScaleGradient(item.score),
               }}
@@ -99,7 +99,7 @@ const RegionItemContent = observer(({ idx, item, setDraggable }) => {
 
           {item.hideable && (
             <Button
-              className={`dm-region-item__toggle ${!item.hidden ? "dm-region-item__toggle_active" : ""}`}
+              className={`lsf-region-item__toggle ${!item.hidden ? "lsf-region-item__toggle_active" : ""}`}
               size="small"
               type="text"
               onClick={item.toggleHidden}

@@ -16,7 +16,7 @@ export const Actions = ({ store }) => {
   const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
 
   return (
-    <div className="dm-bottombar__section">
+    <div className="lsf-bottombar__section">
       {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} />}
 
       {store.description && store.hasInterface("instruction") && (
@@ -51,7 +51,7 @@ export const Actions = ({ store }) => {
       {store.hasInterface("ground-truth") && !isBulkMode && <GroundTruth entity={entity} />}
 
       {!isViewAll && (
-        <div className="dm-bottombar__section">
+        <div className="lsf-bottombar__section">
           <DynamicPreannotationsToggle />
           <AutoAcceptToggle />
         </div>

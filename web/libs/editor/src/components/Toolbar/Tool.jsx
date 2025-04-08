@@ -37,7 +37,7 @@ export const Tool = ({
     const combos = shortcut.split(",").map((s) => s.trim());
 
     return (
-      <div className="dm-tool__shortcut">
+      <div className="lsf-tool__shortcut">
         {combos.map((combo, index) => {
           const keys = combo.split("+");
 
@@ -45,7 +45,7 @@ export const Tool = ({
             <Fragment key={`${keys.join("-")}-${index}`}>
               {keys.map((key) => {
                 return (
-                  <kbd className="dm-tool__key" key={key}>
+                  <kbd className="lsf-tool__key" key={key}>
                     {keysDictionary[key] ?? key}
                   </kbd>
                 );
@@ -107,7 +107,7 @@ export const Tool = ({
   }, [extraShortcuts, active]);
 
   const extraContent = useMemo(() => {
-    return smart && extra ? <div className="dm-tool__extra">{extra}</div> : null;
+    return smart && extra ? <div className="lsf-tool__extra">{extra}</div> : null;
   }, [smart, extra]);
 
   const showControls = dynamic === false && controls?.length && (active || (controlsOnHover && hovered));
@@ -115,12 +115,12 @@ export const Tool = ({
   const isDisabled = disabled || isAnnotationDrawing;
 
   const toolClasses = [
-    "dm-tool",
-    active ? "dm-tool_active" : "",
-    isDisabled ? "dm-tool_disabled" : "",
-    alignment ? `dm-tool_alignment_${alignment}` : "",
-    expanded && !dynamic ? "dm-tool_expanded" : "",
-    dynamic || smart ? "dm-tool_smart" : "",
+    "lsf-tool",
+    active ? "lsf-tool_active" : "",
+    isDisabled ? "lsf-tool_disabled" : "",
+    alignment ? `lsf-tool_alignment_${alignment}` : "",
+    expanded && !dynamic ? "lsf-tool_expanded" : "",
+    dynamic || smart ? "lsf-tool_smart" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -145,12 +145,12 @@ export const Tool = ({
         setHovered(false);
       }}
     >
-      <div className="dm-tool__icon">{icon}</div>
+      <div className="lsf-tool__icon">{icon}</div>
       {dynamic === false &&
         controlsOnHover === false &&
         (expanded ? (
           <>
-            <div className="dm-tool__label">
+            <div className="lsf-tool__label">
               {extraContent}
               {label}
               {shortcutView}
@@ -159,8 +159,8 @@ export const Tool = ({
         ) : (
           (isDefined(label) || isDefined(shortcutView)) &&
           !showControls && (
-            <div className={`dm-tool__tooltip ${!!(smart && extra) ? "dm-tool__tooltip_controlled" : ""}`}>
-              <div className="dm-tool__tooltip-body">
+            <div className={`lsf-tool__tooltip ${!!(smart && extra) ? "lsf-tool__tooltip_controlled" : ""}`}>
+              <div className="lsf-tool__tooltip-body">
                 {extraContent}
                 {label}
                 {shortcutView}
@@ -169,8 +169,8 @@ export const Tool = ({
           )
         ))}
       {showControls && (
-        <div className="dm-tool__controls" onClickCapture={(e) => e.stopPropagation()}>
-          <div className="dm-tool__controls-body">{controls}</div>
+        <div className="lsf-tool__controls" onClickCapture={(e) => e.stopPropagation()}>
+          <div className="lsf-tool__controls-body">{controls}</div>
         </div>
       )}
     </button>

@@ -11,9 +11,9 @@ export const EntityTab = observer(
       const isUnsaved = (entity.userGenerate && !entity.sentUserGenerate) || entity.draftSelected;
       const infoIsHidden = entity.store.hasInterface("annotations:hide-info");
 
-      const tabClasses = ["dm-entity-tab"];
-      if (selected) tabClasses.push("dm-entity-tab_selected");
-      if (bordered) tabClasses.push("dm-entity-tab_bordered");
+      const tabClasses = ["lsf-entity-tab"];
+      if (selected) tabClasses.push("lsf-entity-tab_selected");
+      if (bordered) tabClasses.push("lsf-entity-tab_bordered");
 
       return (
         <div
@@ -28,7 +28,7 @@ export const EntityTab = observer(
         >
           <Space size="small">
             <Userpic
-              className={`dm-entity-tab__userpic ${prediction ? "dm-entity-tab__userpic_prediction" : ""}`}
+              className={`lsf-entity-tab__userpic ${prediction ? "lsf-entity-tab__userpic_prediction" : ""}`}
               showUsername
               username={prediction ? entity.createdBy : null}
               user={infoIsHidden ? {} : (entity.user ?? { email: entity.createdBy })}
@@ -37,14 +37,14 @@ export const EntityTab = observer(
             </Userpic>
 
             {!infoIsHidden && (
-              <div className="dm-entity-tab__identifier">
+              <div className="lsf-entity-tab__identifier">
                 ID {entity.pk ?? entity.id} {isUnsaved && "*"}
               </div>
             )}
 
-            {displayGroundTruth && entity.ground_truth && <IconStar className="dm-entity-tab__ground-truth" />}
+            {displayGroundTruth && entity.ground_truth && <IconStar className="lsf-entity-tab__ground-truth" />}
 
-            {entity.skipped && <IconBan className="dm-entity-tab__skipped" />}
+            {entity.skipped && <IconBan className="lsf-entity-tab__skipped" />}
           </Space>
         </div>
       );

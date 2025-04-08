@@ -8,7 +8,7 @@ const standaloneModal = (props) => {
   const modalRef = createRef();
   const rootDiv = document.createElement("div");
 
-  rootDiv.className = "dm-modal-holder";
+  rootDiv.className = "lsf-modal-holder";
 
   document.body.appendChild(rootDiv);
 

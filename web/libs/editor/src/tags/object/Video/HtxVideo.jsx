@@ -484,16 +484,16 @@ const HtxVideoView = ({ item, store }) => {
   return (
     <ObjectTag item={item}>
       <div
-        className={`dm-video-segmentation ${isFullScreen ? "dm-video-segmentation_fullscreen" : ""}`}
+        className={`lsf-video-segmentation ${isFullScreen ? "lsf-video-segmentation_fullscreen" : ""}`}
         ref={mainContentRef}
       >
         {item.errors?.map((error, i) => (
           <ErrorMessage key={`err-${i}`} error={error} />
         ))}
 
-        <div className={`dm-video ${isFullScreen ? "dm-video_fullscreen" : ""}`} ref={videoBlockRef}>
+        <div className={`lsf-video ${isFullScreen ? "lsf-video_fullscreen" : ""}`} ref={videoBlockRef}>
           <div
-            className="dm-video__main"
+            className="lsf-video__main"
             ref={videoContainerRef}
             style={{ height: Number(item.height) }}
             onMouseDown={handlePan}
@@ -543,7 +543,7 @@ const HtxVideoView = ({ item, store }) => {
 
         {loaded && (
           <Timeline
-            className="dm-video-segmentation__timeline"
+            className="lsf-video-segmentation__timeline"
             playing={playing}
             length={videoLength}
             position={position}

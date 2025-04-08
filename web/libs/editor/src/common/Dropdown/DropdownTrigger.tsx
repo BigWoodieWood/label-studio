@@ -95,7 +95,7 @@ export const DropdownTrigger = forwardRef<DropdownRef, DropdownTriggerProps>(
 
     const cloneProps = useMemo(() => {
       // Build dropdown trigger class names
-      const dropdownTriggerClasses = ["dm-dropdown__trigger"];
+      const dropdownTriggerClasses = ["lsf-dropdown__trigger"];
       if (props.className) dropdownTriggerClasses.push(props.className);
 
       return {

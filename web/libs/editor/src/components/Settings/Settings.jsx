@@ -28,12 +28,12 @@ const HotkeysDescription = () => {
         key: k,
         combo: k.split(",").map((keyGroup) => {
           return (
-            <div className="dm-keys__key-group" key={keyGroup}>
+            <div className="lsf-keys__key-group" key={keyGroup}>
               {keyGroup
                 .trim()
                 .split("+")
                 .map((k) => (
-                  <kbd className="dm-keys__key" key={k}>
+                  <kbd className="lsf-keys__key" key={k}>
                     {k}
                   </kbd>
                 ))}
@@ -44,7 +44,7 @@ const HotkeysDescription = () => {
       }));
 
   return (
-    <div className="dm-keys">
+    <div className="lsf-keys">
       <Tabs size="small">
         {Object.entries(keyNamespaces).map(([ns, data]) => {
           if (Object.keys(data.descriptions).length === 0) {
@@ -77,25 +77,25 @@ if (isFF(FF_DEV_3873)) {
 }
 
 const SettingsTag = ({ children }) => {
-  return <div className="dm-settings-tag">{children}</div>;
+  return <div className="lsf-settings-tag">{children}</div>;
 };
 
 const GeneralSettings = observer(({ store }) => {
   return (
-    <div className={`dm-settings ${isFF(FF_DEV_3873) ? "dm-settings_newUI" : ""}`}>
+    <div className={`lsf-settings ${isFF(FF_DEV_3873) ? "lsf-settings_newUI" : ""}`}>
       {editorSettingsKeys.map((obj, index) => {
         return (
-          <label className="dm-settings__field" key={index}>
+          <label className="lsf-settings__field" key={index}>
             {isFF(FF_DEV_3873) ? (
               <>
-                <div className="dm-settings__label">
-                  <div className="dm-settings__title">
+                <div className="lsf-settings__label">
+                  <div className="lsf-settings__title">
                     {EditorSettings[obj].newUI.title}
                     {EditorSettings[obj].newUI.tags?.split(",").map((tag) => (
                       <SettingsTag key={tag}>{tag}</SettingsTag>
                     ))}
                   </div>
-                  <div className="dm-description">{EditorSettings[obj].newUI.description}</div>
+                  <div className="lsf-description">{EditorSettings[obj].newUI.description}</div>
                 </div>
                 <Toggle
                   key={index}
@@ -125,8 +125,8 @@ const GeneralSettings = observer(({ store }) => {
 
 const LayoutSettings = observer(({ store }) => {
   return (
-    <div className={`dm-settings ${isFF(FF_DEV_3873) ? "dm-settings_newUI" : ""}`}>
-      <div className="dm-settings__field">
+    <div className={`lsf-settings ${isFF(FF_DEV_3873) ? "lsf-settings_newUI" : ""}`}>
+      <div className="lsf-settings__field">
         <Checkbox
           checked={store.settings.bottomSidePanel}
           onChange={() => {
@@ -138,13 +138,13 @@ const LayoutSettings = observer(({ store }) => {
         </Checkbox>
       </div>
 
-      <div className="dm-settings__field">
+      <div className="lsf-settings__field">
         <Checkbox checked={store.settings.displayLabelsByDefault} onChange={store.settings.toggleSidepanelModel}>
           Display Labels by default in Results panel
         </Checkbox>
       </div>
 
-      <div className="dm-settings__field">
+      <div className="lsf-settings__field">
         <Checkbox
           value="Show Annotations panel"
           defaultChecked={store.settings.showAnnotationsPanel}
@@ -156,7 +156,7 @@ const LayoutSettings = observer(({ store }) => {
         </Checkbox>
       </div>
 
-      <div className="dm-settings__field">
+      <div className="lsf-settings__field">
         <Checkbox
           value="Show Predictions panel"
           defaultChecked={store.settings.showPredictionsPanel}
@@ -169,7 +169,7 @@ const LayoutSettings = observer(({ store }) => {
       </div>
 
       {/* Saved for future use */}
-      {/* <div className="dm-settings__field">
+      {/* <div className="lsf-settings__field">
         <Checkbox
           value="Show image in fullsize"
           defaultChecked={store.settings.imageFullSize}

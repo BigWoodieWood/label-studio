@@ -318,8 +318,8 @@ export const Wave: FC<TimelineViewProps> = ({
   }, [cursorPosition]);
 
   return (
-    <div className="dm-wave" ref={rootRef}>
-      <div className="dm-wave__controls">
+    <div className="lsf-wave" ref={rootRef}>
+      <div className="lsf-wave__controls">
         <Space spread style={{ gridAutoColumns: "auto" }}>
           <Range
             continuous
@@ -345,18 +345,18 @@ export const Wave: FC<TimelineViewProps> = ({
           />
         </Space>
       </div>
-      <div className="dm-wave__wrapper">
-        <div className="dm-wave__body" ref={bodyRef} onClick={onTimelineClick}>
-          <div className="dm-wave__cursor" style={cursorStyle} />
+      <div className="lsf-wave__wrapper">
+        <div className="lsf-wave__body" ref={bodyRef} onClick={onTimelineClick}>
+          <div className="lsf-wave__cursor" style={cursorStyle} />
           <div
-            className="dm-wave__surfer"
+            className="lsf-wave__surfer"
             ref={waveRef}
             onClick={(e: RMouseEvent<HTMLElement>) => e.stopPropagation()}
           />
-          <div className="dm-wave__timeline" ref={timelineRef} />
-          {loading && <div className="dm-wave__loader dm-wave__loader_animated" />}
+          <div className="lsf-wave__timeline" ref={timelineRef} />
+          {loading && <div className="lsf-wave__loader lsf-wave__loader_animated" />}
         </div>
-        <div className="dm-wave__scale">
+        <div className="lsf-wave__scale">
           <Range
             min={1}
             max={50}

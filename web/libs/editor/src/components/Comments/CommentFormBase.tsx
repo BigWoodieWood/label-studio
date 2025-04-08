@@ -45,7 +45,7 @@ export const CommentFormBase: FC<CommentFormProps> = observer(
     return (
       <form
         ref={formRef}
-        className={`dm-comment-form ${inline ? "dm-comment-form_inline" : ""}`}
+        className={`lsf-comment-form ${inline ? "lsf-comment-form_inline" : ""}`}
         onSubmit={submitHandler}
       >
         <TextArea
@@ -67,7 +67,7 @@ export const CommentFormBase: FC<CommentFormProps> = observer(
           }}
           onBlur={(e) => onBlur?.(e)}
         />
-        <div className="dm-comment-form__primary-action">
+        <div className="lsf-comment-form__primary-action">
           <button type="submit">
             <IconSend />
           </button>

@@ -86,7 +86,7 @@ const OutlinerStandAlone: FC<OutlinerPanelProps> = ({ regions }) => {
   );
 
   return (
-    <div className={`dm-outliner ${OutlinerFFClasses.join(" ")}`}>
+    <div className={`lsf-outliner ${OutlinerFFClasses.join(" ")}`}>
       <ViewControls
         ordering={regions.sort}
         regions={regions}
@@ -112,10 +112,10 @@ const OutlinerTreeComponent: FC<OutlinerTreeComponentProps> = observer(({ region
   return (
     <>
       {allRegionsHidden ? (
-        <div className="dm-filters-info">
+        <div className="lsf-filters-info">
           <IconInfo width={21} height={20} />
-          <div className="dm-filters-info-title">All regions hidden</div>
-          <div className="dm-filters-info-description">Adjust or remove the filters to view</div>
+          <div className="lsf-filters-info-title">All regions hidden</div>
+          <div className="lsf-filters-info-description">Adjust or remove the filters to view</div>
         </div>
       ) : regions?.regions?.length > 0 ? (
         <>
@@ -123,19 +123,19 @@ const OutlinerTreeComponent: FC<OutlinerTreeComponentProps> = observer(({ region
             regions={regions}
             footer={
               hiddenRegions > 0 && (
-                <div className="dm-filters-info">
+                <div className="lsf-filters-info">
                   <IconInfo width={21} height={20} />
-                  <div className="dm-filters-info-title">
+                  <div className="lsf-filters-info-title">
                     There {hiddenRegions === 1 ? "is" : "are"} {hiddenRegions} hidden region{hiddenRegions > 1 && "s"}
                   </div>
-                  <div className="dm-filters-info-description">Adjust or remove filters to view</div>
+                  <div className="lsf-filters-info-description">Adjust or remove filters to view</div>
                 </div>
               )
             }
           />
         </>
       ) : (
-        <div className="dm-outliner__empty">Regions not added</div>
+        <div className="lsf-outliner__empty">Regions not added</div>
       )}
     </>
   );

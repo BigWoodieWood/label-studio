@@ -57,26 +57,26 @@ export class Modal extends Component {
 
     const bare = this.props.bare;
 
-    const modalClasses = ["dm-modal"];
-    if (this.props.fullscreen) modalClasses.push("dm-modal_fullscreen");
-    if (this.props.bare) modalClasses.push("dm-modal_bare");
-    if (this.props.visible || this.state.visible) modalClasses.push("dm-modal_visible");
+    const modalClasses = ["lsf-modal"];
+    if (this.props.fullscreen) modalClasses.push("lsf-modal_fullscreen");
+    if (this.props.bare) modalClasses.push("lsf-modal_bare");
+    if (this.props.visible || this.state.visible) modalClasses.push("lsf-modal_visible");
     if (this.transitionClass) modalClasses.push(this.transitionClass);
     if (this.props.className) modalClasses.push(this.props.className);
 
     const modalContent = (
       <div className={modalClasses.join(" ")} ref={this.modalRef} onClick={this.onClickOutside}>
-        <div className="dm-modal__wrapper">
-          <div className="dm-modal__content" style={this.props.style}>
+        <div className="lsf-modal__wrapper">
+          <div className="lsf-modal__content" style={this.props.style}>
             {!bare && (
               <Modal.Header>
-                <div className="dm-modal__title">{this.state.title}</div>
+                <div className="lsf-modal__title">{this.state.title}</div>
                 {this.props.allowClose !== false && (
-                  <Button className="dm-modal__close" type="text" style={{ color: "0099FF" }} icon={<IconRemove />} />
+                  <Button className="lsf-modal__close" type="text" style={{ color: "0099FF" }} icon={<IconRemove />} />
                 )}
               </Modal.Header>
             )}
-            <div className={`dm-modal__body ${bare ? "dm-modal__body_bare" : ""}`}>{this.body}</div>
+            <div className={`lsf-modal__body ${bare ? "lsf-modal__body_bare" : ""}`}>{this.body}</div>
             {this.state.footer && <Modal.Footer>{this.state.footer}</Modal.Footer>}
           </div>
         </div>
@@ -89,8 +89,8 @@ export class Modal extends Component {
   onClickOutside = (e) => {
     const { closeOnClickOutside } = this.props;
     const isInModal = this.modalRef.current.contains(e.target);
-    const content = e.target.closest(".dm-modal__content");
-    const close = e.target.closest(".dm-modal__close");
+    const content = e.target.closest(".lsf-modal__content");
+    const close = e.target.closest(".lsf-modal__close");
 
     if ((isInModal && close) || (content === null && closeOnClickOutside !== false)) {
       this.hide();
@@ -148,7 +148,7 @@ export class Modal extends Component {
 }
 
 Modal.Header = ({ children, divided }) => (
-  <div className={`dm-modal__header ${divided ? "dm-modal__header_divided" : ""}`}>{children}</div>
+  <div className={`lsf-modal__header ${divided ? "lsf-modal__header_divided" : ""}`}>{children}</div>
 );
 
-Modal.Footer = ({ children }) => <div className="dm-modal__footer">{children}</div>;
+Modal.Footer = ({ children }) => <div className="lsf-modal__footer">{children}</div>;

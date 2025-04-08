@@ -26,16 +26,16 @@ export const Space: FC<SpaceProps> = ({
   truncated,
   ...rest
 }) => {
-  const spaceClasses = ["dm-space"];
+  const spaceClasses = ["lsf-space"];
 
   // Add all modifier classes
-  if (direction) spaceClasses.push(`dm-space_direction_${direction}`);
-  if (size) spaceClasses.push(`dm-space_size_${size}`);
-  if (spread) spaceClasses.push("dm-space_spread");
-  if (stretch) spaceClasses.push("dm-space_stretch");
-  if (align) spaceClasses.push(`dm-space_align_${align}`);
-  if (collapsed) spaceClasses.push("dm-space_collapsed");
-  if (truncated) spaceClasses.push("dm-space_truncated");
+  if (direction) spaceClasses.push(`lsf-space_direction_${direction}`);
+  if (size) spaceClasses.push(`lsf-space_size_${size}`);
+  if (spread) spaceClasses.push("lsf-space_spread");
+  if (stretch) spaceClasses.push("lsf-space_stretch");
+  if (align) spaceClasses.push(`lsf-space_align_${align}`);
+  if (collapsed) spaceClasses.push("lsf-space_collapsed");
+  if (truncated) spaceClasses.push("lsf-space_truncated");
 
   // Add custom class name if provided
   if (className) spaceClasses.push(className);

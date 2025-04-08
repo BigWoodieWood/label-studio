@@ -17,8 +17,8 @@ if (isFF(FF_LSDV_4711)) audioDefaultProps.crossOrigin = "anonymous";
 
 class HtxParagraphsView extends Component {
   _regionSpanSelector = ".htx-highlight";
-  mainContentSelector = ".dm-main-content";
-  mainViewAnnotationSelector = ".dm-main-view__annotation";
+  mainContentSelector = ".lsf-main-content";
+  mainViewAnnotationSelector = ".lsf-main-view__annotation";
 
   constructor(props) {
     super(props);
@@ -579,7 +579,7 @@ class HtxParagraphsView extends Component {
     if (isFF(FF_DEV_2669) && !item._value) return null;
 
     return (
-      <ObjectTag item={item} className="dm-paragraphs">
+      <ObjectTag item={item} className="lsf-paragraphs">
         {withAudio && (
           <audio
             {...audioDefaultProps}

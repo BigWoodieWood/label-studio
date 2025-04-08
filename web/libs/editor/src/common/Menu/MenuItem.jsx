@@ -34,7 +34,7 @@ export const MenuItem = ({
   const linkContent = useMemo(
     () => (
       <>
-        {icon && <span className="dm-menu__item-icon">{icon}</span>}
+        {icon && <span className="lsf-menu__item-icon">{icon}</span>}
         {children ?? label}
       </>
     ),
@@ -42,11 +42,11 @@ export const MenuItem = ({
   );
 
   const getClassName = () => {
-    const classes = ["dm-menu__item"];
+    const classes = ["lsf-menu__item"];
 
-    if (isActive || active) classes.push("dm-menu__item_active");
-    if (danger) classes.push("dm-menu__item_look_danger");
-    if (allowClickSelected) classes.push("dm-menu__item_clickable");
+    if (isActive || active) classes.push("lsf-menu__item_active");
+    if (danger) classes.push("lsf-menu__item_look_danger");
+    if (allowClickSelected) classes.push("lsf-menu__item_clickable");
     if (className) classes.push(className);
 
     return classes.join(" ");

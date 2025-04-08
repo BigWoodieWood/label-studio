@@ -211,11 +211,11 @@ export const AnnotationButton = observer(
     );
 
     return (
-      <div className={`dm-annotation-button ${entity.selected ? "dm-annotation-button_selected" : ""}`}>
-        <div className="dm-annotation-button__mainSection" onClick={clickHandler}>
-          <div className="dm-annotation-button__picSection">
+      <div className={`lsf-annotation-button ${entity.selected ? "lsf-annotation-button_selected" : ""}`}>
+        <div className="lsf-annotation-button__mainSection" onClick={clickHandler}>
+          <div className="lsf-annotation-button__picSection">
             <Userpic
-              className={`dm-annotation-button__userpic ${isPrediction ? "dm-annotation-button__userpic_prediction" : ""}`}
+              className={`lsf-annotation-button__userpic ${isPrediction ? "lsf-annotation-button__userpic_prediction" : ""}`}
               showUsername
               username={isPrediction ? entity.createdBy : null}
               user={hiddenUser ?? entity.user ?? { email: entity.createdBy }}
@@ -224,26 +224,26 @@ export const AnnotationButton = observer(
               {isPrediction && <IconSparks style={{ width: 18, height: 18 }} />}
             </Userpic>
             {/* to do: return these icons when we have a better way to grab the history action type */}
-            {/* {historyActionType === 'accepted' && <div className="dm-annotation-button__status dm-annotation-button__status_approved"><IconCheckBold /></div>}
+            {/* {historyActionType === 'accepted' && <div className="lsf-annotation-button__status lsf-annotation-button__status_approved"><IconCheckBold /></div>}
             {historyActionType && (
-              <div className="dm-annotation-button__status dm-annotation-button__status_skipped">
+              <div className="lsf-annotation-button__status lsf-annotation-button__status_skipped">
                 <IconCrossBold />
               </div>
             )}
             {entity.history.canUndo && (
-              <div className="dm-annotation-button__status dm-annotation-button__status_updated">
+              <div className="lsf-annotation-button__status lsf-annotation-button__status_updated">
                 <IconCheckBold />
               </div>
             )} */}
           </div>
-          <div className="dm-annotation-button__main">
-            <div className="dm-annotation-button__user">
-              <span className="dm-annotation-button__name">{hiddenUser ? hiddenUser.email : username}</span>
-              {!infoIsHidden && <span className="dm-annotation-button__entity-id">#{entity.pk ?? entity.id}</span>}
+          <div className="lsf-annotation-button__main">
+            <div className="lsf-annotation-button__user">
+              <span className="lsf-annotation-button__name">{hiddenUser ? hiddenUser.email : username}</span>
+              {!infoIsHidden && <span className="lsf-annotation-button__entity-id">#{entity.pk ?? entity.id}</span>}
             </div>
             {!infoIsHidden && (
-              <div className="dm-annotation-button__info">
-                <TimeAgo className="dm-annotation-button__date" date={entity.createdDate} />
+              <div className="lsf-annotation-button__info">
+                <TimeAgo className="lsf-annotation-button__date" date={entity.createdDate} />
                 {isPrediction && isDefined(entity.score) && (
                   <span title={`Prediction score = ${entity.score}`}>
                     {" · "} {(entity.score * 100).toFixed(2)}%
@@ -253,31 +253,31 @@ export const AnnotationButton = observer(
             )}
           </div>
           {!isPrediction && (
-            <div className="dm-annotation-button__icons">
+            <div className="lsf-annotation-button__icons">
               {entity.draftId > 0 && (
                 <Tooltip title="Draft">
-                  <div className="dm-annotation-button__icon dm-annotation-button__icon_draft">
+                  <div className="lsf-annotation-button__icon lsf-annotation-button__icon_draft">
                     <IconDraftCreated2 color="#617ADA" />
                   </div>
                 </Tooltip>
               )}
               {entity.skipped && (
                 <Tooltip title="Skipped">
-                  <div className="dm-annotation-button__icon dm-annotation-button__icon_skipped">
+                  <div className="lsf-annotation-button__icon lsf-annotation-button__icon_skipped">
                     <IconAnnotationSkipped2 color="#DD0000" />
                   </div>
                 </Tooltip>
               )}
               {isGroundTruth && (
                 <Tooltip title="Ground-truth">
-                  <div className="dm-annotation-button__icon dm-annotation-button__icon_groundTruth">
+                  <div className="lsf-annotation-button__icon lsf-annotation-button__icon_groundTruth">
                     <IconAnnotationGroundTruth />
                   </div>
                 </Tooltip>
               )}
               {CommentIcon && (
                 <Tooltip title={renderCommentTooltip(entity)}>
-                  <div className="dm-annotation-button__icon dm-annotation-button__icon_comments">
+                  <div className="lsf-annotation-button__icon lsf-annotation-button__icon_comments">
                     <CommentIcon />
                   </div>
                 </Tooltip>
@@ -286,7 +286,7 @@ export const AnnotationButton = observer(
           )}
         </div>
         <ContextMenuTrigger
-          className="dm-annotation-button__trigger"
+          className="lsf-annotation-button__trigger"
           content={
             <AnnotationButtonContextMenu
               entity={entity}

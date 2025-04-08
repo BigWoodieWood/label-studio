@@ -7,7 +7,7 @@ import { isFF } from "../../../utils/feature-flags";
 
 const SettingsRendererPure: FC<{ store: any; settings: SettingsProperties }> = ({ store, settings }) => {
   return (
-    <div className="dm-settings">
+    <div className="lsf-settings">
       {Object.entries(settings).map(([key, value]) => {
         return value.ff && !isFF(value.ff) ? null : <SettingsField key={key} name={key} store={store} value={value} />;
       })}
@@ -53,7 +53,7 @@ const SettingsField: FC<{
   }
 
   return (
-    <div className="dm-settings__field" key={name}>
+    <div className="lsf-settings__field" key={name}>
       {value.type === "boolean" ? (
         <Checkbox {...props}>{value.description}</Checkbox>
       ) : (

@@ -197,19 +197,19 @@ const HtxNewChoiceView = ({ item, store }) => {
 
   // Determine the choice classes
   const choiceClasses = [
-    "dm-choice",
-    `dm-choice_layout_${item.parent.layout || "default"}`,
-    item.isLeaf ? "dm-choice_leaf" : "dm-choice_notLeaf",
-    !item.visible ? "dm-choice_hidden" : "",
+    "lsf-choice",
+    `lsf-choice_layout_${item.parent.layout || "default"}`,
+    item.isLeaf ? "lsf-choice_leaf" : "lsf-choice_notLeaf",
+    !item.visible ? "lsf-choice_hidden" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   // Determine the item classes
-  const itemClasses = ["dm-choice__item", !item.isLeaf ? "dm-choice__item_notLeaf" : ""].filter(Boolean).join(" ");
+  const itemClasses = ["lsf-choice__item", !item.isLeaf ? "lsf-choice__item_notLeaf" : ""].filter(Boolean).join(" ");
 
   // Determine the checkbox classes
-  const checkboxClasses = ["dm-choice__checkbox", !item.isLeaf ? "dm-choice__checkbox_notLeaf" : ""]
+  const checkboxClasses = ["lsf-choice__checkbox", !item.isLeaf ? "lsf-choice__checkbox_notLeaf" : ""]
     .filter(Boolean)
     .join(" ");
 
@@ -236,7 +236,7 @@ const HtxNewChoiceView = ({ item, store }) => {
         ></div>
         {!item.isLeaf ? (
           <Button
-            className={`dm-choice__toggle ${collapsed ? "dm-choice__toggle_collapsed" : ""}`}
+            className={`lsf-choice__toggle ${collapsed ? "lsf-choice__toggle_collapsed" : ""}`}
             type="text"
             onClick={toogleCollapsed}
           >
@@ -247,7 +247,7 @@ const HtxNewChoiceView = ({ item, store }) => {
         )}
       </div>
       {item.nestedResults && item.children?.length ? (
-        <div className={`dm-choice__children ${collapsed ? "dm-choice__children_collapsed" : ""}`}>
+        <div className={`lsf-choice__children ${collapsed ? "lsf-choice__children_collapsed" : ""}`}>
           {Tree.renderChildren(item, item.annotation)}
         </div>
       ) : null}

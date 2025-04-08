@@ -25,10 +25,10 @@ export default inject("store")(
      * Task information
      */
     let taskInformation;
-    const taskInfoClassName = "dm-task-info";
-    const skipButtonClassName = "dm-skip-btn";
-    const submitButtonClassName = "dm-submit-btn";
-    const updateButtonClassName = "dm-update-btn";
+    const taskInfoClassName = "lsf-task-info";
+    const skipButtonClassName = "lsf-skip-btn";
+    const submitButtonClassName = "lsf-submit-btn";
+    const updateButtonClassName = "lsf-update-btn";
 
     if (store.task) {
       taskInformation = <h4 className={`${styles.task} ${taskInfoClassName}`}>Task ID: {store.task.id}</h4>;

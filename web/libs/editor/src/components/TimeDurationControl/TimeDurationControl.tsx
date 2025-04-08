@@ -43,7 +43,7 @@ export const TimeDurationControl: FC<TimerProps> = ({
   };
 
   return (
-    <div className="dm-timer-duration-control">
+    <div className="lsf-timer-duration-control">
       <TimeBox
         sidepanel={isSidepanel}
         readonly={startTimeReadonly}

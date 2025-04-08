@@ -27,23 +27,23 @@ export const AutoAcceptToggle = injector(
     const loading = store.awaitingSuggestions;
 
     return (
-      <div className="dm-auto-accept">
+      <div className="lsf-auto-accept">
         {withSuggestions && (
-          <div className={`dm-auto-accept__wrapper ${loading ? "dm-auto-accept__wrapper_loading" : ""}`}>
+          <div className={`lsf-auto-accept__wrapper ${loading ? "lsf-auto-accept__wrapper_loading" : ""}`}>
             <Space spread>
               {suggestions.size > 0 ? (
                 <Space size="small">
-                  <div className="dm-auto-accept__info">
+                  <div className="lsf-auto-accept__info">
                     {suggestions.size} suggestion{suggestions.size > 0 && "s"}
                   </div>
                   <Button
-                    className="dm-auto-accept__action dm-auto-accept__action_type_reject"
+                    className="lsf-auto-accept__action lsf-auto-accept__action_type_reject"
                     onClick={() => annotation.rejectAllSuggestions()}
                   >
                     <IconCross />
                   </Button>
                   <Button
-                    className="dm-auto-accept__action dm-auto-accept__action_type_accept"
+                    className="lsf-auto-accept__action lsf-auto-accept__action_type_accept"
                     onClick={() => annotation.acceptAllSuggestions()}
                   >
                     <IconCheck />
@@ -59,7 +59,7 @@ export const AutoAcceptToggle = injector(
             </Space>
           </div>
         )}
-        {loading && <div className="dm-auto-accept__spinner" />}
+        {loading && <div className="lsf-auto-accept__spinner" />}
       </div>
     );
   }),

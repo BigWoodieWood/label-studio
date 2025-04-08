@@ -61,7 +61,7 @@ type WrappedComponentProps<CN extends FC<any>, TN extends TagNames> = {
     [key in keyof Parameters<CN>[0]]: Parameters<CN>[0][key];
   });
 
-const CSS_PREFIX = process.env.CSS_PREFIX ?? "dm-";
+const CSS_PREFIX = process.env.CSS_PREFIX ?? "lsf-";
 
 const assembleClass = (block: string, elem?: string, mix?: CNMix | CNMix[], mod?: CNMod) => {
   const rootName = block;

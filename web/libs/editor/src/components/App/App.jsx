@@ -43,7 +43,7 @@ import { ToastProvider, ToastViewport } from "@humansignal/ui/lib/toast/toast";
 
 // Helper for className
 const cn = (name) => ({
-  toClassName: () => `dm-${name}`,
+  toClassName: () => `lsf-${name}`,
 });
 
 /**
@@ -82,7 +82,7 @@ class App extends Component {
 
   renderSuccess() {
     return (
-      <div className="dm-editor">
+      <div className="lsf-editor">
         <Result status="success" title={getEnv(this.props.store).messages.DONE} />
       </div>
     );
@@ -90,7 +90,7 @@ class App extends Component {
 
   renderNoAnnotation() {
     return (
-      <div className="dm-editor">
+      <div className="lsf-editor">
         <Result status="success" title={getEnv(this.props.store).messages.NO_COMP_LEFT} />
       </div>
     );
@@ -99,7 +99,7 @@ class App extends Component {
   renderNothingToLabel(store) {
     return (
       <div
-        className="dm-editor"
+        className="lsf-editor"
         style={{
           display: "flex",
           alignItems: "center",
@@ -109,7 +109,7 @@ class App extends Component {
         }}
       >
         <Result status="success" title={getEnv(this.props.store).messages.NO_NEXT_TASK} />
-        <div className="dm-editor__sub__result">You have completed all tasks in the queue!</div>
+        <div className="lsf-editor__sub__result">You have completed all tasks in the queue!</div>
         {store.taskHistory.length > 0 && (
           <Button onClick={(e) => store.prevTask(e, true)} look="outlined" style={{ margin: "16px 0" }}>
             Go to Previous Task
@@ -121,7 +121,7 @@ class App extends Component {
 
   renderNoAccess() {
     return (
-      <div className="dm-editor">
+      <div className="lsf-editor">
         <Result status="warning" title={getEnv(this.props.store).messages.NO_ACCESS} />
       </div>
     );
@@ -129,12 +129,12 @@ class App extends Component {
 
   renderConfigValidationException(store) {
     return (
-      <div className="dm-main-view">
-        <div className="dm-main-view__annotation">
+      <div className="lsf-main-view">
+        <div className="lsf-main-view__annotation">
           <TreeValidation errors={this.props.store.annotationStore.validation} />
         </div>
         {!isFF(FF_DEV_3873) && store.hasInterface("infobar") && (
-          <div className="dm-main-view__infobar">Task #{store.task.id}</div>
+          <div className="lsf-main-view__infobar">Task #{store.task.id}</div>
         )}
       </div>
     );
@@ -163,8 +163,8 @@ class App extends Component {
     if (as.viewingAll) return this.renderAllAnnotations();
 
     return (
-      <div key={(as.selectedHistory ?? as.selected)?.id} className="dm-main-view" onScrollCapture={this._notifyScroll}>
-        <div className="dm-main-view__annotation">
+      <div key={(as.selectedHistory ?? as.selected)?.id} className="lsf-main-view" onScrollCapture={this._notifyScroll}>
+        <div className="lsf-main-view__annotation">
           {<Annotation root={root} annotation={as.selected} />}
           {this.renderRelations(as.selected)}
           {isFF(FF_PER_FIELD_COMMENTS) && this.renderCommentsOverlay(as.selected)}
@@ -178,7 +178,7 @@ class App extends Component {
     const { id, queue } = getRoot(as).task;
 
     return (
-      <Space className="dm-main-view__infobar" size="small">
+      <Space className="lsf-main-view__infobar" size="small">
         <span>Task #{id}</span>
 
         {queue && <span>{queue}</span>}
@@ -241,7 +241,7 @@ class App extends Component {
 
     // tags can be styled in config when user is awaiting for suggestions from ML backend
     const mainContent = (
-      <div className={`dm-main-content ${store.awaitingSuggestions ? "dm-main-content_requesting" : ""}`}>
+      <div className={`lsf-main-content ${store.awaitingSuggestions ? "lsf-main-content_requesting" : ""}`}>
         {as.validation === null
           ? this._renderUI(as.selectedHistory?.root ?? root, as)
           : this.renderConfigValidationException(store)}
@@ -254,7 +254,7 @@ class App extends Component {
 
     return (
       <div
-        className={`dm-editor ${settings.fullscreen ? "dm-editor_fullscreen" : ""} ${!outlinerEnabled ? "dm-editor_auto_height" : ""}`}
+        className={`lsf-editor ${settings.fullscreen ? "lsf-editor_fullscreen" : ""} ${!outlinerEnabled ? "lsf-editor_auto_height" : ""}`}
         ref={isFF(FF_LSDV_4620_3_ML) ? reactCleaner(this) : null}
       >
         <Settings store={store} />
@@ -280,8 +280,8 @@ class App extends Component {
 
             {isDefined(store) && store.hasInterface("topbar") && <TopBar store={store} />}
             <div
-              className={`dm-wrapper ${viewingAll ? "dm-wrapper_viewAll" : ""} ${settings.bottomSidePanel ? "dm-wrapper_bsp" : ""} 
-                ${outlinerEnabled ? "dm-wrapper_outliner" : ""} ${newUIEnabled ? "dm-wrapper_showingBottomBar" : ""}`}
+              className={`lsf-wrapper ${viewingAll ? "lsf-wrapper_viewAll" : ""} ${settings.bottomSidePanel ? "lsf-wrapper_bsp" : ""}
+                ${outlinerEnabled ? "lsf-wrapper_outliner" : ""} ${newUIEnabled ? "lsf-wrapper_showingBottomBar" : ""}`}
             >
               {outlinerEnabled ? (
                 newUIEnabled ? (
@@ -318,7 +318,7 @@ class App extends Component {
                   {mainContent}
 
                   {viewingAll === false && (
-                    <div className={`dm-menu ${settings.bottomSidePanel ? "dm-menu_bsp" : ""}`}>
+                    <div className={`lsf-menu ${settings.bottomSidePanel ? "lsf-menu_bsp" : ""}`}>
                       {store.hasInterface("side-column") && (
                         <SidebarTabs>
                           <AnnotationTab store={store} />

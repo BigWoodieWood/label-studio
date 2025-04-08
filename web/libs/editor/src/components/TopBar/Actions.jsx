@@ -21,7 +21,7 @@ export const Actions = ({ store }) => {
   }, [annotationStore]);
 
   return (
-    <div className="dm-topbar__section">
+    <div className="lsf-topbar__section">
       {store.hasInterface("annotations:view-all") && !isBulkMode && (
         <Tooltip title="Compare all annotations">
           <Button

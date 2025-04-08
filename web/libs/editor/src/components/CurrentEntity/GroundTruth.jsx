@@ -12,10 +12,10 @@ export const GroundTruth = observer(({ entity, disabled = false, size = "md" }) 
     !entity.skipped &&
     !entity.userGenerate &&
     entity.type !== "prediction" && (
-      <div className={`dm-ground-truth dm-ground-truth_disabled_${disabled} dm-ground-truth_size_${size}`}>
+      <div className={`lsf-ground-truth lsf-ground-truth_disabled_${disabled} lsf-ground-truth_size_${size}`}>
         <Tooltip alignment="top-left" title={title}>
           <Button
-            className="dm-ground-truth__toggle"
+            className="lsf-ground-truth__toggle"
             size="small"
             type="link"
             onClick={(ev) => {
@@ -25,11 +25,11 @@ export const GroundTruth = observer(({ entity, disabled = false, size = "md" }) 
           >
             {isFF(FF_DEV_3873) && !entity.ground_truth ? (
               <IconStarOutline
-                className={`dm-ground-truth__indicator ${entity.ground_truth ? "dm-ground-truth__indicator_active" : ""} ${isFF(FF_DEV_3873) ? "dm-ground-truth__indicator_dark" : ""}`}
+                className={`lsf-ground-truth__indicator ${entity.ground_truth ? "lsf-ground-truth__indicator_active" : ""} ${isFF(FF_DEV_3873) ? "lsf-ground-truth__indicator_dark" : ""}`}
               />
             ) : (
               <IconStar
-                className={`dm-ground-truth__indicator ${entity.ground_truth ? "dm-ground-truth__indicator_active" : ""} ${isFF(FF_DEV_3873) ? "dm-ground-truth__indicator_dark" : ""}`}
+                className={`lsf-ground-truth__indicator ${entity.ground_truth ? "lsf-ground-truth__indicator_active" : ""} ${isFF(FF_DEV_3873) ? "lsf-ground-truth__indicator_dark" : ""}`}
               />
             )}
           </Button>

@@ -135,7 +135,7 @@ const NodeDebug: FC<any> = observer(({ className, node }) => {
   const labelName = node.labelName;
 
   return (
-    <div className={["dm-node", className].filter(Boolean).join(" ")}>
+    <div className={["lsf-node", className].filter(Boolean).join(" ")}>
       {labelName}
       <br />
       {getContent(node)}
@@ -156,10 +156,10 @@ const Node: FC<any> = observer(({ className, node }) => {
   const labelName = node.labelName;
 
   return (
-    <span className={`dm-node ${className || ""}`}>
+    <span className={`lsf-node ${className || ""}`}>
       {labelName}
       {node.isDrawing && (
-        <span className="dm-node__incomplete">
+        <span className="lsf-node__incomplete">
           <Tooltip title={`Incomplete ${node.type?.replace("region", "") ?? "region"}`}>
             <IconWarning />
           </Tooltip>
@@ -196,10 +196,10 @@ const NodeMinimal: FC<any> = observer(({ node }) => {
   const { name: text, icon } = NodeViews[name];
 
   return (
-    <span className="dm-node-minimal">
-      {index >= 0 && <span className="dm-node-minimal__counter">{index + 1}</span>}
+    <span className="lsf-node-minimal">
+      {index >= 0 && <span className="lsf-node-minimal__counter">{index + 1}</span>}
 
-      {icon && <icon.type {...icon.props} className="dm-node-minimal__icon" />}
+      {icon && <icon.type {...icon.props} className="lsf-node-minimal__icon" />}
 
       {text}
     </span>

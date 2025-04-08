@@ -158,7 +158,7 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
   }
 
   return (
-    <div className="dm-outliner-tree" ref={setRef}>
+    <div className="lsf-outliner-tree" ref={setRef}>
       {!!height && (
         <Tree
           key={regions.group}
@@ -168,8 +168,8 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
           defaultExpandParent={!isPersistCollapseEnabled}
           autoExpandParent
           checkable={false}
-          prefixCls="dm-tree"
-          className="dm-tree"
+          prefixCls="lsf-tree"
+          className="lsf-tree"
           treeData={regionsTree}
           selectedKeys={selectedKeys}
           icon={iconGetter}
@@ -196,10 +196,10 @@ const useDataTree = ({ regions, footer }: any) => {
     const style = item?.background ?? item?.getOneColor?.();
     const color = chroma(style ?? "#666").alpha(1);
 
-    const classes = ["dm-tree__node"];
-    if (hidden) classes.push("dm-tree__node_hidden");
-    if (type) classes.push(`dm-tree__node_type_${type}`);
-    if (isDrawing) classes.push("dm-tree__node_isDrawing");
+    const classes = ["lsf-tree__node"];
+    if (hidden) classes.push("lsf-tree__node_hidden");
+    if (type) classes.push(`lsf-tree__node_type_${type}`);
+    if (isDrawing) classes.push("lsf-tree__node_isDrawing");
 
     const label = <RegionLabel item={item} />;
 
@@ -227,7 +227,7 @@ const useDataTree = ({ regions, footer }: any) => {
     regionsTreeData.push({
       key: "__footer__",
       disabled: true,
-      className: "dm-tree__node dm-tree__node_type_footer",
+      className: "lsf-tree__node lsf-tree__node_type_footer",
       title: footer,
     });
   }
@@ -405,14 +405,14 @@ const RootTitle: FC<any> = observer(
     );
 
     return (
-      <div className="dm-outliner-item">
-        <div className="dm-outliner-item__content">
-          {!props.isGroup && <div className="dm-outliner-item__index">{props.idx + 1}</div>}
-          <div className="dm-outliner-item__title">
+      <div className="lsf-outliner-item">
+        <div className="lsf-outliner-item__content">
+          {!props.isGroup && <div className="lsf-outliner-item__index">{props.idx + 1}</div>}
+          <div className="lsf-outliner-item__title">
             {label}
-            {item?.text && <div className="dm-outliner-item__text">{item.text.replace(/\\n/g, "\n")}</div>}
+            {item?.text && <div className="lsf-outliner-item__text">{item.text.replace(/\\n/g, "\n")}</div>}
             {item?.isDrawing && (
-              <span className="dm-outliner-item__incomplete">
+              <span className="lsf-outliner-item__incomplete">
                 <Tooltip title={`Incomplete ${item.type?.replace("region", "") ?? "region"}`}>
                   <IconWarning />
                 </Tooltip>
@@ -432,7 +432,7 @@ const RootTitle: FC<any> = observer(
         </div>
 
         {!collapsed && hasControls && isArea && (
-          <div className="dm-outliner-item__ocr">
+          <div className="lsf-outliner-item__ocr">
             <RegionItemDesc
               item={item}
               controls={controls}
@@ -499,43 +499,43 @@ const RegionControls: FC<RegionControlsProps> = injector(
       item.setLocked((locked: boolean) => !locked);
     }, []);
 
-    const controlsClasses = ["dm-outliner-item__controls"];
-    if (hasControls) controlsClasses.push("dm-outliner-item__controls_withControls");
-    if (isFF(FF_DEV_3873)) controlsClasses.push("dm-outliner-item__controls_newUI");
+    const controlsClasses = ["lsf-outliner-item__controls"];
+    if (hasControls) controlsClasses.push("lsf-outliner-item__controls_withControls");
+    if (isFF(FF_DEV_3873)) controlsClasses.push("lsf-outliner-item__controls_newUI");
 
     return (
       <div className={controlsClasses.join(" ")}>
         {isFF(FF_DEV_3873) ? (
           <Tooltip title={"Confidence Score"}>
-            <div className="dm-outliner-item__control-wrapper">
-              <div className="dm-outliner-item__control dm-outliner-item__control_type_predict">
+            <div className="lsf-outliner-item__control-wrapper">
+              <div className="lsf-outliner-item__control lsf-outliner-item__control_type_predict">
                 {item?.origin === "prediction" && <IconSparks style={{ width: 18, height: 18 }} />}
               </div>
-              <div className="dm-outliner-item__control dm-outliner-item__control_type_score">
+              <div className="lsf-outliner-item__control lsf-outliner-item__control_type_score">
                 {isDefined(item?.score) && item.score.toFixed(2)}
               </div>
             </div>
           </Tooltip>
         ) : (
           <>
-            <div className="dm-outliner-item__control dm-outliner-item__control_type_score">
+            <div className="lsf-outliner-item__control lsf-outliner-item__control_type_score">
               {isDefined(item?.score) && item.score.toFixed(2)}
             </div>
-            <div className="dm-outliner-item__control dm-outliner-item__control_type_dirty">
+            <div className="lsf-outliner-item__control lsf-outliner-item__control_type_dirty">
               {/* dirtyness is not implemented yet */}
             </div>
-            <div className="dm-outliner-item__control dm-outliner-item__control_type_predict">
+            <div className="lsf-outliner-item__control lsf-outliner-item__control_type_predict">
               {item?.origin === "prediction" && <IconSparks style={{ width: 18, height: 18 }} />}
             </div>
           </>
         )}
-        <div className="dm-outliner-item__wrapper">
+        <div className="lsf-outliner-item__wrapper">
           {store.hasInterface("annotations:copy-link") && isDefined(item?.annotation?.pk) && (
-            <div className="dm-outliner-item__control dm-outliner-item__control_type_menu">
+            <div className="lsf-outliner-item__control lsf-outliner-item__control_type_menu">
               <RegionContextMenu item={item} />
             </div>
           )}
-          <div className="dm-outliner-item__control dm-outliner-item__control_type_lock">
+          <div className="lsf-outliner-item__control lsf-outliner-item__control_type_lock">
             <LockButton
               item={item}
               annotation={item?.annotation}
@@ -544,7 +544,7 @@ const RegionControls: FC<RegionControlsProps> = injector(
               onClick={onToggleLocked}
             />
           </div>
-          <div className="dm-outliner-item__control dm-outliner-item__control_type_visibility">
+          <div className="lsf-outliner-item__control lsf-outliner-item__control_type_visibility">
             {isFF(FF_DEV_3873) ? (
               <RegionControlButton onClick={onToggleHidden} style={hidden ? undefined : { display: "none" }}>
                 {hidden ? (
@@ -564,7 +564,7 @@ const RegionControls: FC<RegionControlsProps> = injector(
             )}
           </div>
           {hasControls && (
-            <div className="dm-outliner-item__control dm-outliner-item__control_type_visibility">
+            <div className="lsf-outliner-item__control lsf-outliner-item__control_type_visibility">
               <RegionControlButton onClick={onToggleCollapsed}>
                 <IconChevronLeft
                   style={{
@@ -602,13 +602,13 @@ const RegionItemDesc: FC<RegionItemOCSProps> = observer(({ item, collapsed, setC
     [item, selected, collapsed],
   );
 
-  const ocrClasses = ["dm-ocr"];
-  if (collapsed) ocrClasses.push("dm-ocr_collapsed");
-  if (!(controls?.length > 0)) ocrClasses.push("dm-ocr_empty");
+  const ocrClasses = ["lsf-ocr"];
+  if (collapsed) ocrClasses.push("lsf-ocr_collapsed");
+  if (!(controls?.length > 0)) ocrClasses.push("lsf-ocr_empty");
 
   return (
     <div className={ocrClasses.join(" ")} onClick={onClick} onDragStart={(e: any) => e.stopPropagation()}>
-      <div className="dm-ocr__controls">
+      <div className="lsf-ocr__controls">
         {controls.map((tag, idx) => {
           const View = Registry.getPerRegionView(tag.type, PER_REGION_MODES.REGION_LIST);
           const color = item.getOneColor();

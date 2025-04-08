@@ -41,7 +41,7 @@ export const Image = observer(
     );
 
     return (
-      <div className="dm-image" style={imageSize}>
+      <div className="lsf-image" style={imageSize}>
         {overlay}
         <ImageProgress
           downloading={imageEntity.downloading}
@@ -67,9 +67,9 @@ export const Image = observer(
 
 const ImageProgress = observer(({ downloading, progress, error, src, usedValue }) => {
   return downloading ? (
-    <div className="dm-image-progress">
-      <div className="dm-image-progress__message">Downloading image</div>
-      <progress className="dm-image-progress__bar" value={progress} min="0" max={1} step={0.0001} />
+    <div className="lsf-image-progress">
+      <div className="lsf-image-progress__message">Downloading image</div>
+      <progress className="lsf-image-progress__bar" value={progress} min="0" max={1} step={0.0001} />
     </div>
   ) : error ? (
     <ImageLoadingError src={src} value={usedValue} />

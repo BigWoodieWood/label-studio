@@ -46,13 +46,13 @@ export const Toolbar = inject("store")(
       <ToolbarProvider value={{ expanded, alignment }}>
         <div
           ref={(el) => setToolbar(el)}
-          className={`dm-toolbar dm-toolbar_alignment_${alignment} ${expanded ? "dm-toolbar_expanded" : ""}`}
+          className={`lsf-toolbar lsf-toolbar_alignment_${alignment} ${expanded ? "lsf-toolbar_expanded" : ""}`}
         >
           {Object.entries(toolGroups).map(([name, tools], i) => {
             const visibleTools = tools.filter((t) => t.viewClass);
 
             return visibleTools.length ? (
-              <div className="dm-toolbar__group" key={`toolset-${name}-${i}`}>
+              <div className="lsf-toolbar__group" key={`toolset-${name}-${i}`}>
                 {visibleTools
                   .sort((a, b) => a.index - b.index)
                   .map((tool, i) => {
@@ -84,7 +84,7 @@ const SmartTools = observer(({ tools }) => {
 
   return (
     tools.length > 0 && (
-      <div className="dm-toolbar__group">
+      <div className="lsf-toolbar__group">
         <Tool
           smart
           label="Auto-Detect"
@@ -93,7 +93,7 @@ const SmartTools = observer(({ tools }) => {
           shortcut="M"
           extra={
             tools.length > 1 ? (
-              <div className="dm-toolbar__smart">
+              <div className="lsf-toolbar__smart">
                 {tools.map((t, i) => {
                   const ToolView = t.viewClass;
 
@@ -119,7 +119,7 @@ const SmartTools = observer(({ tools }) => {
 
             // if that's a smart button in extra block, it's already selected
             // if it's a hotkey handler, there are no `e` event
-            if (e?.target?.closest(`.dm-tool__extra`)) return;
+            if (e?.target?.closest(`.lsf-tool__extra`)) return;
 
             if (!hasSelected) nextIndex = 0;
             else if (nextIndex >= tools.length) nextIndex = 0;

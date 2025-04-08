@@ -143,7 +143,7 @@ export const CommentItem: FC<CommentItemProps> = observer(
 
       if (isPersisted && time)
         return (
-          <div className="dm-comment-item__date">
+          <div className="lsf-comment-item__date">
             <Tooltip alignment="top-right" title={new Date(time).toLocaleString()}>
               <>{`${isEdited ? "updated" : ""} ${humanDateDiff(time)}`}</>
             </Tooltip>
@@ -153,9 +153,9 @@ export const CommentItem: FC<CommentItemProps> = observer(
     };
 
     const commentItemClasses = [
-      "dm-comment-item",
-      resolved ? "dm-comment-item_resolved" : "",
-      isHighlighted ? "dm-comment-item_highlighted" : "",
+      "lsf-comment-item",
+      resolved ? "lsf-comment-item_resolved" : "",
+      isHighlighted ? "lsf-comment-item_highlighted" : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -175,29 +175,29 @@ export const CommentItem: FC<CommentItemProps> = observer(
           <Space size="small" truncated>
             <Userpic
               user={hiddenUser ?? createdBy}
-              className="dm-comment-item__userpic"
+              className="lsf-comment-item__userpic"
               showUsername
               username={createdBy}
             />
-            <span className="dm-comment-item__name">{userDisplayName(hiddenUser ?? createdBy)}</span>
+            <span className="lsf-comment-item__name">{userDisplayName(hiddenUser ?? createdBy)}</span>
           </Space>
 
           <Space size="small">
-            <IconCheck className="dm-comment-item__resolved" />
-            <div className={`dm-comment-item__saving ${isPersisted ? "dm-comment-item__saving_hide" : ""}`}>
-              <div className="dm-comment-item__dot" />
+            <IconCheck className="lsf-comment-item__resolved" />
+            <div className={`lsf-comment-item__saving ${isPersisted ? "lsf-comment-item__saving_hide" : ""}`}>
+              <div className="lsf-comment-item__dot" />
             </div>
             {!infoIsHidden && <TimeTracker />}
           </Space>
         </Space>
 
-        <div className="dm-comment-item__content">
-          <div className="dm-comment-item__text">
+        <div className="lsf-comment-item__content">
+          <div className="lsf-comment-item__text">
             {isEditMode ? (
               <>
                 <CommentFormBase value={text} onSubmit={commentFormBaseOnSubmit} classifications={classifications} />
                 {classificationsItems.length > 0 && (
-                  <div className="dm-comment-item__classifications-row">
+                  <div className="lsf-comment-item__classifications-row">
                     <Taxonomy
                       selected={taxonomySelectedItems}
                       items={classificationsItems}
@@ -209,9 +209,9 @@ export const CommentItem: FC<CommentItemProps> = observer(
                 )}
               </>
             ) : isConfirmDelete ? (
-              <div className="dm-comment-item__confirmForm">
-                <div className="dm-comment-item__question">Are you sure?</div>
-                <div className="dm-comment-item__controls">
+              <div className="lsf-comment-item__confirmForm">
+                <div className="lsf-comment-item__question">Are you sure?</div>
+                <div className="lsf-comment-item__controls">
                   <Button onClick={() => deleteComment()} size="compact" look="danger" autoFocus>
                     Yes
                   </Button>
@@ -223,7 +223,7 @@ export const CommentItem: FC<CommentItemProps> = observer(
             ) : (
               <>
                 {classifications?.default?.values?.length > 0 && (
-                  <ul className="dm-comment-item__classifications">
+                  <ul className="lsf-comment-item__classifications">
                     {classifications?.default?.values?.map((valueArray: string[], index: number) => (
                       <li key={index}>{valueArray.join("/")}</li>
                     ))}
@@ -231,7 +231,7 @@ export const CommentItem: FC<CommentItemProps> = observer(
                 )}
                 {text}
                 {hasLinkState && (
-                  <div className="dm-comment-item__linkState">
+                  <div className="lsf-comment-item__linkState">
                     <LinkState linking={linking} region={region} result={result} interactive />
                   </div>
                 )}
@@ -240,7 +240,7 @@ export const CommentItem: FC<CommentItemProps> = observer(
           </div>
 
           <div
-            className="dm-comment-item__actions"
+            className="lsf-comment-item__actions"
             onClick={(e: any) => {
               e.stopPropagation();
               e.preventDefault();

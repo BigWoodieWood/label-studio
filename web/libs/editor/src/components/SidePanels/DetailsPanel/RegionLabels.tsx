@@ -5,10 +5,10 @@ export const RegionLabels: FC<{ region: LSFRegion }> = observer(({ region }) => 
   const labelsInResults = region.labelings.map((result: any) => result.selectedLabels || []);
   const labels: any[] = [].concat(...labelsInResults);
 
-  if (!labels.length) return <div className="dm-labels-list">No label</div>;
+  if (!labels.length) return <div className="lsf-labels-list">No label</div>;
 
   return (
-    <div className="dm-labels-list">
+    <div className="lsf-labels-list">
       {labels.map((label, index) => {
         const color = label.background || "#000000";
 

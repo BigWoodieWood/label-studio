@@ -21,20 +21,20 @@ We will take a component-by-component approach:
 
 When replacing BEM utility usages, we'll follow these guidelines:
 
-1. Use the "dm-" prefix for all BEM class names:
-   - Block: `dm-block-name`
-   - Element: `dm-block-name__element-name`
-   - Modifier: `dm-block-name_modifier` or `dm-block-name_modifier_value`
+1. Use the "lsf-" prefix for all BEM class names:
+   - Block: `lsf-block-name`
+   - Element: `lsf-block-name__element-name`
+   - Modifier: `lsf-block-name_modifier` or `lsf-block-name_modifier_value`
 
 2. Use arrays and string concatenation for building class names:
    ```jsx
-   const classes = ["dm-block-name"];
-   if (isActive) classes.push("dm-block-name_active");
+   const classes = ["lsf-block-name"];
+   if (isActive) classes.push("lsf-block-name_active");
    if (className) classes.push(className);
    return <div className={classes.join(" ")}>...</div>;
    ```
    
-3. Important: Always use the "dm-" prefix for all class names, even if the original SCSS file doesn't use it.
+3. Important: Always use the "lsf-" prefix for all class names, even if the original SCSS file doesn't use it.
    The CSS styles will be updated separately to match these new class names.
 
 ### Handling useBEM Hook
@@ -45,7 +45,7 @@ The `useBEM` hook is used in some components to access the current block context
 
 ```jsx
 const block = useBEM(); // Gets block context from nearest parent Block
-<input className={block?.elem("input").toClassName()} /> // Generates "dm-parent-block__input"
+<input className={block?.elem("input").toClassName()} /> // Generates "lsf-parent-block__input"
 ```
 
 #### Replacement Strategy
@@ -60,7 +60,7 @@ When removing useBEM:
    <input className={block?.elem("input").toClassName()} />
    
    // After
-   <input className="dm-parent-block__input" />
+   <input className="lsf-parent-block__input" />
    ```
 3. **Component Coupling**: Be aware that this creates tighter coupling - components now need to "know" their parent block
 4. **Current Usage Safety**: Before hardcoding, verify that the component is only used within a specific block context and not reused across different block contexts

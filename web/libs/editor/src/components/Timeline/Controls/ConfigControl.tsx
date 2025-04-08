@@ -75,11 +75,11 @@ export const ConfigControl: FC<ConfigControlProps> = ({
 
   const renderLayerToggles = () => {
     return (
-      <div className="dm-audio-config__buttons">
-        <div className="dm-audio-config__menu-button" onClick={handleSetTimeline}>
+      <div className="lsf-audio-config__buttons">
+        <div className="lsf-audio-config__menu-button" onClick={handleSetTimeline}>
           {isTimeline ? "Hide" : "Show"} timeline
         </div>
-        <div className="dm-audio-config__menu-button" onClick={handleSetAudioWave}>
+        <div className="lsf-audio-config__menu-button" onClick={handleSetAudioWave}>
           {isAudioWave ? "Hide" : "Show"} audio wave
         </div>
       </div>
@@ -88,7 +88,7 @@ export const ConfigControl: FC<ConfigControlProps> = ({
 
   const renderModal = () => {
     return (
-      <div className="dm-audio-config__modal">
+      <div className="lsf-audio-config__modal">
         <Slider
           min={MIN_SPEED}
           max={MAX_SPEED}
@@ -107,7 +107,7 @@ export const ConfigControl: FC<ConfigControlProps> = ({
           info={"Increase or decrease the appearance of amplitude"}
           onChange={handleChangeAmp}
         />
-        <div className="dm-audio-config__toggle">
+        <div className="lsf-audio-config__toggle">
           <Toggle
             checked={settings?.loopRegion}
             onChange={(e) => changeSetting?.("loopRegion", e.target.checked)}
@@ -116,7 +116,7 @@ export const ConfigControl: FC<ConfigControlProps> = ({
             labelProps={{ size: "normal" }}
           />
         </div>
-        <div className="dm-audio-config__toggle">
+        <div className="lsf-audio-config__toggle">
           <Toggle
             checked={settings?.autoPlayNewSegments}
             onChange={(e) => changeSetting?.("autoPlayNewSegments", e.target.checked)}
@@ -131,7 +131,7 @@ export const ConfigControl: FC<ConfigControlProps> = ({
   };
 
   return (
-    <div className="dm-audio-config" onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
+    <div className="lsf-audio-config" onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
       <ControlButton look={configModal ? "active" : undefined} onClick={onSetModal}>
         {<IconConfig />}
       </ControlButton>

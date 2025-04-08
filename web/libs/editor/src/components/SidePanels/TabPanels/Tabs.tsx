@@ -156,27 +156,27 @@ const Tab = ({
   );
 
   const Label = () => {
-    const tabClasses = ["dm-panel-tabs__tab"];
+    const tabClasses = ["lsf-panel-tabs__tab"];
     if (locked ? tabIndex === breakPointActiveTab : active) {
-      tabClasses.push("dm-panel-tabs__tab_active");
+      tabClasses.push("lsf-panel-tabs__tab_active");
     }
 
     return (
       <div id={`${panelKey}_${tabIndex}_droppable`} className={tabClasses.join(" ")}>
-        {!locked && <IconOutlinerDrag className="dm-panel-tabs__icon" />}
+        {!locked && <IconOutlinerDrag className="lsf-panel-tabs__icon" />}
         {tabText}
       </div>
     );
   };
 
   return (
-    <div className="dm-panel-tabs">
-      <div className="dm-panel-tabs__draggable-tab" id={`${tabText}-draggable`} ref={tabRef}>
+    <div className="lsf-panel-tabs">
+      <div className="lsf-panel-tabs__draggable-tab" id={`${tabText}-draggable`} ref={tabRef}>
         <Label />
       </div>
       <div
         ref={ghostTabRef}
-        className="dm-panel-tabs__ghost-tab"
+        className="lsf-panel-tabs__ghost-tab"
         style={{
           width: `${panelWidth}px`,
           height: "fit-content",
@@ -185,7 +185,7 @@ const Tab = ({
         }}
       >
         <Label />
-        {shouldShowGhostTab && <div className="dm-panel-tabs__contents">{children}</div>}
+        {shouldShowGhostTab && <div className="lsf-panel-tabs__contents">{children}</div>}
       </div>
     </div>
   );
@@ -198,14 +198,14 @@ export const Tabs = (props: BaseProps) => {
 
   return (
     <>
-      <div className="dm-tabs">
-        <div className="dm-tabs__tabs-row">
+      <div className="lsf-tabs">
+        <div className="lsf-tabs__tabs-row">
           {props.panelViews.map((view, index) => {
             const { component: Component } = view;
 
             return (
               <div
-                className={`dm-tabs__tab-container ${view.active ? "dm-tabs__tab-container_active" : ""}`}
+                className={`lsf-tabs__tab-container ${view.active ? "lsf-tabs__tab-container_active" : ""}`}
                 key={`${view.title}-${index}-tab`}
               >
                 <Tab
@@ -226,16 +226,16 @@ export const Tabs = (props: BaseProps) => {
                   breakPointActiveTab={props.breakPointActiveTab}
                   setBreakPointActiveTab={props.setBreakPointActiveTab}
                 >
-                  <div className="dm-tabs__content">
+                  <div className="lsf-tabs__content">
                     <Component key={`${view.title}-${index}-ghost`} {...props} name={"outliner"} />
                   </div>
                 </Tab>
               </div>
             );
           })}
-          <div id={`${props.name}_${props.panelViews.length}-droppable-space`} className="dm-tabs__drop-space-after" />
+          <div id={`${props.name}_${props.panelViews.length}-droppable-space`} className="lsf-tabs__drop-space-after" />
         </div>
-        <div className="dm-tabs__contents">{ActiveComponent && <ActiveComponent {...props} />}</div>
+        <div className="lsf-tabs__contents">{ActiveComponent && <ActiveComponent {...props} />}</div>
       </div>
     </>
   );

@@ -481,9 +481,9 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
   }, [sidepanelsCollapsed]);
 
   // Build class names based on modifiers
-  const sidepanelsClasses = ["dm-sidepanels"];
-  if (sidepanelsCollapsed) sidepanelsClasses.push("dm-sidepanels_collapsed");
-  if (isFF(FF_DEV_3873)) sidepanelsClasses.push("dm-sidepanels_newLabelingUI");
+  const sidepanelsClasses = ["lsf-sidepanels"];
+  if (sidepanelsCollapsed) sidepanelsClasses.push("lsf-sidepanels_collapsed");
+  if (isFF(FF_DEV_3873)) sidepanelsClasses.push("lsf-sidepanels_newLabelingUI");
 
   return (
     <SidePanelsContext.Provider value={contextValue}>
@@ -502,7 +502,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
         {initialized && (
           <>
             <div
-              className={`dm-sidepanels__content ${resizing || positioning ? "dm-sidepanels__content_resizing" : ""}`}
+              className={`lsf-sidepanels__content ${resizing || positioning ? "lsf-sidepanels__content_resizing" : ""}`}
             >
               {children}
             </div>
@@ -515,9 +515,9 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
                     return <Fragment key={key}>{content}</Fragment>;
                   }
 
-                  const wrapperClasses = ["dm-sidepanels__wrapper"];
-                  wrapperClasses.push(`dm-sidepanels__wrapper_align_${key}`);
-                  if (snap === key) wrapperClasses.push("dm-sidepanels_snap");
+                  const wrapperClasses = ["lsf-sidepanels__wrapper"];
+                  wrapperClasses.push(`lsf-sidepanels__wrapper_align_${key}`);
+                  if (snap === key) wrapperClasses.push("lsf-sidepanels_snap");
 
                   return (
                     <div key={key} className={wrapperClasses.join(" ")}>

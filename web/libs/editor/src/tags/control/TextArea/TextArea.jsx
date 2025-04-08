@@ -396,7 +396,7 @@ const HtxTextArea = observer(({ item }) => {
   visibleStyle.marginTop = "4px";
 
   return item.displaymode === PER_REGION_MODES.TAG ? (
-    <div className="dm-text-area" style={visibleStyle} ref={item.elementRef}>
+    <div className="lsf-text-area" style={visibleStyle} ref={item.elementRef}>
       {Tree.renderChildren(item, item.annotation)}
 
       {item.showSubmit && (

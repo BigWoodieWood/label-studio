@@ -12,13 +12,13 @@ export const BottomBar = observer(({ store }) => {
   const isViewAll = annotationStore?.viewingAll === true;
 
   return store && !isViewAll ? (
-    <div className="dm-bottombar" style={{ borderTop: isFF(FF_DEV_3873) && "1px solid rgba(0,0,0,0.1)" }}>
-      <div className="dm-bottombar__group">
+    <div className="lsf-bottombar" style={{ borderTop: isFF(FF_DEV_3873) && "1px solid rgba(0,0,0,0.1)" }}>
+      <div className="lsf-bottombar__group">
         <Actions store={store} />
       </div>
-      <div className="dm-bottombar__group">
+      <div className="lsf-bottombar__group">
         {store.hasInterface("controls") && (store.hasInterface("review") || !isPrediction) && (
-          <div className="dm-bottombar__section dm-bottombar__section_flat">
+          <div className="lsf-bottombar__section lsf-bottombar__section_flat">
             <Controls annotation={entity} />
           </div>
         )}
