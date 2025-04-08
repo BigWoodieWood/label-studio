@@ -218,8 +218,8 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     // Build dropdown classes
     const dropdownClasses = ["lsf-dropdown"];
 
-    // Add visibility classes
-    if (visibilityClasses) dropdownClasses.push(visibilityClasses);
+    // Add visibility classes with lsf- prefix
+    if (visibilityClasses) dropdownClasses.push("lsf-" + visibilityClasses);
 
     // Add custom class if provided
     if (props.className) dropdownClasses.push(props.className);

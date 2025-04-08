@@ -98,6 +98,9 @@ export const DropdownTrigger = forwardRef<DropdownRef, DropdownTriggerProps>(
       const dropdownTriggerClasses = ["lsf-dropdown__trigger"];
       if (props.className) dropdownTriggerClasses.push(props.className);
 
+      // Get original classes from the trigger element if they exist
+      const originalClassName = (triggerEL as any).props.className || '';
+      
       return {
         ...(triggerEL as any).props,
         tag,
@@ -109,7 +112,7 @@ export const DropdownTrigger = forwardRef<DropdownRef, DropdownTriggerProps>(
             setMinIndex(Math.max(minIndex, getMinIndex(triggerRef.current)));
           }
         },
-        className: dropdownTriggerClasses.join(" "),
+        className: `${originalClassName} ${dropdownTriggerClasses.join(" ")}`.trim(),
         onClickCapture: handleToggle,
       };
     }, [triggerEL, triggerRef, props.className, handleToggle]);
