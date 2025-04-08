@@ -1,6 +1,5 @@
 import { type FC, type FocusEvent, type MutableRefObject, type RefObject, useCallback, useEffect, useRef } from "react";
 import { debounce } from "lodash";
-import { cn } from "../../utils/bem";
 import { isMacOS } from "../../utils/utilities";
 
 import "./TextArea.scss";
@@ -41,8 +40,17 @@ export const TextArea: FC<TextAreaProps> = ({
 }) => {
   const inlineAction = !!onSubmit;
 
-  const rootClass = cn("textarea");
-  const classList = [rootClass.mod({ inline: inlineAction, autosize: autoSize }), className].join(" ").trim();
+  // Build class names
+  const classes = ["dm-textarea"];
+
+  // Add modifier classes
+  if (inlineAction) classes.push("dm-textarea_inline");
+  if (autoSize) classes.push("dm-textarea_autosize");
+
+  // Add custom class if provided
+  if (className) classes.push(className);
+
+  const classList = classes.join(" ").trim();
 
   const autoGrowRef = useRef({
     rows,

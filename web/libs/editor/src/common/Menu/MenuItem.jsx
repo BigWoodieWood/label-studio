@@ -1,6 +1,5 @@
 import React from "react";
 import { useMemo } from "react";
-import { cn } from "../../utils/bem";
 import { MenuContext } from "./MenuContext";
 
 export const MenuItem = ({
@@ -19,7 +18,6 @@ export const MenuItem = ({
   ...rest
 }) => {
   const { selected, allowClickSelected } = React.useContext(MenuContext);
-  const rootClass = cn("menu", { elem: "item" });
   const isActive = (() => {
     const pathname = window.location.pathname.replace(/\/$/, "");
     const url = to ?? href;
@@ -36,21 +34,26 @@ export const MenuItem = ({
   const linkContent = useMemo(
     () => (
       <>
-        {icon && <span className={rootClass.elem("item-icon")}>{icon}</span>}
+        {icon && <span className="dm-menu__item-icon">{icon}</span>}
         {children ?? label}
       </>
     ),
     [children, label, icon],
   );
 
+  const getClassName = () => {
+    const classes = ["dm-menu__item"];
+
+    if (isActive || active) classes.push("dm-menu__item_active");
+    if (danger) classes.push("dm-menu__item_look_danger");
+    if (allowClickSelected) classes.push("dm-menu__item_clickable");
+    if (className) classes.push(className);
+
+    return classes.join(" ");
+  };
+
   const linkAttributes = {
-    className: rootClass
-      .mod({
-        active: isActive || active,
-        look: danger && "danger",
-        clickable: allowClickSelected,
-      })
-      .mix(className),
+    className: getClassName(),
     onClick,
     ...rest,
   };

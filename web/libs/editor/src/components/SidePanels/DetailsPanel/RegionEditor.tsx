@@ -14,7 +14,6 @@ import {
 } from "react";
 import { IconPropertyAngle } from "@humansignal/icons";
 import { Checkbox } from "@humansignal/ui";
-import { Block, Elem, useBEM } from "../../../utils/bem";
 import { FF_DEV_2715, isFF } from "../../../utils/feature-flags";
 import { TimeDurationControl } from "../../TimeDurationControl/TimeDurationControl";
 import { TimelineRegionEditor } from "./TimelineRegionEditor";
@@ -57,9 +56,9 @@ const RegionEditorComponent: FC<RegionEditorProps> = ({ region }) => {
   const Component = isTimelineRegion ? TimelineRegionEditor : isAudioRegion ? AudioRegionProperties : RegionProperties;
 
   return (
-    <Block name="region-editor" mod={{ disabled: region.isReadOnly() }}>
+    <div className={`dm-region-editor ${region.isReadOnly() ? "dm-region-editor_disabled" : ""}`}>
       <Component region={region} />
-    </Block>
+    </div>
   );
 };
 
@@ -67,7 +66,7 @@ const RegionProperties = ({ region }: RegionEditorProps) => {
   const fields = region.editableFields ?? [];
 
   return (
-    <Elem name="wrapper">
+    <div className="dm-region-editor__wrapper">
       {region.editorEnabled &&
         fields.map((field, i) => {
           return (
@@ -79,7 +78,7 @@ const RegionProperties = ({ region }: RegionEditorProps) => {
             />
           );
         })}
-    </Elem>
+    </div>
   );
 };
 
@@ -93,7 +92,7 @@ const AudioRegionProperties = ({ region }: { region: any }) => {
   };
 
   return (
-    <Elem name="wrapper-time-control">
+    <div className="dm-region-editor__wrapper-time-control">
       <TimeDurationControl
         startTime={region.start}
         endTime={region.end}
@@ -105,7 +104,7 @@ const AudioRegionProperties = ({ region }: { region: any }) => {
         showLabels
         showDuration
       />
-    </Elem>
+    </div>
   );
 };
 
@@ -116,7 +115,6 @@ interface RegionPropertyProps {
 }
 
 const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) => {
-  const block = useBEM();
   const [value, setValue] = useState(region.getProperty(property));
 
   const propertyType = useMemo(() => {
@@ -174,10 +172,10 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
   }, [region]);
 
   return (
-    <Elem name="property" tag="label">
+    <label className="dm-region-editor__property">
       {isBoolean ? (
         <Checkbox
-          className={block?.elem("input").toClassName()}
+          className="dm-region-editor__input"
           checked={value}
           onChange={(e) => onChangeHandler(e.target.checked)}
         />
@@ -189,11 +187,7 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
           onChange={(v) => onChangeHandler(Number(v))}
         />
       ) : options ? (
-        <select
-          value={value}
-          onChange={(e) => onChangeHandler(e.target.value)}
-          className={block?.elem("select").toClassName()}
-        >
+        <select value={value} onChange={(e) => onChangeHandler(e.target.value)} className="dm-region-editor__select">
           {options.map((value, i) => (
             <option key={`${value}-${i}`} value={value}>
               {value}
@@ -202,7 +196,7 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
         </select>
       ) : null}
       <PropertyLabel label={label} />
-    </Elem>
+    </label>
   );
 };
 
@@ -212,7 +206,6 @@ interface RegionInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const RegionInput: FC<RegionInputProps> = ({ onChange: onChangeValue, type, value, step, ...props }) => {
-  const block = useBEM();
   const [currentValue, setValue] = useState(value);
 
   const updateValue = useCallback(
@@ -279,7 +272,7 @@ const RegionInput: FC<RegionInputProps> = ({ onChange: onChangeValue, type, valu
   return (
     <input
       {...props}
-      className={block?.elem("input").toClassName()}
+      className="dm-region-editor__input"
       type="text"
       step={step}
       onChange={onChangeHandler}
@@ -300,11 +293,7 @@ const PropertyLabel: FC<{ label: string }> = ({ label }) => {
     return null;
   }, [label]);
 
-  return (
-    <Elem name="text" tag="span">
-      {IconComponent ? <IconComponent /> : label}
-    </Elem>
-  );
+  return <span className="dm-region-editor__text">{IconComponent ? <IconComponent /> : label}</span>;
 };
 
 export const RegionEditor = observer(RegionEditorComponent);

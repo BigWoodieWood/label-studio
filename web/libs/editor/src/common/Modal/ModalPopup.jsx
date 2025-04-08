@@ -1,12 +1,9 @@
 import { Component, createRef } from "react";
 import { createPortal } from "react-dom";
 import { IconRemove } from "@humansignal/icons";
-import { BemWithSpecifiContext, cn } from "../../utils/bem";
 import { aroundTransition } from "@humansignal/core/lib/utils/transition";
 import { Button } from "../Button/Button";
 import "./Modal.scss";
-
-const { Block, Elem } = BemWithSpecifiContext();
 
 export class Modal extends Component {
   modalRef = createRef();
@@ -60,44 +57,40 @@ export class Modal extends Component {
 
     const bare = this.props.bare;
 
-    const mods = {
-      fullscreen: !!this.props.fullscreen,
-      bare: this.props.bare,
-      visible: this.props.visible || this.state.visible,
-    };
-
-    const mixes = [this.transitionClass, this.props.className];
+    const modalClasses = ["dm-modal"];
+    if (this.props.fullscreen) modalClasses.push("dm-modal_fullscreen");
+    if (this.props.bare) modalClasses.push("dm-modal_bare");
+    if (this.props.visible || this.state.visible) modalClasses.push("dm-modal_visible");
+    if (this.transitionClass) modalClasses.push(this.transitionClass);
+    if (this.props.className) modalClasses.push(this.props.className);
 
     const modalContent = (
-      <Block name="modal" ref={this.modalRef} mod={mods} mix={mixes} onClick={this.onClickOutside}>
-        <Elem name="wrapper">
-          <Elem name="content" style={this.props.style}>
+      <div className={modalClasses.join(" ")} ref={this.modalRef} onClick={this.onClickOutside}>
+        <div className="dm-modal__wrapper">
+          <div className="dm-modal__content" style={this.props.style}>
             {!bare && (
               <Modal.Header>
-                <Elem name="title">{this.state.title}</Elem>
+                <div className="dm-modal__title">{this.state.title}</div>
                 {this.props.allowClose !== false && (
-                  <Elem tag={Button} name="close" type="text" style={{ color: "0099FF" }} icon={<IconRemove />} />
+                  <Button className="dm-modal__close" type="text" style={{ color: "0099FF" }} icon={<IconRemove />} />
                 )}
               </Modal.Header>
             )}
-            <Elem name="body" mod={{ bare }}>
-              {this.body}
-            </Elem>
+            <div className={`dm-modal__body ${bare ? "dm-modal__body_bare" : ""}`}>{this.body}</div>
             {this.state.footer && <Modal.Footer>{this.state.footer}</Modal.Footer>}
-          </Elem>
-        </Elem>
-      </Block>
+          </div>
+        </div>
+      </div>
     );
 
     return createPortal(modalContent, document.body);
   }
 
   onClickOutside = (e) => {
-    const modalRootCN = cn("modal");
     const { closeOnClickOutside } = this.props;
     const isInModal = this.modalRef.current.contains(e.target);
-    const content = modalRootCN.elem("content").closest(e.target);
-    const close = modalRootCN.elem("close").closest(e.target);
+    const content = e.target.closest(".dm-modal__content");
+    const close = e.target.closest(".dm-modal__close");
 
     if ((isInModal && close) || (content === null && closeOnClickOutside !== false)) {
       this.hide();
@@ -155,9 +148,7 @@ export class Modal extends Component {
 }
 
 Modal.Header = ({ children, divided }) => (
-  <Elem name="header" mod={{ divided }}>
-    {children}
-  </Elem>
+  <div className={`dm-modal__header ${divided ? "dm-modal__header_divided" : ""}`}>{children}</div>
 );
 
-Modal.Footer = ({ children }) => <Elem name="footer">{children}</Elem>;
+Modal.Footer = ({ children }) => <div className="dm-modal__footer">{children}</div>;

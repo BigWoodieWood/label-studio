@@ -1,6 +1,5 @@
 import { type FC, useEffect } from "react";
 import { observer } from "mobx-react";
-import { Block } from "../../utils/bem";
 import { CommentForm as CommentFormOld } from "./OldComment/CommentForm";
 import { CommentForm as CommentsFormNew } from "./Comment/CommentForm";
 import { CommentsList as CommentsListOld } from "./OldComment/CommentsList";
@@ -55,10 +54,10 @@ export const Comments: FC<{ annotationStore: any; commentStore: any; cacheKey?: 
     }, [commentStore.hasUnsaved]);
 
     return (
-      <Block name="comments">
+      <div className="dm-comments">
         <CommentForm commentStore={commentStore} annotationStore={annotationStore} inline />
         <CommentsList commentStore={commentStore} />
-      </Block>
+      </div>
     );
   },
 );

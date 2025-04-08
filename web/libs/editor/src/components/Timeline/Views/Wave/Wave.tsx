@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { Block, Elem } from "../../../../utils/bem";
 import { TimelineContext } from "../../Context";
 import type { TimelineContextValue, TimelineViewProps } from "../../Types";
 import WaveSurfer from "wavesurfer.js";
@@ -319,8 +318,8 @@ export const Wave: FC<TimelineViewProps> = ({
   }, [cursorPosition]);
 
   return (
-    <Block name="wave" ref={rootRef}>
-      <Elem name="controls">
+    <div className="dm-wave" ref={rootRef}>
+      <div className="dm-wave__controls">
         <Space spread style={{ gridAutoColumns: "auto" }}>
           <Range
             continuous
@@ -345,15 +344,19 @@ export const Wave: FC<TimelineViewProps> = ({
             onChange={(value) => setZoom(Number(value))}
           />
         </Space>
-      </Elem>
-      <Elem name="wrapper">
-        <Elem name="body" ref={bodyRef} onClick={onTimelineClick}>
-          <Elem name="cursor" style={cursorStyle} />
-          <Elem name="surfer" ref={waveRef} onClick={(e: RMouseEvent<HTMLElement>) => e.stopPropagation()} />
-          <Elem name="timeline" ref={timelineRef} />
-          {loading && <Elem name="loader" mod={{ animated: true }} />}
-        </Elem>
-        <Elem name="scale">
+      </div>
+      <div className="dm-wave__wrapper">
+        <div className="dm-wave__body" ref={bodyRef} onClick={onTimelineClick}>
+          <div className="dm-wave__cursor" style={cursorStyle} />
+          <div
+            className="dm-wave__surfer"
+            ref={waveRef}
+            onClick={(e: RMouseEvent<HTMLElement>) => e.stopPropagation()}
+          />
+          <div className="dm-wave__timeline" ref={timelineRef} />
+          {loading && <div className="dm-wave__loader dm-wave__loader_animated" />}
+        </div>
+        <div className="dm-wave__scale">
           <Range
             min={1}
             max={50}
@@ -365,9 +368,9 @@ export const Wave: FC<TimelineViewProps> = ({
             align="vertical"
             onChange={(value) => setScale(Number(value))}
           />
-        </Elem>
-      </Elem>
-    </Block>
+        </div>
+      </div>
+    </div>
   );
 };
 

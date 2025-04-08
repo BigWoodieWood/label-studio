@@ -2,7 +2,6 @@ import { observer } from "mobx-react";
 import { type FC, useCallback, useState } from "react";
 import { ObjectTag } from "../../../components/Tags/Object";
 import { Timeline } from "../../../components/Timeline/Timeline";
-import { Block } from "../../../utils/bem";
 import { WS_SPEED, WS_VOLUME, WS_ZOOM_X } from "./constants";
 
 interface AudioNextProps {
@@ -92,10 +91,8 @@ const AudioNextView: FC<AudioNextProps> = ({ item }) => {
 
   return (
     <ObjectTag item={item}>
-      <Block
-        mode="wave"
-        name="audio"
-        tag={Timeline}
+      <Timeline
+        className="dm-audio dm-audio_wave"
         framerate={1000}
         hopSize={1000}
         playing={playing}

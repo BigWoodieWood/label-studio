@@ -1,5 +1,4 @@
 import type { FC } from "react";
-import { Block } from "../../utils/bem";
 
 import "./TimeDurationControl.scss";
 import { TimeBox } from "./TimeBox";
@@ -44,7 +43,7 @@ export const TimeDurationControl: FC<TimerProps> = ({
   };
 
   return (
-    <Block name="timer-duration-control">
+    <div className="dm-timer-duration-control">
       <TimeBox
         sidepanel={isSidepanel}
         readonly={startTimeReadonly}
@@ -71,6 +70,6 @@ export const TimeDurationControl: FC<TimerProps> = ({
           label={showLabels ? "Duration" : undefined}
         />
       )}
-    </Block>
+    </div>
   );
 };

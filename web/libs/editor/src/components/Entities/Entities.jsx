@@ -7,7 +7,6 @@ import { LabelList } from "./LabelList";
 import { SortMenu, SortMenuIcon } from "./SortMenu";
 import { Oneof } from "../../common/Oneof/Oneof";
 import { Space } from "../../common/Space/Space";
-import { Block, Elem } from "../../utils/bem";
 import { RadioGroup } from "../../common/RadioGroup/RadioGroup";
 import "./Entities.scss";
 import { Button } from "../../common/Button/Button";
@@ -25,8 +24,8 @@ export default observer(({ regionStore, annotation }) => {
   };
 
   return (
-    <Block name="entities">
-      <Elem name="source">
+    <div className="dm-entities">
+      <div className="dm-entities__source">
         <Space spread>
           <RadioGroup
             size="small"
@@ -37,7 +36,7 @@ export default observer(({ regionStore, annotation }) => {
             }}
           >
             <RadioGroup.Button value="regions">
-              Regions{count ? <Elem name="counter">&nbsp;{count}</Elem> : null}
+              Regions{count ? <span className="dm-entities__counter">&nbsp;{count}</span> : null}
             </RadioGroup.Button>
             <RadioGroup.Button value="labels">Labels</RadioGroup.Button>
           </RadioGroup>
@@ -66,49 +65,55 @@ export default observer(({ regionStore, annotation }) => {
             </Tooltip>
           )}
         </Space>
-      </Elem>
+      </div>
 
       {count ? (
-        <Elem name="header">
+        <div className="dm-entities__header">
           <Space spread align={view === "regions" ? null : "end"}>
             {view === "regions" && (
               <Dropdown overlay={<SortMenu regionStore={regionStore} />} placement="bottomLeft">
-                <Elem name="sort" onClick={(e) => e.preventDefault()}>
-                  <Elem name="sort-icon">
+                <div className="dm-entities__sort" onClick={(e) => e.preventDefault()}>
+                  <div className="dm-entities__sort-icon">
                     <SortMenuIcon sortKey={regionStore.sort} />
-                  </Elem>{" "}
+                  </div>{" "}
                   {`Sorted by ${regionStore.sort[0].toUpperCase()}${regionStore.sort.slice(1)}`}
-                </Elem>
+                </div>
               </Dropdown>
             )}
 
             <Space size="small" align="end">
               {regions.length > 0 ? (
-                <Elem
-                  name="visibility"
-                  tag={Button}
+                <Button
+                  className={`dm-entities__visibility ${regionStore.isAllHidden ? "dm-entities__visibility_hidden" : ""}`}
                   size="small"
                   type="link"
                   style={{ padding: 0 }}
                   onClick={toggleVisibility}
-                  mod={{ hidden: regionStore.isAllHidden }}
                 >
                   {regionStore.isAllHidden ? <IconInvisible /> : <IconVisible />}
-                </Elem>
+                </Button>
               ) : null}
             </Space>
           </Space>
-        </Elem>
+        </div>
       ) : null}
 
       <Oneof value={view}>
-        <Elem name="regions" case="regions">
-          {count ? <RegionTree regionStore={regionStore} /> : <Elem name="empty">No Regions created yet</Elem>}
-        </Elem>
-        <Elem name="labels" case="labels">
-          {count ? <LabelList regionStore={regionStore} /> : <Elem name="empty">No Labeled Regions created yet</Elem>}
-        </Elem>
+        <div className="dm-entities__regions" case="regions">
+          {count ? (
+            <RegionTree regionStore={regionStore} />
+          ) : (
+            <div className="dm-entities__empty">No Regions created yet</div>
+          )}
+        </div>
+        <div className="dm-entities__labels" case="labels">
+          {count ? (
+            <LabelList regionStore={regionStore} />
+          ) : (
+            <div className="dm-entities__empty">No Labeled Regions created yet</div>
+          )}
+        </div>
       </Oneof>
-    </Block>
+    </div>
   );
 });

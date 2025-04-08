@@ -12,7 +12,6 @@ import { IconBan, IconChevron } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
 import { Dropdown } from "../../common/Dropdown/Dropdown";
 import type { CustomButtonType } from "../../stores/CustomButton";
-import { Block, cn, Elem } from "../../utils/bem";
 import { FF_REVIEWER_FLOW, isFF } from "../../utils/feature-flags";
 import { isDefined, toArray } from "../../utils/utilities";
 import {
@@ -65,7 +64,7 @@ const ControlButton = observer(({ button, disabled, onClick }: ControlButtonProp
   }
   return (
     <ButtonTooltip title={button.tooltip}>
-      <Elem name="tooltip-wrapper">{result}</Elem>
+      <div className="dm-controls__tooltip-wrapper">{result}</div>
     </ButtonTooltip>
   );
 });
@@ -76,7 +75,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
     const isNotQuickView = store.hasInterface("topbar:prevnext");
     const historySelected = isDefined(store.annotationStore.selectedHistory);
     const { userGenerate, sentUserGenerate, versions, results, editable: annotationEditable } = annotation;
-    const dropdownTrigger = cn("dropdown").elem("trigger").toClassName();
+    const dropdownTrigger = "dm-dropdown__trigger";
     const customButtons: CustomButtonsField = store.customButtons;
     const buttons = [];
 
@@ -182,9 +181,9 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
       buttons.push(<AcceptButton key="review-accept" disabled={disabled} history={history} store={store} />);
     } else if (annotation.skipped) {
       buttons.push(
-        <Elem name="skipped-info" key="skipped">
+        <div className="dm-controls__skipped-info" key="skipped">
           <IconBan color="#d00" /> Was skipped
-        </Elem>,
+        </div>,
       );
       buttons.push(<UnskipButton key="unskip" disabled={disabled} store={store} />);
     } else {
@@ -236,7 +235,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
 
         buttons.push(
           <ButtonTooltip key="submit" title={title}>
-            <Elem name="tooltip-wrapper">
+            <div className="dm-controls__tooltip-wrapper">
               <Button
                 aria-label="submit"
                 name="submit"
@@ -266,7 +265,7 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
               >
                 Submit
               </Button>
-            </Elem>
+            </div>
           </ButtonTooltip>,
         );
       }
@@ -314,6 +313,6 @@ export const Controls = controlsInjector<{ annotation: MSTAnnotation }>(
       }
     }
 
-    return <Block name="controls">{buttons}</Block>;
+    return <div className="dm-controls">{buttons}</div>;
   }),
 );

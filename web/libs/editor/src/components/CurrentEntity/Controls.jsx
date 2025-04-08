@@ -4,7 +4,6 @@
 
 import { inject, observer } from "mobx-react";
 import { Button } from "../../common/Button/Button";
-import { Block, Elem } from "../../utils/bem";
 import { isDefined } from "../../utils/utilities";
 import { IconBan } from "@humansignal/ui";
 
@@ -56,9 +55,9 @@ export const Controls = controlsInjector(
       );
     } else if (annotation.skipped) {
       buttons.push(
-        <Elem name="skipped-info" key="skipped">
+        <div className="dm-controls__skipped-info" key="skipped">
           <IconBan color="#d00" /> Annotation skipped
-        </Elem>,
+        </div>,
       );
     } else {
       if (store.hasInterface("skip")) {
@@ -77,11 +76,11 @@ export const Controls = controlsInjector(
 
         buttons.push(
           <ButtonTooltip key="submit" name="annotation:submit" title={title}>
-            <Elem name="tooltip-wrapper">
+            <div className="dm-controls__tooltip-wrapper">
               <Button disabled={disabled || submitDisabled} look="primary" onClick={store.submitAnnotation}>
                 Submit
               </Button>
-            </Elem>
+            </div>
           </ButtonTooltip>,
         );
       }
@@ -97,6 +96,6 @@ export const Controls = controlsInjector(
       }
     }
 
-    return <Block name="controls">{buttons}</Block>;
+    return <div className="dm-controls">{buttons}</div>;
   }),
 );

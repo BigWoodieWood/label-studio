@@ -1,7 +1,6 @@
 import { Typography } from "antd";
 import { observer } from "mobx-react";
 import { type FC, useEffect, useMemo, useRef } from "react";
-import { Block, Elem, useBEM } from "../../../utils/bem";
 import { RegionEditor } from "./RegionEditor";
 import "./RegionDetails.scss";
 
@@ -39,66 +38,66 @@ export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
   const content = useMemo(() => {
     if (type === "rating") {
       return (
-        <Elem name="result">
+        <div className="dm-region-meta__result">
           <Text>Rating: </Text>
-          <Elem name="value">
+          <div className="dm-region-meta__value">
             <RatingResult mainValue={mainValue} />
-          </Elem>
-        </Elem>
+          </div>
+        </div>
       );
     }
     if (type === "textarea") {
       return (
-        <Elem name="result">
+        <div className="dm-region-meta__result">
           <Text>Text: </Text>
-          <Elem name="value">
+          <div className="dm-region-meta__value">
             <TextResult mainValue={mainValue} />
-          </Elem>
-        </Elem>
+          </div>
+        </div>
       );
     }
     if (type === "choices") {
       return (
-        <Elem name="result">
+        <div className="dm-region-meta__result">
           <Text>Choices: </Text>
-          <Elem name="value">
+          <div className="dm-region-meta__value">
             <ChoicesResult mainValue={mainValue} />
-          </Elem>
-        </Elem>
+          </div>
+        </div>
       );
     }
     if (type === "taxonomy") {
       return (
-        <Elem name="result">
+        <div className="dm-region-meta__result">
           <Text>Taxonomy: </Text>
-          <Elem name="value">
+          <div className="dm-region-meta__value">
             <ChoicesResult mainValue={mainValue.map((v: string[]) => v.join("/"))} />
-          </Elem>
-        </Elem>
+          </div>
+        </div>
       );
     }
   }, [type, mainValue]);
 
-  return content ? <Block name="region-meta">{content}</Block> : null;
+  return content ? <div className="dm-region-meta">{content}</div> : null;
 });
 
 export const RegionDetailsMain: FC<{ region: any }> = observer(({ region }) => {
   return (
     <>
-      <Elem name="result">
+      <div className="dm-detailed-region__result">
         {(region?.results as any[]).map((res) => (
           <ResultItem key={res.pid} result={res} />
         ))}
         {region?.text ? (
-          <Block name="region-meta">
-            <Elem name="item">
-              <Elem name="content" mod={{ type: "text" }}>
+          <div className="dm-region-meta">
+            <div className="dm-region-meta__item">
+              <div className="dm-region-meta__content dm-region-meta__content_type_text">
                 {region.text.replace(/\\n/g, "\n")}
-              </Elem>
-            </Elem>
-          </Block>
+              </div>
+            </div>
+          </div>
         ) : null}
-      </Elem>
+      </div>
       <RegionEditor region={region} />
     </>
   );
@@ -113,7 +112,6 @@ type RegionDetailsMetaProps = {
 
 export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
   ({ region, editMode, cancelEditMode, enterEditMode }) => {
-    const bem = useBEM();
     const input = useRef<HTMLTextAreaElement | null>();
 
     const saveMeta = (value: string) => {
@@ -135,7 +133,7 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
           <textarea
             ref={(el) => (input.current = el)}
             placeholder="Meta"
-            className={bem.elem("meta-text").toClassName()}
+            className="dm-detailed-region__meta-text"
             value={region.meta.text}
             onChange={(e) => saveMeta(e.target.value)}
             onBlur={(e) => {
@@ -152,9 +150,9 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
           />
         ) : (
           region.meta?.text && (
-            <Elem name="meta-text" onClick={() => enterEditMode?.()}>
+            <div className="dm-detailed-region__meta-text" onClick={() => enterEditMode?.()}>
               {region.meta?.text}
-            </Elem>
+            </div>
           )
         )}
       </>

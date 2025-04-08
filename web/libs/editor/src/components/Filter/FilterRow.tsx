@@ -4,7 +4,6 @@ import { type FC, useEffect, useState } from "react";
 // @ts-ignore
 import * as FilterInputs from "./types";
 
-import { Block, Elem } from "../../utils/bem";
 import { FilterDropdown } from "./FilterDropdown";
 
 import "./FilterRow.scss";
@@ -51,10 +50,10 @@ export const FilterRow: FC<FilterRowInterface> = ({
   }, [_selectedOperation, _selectedField]);
 
   return (
-    <Block name={"filter-row"} data-testid={"filter-row"}>
-      <Elem name={"column"}>
+    <div className="dm-filter-row" data-testid={"filter-row"}>
+      <div className="dm-filter-row__column">
         {index === 0 ? (
-          <Elem name={"title-row"}>Where</Elem>
+          <div className="dm-filter-row__title-row">Where</div>
         ) : (
           <FilterDropdown
             value={logic}
@@ -66,8 +65,8 @@ export const FilterRow: FC<FilterRowInterface> = ({
             }}
           />
         )}
-      </Elem>
-      <Elem name={"column"}>
+      </div>
+      <div className="dm-filter-row__column">
         <FilterDropdown
           value={field}
           items={availableFilters}
@@ -79,8 +78,8 @@ export const FilterRow: FC<FilterRowInterface> = ({
             onChange(index, { value: null });
           }}
         />
-      </Elem>
-      <Elem name={"column"}>
+      </div>
+      <div className="dm-filter-row__column">
         <FilterDropdown
           value={operation}
           items={FilterInputs?.[availableFilters[_selectedField].type]}
@@ -90,29 +89,28 @@ export const FilterRow: FC<FilterRowInterface> = ({
             setSelectedOperation(value);
           }}
         />
-      </Elem>
-      <Elem name={"column"}>
+      </div>
+      <div className="dm-filter-row__column">
         {_inputComponent && operation !== "empty" && (
-          <Elem
-            tag={_inputComponent}
+          <_inputComponent
             value={value}
             onChange={(value: any) => {
               onChange(index, { value });
             }}
           />
         )}
-      </Elem>
-      <Elem name={"column"}>
-        <Elem
+      </div>
+      <div className="dm-filter-row__column">
+        <div
+          className="dm-filter-row__delete"
           onClick={() => {
             onDelete(index);
           }}
           data-testid={`delete-row-${index}`}
-          name={"delete"}
         >
           <IconDelete />
-        </Elem>
-      </Elem>
-    </Block>
+        </div>
+      </div>
+    </div>
   );
 };

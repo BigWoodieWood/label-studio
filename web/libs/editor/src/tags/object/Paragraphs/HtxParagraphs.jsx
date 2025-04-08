@@ -10,7 +10,6 @@ import { AuthorFilter } from "./AuthorFilter";
 import { Phrases } from "./Phrases";
 import { IconHelp } from "@humansignal/icons";
 import { Toggle, Tooltip } from "@humansignal/ui";
-import { cn } from "../../../utils/bem";
 
 const audioDefaultProps = {};
 
@@ -18,8 +17,8 @@ if (isFF(FF_LSDV_4711)) audioDefaultProps.crossOrigin = "anonymous";
 
 class HtxParagraphsView extends Component {
   _regionSpanSelector = ".htx-highlight";
-  mainContentSelector = `.${cn("main-content").toClassName()}`;
-  mainViewAnnotationSelector = `.${cn("main-view").elem("annotation").toClassName()}`;
+  mainContentSelector = ".dm-main-content";
+  mainViewAnnotationSelector = ".dm-main-view__annotation";
 
   constructor(props) {
     super(props);
@@ -580,7 +579,7 @@ class HtxParagraphsView extends Component {
     if (isFF(FF_DEV_2669) && !item._value) return null;
 
     return (
-      <ObjectTag item={item} className={cn("paragraphs").toClassName()}>
+      <ObjectTag item={item} className="dm-paragraphs">
         {withAudio && (
           <audio
             {...audioDefaultProps}

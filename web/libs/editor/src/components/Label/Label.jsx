@@ -1,6 +1,5 @@
 import chroma from "chroma-js";
 import React, { useMemo } from "react";
-import { Block, Elem } from "../../utils/bem";
 import { asVars } from "../../utils/styles";
 
 import "./Label.scss";
@@ -35,26 +34,19 @@ export const Label = React.forwardRef(
       };
     }, [color]);
 
+    const labelClasses = ["dm-label"];
+    if (empty) labelClasses.push("dm-label_empty");
+    if (hidden) labelClasses.push("dm-label_hidden");
+    if (selected) labelClasses.push("dm-label_selected");
+    if (onClick) labelClasses.push("dm-label_clickable");
+    if (margins) labelClasses.push("dm-label_margins");
+    if (className) labelClasses.push(className);
+
     return (
-      <Block
-        tag="span"
-        ref={ref}
-        name="label"
-        mod={{ empty, hidden, selected, clickable: !!onClick, margins }}
-        mix={className}
-        style={styles}
-        onClick={onClick}
-        {...rest}
-      >
-        <Elem tag="span" name="text">
-          {children}
-        </Elem>
-        {hotkey ? (
-          <Elem tag="span" name="hotkey">
-            {hotkey}
-          </Elem>
-        ) : null}
-      </Block>
+      <span ref={ref} className={labelClasses.join(" ")} style={styles} onClick={onClick} {...rest}>
+        <span className="dm-label__text">{children}</span>
+        {hotkey ? <span className="dm-label__hotkey">{hotkey}</span> : null}
+      </span>
     );
   },
 );

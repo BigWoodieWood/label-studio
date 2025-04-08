@@ -17,7 +17,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { BemWithSpecifiContext, cn } from "../../utils/bem";
 import { shallowEqualArrays } from "shallow-equal";
 import { isDefined } from "../../utils/utilities";
 import { Dropdown } from "../Dropdown/Dropdown";
@@ -60,7 +59,24 @@ const SelectContext = createContext<SelectContextProps>({
   setCurrentValue() {},
 });
 
-const { Block, Elem } = BemWithSpecifiContext();
+// Helper functions for building class names
+const buildSelectClasses = (size?: string, surface?: string) => {
+  const classes = ["dm-select"];
+
+  if (size) classes.push(`dm-select_size_${size}`);
+  if (surface) classes.push(`dm-select_surface_${surface}`);
+
+  return classes.join(" ");
+};
+
+const buildOptionClasses = (isSelected?: boolean, isFocused?: boolean) => {
+  const classes = ["dm-select__option"];
+
+  if (isSelected) classes.push("dm-select__option_selected");
+  if (isFocused) classes.push("dm-select__option_focused");
+
+  return classes.join(" ");
+};
 
 const findSelectedChild = (children: ReactNode, value?: string | string[]): FoundChild | null => {
   return Children.toArray(children).reduce<FoundChild | null>((res, child) => {
@@ -204,28 +220,27 @@ export const Select: SelectComponent<SelectProps> = ({
 
   return (
     <SelectContext.Provider value={context}>
-      <Block
-        ref={rootRef}
-        name="select"
-        mod={{ size, surface }}
+      <div
+        ref={rootRef as any}
+        className={buildSelectClasses(size, surface)}
         style={style}
         tabIndex={tabIndex}
         onKeyDown={handleKeyboard}
       >
         <Dropdown.Trigger
           ref={dropdown}
-          className={cn("select", { elem: "dropdown", mod: { variant } }).toClassName()}
-          content={<Elem name="list">{children}</Elem>}
+          className={`dm-select__dropdown${variant ? ` dm-select__dropdown_variant_${variant}` : ""}`}
+          content={<div className="dm-select__list">{children}</div>}
           onToggle={(visible: boolean) => {
             if (!visible) setFocused(null);
           }}
         >
-          <Elem name="selected" data-testid={dataTestid}>
-            <Elem name="value">{selected ?? placeholder}</Elem>
-            <Elem name="icon" />
-          </Elem>
+          <div className="dm-select__selected" data-testid={dataTestid}>
+            <div className="dm-select__value">{selected ?? placeholder}</div>
+            <div className="dm-select__icon" />
+          </div>
         </Dropdown.Trigger>
-      </Block>
+      </div>
     </SelectContext.Provider>
   );
 };
@@ -254,12 +269,8 @@ const SelectOption: FC<SelectOptionProps> = ({ value, children, style }) => {
   }, [value, focused]);
 
   return (
-    <Elem
-      name="option"
-      mod={{
-        selected: isSelected,
-        focused: isFocused,
-      }}
+    <div
+      className={buildOptionClasses(isSelected, isFocused)}
       onClick={(e: MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
         setCurrentValue(value);
@@ -267,7 +278,7 @@ const SelectOption: FC<SelectOptionProps> = ({ value, children, style }) => {
       style={style}
     >
       {children}
-    </Elem>
+    </div>
   );
 };
 
@@ -280,10 +291,10 @@ interface SelectioOptGroupProps {
 
 const SelectOptGroup: FC<SelectioOptGroupProps> = ({ label, children, style }) => {
   return (
-    <Elem name="optgroup" style={style}>
-      <Elem name="optgroup-label">{label}</Elem>
-      <Elem name="optgroup-list">{children}</Elem>
-    </Elem>
+    <div className="dm-select__optgroup" style={style}>
+      <div className="dm-select__optgroup-label">{label}</div>
+      <div className="dm-select__optgroup-list">{children}</div>
+    </div>
   );
 };
 

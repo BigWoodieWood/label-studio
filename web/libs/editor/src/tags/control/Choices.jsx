@@ -13,7 +13,6 @@ import Types from "../../core/Types";
 import { guidGenerator } from "../../core/Helpers";
 import ControlBase from "./Base";
 import { AnnotationMixin } from "../../mixins/AnnotationMixin";
-import { Block } from "../../utils/bem";
 import "./Choices/Choices.scss";
 
 import "./Choice";
@@ -285,14 +284,13 @@ const ChoicesSelectLayout = observer(({ item }) => {
 });
 
 const HtxChoices = observer(({ item }) => {
+  const isHidden = !item.isVisible || !item.perRegionVisible();
+  const className = `dm-choices dm-choices_layout_${item.layout} ${isHidden ? "dm-choices_hidden" : ""}`;
+
   return (
-    <Block
-      name="choices"
-      mod={{ hidden: !item.isVisible || !item.perRegionVisible(), layout: item.layout }}
-      ref={item.elementRef}
-    >
+    <div className={className} ref={item.elementRef}>
       {item.layout === "select" ? <ChoicesSelectLayout item={item} /> : Tree.renderChildren(item, item.annotation)}
-    </Block>
+    </div>
   );
 });
 

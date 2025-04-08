@@ -1,29 +1,28 @@
 import { forwardRef } from "react";
-import { Block, Elem } from "../../utils/bem";
 import "./Label.scss";
 
 export const Label = forwardRef(
   ({ text, children, required, placement, description, size, large, style, simple, flat }, ref) => {
-    const tagName = simple ? "div" : "label";
-    const mods = {
-      size,
-      large,
-      flat,
-      placement,
-      withDescription: !!description,
-      empty: !children,
-    };
+    const TagName = simple ? "div" : "label";
+
+    const classNames = ["dm-field-label"];
+    if (size) classNames.push(`dm-field-label_size_${size}`);
+    if (large) classNames.push("dm-field-label_large");
+    if (flat) classNames.push("dm-field-label_flat");
+    if (placement) classNames.push(`dm-field-label_placement_${placement}`);
+    if (description) classNames.push("dm-field-label_withDescription");
+    if (!children) classNames.push("dm-field-label_empty");
 
     return (
-      <Block ref={ref} name="field-label" mod={mods} tag={tagName} style={style} data-required={required}>
-        <Elem name="text">
-          <Elem name="content">
+      <TagName ref={ref} className={classNames.join(" ")} style={style} data-required={required}>
+        <div className="dm-field-label__text">
+          <div className="dm-field-label__content">
             {text}
-            {description && <Elem name="description">{description}</Elem>}
-          </Elem>
-        </Elem>
-        <Elem name="field">{children}</Elem>
-      </Block>
+            {description && <div className="dm-field-label__description">{description}</div>}
+          </div>
+        </div>
+        <div className="dm-field-label__field">{children}</div>
+      </TagName>
     );
   },
 );

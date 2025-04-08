@@ -1,6 +1,5 @@
 import { inject, observer } from "mobx-react";
 import { Space } from "../../common/Space/Space";
-import { Block, Elem } from "../../utils/bem";
 import { AnnotationHistory } from "./AnnotationHistory.tsx";
 import { useRegionsCopyPaste } from "../../hooks/useRegionsCopyPaste";
 import "./CurrentEntity.scss";
@@ -12,15 +11,15 @@ export const CurrentEntity = injector(
     useRegionsCopyPaste(entity);
 
     return entity ? (
-      <Block name="annotation" onClick={(e) => e.stopPropagation()}>
+      <div className="dm-annotation" onClick={(e) => e.stopPropagation()}>
         {showHistory && (
-          <Elem tag={Space} spread name="title">
+          <Space spread className="dm-annotation__title">
             Annotation History
-            <Elem name="id">#{entity.pk ?? entity.id}</Elem>
-          </Elem>
+            <div className="dm-annotation__id">#{entity.pk ?? entity.id}</div>
+          </Space>
         )}
         <AnnotationHistory enabled={showHistory} />
-      </Block>
+      </div>
     ) : null;
   }),
 );

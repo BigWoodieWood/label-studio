@@ -4,7 +4,6 @@ import chroma from "chroma-js";
 import { Button } from "antd";
 
 import { IconCommentLinkTo, IconClose } from "@humansignal/icons";
-import { Block, Elem } from "../../../utils/bem";
 import { NodeIcon } from "../../Node/Node";
 import { RegionLabel } from "../../SidePanels/OutlinerPanel/RegionLabel";
 
@@ -26,14 +25,20 @@ export const LinkState: FC<LinkStateProps> = ({ linking, region, result, onUnlin
     return undefined;
   }, [linking, region]);
   if (!isVisible) return null;
+
+  // Build link state classes
+  const linkStateClasses = ["dm-link-state"];
+  if (mod?.action) linkStateClasses.push("dm-link-state_action");
+  if (mod?.display) linkStateClasses.push("dm-link-state_display");
+
   return (
-    <Block tag="div" name="link-state" mod={mod}>
-      <Elem tag="div" name="prefix">
+    <div className={linkStateClasses.join(" ")}>
+      <div className="dm-link-state__prefix">
         <IconCommentLinkTo />
-      </Elem>
+      </div>
       {mod?.action && "Select an object to link it to this comment."}
       {mod?.display && <LinkedRegion region={region} result={result} onUnlink={onUnlink} interactive={interactive} />}
-    </Block>
+    </div>
   );
 };
 
@@ -72,10 +77,13 @@ const LinkedRegion: FC<LinkedRegionProps> = observer(({ region, result, interact
     };
   }, [itemColor]);
 
+  // Build link state region classes
+  const linkStateRegionClasses = ["dm-link-state-region"];
+  if (interactive) linkStateRegionClasses.push("dm-link-state-region_interactive");
+
   return (
-    <Block
-      name="link-state-region"
-      mod={{ interactive }}
+    <div
+      className={linkStateRegionClasses.join(" ")}
       style={style}
       onMouseEnter={mouseEnterHandler}
       onMouseLeave={mouseLeaveHandler}
@@ -83,30 +91,30 @@ const LinkedRegion: FC<LinkedRegionProps> = observer(({ region, result, interact
     >
       {!isClassification && (
         <>
-          <Elem name="icon">
+          <div className="dm-link-state-region__icon">
             <NodeIcon node={region} />
-          </Elem>
-          <Elem name="index">{region.region_index}</Elem>
+          </div>
+          <div className="dm-link-state-region__index">{region.region_index}</div>
         </>
       )}
       {result ? (
-        <Elem name="title">
+        <div className="dm-link-state-region__title">
           <ResultText result={result} />
-        </Elem>
+        </div>
       ) : (
-        <Elem name="title">
-          <Elem name="label">
+        <div className="dm-link-state-region__title">
+          <div className="dm-link-state-region__label">
             <RegionLabel item={region} />
-          </Elem>
-          {region?.text && <Elem name="text">{region.text.replace(/\\n/g, "\n")}</Elem>}
-        </Elem>
+          </div>
+          {region?.text && <div className="dm-link-state-region__text">{region.text.replace(/\\n/g, "\n")}</div>}
+        </div>
       )}
       {onUnlink && (
-        <Elem name="close">
+        <div className="dm-link-state-region__close">
           <Button size="small" type="text" icon={<IconClose />} onClick={onUnlink} />
-        </Elem>
+        </div>
       )}
-    </Block>
+    </div>
   );
 });
 

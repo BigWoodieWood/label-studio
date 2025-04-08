@@ -6,7 +6,6 @@ import { inject, observer } from "mobx-react";
 import { Button } from "../../common/Button/Button";
 import { IconBan } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
-import { Block, Elem } from "../../utils/bem";
 import { isDefined } from "../../utils/utilities";
 
 import "./Controls.scss";
@@ -122,9 +121,9 @@ export const Controls = controlsInjector(
       );
     } else if (annotation.skipped) {
       buttons.push(
-        <Elem name="skipped-info" key="skipped">
+        <div className="dm-controls__skipped-info" key="skipped">
           <IconBan color="#d00" /> Was skipped
-        </Elem>,
+        </div>,
       );
       buttons.push(
         <ButtonTooltip key="cancel-skip" title="Cancel skip: []">
@@ -170,7 +169,7 @@ export const Controls = controlsInjector(
 
         buttons.push(
           <ButtonTooltip key="submit" title={title}>
-            <Elem name="tooltip-wrapper">
+            <div className="dm-controls__tooltip-wrapper">
               <Button
                 aria-label="submit"
                 disabled={disabled || submitDisabled}
@@ -182,7 +181,7 @@ export const Controls = controlsInjector(
               >
                 Submit
               </Button>
-            </Elem>
+            </div>
           </ButtonTooltip>,
         );
       }
@@ -209,6 +208,6 @@ export const Controls = controlsInjector(
       }
     }
 
-    return <Block name="controls">{buttons}</Block>;
+    return <div className="dm-controls">{buttons}</div>;
   }),
 );

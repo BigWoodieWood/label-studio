@@ -1,5 +1,4 @@
 import { forwardRef, useCallback, useMemo } from "react";
-import { Block, cn } from "../../utils/bem";
 import { useDropdown } from "../Dropdown/DropdownTrigger";
 import "./Menu.scss";
 import { MenuContext } from "./MenuContext";
@@ -15,7 +14,7 @@ export const Menu = forwardRef(
 
     const clickHandler = useCallback(
       (e) => {
-        const elem = cn("menu").elem("item").closest(e.target);
+        const elem = e.target.closest(".dm-menu__item");
 
         if (dropdown && elem && closeDropdownOnItemClick !== false) {
           dropdown.close();
@@ -32,27 +31,24 @@ export const Menu = forwardRef(
       return { selected, allowClickSelected };
     }, [selected, allowClickSelected]);
 
+    const menuClasses = ["dm-menu"];
+    if (size) menuClasses.push(`dm-menu_size_${size}`);
+    if (collapsed) menuClasses.push("dm-menu_collapsed");
+    if (className) menuClasses.push(className);
+
     return (
       <MenuContext.Provider value={contextValue}>
-        <Block
-          ref={ref}
-          tag="ul"
-          name="menu"
-          mod={{ size, collapsed }}
-          mix={className}
-          style={style}
-          onClick={clickHandler}
-        >
+        <ul ref={ref} className={menuClasses.join(" ")} style={style} onClick={clickHandler}>
           {children}
-        </Block>
+        </ul>
       </MenuContext.Provider>
     );
   },
 );
 
 Menu.Item = MenuItem;
-Menu.Spacer = () => <li className={cn("menu", { elem: "spacer" })} />;
-Menu.Divider = () => <li className={cn("menu", { elem: "divider" })} />;
+Menu.Spacer = () => <li className="dm-menu__spacer" />;
+Menu.Divider = () => <li className="dm-menu__divider" />;
 Menu.Builder = (url, menuItems) => {
   return (menuItems ?? []).map((item, index) => {
     if (item === "SPACER") return <Menu.Spacer key={index} />;
@@ -70,12 +66,13 @@ Menu.Builder = (url, menuItems) => {
 };
 
 Menu.Group = ({ children, title, className, style }) => {
-  const rootClass = cn("menu-group");
+  const classes = ["dm-menu-group"];
+  if (className) classes.push(className);
 
   return (
-    <li className={rootClass.mix(className)} style={style}>
-      <div className={rootClass.elem("title")}>{title}</div>
-      <ul className={rootClass.elem("list")}>{children}</ul>
+    <li className={classes.join(" ")} style={style}>
+      <div className="dm-menu-group__title">{title}</div>
+      <ul className="dm-menu-group__list">{children}</ul>
     </li>
   );
 };

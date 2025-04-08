@@ -17,7 +17,6 @@ import { IconArrow, IconChevronLeft, IconEyeClosed, IconEyeOpened, IconWarning, 
 import { Tooltip } from "@humansignal/ui";
 import Registry from "../../../core/Registry";
 import { PER_REGION_MODES } from "../../../mixins/PerRegionModes";
-import { Block, cn, Elem } from "../../../utils/bem";
 import { FF_DEV_2755, FF_DEV_3873, FF_PER_FIELD_COMMENTS, isFF } from "../../../utils/feature-flags";
 import { flatten, isDefined, isMacOS } from "../../../utils/utilities";
 import { NodeIcon } from "../../Node/Node";
@@ -46,10 +45,8 @@ interface OutlinerTreeProps {
 }
 
 const OutlinerTreeComponent: FC<OutlinerTreeProps> = ({ regions, footer }) => {
-  const rootClass = cn("tree");
   const regionsTree = useDataTree({
     regions,
-    rootClass,
     footer,
     // that's a trick to have a dependency that causes recalculating of tree data on grouping mode change
     // it's for rerender OutlinerTreeComponent
@@ -108,7 +105,6 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
   }, []);
   const eventHandlers = useEventHandlers();
   const selectedKeys = regions.selection.keys;
-  const rootClass = cn("tree");
   let expandedKeys = undefined;
   let onExpand = undefined;
   // It works only for 'label' mode yet.
@@ -162,7 +158,7 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
   }
 
   return (
-    <Block name="outliner-tree" ref={setRef}>
+    <div className="dm-outliner-tree" ref={setRef}>
       {!!height && (
         <Tree
           key={regions.group}
@@ -172,8 +168,8 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
           defaultExpandParent={!isPersistCollapseEnabled}
           autoExpandParent
           checkable={false}
-          prefixCls={rootClass.toClassName()}
-          className={rootClass.toClassName()}
+          prefixCls="dm-tree"
+          className="dm-tree"
           treeData={regionsTree}
           selectedKeys={selectedKeys}
           icon={iconGetter}
@@ -190,16 +186,20 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
             : {})}
         />
       )}
-    </Block>
+    </div>
   );
 });
 
-const useDataTree = ({ regions, rootClass, footer }: any) => {
+const useDataTree = ({ regions, footer }: any) => {
   const processor = useCallback((item: any, idx, _false, _null, _onClick) => {
     const { id, type, hidden, isDrawing } = item ?? {};
     const style = item?.background ?? item?.getOneColor?.();
     const color = chroma(style ?? "#666").alpha(1);
-    const mods: Record<string, any> = { hidden, type, isDrawing };
+
+    const classes = ["dm-tree__node"];
+    if (hidden) classes.push("dm-tree__node_hidden");
+    if (type) classes.push(`dm-tree__node_type_${type}`);
+    if (isDrawing) classes.push("dm-tree__node_isDrawing");
 
     const label = <RegionLabel item={item} />;
 
@@ -216,7 +216,7 @@ const useDataTree = ({ regions, rootClass, footer }: any) => {
         "--text-color": color.css(),
         "--selection-color": color.alpha(0.1).css(),
       },
-      className: rootClass.elem("node").mod(mods).toClassName(),
+      className: classes.join(" "),
       title: (data: any) => <RootTitle {...data} />,
     };
   }, []);
@@ -227,7 +227,7 @@ const useDataTree = ({ regions, rootClass, footer }: any) => {
     regionsTreeData.push({
       key: "__footer__",
       disabled: true,
-      className: rootClass.elem("node").mod({ type: "footer" }).toClassName(),
+      className: "dm-tree__node dm-tree__node_type_footer",
       title: footer,
     });
   }
@@ -405,20 +405,20 @@ const RootTitle: FC<any> = observer(
     );
 
     return (
-      <Block name="outliner-item">
-        <Elem name="content">
-          {!props.isGroup && <Elem name="index">{props.idx + 1}</Elem>}
-          <Elem name="title">
+      <div className="dm-outliner-item">
+        <div className="dm-outliner-item__content">
+          {!props.isGroup && <div className="dm-outliner-item__index">{props.idx + 1}</div>}
+          <div className="dm-outliner-item__title">
             {label}
-            {item?.text && <Elem name="text">{item.text.replace(/\\n/g, "\n")}</Elem>}
+            {item?.text && <div className="dm-outliner-item__text">{item.text.replace(/\\n/g, "\n")}</div>}
             {item?.isDrawing && (
-              <Elem tag="span" name="incomplete">
+              <span className="dm-outliner-item__incomplete">
                 <Tooltip title={`Incomplete ${item.type?.replace("region", "") ?? "region"}`}>
                   <IconWarning />
                 </Tooltip>
-              </Elem>
+              </span>
             )}
-          </Elem>
+          </div>
           <RegionControls
             hovered={hovered}
             item={item}
@@ -429,10 +429,10 @@ const RootTitle: FC<any> = observer(
             hasControls={hasControls && isArea}
             toggleCollapsed={toggleCollapsed}
           />
-        </Elem>
+        </div>
 
         {!collapsed && hasControls && isArea && (
-          <Elem name="ocr">
+          <div className="dm-outliner-item__ocr">
             <RegionItemDesc
               item={item}
               controls={controls}
@@ -440,9 +440,9 @@ const RootTitle: FC<any> = observer(
               setCollapsed={setCollapsed}
               selected={props.selected}
             />
-          </Elem>
+          </div>
         )}
-      </Block>
+      </div>
     );
   },
 );
@@ -499,39 +499,43 @@ const RegionControls: FC<RegionControlsProps> = injector(
       item.setLocked((locked: boolean) => !locked);
     }, []);
 
+    const controlsClasses = ["dm-outliner-item__controls"];
+    if (hasControls) controlsClasses.push("dm-outliner-item__controls_withControls");
+    if (isFF(FF_DEV_3873)) controlsClasses.push("dm-outliner-item__controls_newUI");
+
     return (
-      <Elem name="controls" mod={{ withControls: hasControls, newUI: isFF(FF_DEV_3873) }}>
+      <div className={controlsClasses.join(" ")}>
         {isFF(FF_DEV_3873) ? (
           <Tooltip title={"Confidence Score"}>
-            <Elem name="control-wrapper">
-              <Elem name="control" mod={{ type: "predict" }}>
+            <div className="dm-outliner-item__control-wrapper">
+              <div className="dm-outliner-item__control dm-outliner-item__control_type_predict">
                 {item?.origin === "prediction" && <IconSparks style={{ width: 18, height: 18 }} />}
-              </Elem>
-              <Elem name="control" mod={{ type: "score" }}>
+              </div>
+              <div className="dm-outliner-item__control dm-outliner-item__control_type_score">
                 {isDefined(item?.score) && item.score.toFixed(2)}
-              </Elem>
-            </Elem>
+              </div>
+            </div>
           </Tooltip>
         ) : (
           <>
-            <Elem name="control" mod={{ type: "score" }}>
+            <div className="dm-outliner-item__control dm-outliner-item__control_type_score">
               {isDefined(item?.score) && item.score.toFixed(2)}
-            </Elem>
-            <Elem name="control" mod={{ type: "dirty" }}>
+            </div>
+            <div className="dm-outliner-item__control dm-outliner-item__control_type_dirty">
               {/* dirtyness is not implemented yet */}
-            </Elem>
-            <Elem name="control" mod={{ type: "predict" }}>
+            </div>
+            <div className="dm-outliner-item__control dm-outliner-item__control_type_predict">
               {item?.origin === "prediction" && <IconSparks style={{ width: 18, height: 18 }} />}
-            </Elem>
+            </div>
           </>
         )}
-        <Elem name={"wrapper"}>
+        <div className="dm-outliner-item__wrapper">
           {store.hasInterface("annotations:copy-link") && isDefined(item?.annotation?.pk) && (
-            <Elem name="control" mod={{ type: "menu" }}>
+            <div className="dm-outliner-item__control dm-outliner-item__control_type_menu">
               <RegionContextMenu item={item} />
-            </Elem>
+            </div>
           )}
-          <Elem name="control" mod={{ type: "lock" }}>
+          <div className="dm-outliner-item__control dm-outliner-item__control_type_lock">
             <LockButton
               item={item}
               annotation={item?.annotation}
@@ -539,8 +543,8 @@ const RegionControls: FC<RegionControlsProps> = injector(
               locked={item?.locked}
               onClick={onToggleLocked}
             />
-          </Elem>
-          <Elem name="control" mod={{ type: "visibility" }}>
+          </div>
+          <div className="dm-outliner-item__control dm-outliner-item__control_type_visibility">
             {isFF(FF_DEV_3873) ? (
               <RegionControlButton onClick={onToggleHidden} style={hidden ? undefined : { display: "none" }}>
                 {hidden ? (
@@ -558,9 +562,9 @@ const RegionControls: FC<RegionControlsProps> = injector(
                 )}
               </RegionControlButton>
             )}
-          </Elem>
+          </div>
           {hasControls && (
-            <Elem name="control" mod={{ type: "visibility" }}>
+            <div className="dm-outliner-item__control dm-outliner-item__control_type_visibility">
               <RegionControlButton onClick={onToggleCollapsed}>
                 <IconChevronLeft
                   style={{
@@ -568,10 +572,10 @@ const RegionControls: FC<RegionControlsProps> = injector(
                   }}
                 />
               </RegionControlButton>
-            </Elem>
+            </div>
           )}
-        </Elem>
-      </Elem>
+        </div>
+      </div>
     );
   }),
 );
@@ -598,14 +602,13 @@ const RegionItemDesc: FC<RegionItemOCSProps> = observer(({ item, collapsed, setC
     [item, selected, collapsed],
   );
 
+  const ocrClasses = ["dm-ocr"];
+  if (collapsed) ocrClasses.push("dm-ocr_collapsed");
+  if (!(controls?.length > 0)) ocrClasses.push("dm-ocr_empty");
+
   return (
-    <Block
-      name="ocr"
-      mod={{ collapsed, empty: !(controls?.length > 0) }}
-      onClick={onClick}
-      onDragStart={(e: any) => e.stopPropagation()}
-    >
-      <Elem name="controls">
+    <div className={ocrClasses.join(" ")} onClick={onClick} onDragStart={(e: any) => e.stopPropagation()}>
+      <div className="dm-ocr__controls">
         {controls.map((tag, idx) => {
           const View = Registry.getPerRegionView(tag.type, PER_REGION_MODES.REGION_LIST);
           const color = item.getOneColor();
@@ -624,8 +627,8 @@ const RegionItemDesc: FC<RegionItemOCSProps> = observer(({ item, collapsed, setC
             />
           ) : null;
         })}
-      </Elem>
-    </Block>
+      </div>
+    </div>
   );
 });
 

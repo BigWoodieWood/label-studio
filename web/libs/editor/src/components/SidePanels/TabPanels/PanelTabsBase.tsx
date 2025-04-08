@@ -1,5 +1,4 @@
 import { type FC, type MouseEvent as RMouseEvent, useCallback, useMemo, useRef, useState } from "react";
-import { Block, Elem } from "../../../utils/bem";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -111,17 +110,24 @@ export const PanelTabsBase: FC<BaseProps> = ({
       : {};
   }, [detached, relativeTop, relativeLeft, locked]);
 
-  const mods = useMemo(() => {
-    return {
-      detached: locked ? false : detached,
-      hidden: !visible,
-      alignment: detached ? "left" : (alignment ?? "left"),
-      disabled: locked,
-      collapsed,
-      dragTop: dragTop && attachedKeys && attachedKeys[0] === key,
-      dragBottom: dragBottom && attachedKeys && attachedKeys[attachedKeys.length - 1] === key,
-    };
-  }, [alignment, visible, detached, resizing, locked, collapsed, dragTop, dragBottom]);
+  const panelClasses = useMemo(() => {
+    const classes = ["dm-tabs-panel"];
+
+    if (locked ? false : detached) classes.push("dm-tabs-panel_detached");
+    if (!visible) classes.push("dm-tabs-panel_hidden");
+
+    const alignmentValue = detached ? "left" : (alignment ?? "left");
+    classes.push(`dm-tabs-panel_alignment_${alignmentValue}`);
+
+    if (locked) classes.push("dm-tabs-panel_disabled");
+    if (collapsed) classes.push("dm-tabs-panel_collapsed");
+
+    if (dragTop && attachedKeys && attachedKeys[0] === key) classes.push("dm-tabs-panel_dragTop");
+    if (dragBottom && attachedKeys && attachedKeys[attachedKeys.length - 1] === key)
+      classes.push("dm-tabs-panel_dragBottom");
+
+    return classes;
+  }, [alignment, visible, detached, locked, collapsed, dragTop, dragBottom, attachedKeys, key]);
 
   // Panel positioning
   useDrag(
@@ -284,76 +290,87 @@ export const PanelTabsBase: FC<BaseProps> = ({
   );
 
   return (
-    <Block ref={panelRef} name="tabs-panel" mod={mods} style={{ ...style, ...coordinates }}>
-      <Elem name="content">
+    <div ref={panelRef} className={panelClasses.join(" ")} style={{ ...style, ...coordinates }}>
+      <div className="dm-tabs-panel__content">
         {!locked && collapsedHeader && (
           <>
             {isChildOfGroup && visible && (
-              <Elem
-                name="grouped-top"
+              <div
+                className={`dm-tabs-panel__grouped-top ${
+                  "grouped-top" === resizing ? "dm-tabs-panel__grouped-top_drag" : ""
+                }`}
                 ref={resizeGroup}
-                mod={{ drag: "grouped-top" === resizing }}
                 data-resize={"grouped-top"}
               />
             )}
-            <Elem
+            <div
               ref={headerRef}
               onClick={() => {
                 if (collapsed) handleGroupPanelToggle();
               }}
               id={key}
-              mod={{ collapsed }}
-              name="header"
+              className={`dm-tabs-panel__header ${collapsed ? "dm-tabs-panel__header_collapsed" : ""}`}
             >
-              <Elem name="header-left">
-                {!collapsed && <Elem name="icon" style={{ pointerEvents: "none" }} tag={IconOutlinerDrag} />}
-                {!visible && !collapsed && <Elem name="title">{panelViews.map((view) => view.title).join(" ")}</Elem>}
-              </Elem>
-              <Elem name="header-right">
+              <div className="dm-tabs-panel__header-left">
+                {!collapsed && <IconOutlinerDrag className="dm-tabs-panel__icon" style={{ pointerEvents: "none" }} />}
+                {!visible && !collapsed && (
+                  <div className="dm-tabs-panel__title">{panelViews.map((view) => view.title).join(" ")}</div>
+                )}
+              </div>
+              <div className="dm-tabs-panel__header-right">
                 {(!detached || collapsed) && (
-                  <Elem
-                    name="toggle"
-                    mod={{ detached, collapsed, alignment }}
+                  <div
+                    className={`dm-tabs-panel__toggle ${detached ? "dm-tabs-panel__toggle_detached" : ""} ${
+                      collapsed ? "dm-tabs-panel__toggle_collapsed" : ""
+                    } ${alignment ? `dm-tabs-panel__toggle_alignment_${alignment}` : ""}`}
                     onClick={handleGroupPanelToggle}
                     data-tooltip={`${tooltipText} Group`}
                   >
                     {Side.left === alignment ? <IconChevronLeft /> : <IconChevronRight />}
-                  </Elem>
+                  </div>
                 )}
                 {!collapsed && (
-                  <Elem
-                    name="toggle"
-                    mod={{ detached, collapsed, alignment }}
+                  <div
+                    className={`dm-tabs-panel__toggle ${detached ? "dm-tabs-panel__toggle_detached" : ""} ${
+                      collapsed ? "dm-tabs-panel__toggle_collapsed" : ""
+                    } ${alignment ? `dm-tabs-panel__toggle_alignment_${alignment}` : ""}`}
                     onClick={handlePanelToggle}
                     data-tooltip={tooltipText}
                   >
                     {visible ? <IconCollapseSmall /> : <IconExpandSmall />}
-                  </Elem>
+                  </div>
                 )}
-              </Elem>
-            </Elem>
+              </div>
+            </div>
           </>
         )}
         {visible && !collapsed && (
-          <Elem name="body">
-            {lockPanelContents && <Elem name="shield" />}
+          <div className="dm-tabs-panel__body">
+            {lockPanelContents && <div className="dm-tabs-panel__shield" />}
             {children}
-          </Elem>
+          </div>
         )}
-      </Elem>
+      </div>
       {visible && !positioning && !locked && (
-        <Elem name="resizers" ref={resizerRef} mod={{ locked: positioning || locked }}>
+        <div
+          className={`dm-tabs-panel__resizers ${positioning || locked ? "dm-tabs-panel__resizers_locked" : ""}`}
+          ref={resizerRef}
+        >
           {resizers.map((res) => {
             const shouldRender = collapsed
               ? false
               : ((res === "left" || res === "right") && alignment !== res) || detached;
 
             return shouldRender ? (
-              <Elem key={res} name="resizer" mod={{ drag: res === resizing }} data-resize={res} />
+              <div
+                key={res}
+                className={`dm-tabs-panel__resizer ${res === resizing ? "dm-tabs-panel__resizer_drag" : ""}`}
+                data-resize={res}
+              />
             ) : null;
           })}
-        </Elem>
+        </div>
       )}
-    </Block>
+    </div>
   );
 };

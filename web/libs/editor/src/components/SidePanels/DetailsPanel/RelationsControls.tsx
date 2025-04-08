@@ -1,16 +1,15 @@
 import { type FC, useCallback } from "react";
 import { observer } from "mobx-react";
-import { Block, Elem } from "../../../utils/bem";
 import { Button } from "../../../common/Button/Button";
 import "./RelationsControls.scss";
 import { IconOutlinerEyeClosed, IconOutlinerEyeOpened, IconSortUp, IconSortDown } from "@humansignal/icons";
 
 const RelationsControlsComponent: FC<any> = ({ relationStore }) => {
   return (
-    <Block name="relation-controls">
+    <div className="dm-relation-controls">
       <ToggleRelationsVisibilityButton relationStore={relationStore} />
       <ToggleRelationsOrderButton relationStore={relationStore} />
-    </Block>
+    </div>
   );
 };
 
@@ -32,12 +31,11 @@ const ToggleRelationsVisibilityButton = observer<FC<ToggleRelationsVisibilityBut
   const isAllHidden = !(!isDisabled && relationStore.isAllHidden);
 
   return (
-    <Elem
-      tag={Button}
+    <Button
       type="text"
       disabled={isDisabled}
       onClick={toggleRelationsVisibility}
-      mod={{ hidden: isAllHidden }}
+      className={isAllHidden ? "dm-relation-controls_hidden" : ""}
       aria-label={isAllHidden ? "Show all" : "Hide all"}
       icon={
         isAllHidden ? (
@@ -70,12 +68,11 @@ const ToggleRelationsOrderButton = observer<FC<ToggleRelationsOrderButtonProps>>
   const isAsc = relationStore.order === "asc";
 
   return (
-    <Elem
-      tag={Button}
+    <Button
       type="text"
       onClick={toggleRelationsOrder}
       disabled={isDisabled}
-      mod={{ order: relationStore.order }}
+      className={`dm-relation-controls_order_${relationStore.order}`}
       aria-label={isAsc ? "Order by oldest" : "Order by newest"}
       icon={isAsc ? <IconSortUp /> : <IconSortDown />}
       tooltip={isAsc ? "Order by oldest" : "Order by newest"}

@@ -4,10 +4,25 @@ import { observer } from "mobx-react";
 import { createElement, Fragment } from "react";
 import { Tooltip } from "@humansignal/ui";
 import Hint from "../components/Hint/Hint";
-import { Block, Elem } from "../utils/bem";
 import { FF_MULTI_OBJECT_HOTKEYS, isFF } from "../utils/feature-flags";
 import { isDefined, isMacOS } from "../utils/utilities";
 import defaultKeymap from "./settings/keymap.json";
+
+// Temporary utility components to replace Block and Elem from bem.ts
+const createKeyElem = (key: string) => {
+  return createElement("kbd", { className: "dm-key-group__key" }, key);
+};
+
+const createKeyGroup = (keys: JSX.Element[]) => {
+  return createElement(
+    "span",
+    {
+      className: "dm-key-group",
+      style: { marginLeft: 5 },
+    },
+    ...keys,
+  );
+};
 
 type Keymap = typeof defaultKeymap;
 
@@ -433,28 +448,8 @@ Hotkey.Tooltip = inject("store")(
 
       if (enabled) {
         shortcut.split(",").forEach((combination) => {
-          const keys = combination.split("+").map((key) =>
-            createElement(
-              Elem,
-              {
-                tag: "kbd",
-                name: "key",
-              },
-              key,
-            ),
-          );
-
-          hotkeys.push(
-            createElement(
-              Block,
-              {
-                name: "key-group",
-                tag: "span",
-                style: { marginLeft: 5 },
-              },
-              ...keys,
-            ),
-          );
+          const keys = combination.split("+").map((key) => createKeyElem(key));
+          hotkeys.push(createKeyGroup(keys));
         });
       }
 

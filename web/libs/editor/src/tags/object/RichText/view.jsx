@@ -8,7 +8,6 @@ import { fixCodePointsInRange } from "../../../utils/selection-tools";
 import "./RichText.scss";
 import { isAlive } from "mobx-state-tree";
 import { LoadingOutlined } from "@ant-design/icons";
-import { Block, cn, Elem } from "../../../utils/bem";
 import { observe } from "mobx";
 import { isDefined } from "../../../utils/utilities";
 

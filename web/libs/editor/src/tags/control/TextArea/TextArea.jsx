@@ -23,7 +23,6 @@ import ClassificationBase from "../ClassificationBase";
 import "./TextAreaRegionView";
 
 import "./TextArea.scss";
-import { cn } from "../../../utils/bem";
 
 const { TextArea } = Input;
 
@@ -391,14 +390,13 @@ const HtxTextArea = observer(({ item }) => {
 
   const showAddButton = !item.isReadOnly() && (item.showsubmitbutton ?? rows !== 1);
   const itemStyle = {};
-  const textareaClassName = cn("text-area").toClassName();
 
   if (showAddButton) itemStyle.marginBottom = 0;
 
   visibleStyle.marginTop = "4px";
 
   return item.displaymode === PER_REGION_MODES.TAG ? (
-    <div className={textareaClassName} style={visibleStyle} ref={item.elementRef}>
+    <div className="dm-text-area" style={visibleStyle} ref={item.elementRef}>
       {Tree.renderChildren(item, item.annotation)}
 
       {item.showSubmit && (

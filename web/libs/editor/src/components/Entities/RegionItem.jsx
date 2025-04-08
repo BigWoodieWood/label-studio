@@ -7,7 +7,6 @@ import { IconCollapse, IconExpandTool, IconInvisible, IconSparks, IconVisible } 
 import styles from "./Entities.module.scss";
 import Utils from "../../utils";
 
-import { Block, Elem } from "../../utils/bem";
 import { isDefined } from "../../utils/utilities";
 import "./RegionItem.scss";
 import { Space } from "../../common/Space/Space";
@@ -27,10 +26,8 @@ const RegionItemDesc = observer(({ item, setDraggable }) => {
   const controls = item.perRegionDescControls || [];
 
   return (
-    <Elem
-      name="desc"
-      tag="div"
-      mod={{ collapsed, empty: !(controls?.length > 0) }}
+    <div
+      className={`dm-region-item__desc ${collapsed ? "dm-region-item__desc_collapsed" : ""} ${!(controls?.length > 0) ? "dm-region-item__desc_empty" : ""}`}
       onMouseEnter={() => {
         setDraggable?.(false);
       }}
@@ -38,7 +35,7 @@ const RegionItemDesc = observer(({ item, setDraggable }) => {
         setDraggable?.(true);
       }}
     >
-      <Elem name="controls">
+      <div className="dm-region-item__controls">
         {controls.map((tag, idx) => {
           const View = Registry.getPerRegionView(tag.type, PER_REGION_MODES.REGION_LIST);
 
@@ -46,11 +43,11 @@ const RegionItemDesc = observer(({ item, setDraggable }) => {
             <View key={idx} item={tag} area={item} collapsed={collapsed} setCollapsed={setCollapsed} />
           ) : null;
         })}
-      </Elem>
-      <Elem name="collapse" tag={Button} size="small" type="text" onClick={toggleCollapsed}>
+      </div>
+      <Button className="dm-region-item__collapse" size="small" type="text" onClick={toggleCollapsed}>
         {collapsed ? <IconExpandTool /> : <IconCollapse />}
-      </Elem>
-    </Elem>
+      </Button>
+    </div>
   );
 });
 
@@ -68,56 +65,52 @@ const RegionItemContent = observer(({ idx, item, setDraggable }) => {
     }
   }, [item.selected]);
   return (
-    <Block
+    <div
       ref={itemElRef}
-      name="region-item"
-      mod={{ hidden: item.hidden }}
+      className={`dm-region-item ${item.hidden ? "dm-region-item_hidden" : ""}`}
       data-testid={`regionitem:selected=${item.selected}`}
     >
-      <Elem name="header" tag="div">
-        <Elem name="counter">{isDefined(idx) ? idx + 1 : ""}</Elem>
+      <div className="dm-region-item__header">
+        <div className="dm-region-item__counter">{isDefined(idx) ? idx + 1 : ""}</div>
 
-        <Elem name="title" tag={Node} node={item} mix={styles.node} />
+        <Node className="dm-region-item__title" node={item} mix={styles.node} />
 
         <Space size="small">
-          <Elem tag="span" name="id">
+          <span className="dm-region-item__id">
             <NodeIcon node={item} />
-          </Elem>
+          </span>
 
-          <Elem name="prediction">
+          <div className="dm-region-item__prediction">
             {item.origin === "prediction" && <IconSparks style={{ width: 16, height: 16 }} />}
-          </Elem>
+          </div>
 
           {item.isReadOnly() && <Badge count={"ro"} style={{ backgroundColor: "#ccc" }} />}
 
           {item.score && (
-            <Elem
-              tag="span"
-              name="score"
+            <span
+              className="dm-region-item__score"
               style={{
                 color: Utils.Colors.getScaleGradient(item.score),
               }}
             >
               {item.score.toFixed(2)}
-            </Elem>
+            </span>
           )}
 
           {item.hideable && (
-            <Elem
-              tag={Button}
-              name="toggle"
+            <Button
+              className={`dm-region-item__toggle ${!item.hidden ? "dm-region-item__toggle_active" : ""}`}
               size="small"
               type="text"
-              mod={{ active: !item.hidden }}
               onClick={item.toggleHidden}
             >
               {item.hidden ? <IconInvisible /> : <IconVisible />}
-            </Elem>
+            </Button>
           )}
         </Space>
-      </Elem>
+      </div>
       <RegionItemDesc item={item} setDraggable={setDraggable} />
-    </Block>
+    </div>
   );
 });
 

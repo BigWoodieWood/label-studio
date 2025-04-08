@@ -4,7 +4,6 @@ import { type FC, useMemo, useState } from "react";
 import { IconRelationLink, IconPlus, IconTrash, IconWarning, IconEyeClosed, IconEyeOpened } from "@humansignal/icons";
 import { Button, type ButtonProps } from "../../../common/Button/Button";
 import { CREATE_RELATION_MODE } from "../../../stores/Annotation/LinkingModes";
-import { Block, Elem } from "../../../utils/bem";
 import { NodeIcon } from "../../Node/Node";
 import { LockButton } from "../Components/LockButton";
 import { RegionLabels } from "./RegionLabels";
@@ -42,31 +41,31 @@ export const RegionItem: FC<RegionItemProps> = observer(
     }, [region.background, region.style]);
 
     return (
-      <Block name="detailed-region" mod={{ compact }}>
-        <Elem name="head" style={{ color: color.css() }}>
-          <Elem name="title">
-            <Elem name="icon">
+      <div className={`dm-detailed-region ${compact ? "dm-detailed-region_compact" : ""}`}>
+        <div className="dm-detailed-region__head" style={{ color: color.css() }}>
+          <div className="dm-detailed-region__title">
+            <div className="dm-detailed-region__icon">
               <NodeIcon node={region} />
-            </Elem>
-            <Elem name="index">
-              <Elem tag="span" name="index_value">
-                {region.region_index}
-              </Elem>
-            </Elem>
+            </div>
+            <div className="dm-detailed-region__index">
+              <span className="dm-detailed-region__index_value">{region.region_index}</span>
+            </div>
             <RegionLabels region={region} />
-          </Elem>
+          </div>
           {withIds && <span>{region.cleanId}</span>}
-        </Elem>
+        </div>
         {MainDetails && (
-          <Elem name="content">
+          <div className="dm-detailed-region__content">
             <MainDetails region={region} />
-          </Elem>
+          </div>
         )}
         {region.isDrawing && (
-          <Elem name="warning">
+          <div className="dm-detailed-region__warning">
             <IconWarning />
-            <Elem name="warning-text">Incomplete {region.type?.replace("region", "") ?? "region"}</Elem>
-          </Elem>
+            <div className="dm-detailed-region__warning-text">
+              Incomplete {region.type?.replace("region", "") ?? "region"}
+            </div>
+          </div>
         )}
         {withActions && (
           <RegionAction
@@ -78,16 +77,16 @@ export const RegionItem: FC<RegionItemProps> = observer(
           />
         )}
         {MetaDetails && (
-          <Elem name="content">
+          <div className="dm-detailed-region__content">
             <MetaDetails
               region={region}
               editMode={editMode}
               enterEditMode={() => setEditMode(true)}
               cancelEditMode={() => setEditMode(false)}
             />
-          </Elem>
+          </div>
         )}
-      </Block>
+      </div>
     );
   },
 );
@@ -126,11 +125,11 @@ const RegionAction: FC<any> = observer(({ region, annotation, editMode, onEditMo
   );
 
   return (
-    <Block name="region-actions">
-      <Elem name="group" mod={{ align: "left" }}>
+    <div className="dm-region-actions">
+      <div className="dm-region-actions__group dm-region-actions__group_align_left">
         {!region.isReadOnly() && entityButtons}
-      </Elem>
-      <Elem name="group" mod={{ align: "right" }}>
+      </div>
+      <div className="dm-region-actions__group dm-region-actions__group_align_right">
         <LockButton
           item={region}
           annotation={region?.annotation}
@@ -151,8 +150,8 @@ const RegionAction: FC<any> = observer(({ region, annotation, editMode, onEditMo
           icon={<IconTrash />}
           onClick={() => annotation.deleteRegion(region)}
         />
-      </Elem>
-    </Block>
+      </div>
+    </div>
   );
 });
 

@@ -10,7 +10,6 @@ import { useWaveform } from "../../../lib/AudioUltra/react";
 import type { Region } from "../../../lib/AudioUltra/Regions/Region";
 import type { Segment } from "../../../lib/AudioUltra/Regions/Segment";
 import type { Regions } from "../../../lib/AudioUltra/Regions/Regions";
-import { Block } from "../../../utils/bem";
 
 import "./view.scss";
 
@@ -155,7 +154,7 @@ const AudioUltraView: FC<AudioUltraProps> = ({ item }) => {
   }, []);
 
   return (
-    <Block name="audio-tag">
+    <div className="dm-audio-tag">
       {item.errors?.map((error: any, i: any) => (
         <ErrorMessage key={`err-${i}`} error={error} />
       ))}
@@ -204,7 +203,7 @@ const AudioUltraView: FC<AudioUltraProps> = ({ item }) => {
         }}
         layerVisibility={controls.layerVisibility}
       />
-    </Block>
+    </div>
   );
 };
 

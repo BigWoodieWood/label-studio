@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { Block, Elem } from "../../utils/bem";
 import { IconArrowLeft, IconArrowRight, IconOutlinerCollapse, IconOutlinerExpand } from "@humansignal/icons";
 
 import "./PanelBase.scss";
@@ -309,43 +308,66 @@ export const PanelBase: FC<PanelBaseProps> = ({
     [handlers, detached, width, maxWidth, height, top, left, visible, locked, positioning],
   );
 
-  return (
-    <Block ref={panelRef} name="panel" mix={name} mod={mods} style={{ ...style, ...coordinates }}>
-      <Elem name="content">
-        {!locked && (
-          <Elem ref={headerRef} name="header" onClick={!detached ? handleExpand : undefined}>
-            {(visible || detached) && <Elem name="title">{title}</Elem>}
+  // Build class names based on modifiers
+  const panelClasses = ["dm-panel", name];
+  if (mods.detached) panelClasses.push("dm-panel_detached");
+  if (mods.resizing) panelClasses.push("dm-panel_resizing");
+  if (mods.hidden) panelClasses.push("dm-panel_hidden");
+  if (mods.alignment) panelClasses.push(`dm-panel_alignment_${mods.alignment}`);
+  if (mods.disabled) panelClasses.push("dm-panel_disabled");
+  if (mix) {
+    if (Array.isArray(mix)) {
+      panelClasses.push(...mix);
+    } else {
+      panelClasses.push(mix);
+    }
+  }
 
-            <Elem
-              name="toggle"
-              mod={{ enabled: visible }}
+  return (
+    <div ref={panelRef} className={panelClasses.join(" ")} style={{ ...style, ...coordinates }}>
+      <div className="dm-panel__content">
+        {!locked && (
+          <div ref={headerRef} className="dm-panel__header" onClick={!detached ? handleExpand : undefined}>
+            {(visible || detached) && <div className="dm-panel__title">{title}</div>}
+
+            <div
+              className={`dm-panel__toggle ${visible ? "dm-panel__toggle_enabled" : ""}`}
               onClick={detached && !visible ? handleExpand : handleCollapse}
               data-tooltip={tooltipText}
             >
               {currentIcon}
-            </Elem>
-          </Elem>
+            </div>
+          </div>
         )}
         {visible && (
-          <Elem name="body">
-            <Block name={name} mix={mix}>
+          <div className="dm-panel__body">
+            <div
+              className={`${name}${Array.isArray(mix) && mix.length > 0 ? " " + mix.join(" ") : mix ? " " + mix : ""}`}
+            >
               {children}
-            </Block>
-          </Elem>
+            </div>
+          </div>
         )}
-      </Elem>
+      </div>
 
       {visible && !positioning && !locked && (
-        <Elem name="resizers" ref={resizerRef} mod={{ locked: positioning || locked }}>
+        <div
+          className={`dm-panel__resizers ${positioning || locked ? "dm-panel__resizers_locked" : ""}`}
+          ref={resizerRef}
+        >
           {resizers.map((res) => {
-            const shouldRender = ((res === "left" || res === "right") && alignment !== res) || detached || detached;
+            const shouldRender = ((res === "left" || res === "right") && alignment !== res) || detached;
 
             return shouldRender ? (
-              <Elem key={res} name="resizer" mod={{ drag: res === resizing }} data-resize={res} />
+              <div
+                key={res}
+                className={`dm-panel__resizer ${res === resizing ? "dm-panel__resizer_drag" : ""}`}
+                data-resize={res}
+              />
             ) : null;
           })}
-        </Elem>
+        </div>
       )}
-    </Block>
+    </div>
   );
 };

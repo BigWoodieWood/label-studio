@@ -4,7 +4,6 @@ import { Dropdown, Menu } from "antd";
 import { IconChevron } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
 import { useToggle } from "../../hooks/useToggle";
-import type { CNTagName } from "../../utils/bem";
 import { isArraysEqual } from "../../utils/utilities";
 import TreeStructure from "../TreeStructure/TreeStructure";
 
@@ -154,7 +153,7 @@ type HintTooltipProps = {
   title?: string;
   // wrapper is used as a tag in JSX to wrap child elements to make Tooltip to work with the single child element
   // it can be a real tag or a component that provides real HTMLElement (not a text) as the result
-  wrapper?: CNTagName;
+  wrapper?: React.ElementType;
   children: JSX.Element;
 };
 

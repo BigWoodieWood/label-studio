@@ -1,5 +1,4 @@
 import { type FC, type RefObject, useCallback, useEffect, useRef } from "react";
-import { Block, Elem } from "../../../utils/bem";
 import { IconSend } from "@humansignal/icons";
 
 import "./CommentForm.scss";
@@ -72,7 +71,7 @@ export const CommentForm: FC<CommentFormProps> = observer(
     const value = commentStore.currentComment[annotationStore.selected.id] || "";
 
     return (
-      <Block ref={formRef} tag="form" name="comment-form" mod={{ inline }} onSubmit={onSubmit}>
+      <form ref={formRef} className={`dm-comment-form ${inline ? "dm-comment-form_inline" : ""}`} onSubmit={onSubmit}>
         <TextArea
           actionRef={actionRef}
           name="comment"
@@ -85,13 +84,15 @@ export const CommentForm: FC<CommentFormProps> = observer(
           onSubmit={inline ? onSubmit : undefined}
           onBlur={clearTooltipMessage}
         />
-        <Elem tag="div" name="primary-action">
+        <div className="dm-comment-form__primary-action">
           <button type="submit">
             <IconSend />
           </button>
-        </Elem>
-        {commentStore.tooltipMessage && <Elem name="tooltipMessage">{commentStore.tooltipMessage}</Elem>}
-      </Block>
+        </div>
+        {commentStore.tooltipMessage && (
+          <div className="dm-comment-form__tooltipMessage">{commentStore.tooltipMessage}</div>
+        )}
+      </form>
     );
   },
 );

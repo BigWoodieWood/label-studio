@@ -1,6 +1,4 @@
-import { Block, Elem } from "../../utils/bem";
 import { Dropdown } from "../../common/Dropdown/Dropdown";
-
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "../../common/Button/Button";
 import { IconFilter } from "@humansignal/icons";
@@ -75,7 +73,7 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
 
   const renderFilterList = useMemo(() => {
     return filterList.map(({ field, operation, logic, value }, index) => (
-      <Block key={index} name="filter-item">
+      <div key={index} className="dm-filter-item">
         <FilterRow
           index={index}
           availableFilters={availableFilters}
@@ -86,18 +84,18 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
           onDelete={onDeleteRow}
           onChange={onChangeRow}
         />
-      </Block>
+      </div>
     ));
   }, [filterList, availableFilters, onDeleteRow, onChangeRow]);
 
   const renderFilter = useMemo(() => {
     return (
-      <Block name={"filter"}>
-        {filterList.length > 0 ? renderFilterList : <Elem name="empty">No filters applied</Elem>}
+      <div className="dm-filter">
+        {filterList.length > 0 ? renderFilterList : <div className="dm-filter__empty">No filters applied</div>}
         <Button look="alt" size="small" type={"text"} onClick={addNewFilterListItem}>
           Add {filterList.length ? "Another Filter" : "Filter"}
         </Button>
-      </Block>
+      </div>
     );
   }, [filterList, renderFilterList, addNewFilterListItem]);
 
@@ -105,14 +103,18 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
     setActive(isOpen);
   }, []);
 
+  // Build filter button classes
+  const filterButtonClasses = ["dm-filter-button"];
+  if (active) filterButtonClasses.push("dm-filter-button_active");
+
   return (
     <Dropdown.Trigger content={renderFilter} dataTestId={"dropdown"} animated={animated} onToggle={onToggle}>
-      <Block data-testid={"filter-button"} name={"filter-button"} mod={{ active }}>
-        <Elem name={"icon"}>
+      <div data-testid={"filter-button"} className={filterButtonClasses.join(" ")}>
+        <div className="dm-filter-button__icon">
           <IconFilter />
-        </Elem>
-        <Elem
-          name={"text"}
+        </div>
+        <div
+          className="dm-filter-button__text"
           style={{
             fontSize: isFF(FF_DEV_3873) && 12,
             fontWeight: isFF(FF_DEV_3873) && 500,
@@ -120,13 +122,13 @@ export const Filter: FC<FilterInterface> = ({ availableFilters, filterData, onCh
           }}
         >
           Filter
-        </Elem>
+        </div>
         {filterList.length > 0 && (
-          <Elem name={"filter-length"} data-testid={"filter-length"}>
+          <div className="dm-filter-button__filter-length" data-testid={"filter-length"}>
             {filterList.length}
-          </Elem>
+          </div>
         )}
-      </Block>
+      </div>
     </Dropdown.Trigger>
   );
 };

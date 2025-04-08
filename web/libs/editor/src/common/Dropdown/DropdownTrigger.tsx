@@ -10,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "../../utils/bem";
 import { Dropdown, type DropdownProps, type DropdownRef } from "./DropdownComponent";
 import { DropdownContext, type DropdownContextValue } from "./DropdownContext";
 
@@ -95,6 +94,10 @@ export const DropdownTrigger = forwardRef<DropdownRef, DropdownTriggerProps>(
     );
 
     const cloneProps = useMemo(() => {
+      // Build dropdown trigger class names
+      const dropdownTriggerClasses = ["dm-dropdown__trigger"];
+      if (props.className) dropdownTriggerClasses.push(props.className);
+
       return {
         ...(triggerEL as any).props,
         tag,
@@ -106,7 +109,7 @@ export const DropdownTrigger = forwardRef<DropdownRef, DropdownTriggerProps>(
             setMinIndex(Math.max(minIndex, getMinIndex(triggerRef.current)));
           }
         },
-        className: cn("dropdown").elem("trigger").mix(props.className),
+        className: dropdownTriggerClasses.join(" "),
         onClickCapture: handleToggle,
       };
     }, [triggerEL, triggerRef, props.className, handleToggle]);

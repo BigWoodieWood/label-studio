@@ -13,7 +13,6 @@ import Types from "../../core/Types";
 import { AnnotationMixin } from "../../mixins/AnnotationMixin";
 import { TagParentMixin } from "../../mixins/TagParentMixin";
 import { FF_DEV_3391, isFF } from "../../utils/feature-flags";
-import { Block, Elem } from "../../utils/bem";
 import "./Choice/Choice.scss";
 import { IconChevron } from "@humansignal/ui";
 import { HintTooltip } from "../../components/Taxonomy/Taxonomy";
@@ -196,40 +195,63 @@ const HtxNewChoiceView = ({ item, store }) => {
   const [collapsed, setCollapsed] = useState(false);
   const toogleCollapsed = useCallback(() => setCollapsed((collapsed) => !collapsed), []);
 
+  // Determine the choice classes
+  const choiceClasses = [
+    "dm-choice",
+    `dm-choice_layout_${item.parent.layout || "default"}`,
+    item.isLeaf ? "dm-choice_leaf" : "dm-choice_notLeaf",
+    !item.visible ? "dm-choice_hidden" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  // Determine the item classes
+  const itemClasses = ["dm-choice__item", !item.isLeaf ? "dm-choice__item_notLeaf" : ""].filter(Boolean).join(" ");
+
+  // Determine the checkbox classes
+  const checkboxClasses = ["dm-choice__checkbox", !item.isLeaf ? "dm-choice__checkbox_notLeaf" : ""]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <Block
-      name="choice"
-      mod={{ layout: item.parent.layout, leaf: item.isLeaf, notLeaf: !item.isLeaf, hidden: !item.visible }}
-    >
-      <Elem name="item" mod={{ notLeaf: !item.isLeaf }} style={style}>
-        <Elem
-          name="checkbox"
-          component={nameWrapper(item.isCheckbox ? Checkbox : Radio, item._value)}
-          mod={{ notLeaf: !item.isLeaf }}
-          checked={item.sel}
-          indeterminate={!item.sel && item.indeterminate}
-          disabled={item.isReadOnly()}
-          onChange={changeHandler}
-        >
-          <HintTooltip title={item.hint} wrapper="span">
-            {item.html ? <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.html) }} /> : item._value}
-            {showHotkey && <Hint>[{item.hotkey}]</Hint>}
-          </HintTooltip>
-        </Elem>
+    <div className={choiceClasses}>
+      <div className={itemClasses} style={style}>
+        <div
+          className={checkboxClasses}
+          children={nameWrapper(
+            item.isCheckbox ? Checkbox : Radio,
+            item._value,
+          )({
+            checked: item.sel,
+            indeterminate: !item.sel && item.indeterminate,
+            disabled: item.isReadOnly(),
+            onChange: changeHandler,
+            children: (
+              <HintTooltip title={item.hint} wrapper="span">
+                {item.html ? <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.html) }} /> : item._value}
+                {showHotkey && <Hint>[{item.hotkey}]</Hint>}
+              </HintTooltip>
+            ),
+          })}
+        ></div>
         {!item.isLeaf ? (
-          <Elem name="toggle" mod={{ collapsed }} component={Button} type="text" onClick={toogleCollapsed}>
+          <Button
+            className={`dm-choice__toggle ${collapsed ? "dm-choice__toggle_collapsed" : ""}`}
+            type="text"
+            onClick={toogleCollapsed}
+          >
             <IconChevron />
-          </Elem>
+          </Button>
         ) : (
           false
         )}
-      </Elem>
+      </div>
       {item.nestedResults && item.children?.length ? (
-        <Elem name="children" mod={{ collapsed }}>
+        <div className={`dm-choice__children ${collapsed ? "dm-choice__children_collapsed" : ""}`}>
           {Tree.renderChildren(item, item.annotation)}
-        </Elem>
+        </div>
       ) : null}
-    </Block>
+    </div>
   );
 };
 

@@ -2,18 +2,16 @@ import { observer } from "mobx-react";
 import { IconRedo, IconRemove, IconUndo } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
-import { Block, Elem } from "../../utils/bem";
 import "./HistoryActions.scss";
 
 export const EditingHistory = observer(({ entity }) => {
   const { history } = entity;
 
   return (
-    <Block name="history-buttons">
+    <div className="dm-history-buttons">
       <Tooltip title="Undo">
-        <Elem
-          tag={Button}
-          name="action"
+        <Button
+          className="dm-history-buttons__action"
           type="text"
           aria-label="Undo"
           disabled={!history?.canUndo}
@@ -22,9 +20,8 @@ export const EditingHistory = observer(({ entity }) => {
         />
       </Tooltip>
       <Tooltip title="Redo">
-        <Elem
-          tag={Button}
-          name="action"
+        <Button
+          className="dm-history-buttons__action"
           type="text"
           aria-label="Redo"
           disabled={!history?.canRedo}
@@ -33,9 +30,8 @@ export const EditingHistory = observer(({ entity }) => {
         />
       </Tooltip>
       <Tooltip title="Reset">
-        <Elem
-          tag={Button}
-          name="action"
+        <Button
+          className="dm-history-buttons__action"
           type="text"
           aria-label="Reset"
           disabled={!history?.canUndo}
@@ -43,6 +39,6 @@ export const EditingHistory = observer(({ entity }) => {
           icon={<IconRemove />}
         />
       </Tooltip>
-    </Block>
+    </div>
   );
 });

@@ -1,7 +1,6 @@
 import { Button } from "../../common/Button/Button";
 import { IconCopy, IconInfo, IconViewAll, IconTrash, IconSettings } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
-import { Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import { FF_BULK_ANNOTATION, isFF } from "../../utils/feature-flags";
 import { GroundTruth } from "../CurrentEntity/GroundTruth";
@@ -22,7 +21,7 @@ export const Actions = ({ store }) => {
   }, [annotationStore]);
 
   return (
-    <Elem name="section">
+    <div className="dm-topbar__section">
       {store.hasInterface("annotations:view-all") && !isBulkMode && (
         <Tooltip title="Compare all annotations">
           <Button
@@ -123,6 +122,6 @@ export const Actions = ({ store }) => {
           }}
         />
       )}
-    </Elem>
+    </div>
   );
 };

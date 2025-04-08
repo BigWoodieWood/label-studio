@@ -1,11 +1,8 @@
 import { observer } from "mobx-react";
 import { Tooltip } from "@humansignal/ui";
 import Utils from "../../utils";
-import { cn } from "../../utils/bem";
 
 import "./DraftPanel.scss";
-
-const panel = cn("draft-panel");
 
 export const DraftPanel = observer(({ item }) => {
   if (!item.draftSaved && !item.versions.draft) return null;
@@ -13,18 +10,18 @@ export const DraftPanel = observer(({ item }) => {
 
   if (!item.selected) {
     if (!item.draft) return null;
-    return <div className={panel}>draft{saved}</div>;
+    return <div className="dm-draft-panel">draft{saved}</div>;
   }
   if (!item.versions.result || !item.versions.result.length) {
-    return <div className={panel}>{saved ? `draft${saved}` : "not submitted draft"}</div>;
+    return <div className="dm-draft-panel">{saved ? `draft${saved}` : "not submitted draft"}</div>;
   }
   return (
-    <div className={panel}>
+    <div className="dm-draft-panel">
       <Tooltip
         alignment="top-left"
         title={item.draftSelected ? "switch to original result" : "switch to current draft"}
       >
-        <button type="button" onClick={() => item.toggleDraft()} className={panel.elem("toggle")}>
+        <button type="button" onClick={() => item.toggleDraft()} className="dm-draft-panel__toggle">
           {item.draftSelected ? "draft" : "original"}
         </button>
       </Tooltip>

@@ -1,6 +1,5 @@
 import { observer } from "mobx-react";
 import { type CSSProperties, type FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Block, Elem } from "../../utils/bem";
 import { DetailsPanel } from "./DetailsPanel/DetailsPanel";
 import { OutlinerPanel } from "./OutlinerPanel/OutlinerPanel";
 
@@ -362,7 +361,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
       selection: regions.selection,
       currentEntity,
     };
-  }, [eventHandlers, rootRef, regions, regions.selectio, currentEntity]);
+  }, [eventHandlers, rootRef, regions, regions.selection, currentEntity]);
 
   const padding = useMemo(() => {
     if (panelsHidden && isFF(FF_DEV_3873)) return {};
@@ -481,26 +480,32 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
     };
   }, [sidepanelsCollapsed]);
 
+  // Build class names based on modifiers
+  const sidepanelsClasses = ["dm-sidepanels"];
+  if (sidepanelsCollapsed) sidepanelsClasses.push("dm-sidepanels_collapsed");
+  if (isFF(FF_DEV_3873)) sidepanelsClasses.push("dm-sidepanels_newLabelingUI");
+
   return (
     <SidePanelsContext.Provider value={contextValue}>
-      <Block
+      <div
         ref={(el: HTMLDivElement | null) => {
           if (el) {
             rootRef.current = el;
             setViewportSizeMatch(el.clientWidth <= maxWindowWidth);
           }
         }}
-        name="sidepanels"
+        className={sidepanelsClasses.join(" ")}
         style={{
           ...padding,
         }}
-        mod={{ collapsed: sidepanelsCollapsed, newLabelingUI: isFF(FF_DEV_3873) }}
       >
         {initialized && (
           <>
-            <Elem name="content" mod={{ resizing: resizing || positioning }}>
+            <div
+              className={`dm-sidepanels__content ${resizing || positioning ? "dm-sidepanels__content_resizing" : ""}`}
+            >
               {children}
-            </Elem>
+            </div>
             {panelsHidden !== true && (
               <>
                 {Object.entries(panels).map(([key, panel]) => {
@@ -510,17 +515,21 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
                     return <Fragment key={key}>{content}</Fragment>;
                   }
 
+                  const wrapperClasses = ["dm-sidepanels__wrapper"];
+                  wrapperClasses.push(`dm-sidepanels__wrapper_align_${key}`);
+                  if (snap === key) wrapperClasses.push("dm-sidepanels_snap");
+
                   return (
-                    <Elem key={key} name="wrapper" mod={{ align: key, snap: snap === key }}>
+                    <div key={key} className={wrapperClasses.join(" ")}>
                       {content}
-                    </Elem>
+                    </div>
                   );
                 })}
               </>
             )}
           </>
         )}
-      </Block>
+      </div>
     </SidePanelsContext.Provider>
   );
 };

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { inject, observer } from "mobx-react";
 import { useCopyText } from "@humansignal/core/lib/hooks/useCopyText";
 import { isDefined, userDisplayName } from "@humansignal/core/lib/utils/helpers";
-import { Block, cn, Elem } from "../../utils/bem";
 import {
   IconAnnotationGroundTruth,
   IconAnnotationSkipped2,
@@ -212,90 +211,82 @@ export const AnnotationButton = observer(
     );
 
     return (
-      <Block name="annotation-button" mod={{ selected: entity.selected }}>
-        <Elem name="mainSection" onClick={clickHandler}>
-          <Elem name="picSection">
-            <Elem
-              name="userpic"
-              tag={Userpic}
+      <div className={`dm-annotation-button ${entity.selected ? "dm-annotation-button_selected" : ""}`}>
+        <div className="dm-annotation-button__mainSection" onClick={clickHandler}>
+          <div className="dm-annotation-button__picSection">
+            <Userpic
+              className={`dm-annotation-button__userpic ${isPrediction ? "dm-annotation-button__userpic_prediction" : ""}`}
               showUsername
               username={isPrediction ? entity.createdBy : null}
               user={hiddenUser ?? entity.user ?? { email: entity.createdBy }}
-              mod={{ prediction: isPrediction }}
               size={24}
             >
               {isPrediction && <IconSparks style={{ width: 18, height: 18 }} />}
-            </Elem>
+            </Userpic>
             {/* to do: return these icons when we have a better way to grab the history action type */}
-            {/* {historyActionType === 'accepted' && <Elem name='status' mod={{ approved: true }}><IconCheckBold /></Elem>}
-          {historyActionType && (
-            <Elem name='status' mod={{ skipped: true }}>
-              <IconCrossBold />
-            </Elem>
-          )}
-          {entity.history.canUndo && (
-            <Elem name='status' mod={{ updated: true }}>
-              <IconCheckBold />
-            </Elem>
-          )} */}
-          </Elem>
-          <Elem name="main">
-            <Elem name="user">
-              <Elem tag="span" name="name">
-                {hiddenUser ? hiddenUser.email : username}
-              </Elem>
-              {!infoIsHidden && (
-                <Elem tag="span" name="entity-id">
-                  #{entity.pk ?? entity.id}
-                </Elem>
-              )}
-            </Elem>
+            {/* {historyActionType === 'accepted' && <div className="dm-annotation-button__status dm-annotation-button__status_approved"><IconCheckBold /></div>}
+            {historyActionType && (
+              <div className="dm-annotation-button__status dm-annotation-button__status_skipped">
+                <IconCrossBold />
+              </div>
+            )}
+            {entity.history.canUndo && (
+              <div className="dm-annotation-button__status dm-annotation-button__status_updated">
+                <IconCheckBold />
+              </div>
+            )} */}
+          </div>
+          <div className="dm-annotation-button__main">
+            <div className="dm-annotation-button__user">
+              <span className="dm-annotation-button__name">{hiddenUser ? hiddenUser.email : username}</span>
+              {!infoIsHidden && <span className="dm-annotation-button__entity-id">#{entity.pk ?? entity.id}</span>}
+            </div>
             {!infoIsHidden && (
-              <Elem name="info">
-                <Elem name="date" component={TimeAgo} date={entity.createdDate} />
+              <div className="dm-annotation-button__info">
+                <TimeAgo className="dm-annotation-button__date" date={entity.createdDate} />
                 {isPrediction && isDefined(entity.score) && (
                   <span title={`Prediction score = ${entity.score}`}>
                     {" · "} {(entity.score * 100).toFixed(2)}%
                   </span>
                 )}
-              </Elem>
+              </div>
             )}
-          </Elem>
+          </div>
           {!isPrediction && (
-            <Elem name="icons">
+            <div className="dm-annotation-button__icons">
               {entity.draftId > 0 && (
                 <Tooltip title="Draft">
-                  <Elem name="icon" mod={{ draft: true }}>
+                  <div className="dm-annotation-button__icon dm-annotation-button__icon_draft">
                     <IconDraftCreated2 color="#617ADA" />
-                  </Elem>
+                  </div>
                 </Tooltip>
               )}
               {entity.skipped && (
                 <Tooltip title="Skipped">
-                  <Elem name="icon" mod={{ skipped: true }}>
+                  <div className="dm-annotation-button__icon dm-annotation-button__icon_skipped">
                     <IconAnnotationSkipped2 color="#DD0000" />
-                  </Elem>
+                  </div>
                 </Tooltip>
               )}
               {isGroundTruth && (
                 <Tooltip title="Ground-truth">
-                  <Elem name="icon" mod={{ groundTruth: true }}>
+                  <div className="dm-annotation-button__icon dm-annotation-button__icon_groundTruth">
                     <IconAnnotationGroundTruth />
-                  </Elem>
+                  </div>
                 </Tooltip>
               )}
               {CommentIcon && (
                 <Tooltip title={renderCommentTooltip(entity)}>
-                  <Elem name="icon" mod={{ comments: true }}>
+                  <div className="dm-annotation-button__icon dm-annotation-button__icon_comments">
                     <CommentIcon />
-                  </Elem>
+                  </div>
                 </Tooltip>
               )}
-            </Elem>
+            </div>
           )}
-        </Elem>
+        </div>
         <ContextMenuTrigger
-          className={cn("annotation-button").elem("trigger").toClassName()}
+          className="dm-annotation-button__trigger"
           content={
             <AnnotationButtonContextMenu
               entity={entity}
@@ -304,7 +295,7 @@ export const AnnotationButton = observer(
             />
           }
         />
-      </Block>
+      </div>
     );
   },
 );

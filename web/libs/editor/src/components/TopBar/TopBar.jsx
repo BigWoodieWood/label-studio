@@ -3,7 +3,6 @@ import { observer } from "mobx-react";
 import { Button } from "../../common/Button/Button";
 import { IconViewAll, IconPlus } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
-import { Block, Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import { FF_BULK_ANNOTATION, FF_DEV_3873, isFF } from "../../utils/feature-flags";
 import { AnnotationsCarousel } from "../AnnotationsCarousel/AnnotationsCarousel";
@@ -26,9 +25,9 @@ export const TopBar = observer(({ store }) => {
   if (isFF(FF_DEV_3873) && isBulkMode) return null;
 
   return store ? (
-    <Block name="topbar" mod={{ newLabelingUI: isFF(FF_DEV_3873) }}>
+    <div className={`dm-topbar ${isFF(FF_DEV_3873) ? "dm-topbar_newLabelingUI" : ""}`}>
       {isFF(FF_DEV_3873) ? (
-        <Elem name="group">
+        <div className="dm-topbar__group">
           <CurrentTask store={store} />
           {store.hasInterface("annotations:view-all") && (
             <Tooltip title="Compare all annotations">
@@ -78,30 +77,33 @@ export const TopBar = observer(({ store }) => {
               commentStore={store.commentStore}
             />
           )}
-        </Elem>
+        </div>
       ) : (
         <>
-          <Elem name="group">
+          <div className="dm-topbar__group">
             {!isBulkMode && <CurrentTask store={store} />}
             {!isViewAll && !isBulkMode && (
               <Annotations store={store} annotationStore={store.annotationStore} commentStore={store.commentStore} />
             )}
             <Actions store={store} />
-          </Elem>
-          <Elem name="group">
+          </div>
+          <div className="dm-topbar__group">
             {!isViewAll && (
-              <Elem name="section">
+              <div className="dm-topbar__section">
                 <DynamicPreannotationsToggle />
-              </Elem>
+              </div>
             )}
             {!isViewAll && store.hasInterface("controls") && (store.hasInterface("review") || !isPrediction) && (
-              <Elem name="section" mod={{ flat: true }} style={{ width: 320, boxSizing: "border-box" }}>
+              <div
+                className="dm-topbar__section dm-topbar__section_flat"
+                style={{ width: 320, boxSizing: "border-box" }}
+              >
                 <Controls annotation={entity} />
-              </Elem>
+              </div>
             )}
-          </Elem>
+          </div>
         </>
       )}
-    </Block>
+    </div>
   ) : null;
 });

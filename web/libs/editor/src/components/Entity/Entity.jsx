@@ -17,7 +17,6 @@ import { Tooltip } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
 import { Tag } from "../../common/Tag/Tag";
 import { Space } from "../../common/Space/Space";
-import { Block, cn, Elem } from "../../utils/bem";
 import "./Entity.scss";
 import { PER_REGION_MODES } from "../../mixins/PerRegion";
 import { Hotkey } from "../../core/Hotkey";
@@ -126,13 +125,13 @@ export default observer(({ store, annotation }) => {
     </Hotkey.Tooltip>,
   );
 
-  const entityStatesClassName = cn("entity-states").toClassName();
-  const entityButtonsClassName = cn("entity-buttons").toClassName();
+  const entityStatesClassName = "dm-entity-states";
+  const entityButtonsClassName = "dm-entity-buttons";
 
   return (
-    <Block name="entity">
-      <Elem name="info" tag={Space} spread>
-        <Elem name="node">
+    <div className="dm-entity">
+      <Space spread className="dm-entity__info">
+        <div className="dm-entity__node">
           {node ? (
             <>
               <Node node={node} /> (ID: {node.id})
@@ -140,9 +139,9 @@ export default observer(({ store, annotation }) => {
           ) : (
             `${selectionSize} Region${selectionSize > 1 ? "s are" : " is"} selected`
           )}
-        </Elem>
+        </div>
         {!hasEditableNodes && <Badge count={"readonly"} style={{ backgroundColor: "#ccc" }} />}
-      </Elem>
+      </Space>
       <div className={`${styles.statesblk} ${entityStatesClassName}`}>
         {node?.score && (
           <Fragment>
@@ -170,10 +169,10 @@ export default observer(({ store, annotation }) => {
       </div>
 
       {node?.isDrawing && (
-        <Elem name="warning">
+        <div className="dm-entity__warning">
           <IconWarning />
-          <Elem name="warning-text">Incomplete {node.type.replace("region", "")}</Elem>
-        </Elem>
+          <div className="dm-entity__warning-text">Incomplete {node.type.replace("region", "")}</div>
+        </div>
       )}
 
       <div className={`${styles.block} ${entityButtonsClassName}`}>
@@ -236,6 +235,6 @@ export default observer(({ store, annotation }) => {
           </Button>
         </Form>
       )}
-    </Block>
+    </div>
   );
 });

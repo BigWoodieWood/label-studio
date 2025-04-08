@@ -12,7 +12,6 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { useFullscreen } from "../../hooks/useFullscreen";
-import { Block, cn } from "../../utils/bem";
 import { alignElements, type Align } from "@humansignal/core/lib/utils/dom";
 import { aroundTransition } from "@humansignal/core/lib/utils/transition";
 import "./Dropdown.scss";
@@ -44,8 +43,6 @@ export interface DropdownProps {
 
 export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
   ({ animated = true, visible = false, ...props }, ref) => {
-    const rootName = cn("dropdown");
-
     const dropdown = useRef<HTMLElement>();
     const { triggerRef, minIndex } = useContext(DropdownContext) ?? {};
     const isInline = triggerRef === undefined;
@@ -179,12 +176,18 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     const content = useMemo(() => {
       const ch = children as any;
 
-      return ch.props && ch.props.type === "Menu"
-        ? cloneElement(ch, {
-            ...ch.props,
-            className: rootName.elem("menu").mix(ch.props.className),
-          })
-        : children;
+      if (ch.props && ch.props.type === "Menu") {
+        // Create menu class names
+        const menuClasses = ["dm-dropdown__menu"];
+        if (ch.props.className) menuClasses.push(ch.props.className);
+
+        return cloneElement(ch, {
+          ...ch.props,
+          className: menuClasses.join(" "),
+        });
+      } else {
+        return children;
+      }
     }, [children]);
 
     const visibilityClasses = useMemo(() => {
@@ -212,12 +215,20 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
       };
     }, [props.style, dropdownIndex, minIndex, offset]);
 
+    // Build dropdown classes
+    const dropdownClasses = ["dm-dropdown"];
+
+    // Add visibility classes
+    if (visibilityClasses) dropdownClasses.push(visibilityClasses);
+
+    // Add custom class if provided
+    if (props.className) dropdownClasses.push(props.className);
+
     const result = (
-      <Block
-        ref={dropdown}
-        name="dropdown"
+      <div
+        ref={dropdown as any}
+        className={dropdownClasses.join(" ")}
         data-testid={props.dataTestId}
-        mix={[props.className, visibilityClasses]}
         style={{
           ...compositeStyles,
           borderRadius: isFF(FF_DEV_3873) && 4,
@@ -225,7 +236,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
         {content}
-      </Block>
+      </div>
     );
 
     return props.inline === true ? result : createPortal(result, document.body);

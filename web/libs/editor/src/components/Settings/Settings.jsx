@@ -5,7 +5,6 @@ import { observer } from "mobx-react";
 import { Hotkey } from "../../core/Hotkey";
 
 import "./Settings.scss";
-import { Block, Elem } from "../../utils/bem";
 import { triggerResizeEvent } from "../../utils/utilities";
 
 import EditorSettings from "../../core/settings/editorsettings";
@@ -29,23 +28,23 @@ const HotkeysDescription = () => {
         key: k,
         combo: k.split(",").map((keyGroup) => {
           return (
-            <Elem name="key-group" key={keyGroup}>
+            <div className="dm-keys__key-group" key={keyGroup}>
               {keyGroup
                 .trim()
                 .split("+")
                 .map((k) => (
-                  <Elem tag="kbd" name="key" key={k}>
+                  <kbd className="dm-keys__key" key={k}>
                     {k}
-                  </Elem>
+                  </kbd>
                 ))}
-            </Elem>
+            </div>
           );
         }),
         descr: descr[k],
       }));
 
   return (
-    <Block name="keys">
+    <div className="dm-keys">
       <Tabs size="small">
         {Object.entries(keyNamespaces).map(([ns, data]) => {
           if (Object.keys(data.descriptions).length === 0) {
@@ -58,7 +57,7 @@ const HotkeysDescription = () => {
           );
         })}
       </Tabs>
-    </Block>
+    </div>
   );
 };
 
@@ -78,26 +77,26 @@ if (isFF(FF_DEV_3873)) {
 }
 
 const SettingsTag = ({ children }) => {
-  return <Block name="settings-tag">{children}</Block>;
+  return <div className="dm-settings-tag">{children}</div>;
 };
 
 const GeneralSettings = observer(({ store }) => {
   return (
-    <Block name="settings" mod={newUI}>
+    <div className={`dm-settings ${isFF(FF_DEV_3873) ? "dm-settings_newUI" : ""}`}>
       {editorSettingsKeys.map((obj, index) => {
         return (
-          <Elem name="field" tag="label" key={index}>
+          <label className="dm-settings__field" key={index}>
             {isFF(FF_DEV_3873) ? (
               <>
-                <Block name="settings__label">
-                  <Elem name="title">
+                <div className="dm-settings__label">
+                  <div className="dm-settings__title">
                     {EditorSettings[obj].newUI.title}
                     {EditorSettings[obj].newUI.tags?.split(",").map((tag) => (
                       <SettingsTag key={tag}>{tag}</SettingsTag>
                     ))}
-                  </Elem>
-                  <Block name="description">{EditorSettings[obj].newUI.description}</Block>
-                </Block>
+                  </div>
+                  <div className="dm-description">{EditorSettings[obj].newUI.description}</div>
+                </div>
                 <Toggle
                   key={index}
                   checked={store.settings[obj]}
@@ -117,17 +116,17 @@ const GeneralSettings = observer(({ store }) => {
                 <br />
               </>
             )}
-          </Elem>
+          </label>
         );
       })}
-    </Block>
+    </div>
   );
 });
 
 const LayoutSettings = observer(({ store }) => {
   return (
-    <Block name="settings" mod={newUI}>
-      <Elem name="field">
+    <div className={`dm-settings ${isFF(FF_DEV_3873) ? "dm-settings_newUI" : ""}`}>
+      <div className="dm-settings__field">
         <Checkbox
           checked={store.settings.bottomSidePanel}
           onChange={() => {
@@ -137,15 +136,15 @@ const LayoutSettings = observer(({ store }) => {
         >
           Move sidepanel to the bottom
         </Checkbox>
-      </Elem>
+      </div>
 
-      <Elem name="field">
+      <div className="dm-settings__field">
         <Checkbox checked={store.settings.displayLabelsByDefault} onChange={store.settings.toggleSidepanelModel}>
           Display Labels by default in Results panel
         </Checkbox>
-      </Elem>
+      </div>
 
-      <Elem name="field">
+      <div className="dm-settings__field">
         <Checkbox
           value="Show Annotations panel"
           defaultChecked={store.settings.showAnnotationsPanel}
@@ -155,9 +154,9 @@ const LayoutSettings = observer(({ store }) => {
         >
           Show Annotations panel
         </Checkbox>
-      </Elem>
+      </div>
 
-      <Elem name="field">
+      <div className="dm-settings__field">
         <Checkbox
           value="Show Predictions panel"
           defaultChecked={store.settings.showPredictionsPanel}
@@ -167,10 +166,10 @@ const LayoutSettings = observer(({ store }) => {
         >
           Show Predictions panel
         </Checkbox>
-      </Elem>
+      </div>
 
       {/* Saved for future use */}
-      {/* <Elem name="field">
+      {/* <div className="dm-settings__field">
         <Checkbox
           value="Show image in fullsize"
           defaultChecked={store.settings.imageFullSize}
@@ -180,8 +179,8 @@ const LayoutSettings = observer(({ store }) => {
         >
           Show image in fullsize
         </Checkbox>
-      </Elem> */}
-    </Block>
+      </div> */}
+    </div>
   );
 });
 
@@ -224,12 +223,14 @@ export default observer(({ store }) => {
   }, []);
 
   return (
-    <Block
-      tag={Modal}
+    <Modal
+      className={DEFAULT_MODAL_SETTINGS.name}
+      title={DEFAULT_MODAL_SETTINGS.title}
+      closeIcon={DEFAULT_MODAL_SETTINGS.closeIcon}
+      bodyStyle={DEFAULT_MODAL_SETTINGS.bodyStyle}
       open={store.showingSettings}
       onCancel={store.toggleSettings}
       footer=""
-      {...DEFAULT_MODAL_SETTINGS}
     >
       <Tabs defaultActiveKey={DEFAULT_ACTIVE}>
         {Object.entries(Settings).map(([key, { name, component }]) => (
@@ -243,6 +244,6 @@ export default observer(({ store }) => {
           </Tabs.TabPane>
         ))}
       </Tabs>
-    </Block>
+    </Modal>
   );
 });

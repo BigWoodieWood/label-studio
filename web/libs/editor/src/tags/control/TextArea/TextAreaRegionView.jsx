@@ -10,7 +10,6 @@ import { IconTrash } from "@humansignal/icons";
 import styles from "../../../components/HtxTextBox/HtxTextBox.module.scss";
 import Registry from "../../../core/Registry";
 import { PER_REGION_MODES } from "../../../mixins/PerRegion";
-import { Block, Elem } from "../../../utils/bem";
 
 import "./TextArea.scss";
 
@@ -73,13 +72,16 @@ const HtxTextAreaResultLine = forwardRef(
     };
 
     return (
-      <Elem name="item">
-        <Elem name="input" tag={isTextarea ? TextArea : Input} {...inputProps} ref={ref} />
+      <div className="dm-textarea-tag__item">
+        {isTextarea ? (
+          <TextArea {...inputProps} className={`dm-textarea-tag__input ${inputProps.className}`} ref={ref} />
+        ) : (
+          <Input {...inputProps} className={`dm-textarea-tag__input ${inputProps.className}`} ref={ref} />
+        )}
         {canDelete && !collapsed && !readOnly && (
-          <Elem
-            name="action"
+          <Button
+            className="dm-textarea-tag__action"
             aria-label="Delete Region"
-            tag={Button}
             icon={<IconTrash />}
             size="small"
             type="text"
@@ -88,7 +90,7 @@ const HtxTextAreaResultLine = forwardRef(
             }}
           />
         )}
-      </Elem>
+      </div>
     );
   },
 );
@@ -247,7 +249,10 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
 
   return (
     (result || showSubmit) && (
-      <Block name="textarea-tag" mod={{ mode: item.mode, outliner }} style={styles}>
+      <div
+        className={`dm-textarea-tag dm-textarea-tag_mode_${item.mode} ${outliner ? "dm-textarea-tag_outliner" : ""}`}
+        style={styles}
+      >
         {result ? (
           <HtxTextAreaResult
             control={item}
@@ -260,9 +265,8 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
         ) : null}
 
         {showSubmit && (
-          <Elem
-            name="form"
-            tag={Form}
+          <Form
+            className="dm-textarea-tag__form"
             onFinish={() => {
               if (item.allowsubmit && item._value && !item.annotation.isReadOnly()) {
                 submitValue();
@@ -273,17 +277,26 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
               e.stopPropagation();
             }}
           >
-            <Elem
-              name="input"
-              tag={isTextArea ? TextArea : Input}
-              {...props}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            />
-          </Elem>
+            {isTextArea ? (
+              <TextArea
+                className="dm-textarea-tag__input"
+                {...props}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+            ) : (
+              <Input
+                className="dm-textarea-tag__input"
+                {...props}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+            )}
+          </Form>
         )}
-      </Block>
+      </div>
     )
   );
 });

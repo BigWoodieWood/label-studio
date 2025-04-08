@@ -1,18 +1,12 @@
 import { forwardRef, useMemo } from "react";
-import { cn } from "../../utils/bem";
 import Label from "../Label/Label";
 import "./Input.scss";
 
 const Input = forwardRef(({ label, className, required, labelProps, ghost, waiting, ...props }, ref) => {
-  const rootClass = cn("input");
-  const classList = [rootClass.mod({ ghost }), className].join(" ").trim();
+  const classList = ["dm-input", ghost ? "dm-input_ghost" : "", className].filter(Boolean).join(" ");
 
   const input = useMemo(() => {
-    return waiting ? (
-      <div className={rootClass.elem("spinner")} />
-    ) : (
-      <input {...props} ref={ref} className={classList} />
-    );
+    return waiting ? <div className="dm-input__spinner" /> : <input {...props} ref={ref} className={classList} />;
   }, [props, ref, classList, waiting]);
 
   return label ? (

@@ -1,6 +1,5 @@
 import chroma from "chroma-js";
 import { type FC, memo, type MouseEvent, useCallback, useContext, useMemo } from "react";
-import { Block, Elem } from "../../../../utils/bem";
 import { clamp } from "../../../../utils/utilities";
 import { TimelineContext } from "../../Context";
 import type { TimelineRegion } from "../../Types";
@@ -70,27 +69,26 @@ export const Keypoints: FC<KeypointsProps> = ({ idx, region, startOffset, render
   // will work only for TimelineRegions; sequence for them is 2 or even 1 point (1 for instants)
   const range = timeline ? sequence.map((s) => s.frame) : [];
 
+  const keypointClasses = [
+    "dm-keypoints",
+    selected ? "dm-keypoints_selected" : "",
+    timeline ? "dm-keypoints_timeline" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <Block
-      name="keypoints"
-      style={styles}
-      mod={{ selected, timeline }}
-      data-id={region.id}
-      data-start={range[0]}
-      data-end={range[1]}
-    >
-      <Elem name="label" onClick={onSelectRegionHandler}>
-        <Elem name="name">{label}</Elem>
-        <Elem name="data">
-          <Elem name="data-item" mod={{ faded: true }}>
-            {idx}
-          </Elem>
-        </Elem>
-      </Elem>
-      <Elem name="keypoints" onClick={(e: any) => onSelectRegionHandler(e, true)}>
+    <div className={keypointClasses} style={styles} data-id={region.id} data-start={range[0]} data-end={range[1]}>
+      <div className="dm-keypoints__label" onClick={onSelectRegionHandler}>
+        <div className="dm-keypoints__name">{label}</div>
+        <div className="dm-keypoints__data">
+          <div className="dm-keypoints__data-item dm-keypoints__data-item_faded">{idx}</div>
+        </div>
+      </div>
+      <div className="dm-keypoints__keypoints" onClick={(e: any) => onSelectRegionHandler(e, true)}>
         <LifespansList lifespans={lifespans} step={step} visible={visible} offset={offset} />
-      </Elem>
-    </Block>
+      </div>
+    </div>
   );
 };
 
@@ -145,14 +143,25 @@ const LifespanItem: FC<LifespanItemProps> = memo(
       return { left, width: finalWidth, right };
     }, [left, right, finalWidth]);
 
+    const lifespanClasses = [
+      "dm-keypoints__lifespan",
+      !visible ? "dm-keypoints__lifespan_hidden" : "",
+      !width ? "dm-keypoints__lifespan_instant" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     return (
-      <Elem name="lifespan" mod={{ hidden: !visible, instant: !width }} style={style}>
+      <div className={lifespanClasses} style={style}>
         {points.map((frame, i) => {
           const left = (frame - start) * step;
+          const pointClasses = ["dm-keypoints__point", !!left ? "dm-keypoints__point_last" : ""]
+            .filter(Boolean)
+            .join(" ");
 
-          return <Elem key={i} name="point" style={{ left }} mod={{ last: !!left }} />;
+          return <div key={i} className={pointClasses} style={{ left }} />;
         })}
-      </Elem>
+      </div>
     );
   },
 );

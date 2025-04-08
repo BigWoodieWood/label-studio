@@ -1,5 +1,4 @@
 import { type FC, type RefObject, useCallback, useRef } from "react";
-import { Block, Elem } from "../../utils/bem";
 import { IconSend } from "@humansignal/icons";
 
 import { TextArea } from "../../common/TextArea/TextArea";
@@ -44,7 +43,11 @@ export const CommentFormBase: FC<CommentFormProps> = observer(
     );
 
     return (
-      <Block ref={formRef} tag="form" name="comment-form" mod={{ inline }} onSubmit={submitHandler}>
+      <form
+        ref={formRef}
+        className={`dm-comment-form ${inline ? "dm-comment-form_inline" : ""}`}
+        onSubmit={submitHandler}
+      >
         <TextArea
           actionRef={actionRef}
           name="comment"
@@ -64,12 +67,12 @@ export const CommentFormBase: FC<CommentFormProps> = observer(
           }}
           onBlur={(e) => onBlur?.(e)}
         />
-        <Elem tag="div" name="primary-action">
+        <div className="dm-comment-form__primary-action">
           <button type="submit">
             <IconSend />
           </button>
-        </Elem>
-      </Block>
+        </div>
+      </form>
     );
   },
 );

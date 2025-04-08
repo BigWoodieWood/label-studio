@@ -1,5 +1,4 @@
 import { observer } from "mobx-react";
-import { Block, Elem } from "../../../utils/bem";
 
 export type RegionLabelProps = {
   item: any;
@@ -18,18 +17,18 @@ export const RegionLabel = observer(({ item }: RegionLabelProps) => {
     const labels: any[] = [].concat(...labelsInResults);
 
     return (
-      <Block name="labels-list">
+      <div className="dm-labels-list">
         {labels.map((label, index) => {
           const color = label.background || "#000000";
 
           return [
             index ? ", " : null,
-            <Elem key={label.id} style={{ color }}>
+            <span key={label.id} style={{ color }}>
               {label.value || "No label"}
-            </Elem>,
+            </span>,
           ];
         })}
-      </Block>
+      </div>
     );
   }
   if (type.includes("tool")) {

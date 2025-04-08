@@ -1,5 +1,4 @@
 import { type FC, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Block, Elem } from "../../../../utils/bem";
 import { isDefined } from "../../../../utils/utilities";
 import { TimelineContext } from "../../Context";
 import { visualizeLifespans } from "./Utils";
@@ -27,20 +26,20 @@ export const Minimap: FC<any> = () => {
   }, [length]);
 
   return (
-    <Block ref={root} name="minimap">
+    <div ref={root} className="dm-minimap">
       {visualization.slice(0, 5).map(({ id, color, lifespans }) => {
         return (
-          <Elem key={id} name="region" style={{ "--color": color }}>
+          <div key={id} className="dm-minimap__region" style={{ "--color": color } as React.CSSProperties}>
             {lifespans.map((connection, i) => {
               const isLast = i + 1 === lifespans.length;
               const left = connection.start * step;
               const width = isLast && connection.enabled ? "100%" : connection.width;
 
-              return <Elem key={`${id}${i}`} name="connection" style={{ left, width }} />;
+              return <div key={`${id}${i}`} className="dm-minimap__connection" style={{ left, width }} />;
             })}
-          </Elem>
+          </div>
         );
       })}
-    </Block>
+    </div>
   );
 };

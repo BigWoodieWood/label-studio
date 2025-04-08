@@ -9,7 +9,6 @@ import React, {
 } from "react";
 
 import "./TaxonomySearch.scss";
-import { Block } from "../../utils/bem";
 import type { AntTaxonomyItem } from "./NewTaxonomy";
 import { debounce } from "lodash";
 
@@ -116,10 +115,10 @@ const TaxonomySearch = React.forwardRef<TaxonomySearchRef, TaxonomySearchProps>(
   );
 
   return (
-    <Block
-      ref={inputRef}
+    <input
+      ref={inputRef as React.RefObject<HTMLInputElement>}
       value={inputValue}
-      tag={"input"}
+      className="dm-taxonomy-search"
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
         handleSearch(e);

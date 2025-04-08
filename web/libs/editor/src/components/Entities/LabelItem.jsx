@@ -1,7 +1,6 @@
 import { List } from "antd";
 import { observer } from "mobx-react";
 import { Button } from "../../common/Button/Button";
-import { Block, Elem } from "../../utils/bem";
 import { Space } from "../../common/Space/Space";
 import { IconInvisible, IconVisible } from "@humansignal/ui";
 import { Label } from "../Label/Label";
@@ -16,9 +15,9 @@ export const LabelItem = observer(({ item, regions, regionStore }) => {
   const count = Object.values(regions).length;
 
   return (
-    <Block name="list-item" tag={List.Item} key={item.id} style={vars}>
+    <List.Item className="dm-list-item" key={item.id} style={vars}>
       <Space spread>
-        <Elem name="title">
+        <div className="dm-list-item__title">
           {!item.isNotLabel ? (
             <Label color={color} empty={item.isEmpty}>
               {item._value}
@@ -26,17 +25,15 @@ export const LabelItem = observer(({ item, regions, regionStore }) => {
           ) : (
             <>Not labeled</>
           )}
-          <Elem name="counter">{`${count} Region${count === 0 || count > 1 ? "s" : ""}`}</Elem>
-        </Elem>
-        <Elem
-          name="visibility"
-          tag={Button}
+          <div className="dm-list-item__counter">{`${count} Region${count === 0 || count > 1 ? "s" : ""}`}</div>
+        </div>
+        <Button
+          className={`dm-list-item__visibility ${isHidden ? "dm-list-item__visibility_hidden" : ""}`}
           type="text"
           icon={isHidden ? <IconInvisible /> : <IconVisible />}
           onClick={() => regionStore.setHiddenByLabel(!isHidden, item)}
-          mod={{ hidden: isHidden }}
         />
       </Space>
-    </Block>
+    </List.Item>
   );
 });

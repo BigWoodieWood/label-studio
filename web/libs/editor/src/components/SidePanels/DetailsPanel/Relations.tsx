@@ -10,7 +10,6 @@ import {
   IconEyeOpened,
 } from "@humansignal/icons";
 import { Button } from "../../../common/Button/Button";
-import { Block, Elem } from "../../../utils/bem";
 import { wrapArray } from "../../../utils/utilities";
 import { RegionItem } from "./RegionItem";
 import { Select } from "antd";
@@ -20,9 +19,9 @@ const RealtionsComponent: FC<any> = ({ relationStore }) => {
   const relations = relationStore.orderedRelations;
 
   return (
-    <Block name="relations">
+    <div className="dm-relations">
       <RelationsList relations={relations} />
-    </Block>
+    </div>
   );
 };
 
@@ -77,17 +76,21 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
   // const;
 
   return (
-    <Elem name="item" mod={{ hidden: !relation.visible }} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-      <Elem name="content">
-        <Elem name="icon" onClick={relation.rotateDirection}>
-          <Elem name="direction">{directionIcon}</Elem>
-        </Elem>
-        <Elem name="nodes">
+    <div
+      className={`dm-relations__item ${!relation.visible ? "dm-relations__item_hidden" : ""}`}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div className="dm-relations__content">
+        <div className="dm-relations__icon" onClick={relation.rotateDirection}>
+          <div className="dm-relations__direction">{directionIcon}</div>
+        </div>
+        <div className="dm-relations__nodes">
           <RegionItem compact withActions={false} withIds={false} region={relation.node1} />
           <RegionItem compact withActions={false} withIds={false} region={relation.node2} />
-        </Elem>
-        <Elem name="actions">
-          <Elem name="action">
+        </div>
+        <div className="dm-relations__actions">
+          <div className="dm-relations__action">
             {(hovered || relation.showMeta) && relation.hasRelations && (
               <Button
                 primary={relation.showMeta}
@@ -99,8 +102,8 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 <IconMenu />
               </Button>
             )}
-          </Elem>
-          <Elem name="action">
+          </div>
+          <div className="dm-relations__action">
             {(hovered || !relation.visible) && (
               <Button
                 type="text"
@@ -114,8 +117,8 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 )}
               </Button>
             )}
-          </Elem>
-          <Elem name="action">
+          </div>
+          <div className="dm-relations__action">
             {hovered && (
               <Button
                 type="text"
@@ -130,11 +133,11 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 <IconTrash />
               </Button>
             )}
-          </Elem>
-        </Elem>
-      </Elem>
+          </div>
+        </div>
+      </div>
       {relation.showMeta && <RelationMeta relation={relation} />}
-    </Elem>
+    </div>
   );
 });
 
@@ -156,7 +159,7 @@ const RelationMeta: FC<any> = observer(({ relation }) => {
   );
 
   return (
-    <Block name="relation-meta">
+    <div className="dm-relation-meta">
       <Select
         mode={selectionMode}
         style={{ width: "100%" }}
@@ -170,7 +173,7 @@ const RelationMeta: FC<any> = observer(({ relation }) => {
           </Select.Option>
         ))}
       </Select>
-    </Block>
+    </div>
   );
 });
 

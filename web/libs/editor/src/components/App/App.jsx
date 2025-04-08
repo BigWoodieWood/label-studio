@@ -25,7 +25,6 @@ import "../../tags/visual";
  */
 import { Space } from "../../common/Space/Space";
 import { Button } from "../../common/Button/Button";
-import { Block, Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import {
   FF_BULK_ANNOTATION,
@@ -41,6 +40,11 @@ import { reactCleaner } from "../../utils/reactCleaner";
 import { guidGenerator } from "../../utils/unique";
 import { isDefined, sortAnnotations } from "../../utils/utilities";
 import { ToastProvider, ToastViewport } from "@humansignal/ui/lib/toast/toast";
+
+// Helper for className
+const cn = (name) => ({
+  toClassName: () => `dm-${name}`,
+});
 
 /**
  * Components
@@ -78,24 +82,24 @@ class App extends Component {
 
   renderSuccess() {
     return (
-      <Block name="editor">
+      <div className="dm-editor">
         <Result status="success" title={getEnv(this.props.store).messages.DONE} />
-      </Block>
+      </div>
     );
   }
 
   renderNoAnnotation() {
     return (
-      <Block name="editor">
+      <div className="dm-editor">
         <Result status="success" title={getEnv(this.props.store).messages.NO_COMP_LEFT} />
-      </Block>
+      </div>
     );
   }
 
   renderNothingToLabel(store) {
     return (
-      <Block
-        name="editor"
+      <div
+        className="dm-editor"
         style={{
           display: "flex",
           alignItems: "center",
@@ -105,32 +109,34 @@ class App extends Component {
         }}
       >
         <Result status="success" title={getEnv(this.props.store).messages.NO_NEXT_TASK} />
-        <Block name="sub__result">You have completed all tasks in the queue!</Block>
+        <div className="dm-editor__sub__result">You have completed all tasks in the queue!</div>
         {store.taskHistory.length > 0 && (
           <Button onClick={(e) => store.prevTask(e, true)} look="outlined" style={{ margin: "16px 0" }}>
             Go to Previous Task
           </Button>
         )}
-      </Block>
+      </div>
     );
   }
 
   renderNoAccess() {
     return (
-      <Block name="editor">
+      <div className="dm-editor">
         <Result status="warning" title={getEnv(this.props.store).messages.NO_ACCESS} />
-      </Block>
+      </div>
     );
   }
 
   renderConfigValidationException(store) {
     return (
-      <Block name="main-view">
-        <Elem name="annotation">
+      <div className="dm-main-view">
+        <div className="dm-main-view__annotation">
           <TreeValidation errors={this.props.store.annotationStore.validation} />
-        </Elem>
-        {!isFF(FF_DEV_3873) && store.hasInterface("infobar") && <Elem name="infobar">Task #{store.task.id}</Elem>}
-      </Block>
+        </div>
+        {!isFF(FF_DEV_3873) && store.hasInterface("infobar") && (
+          <div className="dm-main-view__infobar">Task #{store.task.id}</div>
+        )}
+      </div>
     );
   }
 
@@ -157,14 +163,14 @@ class App extends Component {
     if (as.viewingAll) return this.renderAllAnnotations();
 
     return (
-      <Block key={(as.selectedHistory ?? as.selected)?.id} name="main-view" onScrollCapture={this._notifyScroll}>
-        <Elem name="annotation">
+      <div key={(as.selectedHistory ?? as.selected)?.id} className="dm-main-view" onScrollCapture={this._notifyScroll}>
+        <div className="dm-main-view__annotation">
           {<Annotation root={root} annotation={as.selected} />}
           {this.renderRelations(as.selected)}
           {isFF(FF_PER_FIELD_COMMENTS) && this.renderCommentsOverlay(as.selected)}
-        </Elem>
+        </div>
         {!isFF(FF_DEV_3873) && getRoot(as).hasInterface("infobar") && this._renderInfobar(as)}
-      </Block>
+      </div>
     );
   }
 
@@ -172,11 +178,11 @@ class App extends Component {
     const { id, queue } = getRoot(as).task;
 
     return (
-      <Elem name="infobar" tag={Space} size="small">
+      <Space className="dm-main-view__infobar" size="small">
         <span>Task #{id}</span>
 
         {queue && <span>{queue}</span>}
-      </Elem>
+      </Space>
     );
   }
 
@@ -235,11 +241,11 @@ class App extends Component {
 
     // tags can be styled in config when user is awaiting for suggestions from ML backend
     const mainContent = (
-      <Block name="main-content" mix={store.awaitingSuggestions ? ["requesting"] : []}>
+      <div className={`dm-main-content ${store.awaitingSuggestions ? "dm-main-content_requesting" : ""}`}>
         {as.validation === null
           ? this._renderUI(as.selectedHistory?.root ?? root, as)
           : this.renderConfigValidationException(store)}
-      </Block>
+      </div>
     );
 
     const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
@@ -247,9 +253,8 @@ class App extends Component {
     const newUIEnabled = isFF(FF_DEV_3873);
 
     return (
-      <Block
-        name="editor"
-        mod={{ fullscreen: settings.fullscreen, _auto_height: !outlinerEnabled }}
+      <div
+        className={`dm-editor ${settings.fullscreen ? "dm-editor_fullscreen" : ""} ${!outlinerEnabled ? "dm-editor_auto_height" : ""}`}
         ref={isFF(FF_LSDV_4620_3_ML) ? reactCleaner(this) : null}
       >
         <Settings store={store} />
@@ -274,14 +279,9 @@ class App extends Component {
             )}
 
             {isDefined(store) && store.hasInterface("topbar") && <TopBar store={store} />}
-            <Block
-              name="wrapper"
-              mod={{
-                viewAll: viewingAll,
-                bsp: settings.bottomSidePanel,
-                outliner: outlinerEnabled,
-                showingBottomBar: newUIEnabled,
-              }}
+            <div
+              className={`dm-wrapper ${viewingAll ? "dm-wrapper_viewAll" : ""} ${settings.bottomSidePanel ? "dm-wrapper_bsp" : ""} 
+                ${outlinerEnabled ? "dm-wrapper_outliner" : ""} ${newUIEnabled ? "dm-wrapper_showingBottomBar" : ""}`}
             >
               {outlinerEnabled ? (
                 newUIEnabled ? (
@@ -318,24 +318,24 @@ class App extends Component {
                   {mainContent}
 
                   {viewingAll === false && (
-                    <Block name="menu" mod={{ bsp: settings.bottomSidePanel }}>
+                    <div className={`dm-menu ${settings.bottomSidePanel ? "dm-menu_bsp" : ""}`}>
                       {store.hasInterface("side-column") && (
                         <SidebarTabs>
                           <AnnotationTab store={store} />
                         </SidebarTabs>
                       )}
-                    </Block>
+                    </div>
                   )}
 
                   {newUIEnabled && store.hasInterface("topbar") && <BottomBar store={store} />}
                 </>
               )}
-            </Block>
+            </div>
             <ToastViewport />
           </ToastProvider>
         </Provider>
         {store.hasInterface("debug") && <Debug store={store} />}
-      </Block>
+      </div>
     );
   }
 

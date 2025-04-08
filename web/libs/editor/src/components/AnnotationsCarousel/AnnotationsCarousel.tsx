@@ -3,7 +3,6 @@ import { observer } from "mobx-react";
 
 import { IconChevron } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
-import { Block, Elem } from "../../utils/bem";
 import { clamp, sortAnnotations } from "../../utils/utilities";
 import { AnnotationButton } from "./AnnotationButton";
 
@@ -65,9 +64,12 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
   }, [annotationStore, JSON.stringify(annotationStore.predictions), JSON.stringify(annotationStore.annotations)]);
 
   return enableAnnotations || enablePredictions || enableCreateAnnotation ? (
-    <Block name="annotations-carousel" style={{ "--carousel-left": `${currentPosition}px` }}>
-      <Elem ref={containerRef} name="container">
-        <Elem ref={carouselRef} name="carosel">
+    <div
+      className="dm-annotations-carousel"
+      style={{ "--carousel-left": `${currentPosition}px` } as React.CSSProperties}
+    >
+      <div ref={containerRef as React.RefObject<HTMLDivElement>} className="dm-annotations-carousel__container">
+        <div ref={carouselRef as React.RefObject<HTMLDivElement>} className="dm-annotations-carousel__carosel">
           {sortAnnotations(entities).map((entity) => (
             <AnnotationButton
               key={entity?.id}
@@ -82,32 +84,28 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
               annotationStore={annotationStore}
             />
           ))}
-        </Elem>
-      </Elem>
+        </div>
+      </div>
       {(!isLeftDisabled || !isRightDisabled) && (
-        <Elem name="carousel-controls">
-          <Elem
-            tag={Button}
-            name="nav"
+        <div className="dm-annotations-carousel__carousel-controls">
+          <Button
+            className={`dm-annotations-carousel__nav ${isLeftDisabled ? "dm-annotations-carousel__nav_disabled" : ""} dm-annotations-carousel__nav_left`}
             disabled={isLeftDisabled}
-            mod={{ left: true, disabled: isLeftDisabled }}
             aria-label="Carousel left"
-            onClick={(e: MouseEvent) => !isLeftDisabled && updatePosition(e, true)}
+            onClick={(e: any) => !isLeftDisabled && updatePosition(e, true)}
           >
-            <Elem name="arrow" mod={{ left: true }} tag={IconChevron} />
-          </Elem>
-          <Elem
-            tag={Button}
-            name="nav"
+            <IconChevron className="dm-annotations-carousel__arrow dm-annotations-carousel__arrow_left" />
+          </Button>
+          <Button
+            className={`dm-annotations-carousel__nav ${isRightDisabled ? "dm-annotations-carousel__nav_disabled" : ""} dm-annotations-carousel__nav_right`}
             disabled={isRightDisabled}
-            mod={{ right: true, disabled: isRightDisabled }}
             aria-label="Carousel right"
-            onClick={(e: MouseEvent) => !isRightDisabled && updatePosition(e, false)}
+            onClick={(e: any) => !isRightDisabled && updatePosition(e, false)}
           >
-            <Elem name="arrow" mod={{ right: true }} tag={IconChevron} />
-          </Elem>
-        </Elem>
+            <IconChevron className="dm-annotations-carousel__arrow dm-annotations-carousel__arrow_right" />
+          </Button>
+        </div>
       )}
-    </Block>
+    </div>
   ) : null;
 });

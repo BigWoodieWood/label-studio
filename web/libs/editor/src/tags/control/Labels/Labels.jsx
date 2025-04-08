@@ -11,7 +11,6 @@ import { AnnotationMixin } from "../../../mixins/AnnotationMixin";
 import DynamicChildrenMixin from "../../../mixins/DynamicChildrenMixin";
 import LabelMixin from "../../../mixins/LabelMixin";
 import SelectedModelMixin from "../../../mixins/SelectedModel";
-import { Block } from "../../../utils/bem";
 import ControlBase from "../Base";
 import "../Label";
 import "./Labels.scss";
@@ -145,11 +144,11 @@ const LabelsModel = types.compose(
 );
 
 const HtxLabels = observer(({ item }) => {
-  return (
-    <Block name="labels" mod={{ hidden: !item.visible, inline: item.showinline }}>
-      {Tree.renderChildren(item, item.annotation)}
-    </Block>
-  );
+  const classes = ["dm-labels", !item.visible ? "dm-labels_hidden" : "", item.showinline ? "dm-labels_inline" : ""]
+    .filter(Boolean)
+    .join(" ");
+
+  return <div className={classes}>{Tree.renderChildren(item, item.annotation)}</div>;
 });
 
 Registry.addTag("labels", LabelsModel, HtxLabels);

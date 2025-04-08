@@ -16,7 +16,6 @@ import {
 } from "@humansignal/icons";
 import { Tooltip, Userpic } from "@humansignal/ui";
 import { Space } from "../../common/Space/Space";
-import { Block, Elem } from "../../utils/bem";
 import { humanDateDiff, userDisplayName } from "../../utils/utilities";
 import "./AnnotationHistory.scss";
 
@@ -76,17 +75,17 @@ const DraftState: FC<{
       date={annotation.draftSaved}
       extra={
         annotation.isDraftSaving ? (
-          <Elem name="saving">
-            <Elem name="spin" />
-          </Elem>
+          <div className="dm-history-item__saving">
+            <div className="dm-history-item__spin" />
+          </div>
         ) : hasUnsavedChanges ? (
-          <Elem name="saving">
-            <Elem name="dot" />
-          </Elem>
+          <div className="dm-history-item__saving">
+            <div className="dm-history-item__dot" />
+          </div>
         ) : hasChanges ? (
-          <Elem name="saving">
-            <Elem name="saved" component={IconCheck} />
-          </Elem>
+          <div className="dm-history-item__saving">
+            <IconCheck className="dm-history-item__saved" />
+          </div>
         ) : null
       }
       inline={inline}
@@ -120,7 +119,7 @@ const AnnotationHistoryComponent: FC<any> = ({
     !annotationStore.selectedHistory && (annotation.draftSelected || (!annotation.versions.draft && hasChanges));
 
   return (
-    <Block name="annotation-history" mod={{ inline }}>
+    <div className={`dm-annotation-history ${inline ? "dm-annotation-history_inline" : ""}`}>
       <DraftState annotation={annotation} isSelected={isDraftSelected} inline={inline} />
 
       {enabled &&
@@ -161,7 +160,7 @@ const AnnotationHistoryComponent: FC<any> = ({
             />
           );
         })}
-    </Block>
+    </div>
   );
 };
 
@@ -230,45 +229,50 @@ const HistoryItemComponent: FC<{
     [onClick, disabled],
   );
 
+  const historyItemClasses = [
+    "dm-history-item",
+    inline ? "dm-history-item_inline" : "",
+    selected ? "dm-history-item_selected" : "",
+    disabled ? "dm-history-item_disabled" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <Block name="history-item" mod={{ inline, selected, disabled }} onClick={handleClick}>
+    <div className={historyItemClasses} onClick={handleClick}>
       <Space spread size="medium" truncated>
         <Space size="small" truncated>
-          <Elem
-            tag={Userpic}
+          <Userpic
             user={user}
-            name="userpic"
+            className={`dm-history-item__userpic ${isPrediction ? "dm-history-item__userpic_prediction" : ""}`}
             showUsername
             username={isPrediction ? entity.createdBy : null}
-            mod={{ prediction: isPrediction }}
           >
             {isPrediction && <IconSparks style={{ width: 16, height: 16 }} />}
-          </Elem>
-          <Elem name="name" tag="span">
-            {isPrediction ? entity.createdBy : userDisplayName(user)}
-          </Elem>
+          </Userpic>
+          <span className="dm-history-item__name">{isPrediction ? entity.createdBy : userDisplayName(user)}</span>
         </Space>
 
         {!infoIsHidden && (
           <Space size="small">
-            {extra && <Elem name="date">{extra}</Elem>}
+            {extra && <div className="dm-history-item__date">{extra}</div>}
             {date && (
-              <Elem name="date">
+              <div className="dm-history-item__date">
                 <Tooltip alignment="top-right" title={new Date(date).toLocaleString()}>
                   <>{humanDateDiff(date)}</>
                 </Tooltip>
-              </Elem>
+              </div>
             )}
           </Space>
         )}
       </Space>
       {(reason || comment) && (
-        <Elem name="action" tag={Space} size="small">
+        <Space className="dm-history-item__action" size="small">
           {acceptedState && <HistoryIcon type={acceptedState} />}
           <HistoryComment comment={comment} reason={reason} />
-        </Elem>
+        </Space>
       )}
-    </Block>
+    </div>
   );
 };
 
@@ -291,25 +295,26 @@ const HistoryComment: FC<{
     }
   }, []);
 
+  const commentClasses = `dm-history-item__comment ${collapsed ? "dm-history-item__comment_collapsed" : ""}`;
+
   return (
-    <Elem name="comment" ref={commentRef} mod={{ collapsed }}>
-      <Elem name="comment-content" data-reason={`${reason}${comment ? ": " : ""}`}>
+    <div className={commentClasses} ref={commentRef}>
+      <div className="dm-history-item__comment-content" data-reason={`${reason}${comment ? ": " : ""}`}>
         {comment}
-      </Elem>
+      </div>
 
       {collapsible && (
-        <Elem
-          name="collapse-comment"
-          mod={{ collapsed }}
-          onClick={(e: MouseEvent) => {
+        <div
+          className={`dm-history-item__collapse-comment ${collapsed ? "dm-history-item__collapse-comment_collapsed" : ""}`}
+          onClick={(e: any) => {
             e.stopPropagation();
             setCollapsed((v) => !v);
           }}
         >
           {collapsed ? "Show more" : "Show less"}
-        </Elem>
+        </div>
       )}
-    </Elem>
+    </div>
   );
 };
 
@@ -343,7 +348,7 @@ const HistoryIcon: FC<{ type: HistoryItemType }> = ({ type }) => {
     }
   }, [type]);
 
-  return icon && <Elem name="history-icon">{icon}</Elem>;
+  return icon && <div className="dm-history-item__history-icon">{icon}</div>;
 };
 
 const HistoryItem = observer(HistoryItemComponent);

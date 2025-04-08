@@ -6,7 +6,6 @@ import { DraftPanel } from "../Annotations/Annotations";
 import styles from "./Controls.module.scss";
 import { Button } from "../../common/Button/Button";
 import { Tooltip } from "@humansignal/ui";
-import { cn } from "../../utils/bem";
 
 export default inject("store")(
   observer(({ item, store }) => {
@@ -26,10 +25,10 @@ export default inject("store")(
      * Task information
      */
     let taskInformation;
-    const taskInfoClassName = cn("task-info").toClassName();
-    const skipButtonClassName = cn("skip-btn").toClassName();
-    const submitButtonClassName = cn("submit-btn").toClassName();
-    const updateButtonClassName = cn("update-btn").toClassName();
+    const taskInfoClassName = "dm-task-info";
+    const skipButtonClassName = "dm-skip-btn";
+    const submitButtonClassName = "dm-submit-btn";
+    const updateButtonClassName = "dm-update-btn";
 
     if (store.task) {
       taskInformation = <h4 className={`${styles.task} ${taskInfoClassName}`}>Task ID: {store.task.id}</h4>;

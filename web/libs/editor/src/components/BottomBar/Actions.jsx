@@ -1,9 +1,8 @@
 import { IconInfoOutline, IconSettings } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
-import { Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
-import { FF_BULK_ANNOTATION } from "../../utils/feature-flags";
+import { FF_BULK_ANNOTATION, isFF } from "../../utils/feature-flags";
 import { EditingHistory } from "./HistoryActions";
 import { DynamicPreannotationsToggle } from "../AnnotationTab/DynamicPreannotationsToggle";
 import { AutoAcceptToggle } from "../AnnotationTab/AutoAcceptToggle";
@@ -17,7 +16,7 @@ export const Actions = ({ store }) => {
   const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
 
   return (
-    <Elem name="section">
+    <div className="dm-bottombar__section">
       {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} />}
 
       {store.description && store.hasInterface("instruction") && (
@@ -52,11 +51,11 @@ export const Actions = ({ store }) => {
       {store.hasInterface("ground-truth") && !isBulkMode && <GroundTruth entity={entity} />}
 
       {!isViewAll && (
-        <Elem name="section">
+        <div className="dm-bottombar__section">
           <DynamicPreannotationsToggle />
           <AutoAcceptToggle />
-        </Elem>
+        </div>
       )}
-    </Elem>
+    </div>
   );
 };

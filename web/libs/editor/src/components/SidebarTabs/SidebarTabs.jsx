@@ -1,4 +1,3 @@
-import { Block, Elem } from "../../utils/bem";
 import "./SidebarTabs.scss";
 
 // @todo there was an idea of switchable tabs, but they were not used,
@@ -6,8 +5,8 @@ import "./SidebarTabs.scss";
 // @todo is waiting to be removed in favor of new UI (see FF_DEV_3873)
 export const SidebarTabs = ({ children }) => {
   return (
-    <Block name="sidebar-tabs">
-      <Elem name="content">{children}</Elem>
-    </Block>
+    <div className="dm-sidebar-tabs">
+      <div className="dm-sidebar-tabs__content">{children}</div>
+    </div>
   );
 };

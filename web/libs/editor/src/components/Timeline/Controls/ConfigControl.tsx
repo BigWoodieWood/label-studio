@@ -1,7 +1,6 @@
 import type React from "react";
 import { type FC, type MouseEvent, useContext, useEffect, useState } from "react";
 import { Toggle } from "@humansignal/ui";
-import { Block, Elem } from "../../../utils/bem";
 
 import { IconConfig } from "@humansignal/ui";
 import { TimelineContext } from "../Context";
@@ -76,20 +75,20 @@ export const ConfigControl: FC<ConfigControlProps> = ({
 
   const renderLayerToggles = () => {
     return (
-      <Elem name={"buttons"}>
-        <Elem name="menu-button" onClick={handleSetTimeline}>
+      <div className="dm-audio-config__buttons">
+        <div className="dm-audio-config__menu-button" onClick={handleSetTimeline}>
           {isTimeline ? "Hide" : "Show"} timeline
-        </Elem>
-        <Elem name="menu-button" onClick={handleSetAudioWave}>
+        </div>
+        <div className="dm-audio-config__menu-button" onClick={handleSetAudioWave}>
           {isAudioWave ? "Hide" : "Show"} audio wave
-        </Elem>
-      </Elem>
+        </div>
+      </div>
     );
   };
 
   const renderModal = () => {
     return (
-      <Elem name="modal">
+      <div className="dm-audio-config__modal">
         <Slider
           min={MIN_SPEED}
           max={MAX_SPEED}
@@ -108,7 +107,7 @@ export const ConfigControl: FC<ConfigControlProps> = ({
           info={"Increase or decrease the appearance of amplitude"}
           onChange={handleChangeAmp}
         />
-        <Elem name="toggle">
+        <div className="dm-audio-config__toggle">
           <Toggle
             checked={settings?.loopRegion}
             onChange={(e) => changeSetting?.("loopRegion", e.target.checked)}
@@ -116,8 +115,8 @@ export const ConfigControl: FC<ConfigControlProps> = ({
             // there are no "normal" size, so that's the hack to reset size
             labelProps={{ size: "normal" }}
           />
-        </Elem>
-        <Elem name="toggle">
+        </div>
+        <div className="dm-audio-config__toggle">
           <Toggle
             checked={settings?.autoPlayNewSegments}
             onChange={(e) => changeSetting?.("autoPlayNewSegments", e.target.checked)}
@@ -125,18 +124,18 @@ export const ConfigControl: FC<ConfigControlProps> = ({
             // there are no "normal" size, so that's the hack to reset size
             labelProps={{ size: "normal" }}
           />
-        </Elem>
+        </div>
         {renderLayerToggles()}
-      </Elem>
+      </div>
     );
   };
 
   return (
-    <Block name="audio-config" onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
+    <div className="dm-audio-config" onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
       <ControlButton look={configModal ? "active" : undefined} onClick={onSetModal}>
         {<IconConfig />}
       </ControlButton>
       {configModal && renderModal()}
-    </Block>
+    </div>
   );
 };

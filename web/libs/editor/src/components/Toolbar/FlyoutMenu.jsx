@@ -1,4 +1,3 @@
-import { Block, Elem } from "../../utils/bem";
 import { Fragment, useEffect, useState } from "react";
 import { Hotkey } from "../../core/Hotkey";
 
@@ -15,7 +14,7 @@ const shortcutView = (shortcut) => {
   const combos = shortcut.split(",").map((s) => s.trim());
 
   return (
-    <Elem name="shortcut">
+    <div className="dm-flyoutmenu__shortcut">
       {combos.map((combo, index) => {
         const keys = combo.split("+");
 
@@ -23,15 +22,15 @@ const shortcutView = (shortcut) => {
           <Fragment key={`${keys.join("-")}-${index}`}>
             {keys.map((key) => {
               return (
-                <Elem name="key" tag="kbd" key={key}>
+                <kbd className="dm-flyoutmenu__key" key={key}>
                   {keysDictionary[key] ?? key}
-                </Elem>
+                </kbd>
               );
             })}
           </Fragment>
         );
       })}
-    </Elem>
+    </div>
   );
 };
 
@@ -87,22 +86,23 @@ export const FlyoutMenu = ({ items, icon }) => {
   });
 
   return (
-    <Block
-      name="flyoutmenu"
-      tag="div"
-      className={`${isClicked ? "hovered" : ""}`}
+    <div
+      className={`dm-flyoutmenu ${isClicked ? "hovered" : ""}`}
       onClick={(e) => {
         e.stopPropagation();
         setClicked(!isClicked);
       }}
     >
-      <Elem name="icon" className={`${isClicked ? "isClicked" : ""}`} title="Zoom presets (click to see options)">
+      <div
+        className={`dm-flyoutmenu__icon ${isClicked ? "isClicked" : ""}`}
+        title="Zoom presets (click to see options)"
+      >
         {icon}
-      </Elem>
-      <Block name="tooltips" tag="div">
+      </div>
+      <div className="dm-tooltips">
         {items.map((childItem, index) => (
-          <Elem
-            name="tooltip"
+          <div
+            className="dm-tooltips__tooltip"
             key={index}
             onClick={(e) => {
               e.stopPropagation();
@@ -110,13 +110,13 @@ export const FlyoutMenu = ({ items, icon }) => {
               setClicked(false);
             }}
           >
-            <Elem name="tooltip-body">
-              <Elem name="label">{childItem.label}</Elem>
+            <div className="dm-tooltips__tooltip-body">
+              <div className="dm-tooltips__label">{childItem.label}</div>
               {shortcutView(childItem.shortcut)}
-            </Elem>
-          </Elem>
+            </div>
+          </div>
         ))}
-      </Block>
-    </Block>
+      </div>
+    </div>
   );
 };

@@ -1,6 +1,5 @@
 import { inject, observer } from "mobx-react";
 import type { FC } from "react";
-import { Block, Elem } from "../../../utils/bem";
 import { Comments as CommentsComponent } from "../../Comments/Comments";
 import { AnnotationHistory } from "../../CurrentEntity/AnnotationHistory";
 import { PanelBase, type PanelProps } from "../PanelBase";
@@ -31,9 +30,9 @@ const DetailsComponent: FC<DetailsPanelProps> = ({ currentEntity, regions }) => 
   const selectedRegions = regions.selection;
 
   return (
-    <Block name="details-tab">
+    <div className="dm-details-tab">
       <Content selection={selectedRegions} currentEntity={currentEntity} />
-    </Block>
+    </div>
   );
 };
 
@@ -46,17 +45,17 @@ const CommentsTab: FC<any> = inject("store")(
     return (
       <>
         {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
-          <Block name="comments-panel">
-            <Elem name="section-tab">
-              <Elem name="section-content">
+          <div className="dm-comments-panel">
+            <div className="dm-comments-panel__section-tab">
+              <div className="dm-comments-panel__section-content">
                 <CommentsComponent
                   annotationStore={store.annotationStore}
                   commentStore={store.commentStore}
                   cacheKey={`task.${store.task.id}`}
                 />
-              </Elem>
-            </Elem>
-          </Block>
+              </div>
+            </div>
+          </div>
         )}
       </>
     );
@@ -69,17 +68,17 @@ const RelationsTab: FC<any> = inject("store")(
 
     return (
       <>
-        <Block name="relations">
-          <Elem name="section-tab">
-            <Elem name="view-control">
-              <Elem name="section-head">Relations ({relationStore.size})</Elem>
+        <div className="dm-relations">
+          <div className="dm-relations__section-tab">
+            <div className="dm-relations__view-control">
+              <div className="dm-relations__section-head">Relations ({relationStore.size})</div>
               <RelationsControls relationStore={relationStore} />
-            </Elem>
-            <Elem name="section-content">
+            </div>
+            <div className="dm-relations__section-content">
               <RelationsComponent relationStore={relationStore} />
-            </Elem>
-          </Elem>
-        </Block>
+            </div>
+          </div>
+        </div>
       </>
     );
   }),
@@ -91,17 +90,17 @@ const HistoryTab: FC<any> = inject("store")(
 
     return (
       <>
-        <Block name="history">
-          <Elem name="section-tab">
-            <Elem name="section-head">
+        <div className="dm-history">
+          <div className="dm-history__section-tab">
+            <div className="dm-history__section-head">
               Annotation History
               <span>#{currentEntity.pk ?? currentEntity.id}</span>
-            </Elem>
-            <Elem name="section-content">
+            </div>
+            <div className="dm-history__section-content">
               <AnnotationHistory inline enabled={showAnnotationHistory} />
-            </Elem>
-          </Elem>
-        </Block>
+            </div>
+          </div>
+        </div>
       </>
     );
   }),
@@ -111,12 +110,12 @@ const InfoTab: FC<any> = inject("store")(
   observer(({ selection }) => {
     return (
       <>
-        <Block name="info">
-          <Elem name="section-tab">
-            <Elem name="section-head">Selection Details</Elem>
+        <div className="dm-info">
+          <div className="dm-info__section-tab">
+            <div className="dm-info__section-head">Selection Details</div>
             <RegionsPanel regions={selection} />
-          </Elem>
-        </Block>
+          </div>
+        </div>
       </>
     );
   }),
@@ -128,35 +127,35 @@ const GeneralPanel: FC<any> = inject("store")(
     const showAnnotationHistory = store.hasInterface("annotations:history");
     return (
       <>
-        <Elem name="section">
-          <Elem name="section-head">
+        <div className="dm-details__section">
+          <div className="dm-details__section-head">
             Annotation History
             <span>#{currentEntity.pk ?? currentEntity.id}</span>
-          </Elem>
-          <Elem name="section-content">
+          </div>
+          <div className="dm-details__section-content">
             <AnnotationHistory inline enabled={showAnnotationHistory} />
-          </Elem>
-        </Elem>
-        <Elem name="section">
-          <Elem name="view-control">
-            <Elem name="section-head">Relations ({relationStore.size})</Elem>
+          </div>
+        </div>
+        <div className="dm-details__section">
+          <div className="dm-details__view-control">
+            <div className="dm-details__section-head">Relations ({relationStore.size})</div>
             <RelationsControls relationStore={relationStore} />
-          </Elem>
-          <Elem name="section-content">
+          </div>
+          <div className="dm-details__section-content">
             <RelationsComponent relationStore={relationStore} />
-          </Elem>
-        </Elem>
+          </div>
+        </div>
         {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
-          <Elem name="section">
-            <Elem name="section-head">Comments</Elem>
-            <Elem name="section-content">
+          <div className="dm-details__section">
+            <div className="dm-details__section-head">Comments</div>
+            <div className="dm-details__section-content">
               <CommentsComponent
                 annotationStore={store.annotationStore}
                 commentStore={store.commentStore}
                 cacheKey={`task.${store.task.id}`}
               />
-            </Elem>
-          </Elem>
+            </div>
+          </div>
         )}
       </>
     );

@@ -1,6 +1,4 @@
 import type { CSSProperties, FC } from "react";
-import { Block } from "../../utils/bem";
-
 import "./Hint.scss";
 
 interface HintProps {
@@ -13,10 +11,14 @@ interface HintProps {
  * Hint Component
  */
 const Hint: FC<HintProps> = (props) => {
+  // Combine classes
+  const classes = ["dm-hint"];
+  if (props.className) classes.push(props.className);
+
   return (
-    <Block name="hint" tag="sup" className={props.className} data-copy={props.copy} style={props.style}>
+    <sup className={classes.join(" ")} data-copy={props.copy} style={props.style}>
       {props.children}
-    </Block>
+    </sup>
   );
 };
 

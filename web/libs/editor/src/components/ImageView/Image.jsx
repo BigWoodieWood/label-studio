@@ -1,6 +1,5 @@
 import { observer } from "mobx-react";
 import { forwardRef, useCallback, useMemo } from "react";
-import { Block, Elem } from "../../utils/bem";
 import { FF_LSDV_4711, isFF } from "../../utils/feature-flags";
 import messages from "../../utils/messages";
 import { ErrorMessage } from "../ErrorMessage/ErrorMessage";
@@ -42,7 +41,7 @@ export const Image = observer(
     );
 
     return (
-      <Block name="image" style={imageSize}>
+      <div className="dm-image" style={imageSize}>
         {overlay}
         <ImageProgress
           downloading={imageEntity.downloading}
@@ -61,17 +60,17 @@ export const Image = observer(
             imageTransform={imageTransform}
           />
         ) : null}
-      </Block>
+      </div>
     );
   }),
 );
 
 const ImageProgress = observer(({ downloading, progress, error, src, usedValue }) => {
   return downloading ? (
-    <Block name="image-progress">
-      <Elem name="message">Downloading image</Elem>
-      <Elem tag="progress" name="bar" value={progress} min="0" max={1} step={0.0001} />
-    </Block>
+    <div className="dm-image-progress">
+      <div className="dm-image-progress__message">Downloading image</div>
+      <progress className="dm-image-progress__bar" value={progress} min="0" max={1} step={0.0001} />
+    </div>
   ) : error ? (
     <ImageLoadingError src={src} value={usedValue} />
   ) : null;

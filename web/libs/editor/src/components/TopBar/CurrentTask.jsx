@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
 import { Button } from "../../common/Button/Button";
-import { Block, Elem } from "../../utils/bem";
 import { FF_DEV_3873, FF_DEV_4174, FF_LEAP_1173, FF_TASK_COUNT_FIX, isFF } from "../../utils/feature-flags";
 import { guidGenerator } from "../../utils/unique";
 import { isDefined } from "../../utils/utilities";
@@ -54,58 +53,53 @@ export const CurrentTask = observer(({ store }) => {
   }
 
   return (
-    <Elem name="section">
-      <Block
-        name="current-task"
-        mod={{ "with-history": historyEnabled }}
+    <div className="dm-topbar__section">
+      <div
+        className={`dm-current-task ${historyEnabled ? "dm-current-task_with-history" : ""}`}
         style={{
           padding: isFF(FF_DEV_3873) && 0,
           width: isFF(FF_DEV_3873) && "auto",
         }}
       >
-        <Elem name="task-id" style={{ fontSize: isFF(FF_DEV_3873) ? 12 : 14 }}>
+        <div className="dm-current-task__task-id" style={{ fontSize: isFF(FF_DEV_3873) ? 12 : 14 }}>
           {store.task.id ?? guidGenerator()}
           {historyEnabled &&
             showCounter &&
             (isFF(FF_TASK_COUNT_FIX) ? (
-              <Elem name="task-count">
+              <div className="dm-current-task__task-count">
                 {store.queuePosition} of {store.queueTotal}
-              </Elem>
+              </div>
             ) : (
-              <Elem name="task-count">
+              <div className="dm-current-task__task-count">
                 {currentIndex} of {store.taskHistory.length}
-              </Elem>
+              </div>
             ))}
-        </Elem>
+        </div>
         {historyEnabled && (
-          <Elem name="history-controls" mod={{ newui: isFF(FF_DEV_3873) }}>
-            <Elem
-              tag={Button}
-              name="prevnext"
-              mod={{ prev: true, disabled: !store.canGoPrevTask, newui: isFF(FF_DEV_3873) }}
+          <div
+            className={`dm-current-task__history-controls ${isFF(FF_DEV_3873) ? "dm-current-task__history-controls_newui" : ""}`}
+          >
+            <Button
+              className={`dm-current-task__prevnext dm-current-task__prevnext_prev ${!store.canGoPrevTask ? "dm-current-task__prevnext_disabled" : ""} ${isFF(FF_DEV_3873) ? "dm-current-task__prevnext_newui" : ""}`}
               type="link"
               disabled={!historyEnabled || !store.canGoPrevTask}
               onClick={store.prevTask}
               style={{ background: !isFF(FF_DEV_3873) && "none", backgroundColor: isFF(FF_DEV_3873) && "none" }}
             />
-            <Elem
-              tag={Button}
-              name="prevnext"
+            <Button
+              className={`dm-current-task__prevnext dm-current-task__prevnext_next 
+                ${!store.canGoNextTask && !canPostpone ? "dm-current-task__prevnext_disabled" : ""} 
+                ${!store.canGoNextTask && canPostpone ? "dm-current-task__prevnext_postpone" : ""} 
+                ${isFF(FF_DEV_3873) ? "dm-current-task__prevnext_newui" : ""}`}
               data-testid="next-task"
-              mod={{
-                next: true,
-                disabled: !store.canGoNextTask && !canPostpone,
-                postpone: !store.canGoNextTask && canPostpone,
-                newui: isFF(FF_DEV_3873),
-              }}
               type="link"
               disabled={!store.canGoNextTask && !canPostpone}
               onClick={store.canGoNextTask ? store.nextTask : store.postponeTask}
               style={{ background: !isFF(FF_DEV_3873) && "none", backgroundColor: isFF(FF_DEV_3873) && "none" }}
             />
-          </Elem>
+          </div>
         )}
-      </Block>
-    </Elem>
+      </div>
+    </div>
   );
 });

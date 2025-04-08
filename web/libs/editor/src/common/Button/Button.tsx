@@ -7,12 +7,19 @@ import {
   forwardRef,
   type ForwardRefExoticComponent,
   useMemo,
+  type ComponentClass,
+  type FunctionComponent,
 } from "react";
 import { Hotkey } from "../../core/Hotkey";
 import { useHotkey } from "../../hooks/useHotkey";
-import { Block, type CNTagName, Elem } from "../../utils/bem";
 import { isDefined } from "../../utils/utilities";
 import { Tooltip } from "@humansignal/ui";
+
+// Define a type for component or tag name for backwards compatibility
+type ComponentType = FC<any> | ComponentClass<unknown, unknown> | FunctionComponent<unknown>;
+type TagNameType = keyof React.ReactHTML | keyof React.ReactSVG | string;
+type CNTagName = ComponentType | TagNameType;
+
 import "./Button.scss";
 
 type HTMLButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type">;
@@ -105,18 +112,38 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
 
     useHotkey(hotkey, rest.onClick as unknown as Keymaster.KeyHandler, hotkeyScope);
 
+    // Build class names based on modifiers
+    const buttonClasses = ["dm-button"];
+
+    // Add modifier classes
+    if (mods.size) buttonClasses.push(`dm-button_size_${mods.size}`);
+    if (mods.waiting) buttonClasses.push("dm-button_waiting");
+    if (mods.type) buttonClasses.push(`dm-button_type_${mods.type}`);
+    if (mods.danger) buttonClasses.push("dm-button_danger");
+    if (mods.nopadding) buttonClasses.push("dm-button_nopadding");
+    if (mods.withIcon) buttonClasses.push("dm-button_with-icon");
+    if (mods.withExtra) buttonClasses.push("dm-button_with-extra");
+
+    // Handle look modifier which can be an array or string
+    if (Array.isArray(mods.look)) {
+      mods.look.forEach((look) => buttonClasses.push(`dm-button_look_${look}`));
+    } else if (mods.look) {
+      buttonClasses.push(`dm-button_look_${mods.look}`);
+    }
+
+    // Add custom class names
+    if (className) buttonClasses.push(className);
+
+    const Tag = finalTag as any;
+
     const buttonBody = (
-      <Block name="button" mod={mods} mix={className} ref={ref} tag={finalTag} type={type} {...rest}>
+      <Tag className={buttonClasses.join(" ")} ref={ref} type={type} {...rest}>
         <>
-          {iconElem && (
-            <Elem tag="span" name="icon">
-              {iconElem}
-            </Elem>
-          )}
+          {iconElem && <span className="dm-button__icon">{iconElem}</span>}
           {iconElem && children ? <span>{children}</span> : children}
-          {extra !== undefined ? <Elem name="extra">{extra}</Elem> : null}
+          {extra !== undefined ? <div className="dm-button__extra">{extra}</div> : null}
         </>
-      </Block>
+      </Tag>
     );
 
     if (hotkey && isDefined(Hotkey.keymap[hotkey])) {
@@ -142,11 +169,12 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
 Button.displayName = "Button";
 
 const Group: FC<ButtonGroupProps> = ({ className, children, collapsed }) => {
-  return (
-    <Block name="button-group" mod={{ collapsed }} mix={className}>
-      {children}
-    </Block>
-  );
+  const groupClasses = ["dm-button-group"];
+
+  if (collapsed) groupClasses.push("dm-button-group_collapsed");
+  if (className) groupClasses.push(className);
+
+  return <div className={groupClasses.join(" ")}>{children}</div>;
 };
 
 Button.Group = Group;

@@ -1,5 +1,4 @@
 import { type FC, type MutableRefObject, useMemo, useRef, useState } from "react";
-import { Block } from "../../../utils/bem";
 import { clamp } from "../../../utils/utilities";
 import type { TimelineSideControlProps } from "../Types";
 import "./FramesControl.scss";
@@ -11,7 +10,7 @@ export const FramesControl: FC<TimelineSideControlProps> = ({ position = 0, leng
   }, [length]);
 
   return (
-    <Block name="frames-control" onClick={() => setInputMode(true)}>
+    <div className="dm-frames-control" onClick={() => setInputMode(true)}>
       {inputMode ? (
         <FrameInput
           length={duration}
@@ -28,7 +27,7 @@ export const FramesControl: FC<TimelineSideControlProps> = ({ position = 0, leng
           {clamp(Math.round(position + 1), 1, duration + 1)} <span>of {duration + 1}</span>
         </>
       )}
-    </Block>
+    </div>
   );
 };
 

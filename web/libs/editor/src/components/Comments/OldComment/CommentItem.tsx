@@ -5,7 +5,6 @@ import { IconCheck, IconEllipsis } from "@humansignal/icons";
 import { Space } from "../../../common/Space/Space";
 import { Dropdown } from "../../../common/Dropdown/Dropdown";
 import { Menu } from "../../../common/Menu/Menu";
-import { Block, Elem } from "../../../utils/bem";
 import { humanDateDiff, userDisplayName } from "../../../utils/utilities";
 import { CommentFormBase } from "../CommentFormBase";
 
@@ -72,36 +71,34 @@ export const CommentItem: FC<any> = observer(
 
       if (isPersisted && time)
         return (
-          <Elem name="date">
+          <div className="dm-comment-item__date">
             <Tooltip alignment="top-right" title={new Date(time).toLocaleString()}>
               <>{`${isEdited ? "updated" : ""} ${humanDateDiff(time)}`}</>
             </Tooltip>
-          </Elem>
+          </div>
         );
       return null;
     };
 
     return (
-      <Block name="comment-item" mod={{ resolved }}>
+      <div className={`dm-comment-item ${resolved ? "dm-comment-item_resolved" : ""}`}>
         <Space spread size="medium" truncated>
           <Space size="small" truncated>
-            <Elem tag={Userpic} user={createdBy} name="userpic" showUsername username={createdBy} />
-            <Elem name="name" tag="span">
-              {userDisplayName(createdBy)}
-            </Elem>
+            <Userpic user={createdBy} className="dm-comment-item__userpic" showUsername username={createdBy} />
+            <span className="dm-comment-item__name">{userDisplayName(createdBy)}</span>
           </Space>
 
           <Space size="small">
-            <Elem name="resolved" component={IconCheck} />
-            <Elem name="saving" mod={{ hide: isPersisted }}>
-              <Elem name="dot" />
-            </Elem>
+            <IconCheck className="dm-comment-item__resolved" />
+            <div className={`dm-comment-item__saving ${isPersisted ? "dm-comment-item__saving_hide" : ""}`}>
+              <div className="dm-comment-item__dot" />
+            </div>
             <TimeTracker />
           </Space>
         </Space>
 
-        <Elem name="content">
-          <Elem name="text">
+        <div className="dm-comment-item__content">
+          <div className="dm-comment-item__text">
             {isEditMode ? (
               <CommentFormBase
                 value={currentComment}
@@ -112,24 +109,24 @@ export const CommentItem: FC<any> = observer(
                 }}
               />
             ) : isConfirmDelete ? (
-              <Elem name="confirmForm">
-                <Elem name="question">Are you sure?</Elem>
-                <Elem name="controls">
+              <div className="dm-comment-item__confirmForm">
+                <div className="dm-comment-item__question">Are you sure?</div>
+                <div className="dm-comment-item__controls">
                   <Button onClick={() => deleteComment()} size="compact" look="danger" autoFocus>
                     Yes
                   </Button>
                   <Button onClick={() => setConfirmMode(false)} size="compact">
                     No
                   </Button>
-                </Elem>
-              </Elem>
+                </div>
+              </div>
             ) : (
               <>{currentComment}</>
             )}
-          </Elem>
+          </div>
 
-          <Elem
-            name="actions"
+          <div
+            className="dm-comment-item__actions"
             onClick={(e: any) => {
               e.stopPropagation();
               e.preventDefault();
@@ -171,9 +168,9 @@ export const CommentItem: FC<any> = observer(
                 <Button size="small" type="text" icon={<IconEllipsis />} />
               </Dropdown.Trigger>
             )}
-          </Elem>
-        </Elem>
-      </Block>
+          </div>
+        </div>
+      </div>
     );
   },
 );

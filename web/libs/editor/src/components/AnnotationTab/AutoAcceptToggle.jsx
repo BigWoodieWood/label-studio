@@ -3,7 +3,6 @@ import { inject, observer } from "mobx-react";
 import { IconCheck, IconCross } from "@humansignal/icons";
 import { Toggle } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
-import { Block, Elem } from "../../utils/bem";
 import { Space } from "../../common/Space/Space";
 
 import "./AutoAcceptToggle.scss";
@@ -28,31 +27,27 @@ export const AutoAcceptToggle = injector(
     const loading = store.awaitingSuggestions;
 
     return (
-      <Block name="auto-accept">
+      <div className="dm-auto-accept">
         {withSuggestions && (
-          <Elem name="wrapper" mod={{ loading }}>
+          <div className={`dm-auto-accept__wrapper ${loading ? "dm-auto-accept__wrapper_loading" : ""}`}>
             <Space spread>
               {suggestions.size > 0 ? (
                 <Space size="small">
-                  <Elem name="info">
+                  <div className="dm-auto-accept__info">
                     {suggestions.size} suggestion{suggestions.size > 0 && "s"}
-                  </Elem>
-                  <Elem
-                    name="action"
-                    tag={Button}
-                    mod={{ type: "reject" }}
+                  </div>
+                  <Button
+                    className="dm-auto-accept__action dm-auto-accept__action_type_reject"
                     onClick={() => annotation.rejectAllSuggestions()}
                   >
                     <IconCross />
-                  </Elem>
-                  <Elem
-                    name="action"
-                    tag={Button}
-                    mod={{ type: "accept" }}
+                  </Button>
+                  <Button
+                    className="dm-auto-accept__action dm-auto-accept__action_type_accept"
                     onClick={() => annotation.acceptAllSuggestions()}
                   >
                     <IconCheck />
-                  </Elem>
+                  </Button>
                 </Space>
               ) : (
                 <Toggle
@@ -62,10 +57,10 @@ export const AutoAcceptToggle = injector(
                 />
               )}
             </Space>
-          </Elem>
+          </div>
         )}
-        {loading && <Elem name="spinner" />}
-      </Block>
+        {loading && <div className="dm-auto-accept__spinner" />}
+      </div>
     );
   }),
 );

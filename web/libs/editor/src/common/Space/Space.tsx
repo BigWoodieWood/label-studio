@@ -1,8 +1,5 @@
 import type { CSSProperties, FC } from "react";
-import { BemWithSpecifiContext } from "../../utils/bem";
 import "./Space.scss";
-
-const { Block } = BemWithSpecifiContext();
 
 export interface SpaceProps {
   direction?: "horizontal" | "vertical";
@@ -29,15 +26,23 @@ export const Space: FC<SpaceProps> = ({
   truncated,
   ...rest
 }) => {
+  const spaceClasses = ["dm-space"];
+
+  // Add all modifier classes
+  if (direction) spaceClasses.push(`dm-space_direction_${direction}`);
+  if (size) spaceClasses.push(`dm-space_size_${size}`);
+  if (spread) spaceClasses.push("dm-space_spread");
+  if (stretch) spaceClasses.push("dm-space_stretch");
+  if (align) spaceClasses.push(`dm-space_align_${align}`);
+  if (collapsed) spaceClasses.push("dm-space_collapsed");
+  if (truncated) spaceClasses.push("dm-space_truncated");
+
+  // Add custom class name if provided
+  if (className) spaceClasses.push(className);
+
   return (
-    <Block
-      name="space"
-      mod={{ direction, size, spread, stretch, align, collapsed, truncated }}
-      mix={className}
-      style={style}
-      {...rest}
-    >
+    <div className={spaceClasses.join(" ")} style={style} {...rest}>
       {children}
-    </Block>
+    </div>
   );
 };

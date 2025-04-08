@@ -1,7 +1,6 @@
 import { type ChangeEvent, type FC, forwardRef, type KeyboardEvent, useCallback, useState } from "react";
 import { Hotkey } from "../../core/Hotkey";
 import { useHotkey } from "../../hooks/useHotkey";
-import { Block, Elem } from "../../utils/bem";
 import "./Pagination.scss";
 
 interface PaginationProps {
@@ -66,16 +65,26 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
       });
     };
 
+    // Build class names for pagination component
+    const paginationClasses = ["dm-pagination"];
+
+    // Add modifier classes
+    if (size) paginationClasses.push(`dm-pagination_size_${size}`);
+    if (outline) paginationClasses.push("dm-pagination_outline");
+    if (align) paginationClasses.push(`dm-pagination_align_${align}`);
+    if (noPadding) paginationClasses.push("dm-pagination_no-padding");
+    if (disabled) paginationClasses.push("dm-pagination_disabled");
+
     return (
-      <Block name="pagination" mod={{ size, outline, align, noPadding, disabled }}>
-        <Elem name="navigation">
+      <div className={paginationClasses.join(" ")}>
+        <div className="dm-pagination__navigation">
           <>
             <NavigationButton
               mod={["arrow-left", "arrow-left-double"]}
               onClick={() => onChange?.(1)}
               disabled={currentPage === 1 || disabled}
             />
-            <Elem name="divider" />
+            <div className="dm-pagination__divider" />
           </>
           <NavigationButton
             mod={["arrow-left"]}
@@ -83,7 +92,7 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
             hotkey={hotkey?.prev}
             disabled={currentPage === 1 || disabled}
           />
-          <Elem name="input">
+          <div className="dm-pagination__input">
             {inputMode ? (
               <input
                 type="text"
@@ -117,8 +126,8 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
                 }}
               />
             ) : (
-              <Elem
-                name="page-indicator"
+              <div
+                className="dm-pagination__page-indicator"
                 onClick={() => {
                   setInputMode(true);
                 }}
@@ -129,9 +138,9 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
                     /*  */
                   }}
                 />
-              </Elem>
+              </div>
             )}
-          </Elem>
+          </div>
           <NavigationButton
             mod={["arrow-right"]}
             onClick={() => onChange?.(currentPage + 1)}
@@ -139,22 +148,22 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
             hotkey={hotkey?.next}
           />
           <>
-            <Elem name="divider" />
+            <div className="dm-pagination__divider" />
             <NavigationButton
               mod={["arrow-right", "arrow-right-double"]}
               onClick={() => onChange?.(totalPages)}
               disabled={currentPage === totalPages || disabled}
             />
           </>
-        </Elem>
+        </div>
         {pageSizeSelectable && (
-          <Elem name="page-size">
+          <div className="dm-pagination__page-size">
             <select value={pageSize} onChange={handleChangeSelect}>
               {renderOptions()}
             </select>
-          </Elem>
+          </div>
         )}
-      </Block>
+      </div>
     );
   },
 );
@@ -167,21 +176,26 @@ type NavigationButtonProps = {
 };
 
 const NavigationButton: FC<NavigationButtonProps> = ({ mod, disabled, hotkey, onClick }) => {
-  const buttonMod = Object.fromEntries(mod.map((m) => [m, true]));
-
   const actionHandler = useCallback(() => {
     if (!disabled) onClick();
   }, [disabled, onClick]);
 
-  buttonMod.disabled = disabled === true;
-
   useHotkey(hotkey, actionHandler);
 
-  return hotkey ? (
-    <Hotkey.Tooltip name={hotkey}>
-      <Elem name="btn" mod={buttonMod} onClick={actionHandler} />
-    </Hotkey.Tooltip>
-  ) : (
-    <Elem name="btn" mod={buttonMod} onClick={actionHandler} />
+  // Build button class names
+  const buttonClasses = ["dm-pagination__btn"];
+
+  // Add all modifiers from the array
+  mod.forEach((modifier) => {
+    buttonClasses.push(`dm-pagination__btn_${modifier}`);
+  });
+
+  // Add disabled state if needed
+  if (disabled) buttonClasses.push("dm-pagination__btn_disabled");
+
+  const buttonElement = (
+    <button className={buttonClasses.join(" ")} onClick={actionHandler} disabled={disabled} type="button" />
   );
+
+  return hotkey ? <Hotkey.Tooltip name={hotkey}>{buttonElement}</Hotkey.Tooltip> : buttonElement;
 };

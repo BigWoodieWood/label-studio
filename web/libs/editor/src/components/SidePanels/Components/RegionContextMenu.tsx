@@ -5,7 +5,6 @@ import { IconLink, IconEllipsis } from "@humansignal/icons";
 import { ToastType, useToast } from "@humansignal/ui";
 import { ContextMenu, type ContextMenuAction, ContextMenuTrigger, type MenuActionOnClick } from "../../ContextMenu";
 import { Button } from "../../../common/Button/Button";
-import { cn } from "../../../utils/bem";
 
 export const RegionContextMenu: FC<{ item: any }> = observer(({ item }: { item: any }) => {
   const [open, setOpen] = useState(false);
@@ -47,7 +46,7 @@ export const RegionContextMenu: FC<{ item: any }> = observer(({ item }: { item: 
 
   return (
     <ContextMenuTrigger
-      className={cn("region-context-menu").toClassName()}
+      className="dm-region-context-menu"
       content={<ContextMenu actions={actions} />}
       onToggle={(isOpen) => setOpen(isOpen)}
     >

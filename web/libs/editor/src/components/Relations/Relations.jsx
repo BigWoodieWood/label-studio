@@ -9,7 +9,6 @@ import { wrapArray } from "../../utils/utilities";
 import globalStyles from "../../styles/global.module.scss";
 
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
-import { Block, Elem } from "../../utils/bem";
 import "./Relations.scss";
 
 const { Option } = Select;
@@ -138,10 +137,10 @@ const RelationsComponent = ({ store }) => {
   const relationsUIVisible = annotation.relationStore.showConnections;
 
   return (
-    <Block name="relations">
+    <div className="dm-relations">
       {/* override LS styles' height */}
-      <Elem name="header">
-        <Elem name="title">Relations ({relations.length})</Elem>
+      <div className="dm-relations__header">
+        <div className="dm-relations__title">Relations ({relations.length})</div>
         {hasRelations && (
           <Button
             size="small"
@@ -151,9 +150,9 @@ const RelationsComponent = ({ store }) => {
             className={[relationsUIVisible ? styles.uihidden : styles.uivisible, globalStyles.link]}
           />
         )}
-      </Elem>
+      </div>
 
-      <Elem name="content">
+      <div className="dm-relations__content">
         {hasRelations ? (
           <List
             size="small"
@@ -166,8 +165,8 @@ const RelationsComponent = ({ store }) => {
         ) : (
           <p>No Relations added yet</p>
         )}
-      </Elem>
-    </Block>
+      </div>
+    </div>
   );
 };
 

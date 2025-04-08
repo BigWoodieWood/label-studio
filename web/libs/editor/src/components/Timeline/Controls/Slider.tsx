@@ -2,7 +2,6 @@ import type React from "react";
 import { type FC, useEffect, useRef, useState } from "react";
 import { Tooltip } from "@humansignal/ui";
 import { IconInfoConfig } from "@humansignal/icons";
-import { Block, Elem } from "../../../utils/bem";
 
 import "./Slider.scss";
 
@@ -56,39 +55,36 @@ export const Slider: FC<SliderProps> = ({ description, info, max, min, value, st
   };
 
   const renderInput = () => {
+    const hasError =
+      valueError !== undefined && (typeof valueError === "string" || valueError > max || valueError < min);
+
     return (
-      <Elem name="control">
-        <Elem name="info">
+      <div className="dm-audio-slider__control">
+        <div className="dm-audio-slider__info">
           {description}
           {info && (
             <Tooltip title={info}>
               <IconInfoConfig />
             </Tooltip>
           )}
-        </Elem>
-        <Elem
-          name="input"
-          tag="input"
+        </div>
+        <input
+          className={`dm-audio-slider__input ${hasError ? "dm-audio-slider__input_error_control" : ""}`}
           type="text"
-          mod={
-            valueError !== undefined &&
-            (typeof valueError === "string" || valueError > max || valueError < min) && { error: "control" }
-          }
           min={min}
           max={max}
           value={valueError === undefined ? value : valueError}
           onChange={handleChangeInputValue}
         />
-      </Elem>
+      </div>
     );
   };
 
   return (
-    <Block name="audio-slider">
-      <Elem
-        ref={sliderRef}
-        name="range"
-        tag="input"
+    <div className="dm-audio-slider">
+      <input
+        ref={sliderRef as React.RefObject<HTMLInputElement>}
+        className="dm-audio-slider__range"
         type="range"
         min={min}
         max={max}
@@ -97,6 +93,6 @@ export const Slider: FC<SliderProps> = ({ description, info, max, min, value, st
         onChange={handleChangeInputValue}
       />
       {renderInput()}
-    </Block>
+    </div>
   );
 };

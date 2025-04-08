@@ -1,6 +1,5 @@
 import { observer } from "mobx-react";
 import { type FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Block, Elem } from "../../../utils/bem";
 import { useMedia } from "../../../hooks/useMedia";
 import ResizeObserver from "../../../utils/resize-observer";
 import { clamp } from "../../../utils/utilities";
@@ -536,29 +535,30 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
 
   return (
     <SidePanelsContext.Provider value={contextValue}>
-      <Block
+      <div
         ref={(el: HTMLDivElement | null) => {
           if (el) {
             rootRef.current = el;
             setViewportSizeMatch(el.clientWidth <= maxWindowWidth);
           }
         }}
-        name="sidepanels"
-        mod={{ collapsed: panelBreakPoint }}
+        className={`dm-sidepanels ${panelBreakPoint ? "dm-sidepanels_collapsed" : ""}`}
         style={{ ...padding }}
       >
         {initialized && (
           <>
-            <Elem name="content" mod={{ resizing: lockPanelContents || positioning }}>
+            <div
+              className={`dm-sidepanels__content ${lockPanelContents || positioning ? "dm-sidepanels__content_resizing" : ""}`}
+            >
               {children}
-            </Elem>
+            </div>
             {panelsHidden !== true && panelBreakPoint ? (
               <>
-                <Elem name="wrapper">
+                <div className="dm-sidepanels__wrapper">
                   <PanelTabsBase {...emptyBaseProps}>
                     <Tabs {...emptyBaseProps} />
                   </PanelTabsBase>
-                </Elem>
+                </div>
               </>
             ) : (
               <>
@@ -577,16 +577,19 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
                     return <Fragment key={panelType}>{content}</Fragment>;
                   }
                   return (
-                    <Elem key={panelType} name="wrapper" mod={{ align: panelType, snap: snap === panelType }}>
+                    <div
+                      key={panelType}
+                      className={`dm-sidepanels__wrapper dm-sidepanels__wrapper_align_${panelType} ${snap === panelType ? "dm-sidepanels__wrapper_snap" : ""}`}
+                    >
                       {content}
-                    </Elem>
+                    </div>
                   );
                 })}
               </>
             )}
           </>
         )}
-      </Block>
+      </div>
     </SidePanelsContext.Provider>
   );
 };

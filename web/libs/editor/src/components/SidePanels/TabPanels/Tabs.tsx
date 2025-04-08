@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { IconOutlinerDrag } from "@humansignal/ui";
 import { useDrag } from "../../../hooks/useDrag";
-import { Block, Elem } from "../../../utils/bem";
 import { DEFAULT_PANEL_HEIGHT } from "../constants";
 import "./Tabs.scss";
 import { type BaseProps, Side, type TabProps } from "./types";
@@ -156,25 +155,28 @@ const Tab = ({
     [],
   );
 
-  const Label = () => (
-    <Elem
-      id={`${panelKey}_${tabIndex}_droppable`}
-      name="tab"
-      mod={{ active: locked ? tabIndex === breakPointActiveTab : active }}
-    >
-      {!locked && <Elem name="icon" tag={IconOutlinerDrag} />}
-      {tabText}
-    </Elem>
-  );
+  const Label = () => {
+    const tabClasses = ["dm-panel-tabs__tab"];
+    if (locked ? tabIndex === breakPointActiveTab : active) {
+      tabClasses.push("dm-panel-tabs__tab_active");
+    }
+
+    return (
+      <div id={`${panelKey}_${tabIndex}_droppable`} className={tabClasses.join(" ")}>
+        {!locked && <IconOutlinerDrag className="dm-panel-tabs__icon" />}
+        {tabText}
+      </div>
+    );
+  };
 
   return (
-    <Block name="panel-tabs">
-      <Elem name="draggable-tab" id={`${tabText}-draggable`} ref={tabRef}>
+    <div className="dm-panel-tabs">
+      <div className="dm-panel-tabs__draggable-tab" id={`${tabText}-draggable`} ref={tabRef}>
         <Label />
-      </Elem>
-      <Elem
+      </div>
+      <div
         ref={ghostTabRef}
-        name="ghost-tab"
+        className="dm-panel-tabs__ghost-tab"
         style={{
           width: `${panelWidth}px`,
           height: "fit-content",
@@ -183,9 +185,9 @@ const Tab = ({
         }}
       >
         <Label />
-        {shouldShowGhostTab && <Elem name="contents">{children}</Elem>}
-      </Elem>
-    </Block>
+        {shouldShowGhostTab && <div className="dm-panel-tabs__contents">{children}</div>}
+      </div>
+    </div>
   );
 };
 
@@ -196,13 +198,16 @@ export const Tabs = (props: BaseProps) => {
 
   return (
     <>
-      <Block name="tabs">
-        <Elem name="tabs-row">
+      <div className="dm-tabs">
+        <div className="dm-tabs__tabs-row">
           {props.panelViews.map((view, index) => {
             const { component: Component } = view;
 
             return (
-              <Elem name="tab-container" key={`${view.title}-${index}-tab`} mod={{ active: view.active }}>
+              <div
+                className={`dm-tabs__tab-container ${view.active ? "dm-tabs__tab-container_active" : ""}`}
+                key={`${view.title}-${index}-tab`}
+              >
                 <Tab
                   name={view.name}
                   rootRef={props.root}
@@ -221,17 +226,17 @@ export const Tabs = (props: BaseProps) => {
                   breakPointActiveTab={props.breakPointActiveTab}
                   setBreakPointActiveTab={props.setBreakPointActiveTab}
                 >
-                  <Elem name="content">
+                  <div className="dm-tabs__content">
                     <Component key={`${view.title}-${index}-ghost`} {...props} name={"outliner"} />
-                  </Elem>
+                  </div>
                 </Tab>
-              </Elem>
+              </div>
             );
           })}
-          <Elem id={`${props.name}_${props.panelViews.length}-droppable-space`} name="drop-space-after" />
-        </Elem>
-        <Elem name="contents">{ActiveComponent && <ActiveComponent {...props} />}</Elem>
-      </Block>
+          <div id={`${props.name}_${props.panelViews.length}-droppable-space`} className="dm-tabs__drop-space-after" />
+        </div>
+        <div className="dm-tabs__contents">{ActiveComponent && <ActiveComponent {...props} />}</div>
+      </div>
     </>
   );
 };

@@ -17,7 +17,6 @@ import {
 import { defaultStyle } from "../../../core/Constants";
 import { useFullscreen } from "../../../hooks/useFullscreen";
 import { useToggle } from "../../../hooks/useToggle";
-import { Block, Elem } from "../../../utils/bem";
 import { FF_DEV_2715, isFF } from "../../../utils/feature-flags";
 import ResizeObserver from "../../../utils/resize-observer";
 import { clamp, isDefined } from "../../../utils/utilities";
@@ -484,14 +483,17 @@ const HtxVideoView = ({ item, store }) => {
 
   return (
     <ObjectTag item={item}>
-      <Block name="video-segmentation" ref={mainContentRef} mod={{ fullscreen: isFullScreen }}>
+      <div
+        className={`dm-video-segmentation ${isFullScreen ? "dm-video-segmentation_fullscreen" : ""}`}
+        ref={mainContentRef}
+      >
         {item.errors?.map((error, i) => (
           <ErrorMessage key={`err-${i}`} error={error} />
         ))}
 
-        <Block name="video" mod={{ fullscreen: isFullScreen }} ref={videoBlockRef}>
-          <Elem
-            name="main"
+        <div className={`dm-video ${isFullScreen ? "dm-video_fullscreen" : ""}`} ref={videoBlockRef}>
+          <div
+            className="dm-video__main"
             ref={videoContainerRef}
             style={{ height: Number(item.height) }}
             onMouseDown={handlePan}
@@ -536,13 +538,12 @@ const HtxVideoView = ({ item, store }) => {
                 />
               </>
             )}
-          </Elem>
-        </Block>
+          </div>
+        </div>
 
         {loaded && (
-          <Elem
-            name="timeline"
-            tag={Timeline}
+          <Timeline
+            className="dm-video-segmentation__timeline"
             playing={playing}
             length={videoLength}
             position={position}
@@ -590,7 +591,7 @@ const HtxVideoView = ({ item, store }) => {
             onAction={handleAction}
           />
         )}
-      </Block>
+      </div>
     </ObjectTag>
   );
 };

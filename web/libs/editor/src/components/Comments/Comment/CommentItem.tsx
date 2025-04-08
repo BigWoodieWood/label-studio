@@ -7,7 +7,6 @@ import { Button } from "../../../common/Button/Button";
 import { Dropdown } from "../../../common/Dropdown/Dropdown";
 import { Menu } from "../../../common/Menu/Menu";
 import { Space } from "../../../common/Space/Space";
-import { Block, Elem } from "../../../utils/bem";
 import { humanDateDiff, userDisplayName } from "../../../utils/utilities";
 import { CommentFormBase } from "../CommentFormBase";
 import { CommentsContext } from "./CommentsList";
@@ -144,19 +143,26 @@ export const CommentItem: FC<CommentItemProps> = observer(
 
       if (isPersisted && time)
         return (
-          <Elem name="date">
+          <div className="dm-comment-item__date">
             <Tooltip alignment="top-right" title={new Date(time).toLocaleString()}>
               <>{`${isEdited ? "updated" : ""} ${humanDateDiff(time)}`}</>
             </Tooltip>
-          </Elem>
+          </div>
         );
       return null;
     };
 
+    const commentItemClasses = [
+      "dm-comment-item",
+      resolved ? "dm-comment-item_resolved" : "",
+      isHighlighted ? "dm-comment-item_highlighted" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     return (
-      <Block
-        name="comment-item"
-        mod={{ resolved, highlighted: isHighlighted }}
+      <div
+        className={commentItemClasses}
         onMouseEnter={() => {
           setHighlighted(true);
         }}
@@ -167,28 +173,31 @@ export const CommentItem: FC<CommentItemProps> = observer(
       >
         <Space spread size="medium" truncated>
           <Space size="small" truncated>
-            <Elem tag={Userpic} user={hiddenUser ?? createdBy} name="userpic" showUsername username={createdBy} />
-            <Elem name="name" tag="span">
-              {userDisplayName(hiddenUser ?? createdBy)}
-            </Elem>
+            <Userpic
+              user={hiddenUser ?? createdBy}
+              className="dm-comment-item__userpic"
+              showUsername
+              username={createdBy}
+            />
+            <span className="dm-comment-item__name">{userDisplayName(hiddenUser ?? createdBy)}</span>
           </Space>
 
           <Space size="small">
-            <Elem name="resolved" component={IconCheck} />
-            <Elem name="saving" mod={{ hide: isPersisted }}>
-              <Elem name="dot" />
-            </Elem>
+            <IconCheck className="dm-comment-item__resolved" />
+            <div className={`dm-comment-item__saving ${isPersisted ? "dm-comment-item__saving_hide" : ""}`}>
+              <div className="dm-comment-item__dot" />
+            </div>
             {!infoIsHidden && <TimeTracker />}
           </Space>
         </Space>
 
-        <Elem name="content">
-          <Elem name="text">
+        <div className="dm-comment-item__content">
+          <div className="dm-comment-item__text">
             {isEditMode ? (
               <>
                 <CommentFormBase value={text} onSubmit={commentFormBaseOnSubmit} classifications={classifications} />
                 {classificationsItems.length > 0 && (
-                  <Elem name="classifications-row">
+                  <div className="dm-comment-item__classifications-row">
                     <Taxonomy
                       selected={taxonomySelectedItems}
                       items={classificationsItems}
@@ -196,42 +205,42 @@ export const CommentItem: FC<CommentItemProps> = observer(
                       options={COMMENT_TAXONOMY_OPTIONS}
                       defaultSearch={false}
                     />
-                  </Elem>
+                  </div>
                 )}
               </>
             ) : isConfirmDelete ? (
-              <Elem name="confirmForm">
-                <Elem name="question">Are you sure?</Elem>
-                <Elem name="controls">
+              <div className="dm-comment-item__confirmForm">
+                <div className="dm-comment-item__question">Are you sure?</div>
+                <div className="dm-comment-item__controls">
                   <Button onClick={() => deleteComment()} size="compact" look="danger" autoFocus>
                     Yes
                   </Button>
                   <Button onClick={() => setConfirmMode(false)} size="compact">
                     No
                   </Button>
-                </Elem>
-              </Elem>
+                </div>
+              </div>
             ) : (
               <>
                 {classifications?.default?.values?.length > 0 && (
-                  <Elem name="classifications" tag="ul">
+                  <ul className="dm-comment-item__classifications">
                     {classifications?.default?.values?.map((valueArray: string[], index: number) => (
                       <li key={index}>{valueArray.join("/")}</li>
                     ))}
-                  </Elem>
+                  </ul>
                 )}
                 {text}
                 {hasLinkState && (
-                  <Elem name="linkState">
+                  <div className="dm-comment-item__linkState">
                     <LinkState linking={linking} region={region} result={result} interactive />
-                  </Elem>
+                  </div>
                 )}
               </>
             )}
-          </Elem>
+          </div>
 
-          <Elem
-            name="actions"
+          <div
+            className="dm-comment-item__actions"
             onClick={(e: any) => {
               e.stopPropagation();
               e.preventDefault();
@@ -274,9 +283,9 @@ export const CommentItem: FC<CommentItemProps> = observer(
                 <Button size="small" type="text" icon={<IconEllipsis width={20} height={20} />} />
               </Dropdown.Trigger>
             )}
-          </Elem>
-        </Elem>
-      </Block>
+          </div>
+        </div>
+      </div>
     );
   },
 );

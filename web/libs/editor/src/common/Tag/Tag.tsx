@@ -1,6 +1,5 @@
 import color from "chroma-js";
 import type { CSSProperties, FC } from "react";
-import { Block } from "../../utils/bem";
 import { colors } from "../../utils/namedColors";
 import "./Tag.scss";
 
@@ -45,9 +44,17 @@ export const Tag: FC<TagProps> = ({ className, style, size, color, solid = false
 
   const styles = { ...(style ?? {}), ...finalColor };
 
+  const classes = ["dm-tag"];
+
+  // Add size modifier if present
+  if (size) classes.push(`dm-tag_size_${size}`);
+
+  // Add custom class if provided
+  if (className) classes.push(className);
+
   return (
-    <Block tag="span" name="tag" mod={{ size }} mix={className} style={styles}>
+    <span className={classes.join(" ")} style={styles}>
       {children}
-    </Block>
+    </span>
   );
 };

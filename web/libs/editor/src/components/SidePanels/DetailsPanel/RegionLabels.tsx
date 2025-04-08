@@ -1,16 +1,14 @@
 import type { FC } from "react";
 import { observer } from "mobx-react";
 
-import { Block } from "../../../utils/bem";
-
 export const RegionLabels: FC<{ region: LSFRegion }> = observer(({ region }) => {
   const labelsInResults = region.labelings.map((result: any) => result.selectedLabels || []);
   const labels: any[] = [].concat(...labelsInResults);
 
-  if (!labels.length) return <Block name="labels-list">No label</Block>;
+  if (!labels.length) return <div className="dm-labels-list">No label</div>;
 
   return (
-    <Block name="labels-list">
+    <div className="dm-labels-list">
       {labels.map((label, index) => {
         const color = label.background || "#000000";
 
@@ -21,6 +19,6 @@ export const RegionLabels: FC<{ region: LSFRegion }> = observer(({ region }) => 
           </span>,
         ];
       })}
-    </Block>
+    </div>
   );
 });

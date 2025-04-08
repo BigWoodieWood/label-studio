@@ -1,5 +1,4 @@
 import { forwardRef, memo, type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Block, Elem } from "../../utils/bem";
 import { FF_LSDV_4711, FF_VIDEO_FRAME_SEEK_PRECISION, isFF } from "../../utils/feature-flags";
 import { clamp, isDefined } from "../../utils/utilities";
 import "./VideoCanvas.scss";
@@ -542,14 +541,14 @@ export const VideoCanvas = memo(
     }, []);
 
     return (
-      <Block ref={rootRef} name="video-canvas">
+      <div ref={rootRef} className="dm-video-canvas">
         {loading && (
-          <Elem name="loading">
-            <Block name="spinner" />
-          </Elem>
+          <div className="dm-video-canvas__loading">
+            <div className="dm-spinner" />
+          </div>
         )}
-        <Elem
-          name="view"
+        <div
+          className="dm-video-canvas__view"
           onClick={props.onClick}
           style={{
             width: canvasWidth,
@@ -566,8 +565,8 @@ export const VideoCanvas = memo(
             width={canvasWidth}
             height={canvasHeight}
           />
-          {!loading && buffering && <Elem name="buffering" />}
-        </Elem>
+          {!loading && buffering && <div className="dm-video-canvas__buffering" />}
+        </div>
 
         <VirtualVideo
           ref={videoRef as MutableRefObject<HTMLVideoElement>}
@@ -598,7 +597,7 @@ export const VideoCanvas = memo(
           onEnded={handleVideoEnded}
           onError={handleVideoError}
         />
-      </Block>
+      </div>
     );
   }),
 );

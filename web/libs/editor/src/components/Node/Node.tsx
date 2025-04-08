@@ -4,7 +4,6 @@ import { observer } from "mobx-react";
 import { ApartmentOutlined, AudioOutlined, LineChartOutlined, MessageOutlined } from "@ant-design/icons";
 
 import "./Node.scss";
-import { Block, Elem } from "../../utils/bem";
 import { NodeView } from "./NodeView";
 import {
   IconBrushTool,
@@ -136,12 +135,12 @@ const NodeDebug: FC<any> = observer(({ className, node }) => {
   const labelName = node.labelName;
 
   return (
-    <Block name="node" className={[className].filter(Boolean).join(" ")}>
+    <div className={["dm-node", className].filter(Boolean).join(" ")}>
       {labelName}
       <br />
       {getContent(node)}
       {fullContent && fullContent(node)}
-    </Block>
+    </div>
   );
 });
 
@@ -157,17 +156,17 @@ const Node: FC<any> = observer(({ className, node }) => {
   const labelName = node.labelName;
 
   return (
-    <Block name="node" tag="span" className={className}>
+    <span className={`dm-node ${className || ""}`}>
       {labelName}
       {node.isDrawing && (
-        <Elem tag="span" name="incomplete">
+        <span className="dm-node__incomplete">
           <Tooltip title={`Incomplete ${node.type?.replace("region", "") ?? "region"}`}>
             <IconWarning />
           </Tooltip>
-        </Elem>
+        </span>
       )}{" "}
       {getContent(node)}
-    </Block>
+    </span>
   );
 });
 
@@ -197,13 +196,13 @@ const NodeMinimal: FC<any> = observer(({ node }) => {
   const { name: text, icon } = NodeViews[name];
 
   return (
-    <Block name="node-minimal" tag="span">
-      {index >= 0 && <Elem name="counter">{index + 1}</Elem>}
+    <span className="dm-node-minimal">
+      {index >= 0 && <span className="dm-node-minimal__counter">{index + 1}</span>}
 
-      <Elem name="icon" tag={icon} />
+      {icon && <icon.type {...icon.props} className="dm-node-minimal__icon" />}
 
       {text}
-    </Block>
+    </span>
   );
 });
 
