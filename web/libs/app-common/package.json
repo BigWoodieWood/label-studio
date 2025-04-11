@@ -7,4 +7,3 @@
   "main": "src/index.ts",
   "files": ["src/lib", "src/pages"]
 }
-
