@@ -1,9 +1,25 @@
 ---
 description: React coding standards and best practices for the LabelStudio clientside application
 globs: web/**/*.tsx, web/**/*.jsx
+alwaysApply: false
 ---
 
 # React Best Practices
+
+## Project Structure
+- All frontend code lives in the `web` directory
+- Main application code is in `web/apps/labelstudio`
+- Shared libraries are in `web/libs`
+- Follow the established directory structure:
+  - `components/`: Reusable UI components
+  - `pages/`: Top-level page components
+  - `utils/`: Utility functions
+  - `hooks/`: Custom React hooks
+  - `atoms/`: Jotai atom state definitions
+  - `providers/`: Context providers
+  - `services/`: API and other services
+  - `types/`: TypeScript type definitions
+  - `assets/`: Static assets
 
 ## Component Structure
 - Use functional components over class components
@@ -12,6 +28,14 @@ globs: web/**/*.tsx, web/**/*.jsx
 - Use composition over inheritance
 - Implement proper prop types with TypeScript
 - Split large components into smaller, focused ones
+- Follow a consistent file organization pattern:
+  ```
+  component-name/
+    component-name.tsx
+    component-name.module.scss
+    component-name.test.tsx
+    index.ts
+  ```
 
 ## Hooks
 - Follow the Rules of Hooks
@@ -39,6 +63,12 @@ globs: web/**/*.tsx, web/**/*.jsx
 - Use proper key props in lists
 - Profile and optimize render performance
 
+## Tooling
+- Use Biome for code linting and formatting
+- Follow CSS/SCSS linting rules defined in .stylelintrc.json
+- Use TypeScript for type safety
+- Keep bundle size in check by monitoring imports
+
 ## Forms
 - Use controlled components for form inputs
 - Implement proper form validation
@@ -64,6 +94,7 @@ globs: web/**/*.tsx, web/**/*.jsx
 - Implement proper mock data
 
 ## Accessibility
+- Ensure components meet WCAG 2.1 AA standards
 - Use semantic HTML elements
 - Implement proper ARIA attributes
 - Ensure keyboard navigation
@@ -73,18 +104,25 @@ globs: web/**/*.tsx, web/**/*.jsx
 
 ## Code Organization
 - Use proper file naming conventions which is kebab-case ie. ListItem -> `list-item.tsx`
-- Prefer one component per folder, but group related components together when necessary, but ensure there is only one component per file.
+- Prefer one component per folder, but group related components together when necessary, and ensure there is only one component per file.
 - Component folders should have a SCSS `.module.scss` with the name of the component kebab-case ie. ListItem -> `list-item.module.scss`
 - Implement proper directory structure
-- UI components should live within `web/libs/ui`
-- Application components that are shared across applications such as certain page-level blocks should live within `web/libs/app-common`
-- No cyclic imports
+- UI components live within `web/libs/ui`
+- Application components that are shared across applications such as certain page-level blocks live within `web/libs/app-common`
 - Code in `web/apps` can only import code from `web/libs` and `web/libs` cannot import from `web/apps`
 - Keep atoms in a global atoms folder with the name of the file matching the entity or intent of state
-- Use proper imports/exports
-- Document complex component logic
-- Add all components to Storybook by co-locating the story file next to the component file ie. `list-item.stories.tsx`
+- Add all components and there states to Storybook by co-locating the story file next to the component file ie. `list-item.stories.tsx`
 - Use the `@humansignal/ui` package for UI components
 - Use the `@humansignal/icons` package for icons
 - Use the `@humansignal/core` package for core utilities/functions
 - Use the `@humansignal/app-common` package for application components
+
+## Best Practices
+- No cyclic imports
+- Use proper imports/exports
+- Follow established import ordering
+- Compose components rather than extending them
+- Keep components focused on a single responsibility
+- Document complex logic with clear comments
+- Follow the project's folder structure and naming conventions
+- Prefer controlled components over uncontrolled ones 
