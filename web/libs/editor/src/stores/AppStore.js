@@ -275,6 +275,10 @@ export default types
       self.showingDescription = !self.showingDescription;
     }
 
+    function setHydrated(hydrated) {
+      self.hydrated = hydrated;
+    }
+
     function setFlags(flags) {
       const names = [
         "showingSettings",
@@ -326,7 +330,7 @@ export default types
       ToolsManager.setRoot(self);
 
       // important thing to detect Area atomatically: it hasn't access to store, only via global
-      window.Htx = self;
+      // window.Htx = self;
 
       self.attachHotkeys();
 
@@ -1026,6 +1030,7 @@ export default types
       setAppControls,
       clearApp,
       renderApp,
+      setHydrated,
       selfDestroy() {
         const children = [];
 

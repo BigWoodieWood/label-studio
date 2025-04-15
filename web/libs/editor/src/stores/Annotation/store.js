@@ -204,6 +204,8 @@ const AnnotationStoreModel = types
     }
 
     function initRoot(config) {
+      console.log("initRoot:start");
+      const startTime = performance.now();
       if (self.root) return;
 
       if (!config) {
@@ -274,6 +276,8 @@ const AnnotationStoreModel = types
 
       self.initialized = true;
 
+      const endTime = performance.now();
+      console.log(`Store init time taken: ${endTime - startTime} milliseconds`);
       return self.root;
     }
 

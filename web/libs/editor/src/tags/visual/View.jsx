@@ -6,6 +6,7 @@ import Tree from "../../core/Tree";
 import Types from "../../core/Types";
 import VisibilityMixin from "../../mixins/Visibility";
 import { AnnotationMixin } from "../../mixins/AnnotationMixin";
+import { useRef } from "react";
 
 /**
  * The `View` element is used to configure the display of blocks, similar to the div tag in HTML.
@@ -133,8 +134,13 @@ const Model = types
 
 const ViewModel = types.compose("ViewModel", TagAttrs, Model, VisibilityMixin, AnnotationMixin);
 
+const renderedItemCount = new WeakMap();
+
+window.renderedItemCount = renderedItemCount;
+
 const HtxView = observer(({ item }) => {
   let style = {};
+  const viewRef = useRef({});
 
   if (item.display === "inline") {
     style = { display: "inline-block", marginRight: "15px" };
@@ -147,6 +153,9 @@ const HtxView = observer(({ item }) => {
   if (item.isVisible === false) {
     style.display = "none";
   }
+
+  renderedItemCount.set(viewRef.current, (renderedItemCount.get(viewRef.current) ?? 0) + 1);
+  console.log(`Rendered item count: ${renderedItemCount.get(viewRef.current)}`);
 
   return (
     <div id={item.idattr} className={item.classname} style={style}>

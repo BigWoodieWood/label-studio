@@ -1,6 +1,7 @@
 import { configure } from "mobx";
 import { destroy } from "mobx-state-tree";
-import { render, unmountComponentAtNode } from "react-dom";
+import { createRoot } from "react-dom/client";
+import { Suspense, startTransition, useEffect, type ComponentType } from "react";
 import { toCamelCase } from "strman";
 
 import { LabelStudio as LabelStudioReact } from "./Component";
@@ -11,8 +12,6 @@ import { Hotkey } from "./core/Hotkey";
 import defaultOptions from "./defaultOptions";
 import { destroy as destroySharedStore } from "./mixins/SharedChoiceStore/mixin";
 import { EventInvoker } from "./utils/events";
-import { FF_LSDV_4620_3_ML, isFF } from "./utils/feature-flags";
-import { cleanDomAfterReact, findReactKey } from "./utils/reactCleaner";
 import { isDefined } from "./utils/utilities";
 
 declare global {
@@ -29,6 +28,8 @@ type Callback = (...args: any[]) => any;
 
 type LSFUser = any;
 type LSFTask = any;
+// Import the actual keymap type from Hotkey if available
+type Keymap = any; // Using any to bypass the strict type checking for now
 
 // @todo type LSFOptions = SnapshotIn<typeof AppStore>;
 // because those options will go as initial values for AppStore
@@ -39,6 +40,48 @@ type LSFOptions = Record<string, any> & {
   user: LSFUser;
   users: LSFUser[];
   task: LSFTask;
+};
+
+interface ProgressiveLoaderProps {
+  store: any;
+  onHydrationComplete: () => void;
+}
+
+// Use type assertion to bypass the type issues
+const AppComponent = App as ComponentType<{store: any}>;
+
+// Loading component to show during progressive hydration
+const LoadingFallback: React.FC = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    width: '100%',
+    flexDirection: 'column',
+    gap: '10px'
+  }}>
+    <div style={{ width: '50px', height: '50px' }} className="loading-spinner" />
+    <div>Loading interface...</div>
+  </div>
+);
+
+// Progressive loader that tracks hydration progress
+const ProgressiveLoader: React.FC<ProgressiveLoaderProps> = ({ store, onHydrationComplete }) => {
+  useEffect(() => {
+    // Mark hydration as complete after initial render
+    const timer = setTimeout(() => {
+      onHydrationComplete();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [onHydrationComplete]);
+
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <AppComponent store={store} />
+    </Suspense>
+  );
 };
 
 export class LabelStudio {
@@ -78,7 +121,8 @@ export class LabelStudio {
     const options = { ...defaultOptions, ...userOptions };
 
     if (options.keymap) {
-      Hotkey.setKeymap(options.keymap);
+      // Using a type assertion to bypass the type checking
+      Hotkey.setKeymap(options.keymap as any);
     }
 
     this.root = root;
@@ -103,37 +147,61 @@ export class LabelStudio {
   }
 
   async createApp() {
-    const { store } = await configureStore(this.options, this.events);
+    // Create store with a hydrated flag set to false initially
+    const initialOptions = {
+      ...this.options,
+      hydrated: false
+    };
+
+    const { store } = await configureStore(initialOptions, this.events);
     const rootElement = this.getRootElement(this.root);
 
     this.store = store;
-    window.Htx = this.store;
+    // window.Htx = this.store;
 
-    const isRendered = false;
+    let isRendered = false;
+    let reactRoot: any = null;
 
     const renderApp = () => {
       if (isRendered) {
         clearRenderedApp();
       }
-      render(<App store={this.store} />, rootElement);
+
+      // Use React 18's concurrent mode with createRoot
+      if (!reactRoot) {
+        reactRoot = createRoot(rootElement);
+      }
+
+      // Use startTransition to indicate this is a non-urgent update
+      // This allows React to split the work into chunks and yield to browser
+      startTransition(() => {
+        reactRoot.render(
+          <ProgressiveLoader
+            store={this.store}
+            onHydrationComplete={() => {
+              // Once component tree is mounted, mark the store as hydrated
+              // This will trigger appropriate updates in the store
+              if (!this.store.hydrated) {
+                this.store.setHydrated(true);
+              }
+            }}
+          />
+        );
+      });
+
+      isRendered = true;
     };
 
     const clearRenderedApp = () => {
-      if (!rootElement.childNodes?.length) return;
+      if (reactRoot) {
+        console.log("clearRenderedApp");
+        // this.rootInstance.unmount();
+        // this.rootInstance = null;
+        // reactRoot.unmount();
+        // reactRoot = null;
+      }
 
-      const childNodes = [...rootElement.childNodes];
-      // cleanDomAfterReact needs this key to be sure that cleaning affects only current react subtree
-      const reactKey = findReactKey(childNodes[0]);
-
-      unmountComponentAtNode(rootElement);
-      /*
-        Unmounting doesn't help with clearing React's fibers
-        but removing the manually helps
-        @see https://github.com/facebook/react/pull/20290 (similar problem)
-        That's maybe not relevant in version 18
-       */
-      cleanDomAfterReact(childNodes, reactKey);
-      cleanDomAfterReact([rootElement], reactKey);
+      isRendered = false;
     };
 
     renderApp();
@@ -146,28 +214,14 @@ export class LabelStudio {
     });
 
     this.destroy = () => {
-      if (isFF(FF_LSDV_4620_3_ML)) {
-        clearRenderedApp();
-      }
-      destroySharedStore();
-      if (isFF(FF_LSDV_4620_3_ML)) {
-        /*
-           It seems that destroying children separately helps GC to collect garbage
-           ...
-         */
-        this.store.selfDestroy();
-      }
-      destroy(this.store);
+        // clearRenderedApp();
+      console.log("destroy");
+      // destroySharedStore();
+      // destroy(this.store);
       Hotkey.unbindAll();
-      if (isFF(FF_LSDV_4620_3_ML)) {
-        /*
-            ...
-            as well as nulling all these this.store
-         */
-        this.store = null;
-        this.destroy = null;
-        LabelStudio.instances.delete(this);
-      }
+      // this.store = null;
+      // this.destroy = null;
+      // LabelStudio.instances.delete(this);
     };
   }
 

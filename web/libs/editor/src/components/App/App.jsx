@@ -153,10 +153,11 @@ class App extends Component {
   _renderUI(root, as) {
     if (as.viewingAll) return this.renderAllAnnotations();
 
+    console.log("_renderUI");
     return (
       <Block key={(as.selectedHistory ?? as.selected)?.id} name="main-view" onScrollCapture={this._notifyScroll}>
         <Elem name="annotation">
-          {<Annotation root={root} annotation={as.selected} />}
+          <Annotation root={root} annotation={as.selected} />
           {this.renderRelations(as.selected)}
           {isFF(FF_PER_FIELD_COMMENTS) && this.renderCommentsOverlay(as.selected)}
         </Elem>

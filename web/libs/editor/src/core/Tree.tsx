@@ -187,6 +187,7 @@ function attrsToProps(node: Element, replaces?: Record<string, string>): Record<
  * @param {string} html
  */
 function treeToModel(html: string, store: { task: { dataObj: Record<string, any> } }): ConfigNode {
+  const startTime = performance.now();
   const parser = new DOMParser();
 
   const doc = parser.parseFromString(html, "application/xml");
@@ -197,6 +198,9 @@ function treeToModel(html: string, store: { task: { dataObj: Record<string, any>
   if (parserError) {
     throw new Error(parserError);
   }
+
+  const endTime = performance.now();
+  console.log(`Parsing time taken: ${endTime - startTime} milliseconds`);
 
   return tagIntoObject(root, store.task?.dataObj ?? {});
 
@@ -211,11 +215,14 @@ function treeToModel(html: string, store: { task: { dataObj: Record<string, any>
   // return root;
 }
 
+let renderItemCount = 0;
 /**
  * Render items of tree
  * @param {*} el
  */
 function renderItem(ref: IAnyStateTreeNode, annotation: IAnnotation, includeKey = true) {
+  renderItemCount++;
+  console.log("renderItem", renderItemCount);
   let el = ref;
 
   if (isFF(FF_DEV_3391)) {
