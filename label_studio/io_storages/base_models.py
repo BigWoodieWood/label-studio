@@ -25,7 +25,7 @@ from django.utils.translation import gettext_lazy as _
 from django_rq import job
 from io_storages.utils import get_uri_via_regex
 from rq.job import Job
-from tasks.models import Annotation, Task
+from tasks.models import Annotation, Prediction, Task
 from tasks.serializers import AnnotationSerializer, PredictionSerializer
 from webhooks.models import WebhookAction
 from webhooks.utils import emit_webhooks_for_instance
@@ -299,66 +299,83 @@ class ImportStorage(Storage):
         raise NotImplementedError
 
     @classmethod
-    def add_task(cls, data, project, maximum_annotations, max_inner_id, storage, key, link_class):
-        # predictions
-        predictions = data.get('predictions', [])
-        if predictions:
-            if 'data' not in data:
+    def add_tasks_batch(cls, task_datas, keys, project, maximum_annotations, start_inner_id, storage, link_class):
+        tasks_to_create = []
+        task_input_refs = []  # [(predictions, annotations, key)]
+
+        inner_id = start_inner_id
+
+        # Prepare Task objects
+        for i, (task_data, key) in enumerate(zip(task_datas, keys)):
+            raw_data = task_data.get('data', {})
+            predictions = task_data.get('predictions', [])
+            if predictions and not raw_data:
                 raise ValueError(
                     'If you use "predictions" field in the task, ' 'you must put "data" field in the task too'
                 )
-
-        # annotations
-        annotations = data.get('annotations', [])
-        cancelled_annotations = 0
-        if annotations:
-            if 'data' not in data:
+            annotations = task_data.get('annotations', [])
+            if annotations and not raw_data:
                 raise ValueError(
                     'If you use "annotations" field in the task, ' 'you must put "data" field in the task too'
                 )
             cancelled_annotations = len([a for a in annotations if a.get('was_cancelled', False)])
 
-        if 'data' in data and isinstance(data['data'], dict):
-            data = data['data']
+            if not isinstance(raw_data, dict):
+                raise ValueError(f"Invalid or missing 'data' field for task at index {i}")
 
-        with transaction.atomic():
-            task = Task.objects.create(
-                data=data,
+            task = Task(
+                data=raw_data,
                 project=project,
                 overlap=maximum_annotations,
                 is_labeled=len(annotations) >= maximum_annotations,
                 total_predictions=len(predictions),
                 total_annotations=len(annotations) - cancelled_annotations,
                 cancelled_annotations=cancelled_annotations,
-                inner_id=max_inner_id,
+                inner_id=inner_id,
             )
+            tasks_to_create.append(task)
+            task_input_refs.append((predictions, annotations, key))
+            inner_id += 1
 
-            link_class.create(task, key, storage)
-            logger.debug(f'Create {storage.__class__.__name__} link with key={key} for task={task}')
+        raise_exception = not flag_set(
+            'ff_fix_back_dev_3342_storage_scan_with_invalid_annotations', user=AnonymousUser()
+        )
 
-            raise_exception = not flag_set(
-                'ff_fix_back_dev_3342_storage_scan_with_invalid_annotations', user=AnonymousUser()
-            )
+        with transaction.atomic():
+            created_tasks = Task.objects.bulk_create(tasks_to_create)
 
-            # add predictions
-            logger.debug(f'Create {len(predictions)} predictions for task={task}')
-            for prediction in predictions:
-                prediction['task'] = task.id
-                prediction['project'] = project.id
-            prediction_ser = PredictionSerializer(data=predictions, many=True)
-            if prediction_ser.is_valid(raise_exception=raise_exception):
-                prediction_ser.save()
+            predictions_to_create = []
+            annotations_to_create = []
 
-            # add annotations
-            logger.debug(f'Create {len(annotations)} annotations for task={task}')
-            for annotation in annotations:
-                annotation['task'] = task.id
-                annotation['project'] = project.id
-            annotation_ser = AnnotationSerializer(data=annotations, many=True)
-            if annotation_ser.is_valid(raise_exception=raise_exception):
-                annotation_ser.save()
-        return task
-        # FIXME: add_annotation_history / post_process_annotations should be here
+            for task, (preds, annos, key) in zip(created_tasks, task_input_refs):
+                # Validate predictions
+                if preds:
+                    for pred in preds:
+                        pred['task'] = task.id
+                        pred['project'] = project.id
+                    pred_ser = PredictionSerializer(data=preds, many=True)
+                    pred_ser.is_valid(raise_exception=raise_exception)
+                    predictions_to_create.extend(pred_ser.validated_data)
+
+                # Validate annotations
+                if annos:
+                    for anno in annos:
+                        anno['task'] = task.id
+                        anno['project'] = project.id
+                    annot_ser = AnnotationSerializer(data=annos, many=True)
+                    annot_ser.is_valid(raise_exception=raise_exception)
+                    annotations_to_create.extend(annot_ser.validated_data)
+
+                # Create storage link
+                link_class.create(task, key, storage)
+
+            # Save all related objects
+            if predictions_to_create:
+                Prediction.objects.bulk_create([Prediction(**item) for item in predictions_to_create])
+            if annotations_to_create:
+                Annotation.objects.bulk_create([Annotation(**item) for item in annotations_to_create])
+
+        return created_tasks
 
     def _scan_and_create_links(self, link_class):
         """
@@ -374,6 +391,8 @@ class ImportStorage(Storage):
         max_inner_id = (task.inner_id + 1) if task else 1
 
         tasks_for_webhook = []
+        tasks_to_create = []
+        keys = []
         for key in self.iterkeys():
             # w/o Dataflow
             # pubsub.push(topic, key)
@@ -398,30 +417,36 @@ class ImportStorage(Storage):
                     f'"Treat every bucket object as a source file"'
                 )
 
-            task = self.add_task(data, self.project, maximum_annotations, max_inner_id, self, key, link_class)
-            max_inner_id += 1
+            tasks_to_create.append(data)
+            keys.append(key)
+            if len(keys) == settings.CLOUD_IMPORT_TASK_CREATE_BATCH_SIZE:
+                created_tasks = self.add_tasks_batch(
+                    tasks_to_create, keys, self.project, maximum_annotations, max_inner_id, self, link_class
+                )
+                tasks_created += len(created_tasks)
+                self.info_update_progress(last_sync_count=tasks_created, tasks_existed=tasks_existed)
 
-            # update progress counters for storage info
-            tasks_created += 1
-
-            # add task to webhook list
-            tasks_for_webhook.append(task)
-
-            # settings.WEBHOOK_BATCH_SIZE
-            # `WEBHOOK_BATCH_SIZE` sets the maximum number of tasks sent in a single webhook call, ensuring manageable payload sizes.
-            # When `tasks_for_webhook` accumulates tasks equal to/exceeding `WEBHOOK_BATCH_SIZE`, they're sent in a webhook via
-            # `emit_webhooks_for_instance`, and `tasks_for_webhook` is cleared for new tasks.
-            # If tasks remain in `tasks_for_webhook` at process end (less than `WEBHOOK_BATCH_SIZE`), they're sent in a final webhook
-            # call to ensure all tasks are processed and no task is left unreported in the webhook.
-            if len(tasks_for_webhook) >= settings.WEBHOOK_BATCH_SIZE:
+                tasks_for_webhook.extend(created_tasks)
                 emit_webhooks_for_instance(
                     self.project.organization, self.project, WebhookAction.TASKS_CREATED, tasks_for_webhook
                 )
+
+                tasks_to_create = []
+                keys = []
                 tasks_for_webhook = []
-        if tasks_for_webhook:
-            emit_webhooks_for_instance(
-                self.project.organization, self.project, WebhookAction.TASKS_CREATED, tasks_for_webhook
+
+        if tasks_to_create:
+            created_tasks = self.add_tasks_batch(
+                tasks_to_create, keys, self.project, maximum_annotations, max_inner_id, self, link_class
             )
+            tasks_created += len(created_tasks)
+            self.info_update_progress(last_sync_count=tasks_created, tasks_existed=tasks_existed)
+
+            tasks_for_webhook = created_tasks
+            if tasks_for_webhook:
+                emit_webhooks_for_instance(
+                    self.project.organization, self.project, WebhookAction.TASKS_CREATED, tasks_for_webhook
+                )
 
         self.project.update_tasks_states(
             maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True
