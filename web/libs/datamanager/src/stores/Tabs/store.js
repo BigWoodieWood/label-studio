@@ -1,4 +1,4 @@
-import { applySnapshot, clone, destroy, flow, getRoot, getSnapshot, types } from "mobx-state-tree";
+import { applySnapshot, clone, destroy, flow, getRoot, getSnapshot, isAlive, types } from "mobx-state-tree";
 import { History } from "../../utils/history";
 import { guidGenerator } from "../../utils/random";
 import { isDefined, unique } from "../../utils/utils";
@@ -82,14 +82,26 @@ export const TabStore = types
   }))
   .views((self) => ({
     get all() {
+      if (!isAlive(self)) {
+        return [];
+      }
+
       return self.views;
     },
 
     get canClose() {
+      if (!isAlive(self)) {
+        return false;
+      }
+
       return self.all.length > 1;
     },
 
     get columns() {
+      if (!isAlive(self)) {
+        return [];
+      }
+
       const cols = self.columnsTargetMap ?? new Map();
 
       return cols.get(self.selected?.target ?? "tasks") ?? [];
@@ -117,6 +129,10 @@ export const TabStore = types
   }))
   .actions((self) => ({
     setSelected: flow(function* (view, options = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       let selected;
 
       if (typeof view === "string") {
@@ -153,6 +169,10 @@ export const TabStore = types
     }),
 
     deleteView: flow(function* (view, { autoselect = true } = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       if (autoselect && self.selected === view) {
         let newView;
 
@@ -175,6 +195,10 @@ export const TabStore = types
     }),
 
     createSnapshot(viewSnapshot = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const isVirtual = !!viewSnapshot?.virtual;
       const tabStorageKey = isVirtual && viewSnapshot.projectId ? `virtual-tab-${viewSnapshot.projectId}` : null;
       const existingTabStorage = isVirtual && localStorage.getItem(tabStorageKey);
@@ -212,6 +236,10 @@ export const TabStore = types
     },
 
     addView: flow(function* (viewSnapshot = {}, options) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const { autoselect = true, autosave = true, reload = true } = options ?? {};
 
       const newSnapshot = self.createSnapshot(viewSnapshot);
@@ -234,6 +262,10 @@ export const TabStore = types
     }),
 
     getViewByKey: flow(function* (key) {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       const view = self.views.find((v) => v.key === key);
 
       if (view) return view;
@@ -245,6 +277,10 @@ export const TabStore = types
     }),
 
     addVirtualView: flow(function* (viewSnapshot) {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       return yield self.addView(viewSnapshot, {
         autosave: false,
         // No need to select 'cause it's a selecting phase
@@ -253,6 +289,10 @@ export const TabStore = types
     }),
 
     createDefaultView: flow(function* () {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.views.push({
         id: 0,
         title: "Default",
@@ -271,6 +311,10 @@ export const TabStore = types
     }),
 
     snapshotFromUrl(viewQueryParam) {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       try {
         const viewSnapshot = deserializeJsonFromUrl(viewQueryParam);
 
@@ -283,10 +327,18 @@ export const TabStore = types
     },
 
     snapshotToUrl(snapshot) {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       return serializeJsonForUrl(snapshot);
     },
 
     saveView: flow(function* (view, { reload, interaction } = {}) {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       const needsLock = ["ordering", "filter"].includes(interaction);
 
       if (needsLock) view.lock();
@@ -334,6 +386,10 @@ export const TabStore = types
     }),
 
     updateViewOrder: flow(function* (source, destination) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       // Detach the view from the original position
       const [removed] = self.views.splice(source, 1);
       const sn = getSnapshot(removed);
@@ -351,6 +407,10 @@ export const TabStore = types
       getRoot(self).apiCall("orderTab", {}, { body: idList }, { alwaysExpectJSON: false });
     }),
     duplicateView: flow(function* (view) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const sn = getSnapshot(view);
 
       self.views.push({
@@ -369,24 +429,44 @@ export const TabStore = types
     }),
 
     createView(viewSnapshot) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       return Tab.create(viewSnapshot ?? {});
     },
 
     expandFilters() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.sidebarEnabled = storeValue("sidebarEnabled", true);
       self.sidebarVisible = storeValue("sidebarVisible", true);
     },
 
     collapseFilters() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.sidebarEnabled = storeValue("sidebarEnabled", false);
       self.sidebarVisible = storeValue("sidebarVisible", false);
     },
 
     toggleSidebar() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.sidebarVisible = storeValue("sidebarVisible", !self.sidebarVisible);
     },
 
     fetchColumns() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const columns = self.columnsRaw;
       const targets = unique(columns.map((c) => c.target));
       const hiddenColumns = {};
@@ -470,6 +550,10 @@ export const TabStore = types
     },
 
     fetchTabs: flow(function* (tab, taskID, labeling) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const tabId = Number.parseInt(tab);
       const response = yield getRoot(self).apiCall("tabs");
       const tabs = response.tabs ?? response ?? [];
@@ -508,6 +592,10 @@ export const TabStore = types
     }),
 
     fetchSingleTab: flow(function* (tabKey, selectedItems) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       let tab;
       const tabId = Number.parseInt(tabKey);
 

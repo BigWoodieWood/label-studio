@@ -39,6 +39,7 @@ const plugins = [
   new MiniCssExtractPlugin(),
   new DefinePlugin({
     "process.env.CSS_PREFIX": JSON.stringify(css_prefix),
+    "process.env.NODE_ENV": JSON.stringify(mode),
   }),
   new EnvironmentPlugin(LOCAL_ENV),
 ];

@@ -215,14 +215,11 @@ function treeToModel(html: string, store: { task: { dataObj: Record<string, any>
   // return root;
 }
 
-let renderItemCount = 0;
 /**
  * Render items of tree
  * @param {*} el
  */
 function renderItem(ref: IAnyStateTreeNode, annotation: IAnnotation, includeKey = true) {
-  renderItemCount++;
-  console.log("renderItem", renderItemCount);
   let el = ref;
 
   if (isFF(FF_DEV_3391)) {

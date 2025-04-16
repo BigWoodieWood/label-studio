@@ -1,4 +1,4 @@
-import { getRoot, getSnapshot, types } from "mobx-state-tree";
+import { getRoot, getSnapshot, isAlive, types } from "mobx-state-tree";
 import {
   IconCommentCheck,
   IconCommentRed,
@@ -78,6 +78,10 @@ export const TabColumn = types
   })
   .views((self) => ({
     get hidden() {
+      if (!isAlive(self)) {
+        return false;
+      }
+
       if (self.children) {
         return all(self.children, (c) => c.hidden);
       }
@@ -85,6 +89,10 @@ export const TabColumn = types
     },
 
     get parentView() {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       return getRoot(self).viewsStore.selected;
     },
 
@@ -197,15 +205,27 @@ export const TabColumn = types
   }))
   .actions((self) => ({
     toggleVisibility() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.parentView.toggleColumn(self);
     },
 
     setType(type) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.parentView.setColumnDisplayType(self.id, type);
       self.parentView.save();
     },
 
     setWidth(width) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const view = self.parentView;
 
       view.setColumnWidth(self.id, width ?? null);
@@ -213,6 +233,10 @@ export const TabColumn = types
     },
 
     resetWidth() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.parentView.setColumnWidth(self.id, null);
       self.parentView.save();
     },

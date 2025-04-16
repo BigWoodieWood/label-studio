@@ -71,7 +71,7 @@ const ProgressiveLoader: React.FC<ProgressiveLoaderProps> = ({ store, onHydratio
   useEffect(() => {
     // Mark hydration as complete after initial render
     const timer = setTimeout(() => {
-      onHydrationComplete();
+      // onHydrationComplete();
     }, 0);
 
     return () => clearTimeout(timer);
@@ -147,6 +147,7 @@ export class LabelStudio {
   }
 
   async createApp() {
+    console.trace("createApp");
     // Create store with a hydrated flag set to false initially
     const initialOptions = {
       ...this.options,
@@ -175,16 +176,17 @@ export class LabelStudio {
       // Use startTransition to indicate this is a non-urgent update
       // This allows React to split the work into chunks and yield to browser
       startTransition(() => {
+        const onHydrationComplete = () => {
+          // Once component tree is mounted, mark the store as hydrated
+          // This will trigger appropriate updates in the store
+          if (!this.store.hydrated) {
+            this.store.setHydrated(true);
+          }
+        };
         reactRoot.render(
           <ProgressiveLoader
             store={this.store}
-            onHydrationComplete={() => {
-              // Once component tree is mounted, mark the store as hydrated
-              // This will trigger appropriate updates in the store
-              if (!this.store.hydrated) {
-                this.store.setHydrated(true);
-              }
-            }}
+            onHydrationComplete={onHydrationComplete}
           />
         );
       });
@@ -194,18 +196,17 @@ export class LabelStudio {
 
     const clearRenderedApp = () => {
       if (reactRoot) {
-        console.log("clearRenderedApp");
-        // this.rootInstance.unmount();
-        // this.rootInstance = null;
-        // reactRoot.unmount();
-        // reactRoot = null;
+        console.trace("clearRenderedApp");
+        reactRoot.unmount();
+        reactRoot = null;
       }
 
       isRendered = false;
     };
 
     renderApp();
-    store.setAppControls({
+
+    this.store.setAppControls({
       isRendered() {
         return isRendered;
       },
@@ -214,14 +215,14 @@ export class LabelStudio {
     });
 
     this.destroy = () => {
-        // clearRenderedApp();
-      console.log("destroy");
-      // destroySharedStore();
-      // destroy(this.store);
+      clearRenderedApp();
+      console.trace("destroy");
+      destroySharedStore();
+      destroy(this.store);
       Hotkey.unbindAll();
-      // this.store = null;
-      // this.destroy = null;
-      // LabelStudio.instances.delete(this);
+      this.store = null;
+      this.destroy = null;
+      LabelStudio.instances.delete(this);
     };
   }
 

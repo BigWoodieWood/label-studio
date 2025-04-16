@@ -134,10 +134,6 @@ const Model = types
 
 const ViewModel = types.compose("ViewModel", TagAttrs, Model, VisibilityMixin, AnnotationMixin);
 
-const renderedItemCount = new WeakMap();
-
-window.renderedItemCount = renderedItemCount;
-
 const HtxView = observer(({ item }) => {
   let style = {};
   const viewRef = useRef({});
@@ -153,9 +149,6 @@ const HtxView = observer(({ item }) => {
   if (item.isVisible === false) {
     style.display = "none";
   }
-
-  renderedItemCount.set(viewRef.current, (renderedItemCount.get(viewRef.current) ?? 0) + 1);
-  console.log(`Rendered item count: ${renderedItemCount.get(viewRef.current)}`);
 
   return (
     <div id={item.idattr} className={item.classname} style={style}>

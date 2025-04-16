@@ -1,4 +1,4 @@
-import { destroy, flow, types } from "mobx-state-tree";
+import { destroy, flow, isAlive, types } from "mobx-state-tree";
 import { Modal } from "../components/Common/Modal/Modal";
 import { FF_DEV_2887, FF_LOPS_E_3, FF_REGION_VISIBILITY_FROM_URL, isFF } from "../utils/feature-flags";
 import { History } from "../utils/history";
@@ -79,22 +79,42 @@ export const AppStore = types
     },
 
     get isLabeling() {
+      if (!isAlive(self)) {
+        return false;
+      }
+
       return !!self.dataStore?.selected || self.isLabelStreamMode || self.mode === "labeling";
     },
 
     get isLabelStreamMode() {
+      if (!isAlive(self)) {
+        return false;
+      }
+
       return self.mode === "labelstream";
     },
 
     get isExplorerMode() {
+      if (!isAlive(self)) {
+        return false;
+      }
+
       return self.mode === "explorer" || self.mode === "labeling";
     },
 
     get currentView() {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       return self.viewsStore.selected;
     },
 
     get dataStore() {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       switch (self.target) {
         case "tasks":
           return self.taskStore;
@@ -106,14 +126,25 @@ export const AppStore = types
     },
 
     get target() {
+      if (!isAlive(self)) {
+        return "tasks";
+      }
+
       return self.viewsStore.selected?.target ?? "tasks";
     },
 
     get labelingIsConfigured() {
+      if (!isAlive(self)) {
+        return false;
+      }
       return self.project?.config_has_control_tags === true;
     },
 
     get labelingConfig() {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       return self.project.label_config_line ?? self.project.label_config;
     },
 
@@ -122,10 +153,18 @@ export const AppStore = types
     },
 
     get currentSelection() {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       return self.currentView.selected.snapshot;
     },
 
     get currentFilter() {
+      if (!isAlive(self)) {
+        return null;
+      }
+
       return self.currentView.filterSnapshot;
     },
   }))
@@ -136,6 +175,10 @@ export const AppStore = types
   }))
   .actions((self) => ({
     startPolling() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       if (self._poll) return;
       if (self.SDK.polling === false) return;
 
@@ -159,25 +202,44 @@ export const AppStore = types
     },
 
     setMode(mode) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.mode = mode;
     },
 
     setActions(actions) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       if (!Array.isArray(actions)) throw new Error("Actions must be an array");
       self.availableActions = actions;
     },
 
     removeAction(id) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const action = self.availableActions.find((action) => action.id === id);
 
       if (action) destroy(action);
     },
 
     interfaceEnabled(name) {
+      if (!isAlive(self)) {
+        return false;
+      }
+
       return self.interfaces.get(name) === true;
     },
 
     enableInterface(name) {
+      if (!isAlive(self)) {
+        return;
+      }
       if (!self.interfaces.has(name)) {
         console.warn(`Unknown interface ${name}`);
       } else {
@@ -186,6 +248,10 @@ export const AppStore = types
     },
 
     disableInterface(name) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       if (!self.interfaces.has(name)) {
         console.warn(`Unknown interface ${name}`);
       } else {
@@ -194,10 +260,17 @@ export const AppStore = types
     },
 
     setToolbar(toolbarString) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.toolbar = toolbarString;
     },
 
     setTask: flow(function* ({ taskID, annotationID, pushState }) {
+      if (!isAlive(self)) {
+        return;
+      }
       if (pushState !== false) {
         History.navigate({
           task: taskID,
@@ -283,10 +356,17 @@ export const AppStore = types
     }),
 
     setLoadingData(value) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.loadingData = value;
     },
 
     unsetTask(options) {
+      if (!isAlive(self)) {
+        return;
+      }
       try {
         self.annotationStore.unset();
         self.taskStore.unset();
@@ -300,11 +380,18 @@ export const AppStore = types
     },
 
     unsetSelection() {
+      if (!isAlive(self)) {
+        return;
+      }
       self.annotationStore.unset({ withHightlight: true });
       self.taskStore.unset({ withHightlight: true });
     },
 
     createDataStores() {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const grouppedColumns = self.viewsStore.columns.reduce((res, column) => {
         res.set(column.target, res.get(column.target) ?? []);
         res.get(column.target).push(column);
@@ -319,6 +406,10 @@ export const AppStore = types
     },
 
     startLabelStream(options = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       if (!self.confirmLabelingConfigured()) return;
 
       const nextAction = () => {
@@ -345,6 +436,10 @@ export const AppStore = types
     },
 
     startLabeling(item, options = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       if (!self.confirmLabelingConfigured()) return;
 
       if (self.dataStore.loadingItem) return;
@@ -390,6 +485,10 @@ export const AppStore = types
     },
 
     confirmLabelingConfigured() {
+      if (!isAlive(self)) {
+        return false;
+      }
+
       if (!self.labelingIsConfigured) {
         Modal.confirm({
           title: "You're almost there!",
@@ -405,6 +504,10 @@ export const AppStore = types
     },
 
     closeLabeling(options) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const { SDK } = self;
 
       self.unsetTask(options);
@@ -429,6 +532,10 @@ export const AppStore = types
     },
 
     handlePopState: (({ state }) => {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const { tab, task, annotation, labeling, region } = state ?? {};
 
       if (tab) {
@@ -468,10 +575,18 @@ export const AppStore = types
     },
 
     setLoading(value) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.loading = value;
     },
 
     fetchProject: flow(function* (options = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.projectFetch = options.force === true;
 
       const isTimer = options.interaction === "timer";
@@ -533,6 +648,10 @@ export const AppStore = types
     }),
 
     fetchActions: flow(function* () {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const serverActions = yield self.apiCall("actions");
 
       const actions = (serverActions ?? []).map((action) => {
@@ -543,12 +662,20 @@ export const AppStore = types
     }),
 
     fetchUsers: flow(function* () {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const list = yield self.apiCall("users", { __useQueryCache: 60 * 1000 });
 
       self.users.push(...list);
     }),
 
     fetchData: flow(function* ({ isLabelStream } = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       self.setLoading(true);
 
       const { tab, task, labeling, query } = History.getParams();
@@ -684,6 +811,10 @@ export const AppStore = types
     }),
 
     invokeAction: flow(function* (actionId, options = {}) {
+      if (!isAlive(self)) {
+        return;
+      }
+
       const view = self.currentView ?? {};
 
       const needsLock = self.availableActions.findIndex((a) => a.id === actionId) >= 0;
