@@ -2,6 +2,7 @@ from core.utils.common import temporary_disconnect_all_signals
 from django.db import transaction
 from organizations.models import Organization, OrganizationMember
 from projects.models import Project
+from django.conf import settings
 
 
 def create_organization(title, created_by, **kwargs):
@@ -16,6 +17,10 @@ def create_organization(title, created_by, **kwargs):
             # set auth tokens to new system for new users
             org.jwt.api_tokens_enabled = True
             org.jwt.legacy_api_tokens_enabled = False
+            org.jwt.save()
+        # Enable legacy API tokens if the flag or environment variable is set
+        if kwargs.get('enable_legacy_api_token') or settings.LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN:
+            org.jwt.legacy_api_tokens_enabled = True
             org.jwt.save()
         return org
 
