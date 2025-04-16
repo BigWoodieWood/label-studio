@@ -177,6 +177,11 @@ def _create_user(input_args, config):
     user.active_organization = org
     user.save(update_fields=['active_organization'])
 
+    # Enable legacy API tokens if the flag or environment variable is set
+    if input_args.enable_legacy_api_token or get_env('LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN', False):
+        org.jwt.legacy_api_tokens_enabled = True
+        org.jwt.save(update_fields=['legacy_api_tokens_enabled'])
+
     return user
 
 
