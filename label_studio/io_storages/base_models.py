@@ -327,7 +327,7 @@ class ImportStorage(Storage):
             # If 'data' is in the dict - we are importing LS JSON and should use 'data' key
             # If not, then we are importing data using use_blob_urls = True
             if 'data' in task_data and isinstance(task_data['data'], dict):
-                task_data = data['data']
+                task_data = task_data['data']
 
             task = Task(
                 data=task_data,
