@@ -305,26 +305,32 @@ class ImportStorage(Storage):
 
         inner_id = start_inner_id
 
-        # Prepare Task objects
+        """
+        Prepare Task objects
+        task_data comes from self.get_data(key) - if use_blob_urls then we will have a dict like
+        {settings.DATA_UNDEFINED_NAME: blob_uri}
+        if not use_blob_urls then dict will be the full JSON task
+        """
         for i, (task_data, key) in enumerate(zip(task_datas, keys)):
-            raw_data = task_data.get('data', {})
             predictions = task_data.get('predictions', [])
-            if predictions and not raw_data:
+            if predictions and 'data' not in task_data:
                 raise ValueError(
                     'If you use "predictions" field in the task, ' 'you must put "data" field in the task too'
                 )
             annotations = task_data.get('annotations', [])
-            if annotations and not raw_data:
+            if annotations and 'data' not in task_data:
                 raise ValueError(
                     'If you use "annotations" field in the task, ' 'you must put "data" field in the task too'
                 )
             cancelled_annotations = len([a for a in annotations if a.get('was_cancelled', False)])
 
-            if not isinstance(raw_data, dict):
-                raise ValueError(f"Invalid or missing 'data' field for task at index {i}")
+            # If 'data' is in the dict - we are importing LS JSON and should use 'data' key
+            # If not, then we are importing data using use_blob_urls = True
+            if 'data' in task_data and isinstance(task_data['data'], dict):
+                task_data = data['data']
 
             task = Task(
-                data=raw_data,
+                data=task_data,
                 project=project,
                 overlap=maximum_annotations,
                 is_labeled=len(annotations) >= maximum_annotations,
@@ -435,6 +441,7 @@ class ImportStorage(Storage):
                 keys = []
                 tasks_for_webhook = []
 
+        # Create any left over tasks
         if tasks_to_create:
             created_tasks = self.add_tasks_batch(
                 tasks_to_create, keys, self.project, maximum_annotations, max_inner_id, self, link_class
