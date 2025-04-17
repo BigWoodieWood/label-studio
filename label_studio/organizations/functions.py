@@ -1,8 +1,8 @@
 from core.utils.common import temporary_disconnect_all_signals
+from django.conf import settings
 from django.db import transaction
 from organizations.models import Organization, OrganizationMember
 from projects.models import Project
-from django.conf import settings
 
 
 def create_organization(title, created_by, legacy_api_tokens_enabled=False, **kwargs):
