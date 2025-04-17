@@ -215,12 +215,18 @@ export class LabelStudio {
     });
 
     this.destroy = () => {
-      clearRenderedApp();
       console.trace("destroy");
+
+      clearRenderedApp();
+
       destroySharedStore();
-      destroy(this.store);
+
+      if (this.store) {
+        destroy(this.store);
+        this.store = null;
+      }
+
       Hotkey.unbindAll();
-      this.store = null;
       this.destroy = null;
       LabelStudio.instances.delete(this);
     };
