@@ -127,7 +127,6 @@ class AllImportStorageListAPI(generics.ListAPIView):
             response = view(request._request, *args, **kwargs)
             payload = response.data
             if not isinstance(payload, list):
-                print(f'{payload=}')
                 raise ValueError('Response is not list')
             return response.data
         except Exception:
