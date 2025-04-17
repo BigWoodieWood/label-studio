@@ -821,5 +821,5 @@ if CI:
 
 LOGOUT_REDIRECT_URL = get_env('LOGOUT_REDIRECT_URL', None)
 
-# Add LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN environment variable
+# Enable legacy tokens (useful for running with a pre-existing token via `LABEL_STUDIO_USER_TOKEN`)
 LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN = get_bool_env('LABEL_STUDIO_ENABLE_LEGACY_API_TOKEN', False)
