@@ -483,36 +483,38 @@ export const ImportPage = ({
             )}
 
             <div className="w-[650px]">
-              {projectConfigured && ff.isFF(ff.FF_JSON_PREVIEW) ? (
+              {ff.isFF(ff.FF_JSON_PREVIEW) && (
                 <SimpleCard title="Expected input preview" className="w-[650px] h-full">
-                  {sampleConfig.data ? (
-                    <CodeBlock
-                      title="Expected input preview"
-                      code={sampleConfig?.data ?? ""}
-                      className="w-[650px] h-full"
-                    />
-                  ) : sampleConfig.isLoading ? (
-                    <div className="w-full flex justify-center py-12">
-                      <Spinner className="h-6 w-6" />
-                    </div>
-                  ) : sampleConfig.isError ? (
-                    <div className="w-full pt-4 text-lg text-negative-content">Unable to load sample data</div>
-                  ) : null}
+                  {projectConfigured ? (
+                    sampleConfig.data ? (
+                      <CodeBlock
+                        title="Expected input preview"
+                        code={sampleConfig?.data ?? ""}
+                        className="w-[650px] h-full"
+                      />
+                    ) : sampleConfig.isLoading ? (
+                      <div className="w-full flex justify-center py-12">
+                        <Spinner className="h-6 w-6" />
+                      </div>
+                    ) : sampleConfig.isError ? (
+                      <div className="w-full pt-4 text-lg text-negative-content">Unable to load sample data</div>
+                    ) : null
+                  ) : (
+                    <>
+                      Set up your{" "}
+                      <button
+                        type="button"
+                        look="link"
+                        onClick={openConfig}
+                        className="border-none bg-none p-0 m-0 text-primary-content underline"
+                      >
+                        labeling configuration
+                      </button>{" "}
+                      to generate an input preview.
+                    </>
+                  )}
                 </SimpleCard>
-              ) : ff.isFF(ff.FF_JSON_PREVIEW) ? (
-                <SimpleCard title="Expected input preview" className="w-[650px] h-full">
-                  Set up your{" "}
-                  <button
-                    type="button"
-                    look="link"
-                    onClick={openConfig}
-                    className="border-none bg-none p-0 m-0 text-primary-content underline"
-                  >
-                    labeling configuration
-                  </button>{" "}
-                  to generate an input preview.
-                </SimpleCard>
-              ) : null}
+              )}
             </div>
           </div>
         </Upload>
