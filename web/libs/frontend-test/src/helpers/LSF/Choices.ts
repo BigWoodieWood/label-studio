@@ -20,7 +20,7 @@ class ChoicesHelper {
   }
 
   get select() {
-    return this.root.find("[data-testid*=select-trigger]");
+    return this.root.find(".ant-select");
   }
 
   findChoice(text: string) {
@@ -40,8 +40,7 @@ class ChoicesHelper {
   }
 
   findOption(text: string) {
-    const option = cy.get(`[data-testid*='select-option'][data-value="${text}"] [data-testid=choiceOptionText]`);
-    return option;
+    return cy.get(".ant-select-dropdown").find(".ant-select-item-option").contains(text);
   }
 }
 

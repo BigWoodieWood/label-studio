@@ -3,7 +3,7 @@ const Helpers = require("../tests/helpers");
 
 module.exports = {
   _rootSelector: ".lsf-paragraphs",
-  _filterSelector: "button[data-testid*='select-trigger']",
+  _filterSelector: ".lsf-select__value",
   _phraseSelector: "[class^='phrase--']",
   _phraseDialoguetextSelector: "[class^='dialoguetext--']",
 
@@ -36,30 +36,11 @@ module.exports = {
   },
 
   clickFilter(...authors) {
-    // Open dropdown and wait for it to appear
-    I.click(locate(this._filterSelector));
-    I.wait(0.5);
-    // For the new select component, we need to select each author
-    // and the dropdown is managed automatically
+    I.click(this.locate(this._filterSelector));
     for (const author of authors) {
-      // We may or may not have a search field depending on number of options
-      const hasSearchField = I.executeScript(() => {
-        return !!document.querySelector("input[data-testid='select-search-field']");
-      });
-
-      if (hasSearchField) {
-        // Try to search if field is available
-        I.fillField(locate("input[data-testid='select-search-field']"), author);
-        I.wait(0.5);
-      }
-
-      // Select the author option
-      I.click(locate(`div[data-testid='select-option-${author}']`));
-      I.wait(0.5);
+      I.fillField("search_author", author);
+      I.click(locate(".lsf-select__option").withText(author));
     }
-
-    // Close any open dropdown
-    I.pressKey("Escape");
-    I.wait(1); // Wait for UI to update after filter change
+    I.click(this.locate(this._filterSelector));
   },
 };

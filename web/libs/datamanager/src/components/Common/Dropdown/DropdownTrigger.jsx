@@ -4,20 +4,7 @@ import { Dropdown } from "./DropdownComponent";
 import { DropdownContext } from "./DropdownContext";
 
 export const DropdownTrigger = React.forwardRef(
-  (
-    {
-      tag,
-      children,
-      dropdown,
-      content,
-      toggle,
-      closeOnClickOutside = true,
-      disabled = false,
-      isChildValid = (element) => false,
-      ...props
-    },
-    ref,
-  ) => {
+  ({ tag, children, dropdown, content, toggle, closeOnClickOutside = true, disabled = false, ...props }, ref) => {
     if (children.length > 2) throw new Error("Trigger can't contain more that one child and a dropdown");
     const dropdownRef = ref ?? dropdown ?? React.useRef();
     const triggerEL = React.Children.only(children);
@@ -35,9 +22,9 @@ export const DropdownTrigger = React.forwardRef(
           return res || child.hasTarget(target);
         }, false);
 
-        return triggerClicked || dropdownClicked || childDropdownClicked || isChildValid(target);
+        return triggerClicked || dropdownClicked || childDropdownClicked;
       },
-      [triggerRef, dropdownRef, isChildValid],
+      [triggerRef, dropdownRef],
     );
 
     const handleClick = React.useCallback(

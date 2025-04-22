@@ -1,3 +1,4 @@
+import { Select } from "antd";
 import { observer } from "mobx-react";
 import { types } from "mobx-state-tree";
 
@@ -20,11 +21,12 @@ import DynamicChildrenMixin from "../../mixins/DynamicChildrenMixin";
 import { FF_LSDV_4583, isFF } from "../../utils/feature-flags";
 import { ReadOnlyControlMixin } from "../../mixins/ReadOnlyMixin";
 import SelectedChoiceMixin from "../../mixins/SelectedChoiceMixin";
+import { HintTooltip } from "../../components/Taxonomy/Taxonomy";
 import ClassificationBase from "./ClassificationBase";
 import PerItemMixin from "../../mixins/PerItem";
 import Infomodal from "../../components/Infomodal/Infomodal";
-import { useMemo } from "react";
-import { Select, Tooltip } from "@humansignal/ui";
+
+const { Option } = Select;
 
 /**
  * The `Choices` tag is used to create a group of choices, with radio buttons or checkboxes. It can be used for single or multi-class classification. Also, it is used for advanced classification tasks where annotators can choose one or multiple answers.
@@ -251,25 +253,11 @@ const ChoicesModel = types.compose(
 );
 
 const ChoicesSelectLayout = observer(({ item }) => {
-  const options = useMemo(
-    () =>
-      item.tiedChildren.map((i) => ({
-        value: i._value,
-        label: (
-          <Tooltip title={i.hint}>
-            <span data-testid="choiceOptionText" className="w-full">
-              {i._value}
-            </span>
-          </Tooltip>
-        ),
-      })),
-    [item.tiedChildren],
-  );
   return (
     <Select
       style={{ width: "100%" }}
       value={item.selectedLabels.map((l) => l._value)}
-      multiple={item.choice === "multiple"}
+      mode={item.choice === "multiple" ? "multiple" : ""}
       disabled={item.isReadOnly()}
       onChange={(val) => {
         if (Array.isArray(val)) {
@@ -284,8 +272,15 @@ const ChoicesSelectLayout = observer(({ item }) => {
           }
         }
       }}
-      options={options}
-    />
+    >
+      {item.tiedChildren.map((i) => (
+        <Option key={i._value} value={i._value}>
+          <HintTooltip title={i.hint} wrapper="div">
+            {i._value}
+          </HintTooltip>
+        </Option>
+      ))}
+    </Select>
   );
 });
 

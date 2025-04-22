@@ -1,10 +1,8 @@
 .input-ls,
 .select-ls,
 .textarea-ls {
-  --input-size: 40px;
-
-  height: var(--input-size);
-  min-height: var(--input-size);
+  height: 40px;
+  min-height: 40px;
   background: var(--sand_0);
   font-size: 16px;
   line-height: 22px;

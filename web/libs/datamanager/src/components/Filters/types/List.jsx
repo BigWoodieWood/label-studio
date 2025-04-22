@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { FilterDropdown } from "../FilterDropdown";
 // import { Common } from "./Common";
 
-export const VariantSelect = observer(({ filter, schema, onChange, multiple, value, placeholder }) => {
+export const VariantSelect = observer(({ filter, schema, onChange, multiple, value }) => {
   if (!schema) return <></>;
   const { items } = schema;
 
@@ -14,9 +14,10 @@ export const VariantSelect = observer(({ filter, schema, onChange, multiple, val
   })();
 
   const FilterItem = filter.cellView?.FilterItem;
+
   return (
     <FilterDropdown
-      items={items?.toJSON ? items.toJSON() : items}
+      items={items}
       value={selectedValue}
       multiple={multiple}
       optionRender={FilterItem}
@@ -27,9 +28,7 @@ export const VariantSelect = observer(({ filter, schema, onChange, multiple, val
             }
           : undefined
       }
-      searchFilter={filter.cellView?.searchFilter}
       onChange={(value) => onChange(value)}
-      placeholder={placeholder ?? "Select value"}
     />
   );
 });

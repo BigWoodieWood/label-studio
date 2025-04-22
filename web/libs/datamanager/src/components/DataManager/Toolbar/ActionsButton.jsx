@@ -50,7 +50,6 @@ export const ActionsButton = injector(
             store.SDK.invoke("actionDialogOk", action.id, { body });
             store.invokeAction(action.id, { body });
           },
-          closeOnClickOutside: false,
         });
       } else {
         store.invokeAction(action.id);

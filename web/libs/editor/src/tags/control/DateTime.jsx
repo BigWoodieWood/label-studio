@@ -15,7 +15,6 @@ import { ReadOnlyControlMixin } from "../../mixins/ReadOnlyMixin";
 import ClassificationBase from "./ClassificationBase";
 import PerItemMixin from "../../mixins/PerItem";
 import { FF_LSDV_4583, isFF } from "../../utils/feature-flags";
-import { Select } from "@humansignal/ui";
 
 const FORMAT_FULL = "%Y-%m-%dT%H:%M";
 const FORMAT_DATE = "%Y-%m-%d";
@@ -177,7 +176,7 @@ const Model = types
     const date = new Date();
     const getYear = (minmax) => {
       if (minmax === "current") return date.getFullYear();
-      if (minmax.length === 4) return Number.parseInt(minmax);
+      if (minmax.length === 4) return minmax;
       return self.parseDateTime(minmax)?.getFullYear();
     };
     const minYear = getYear(self.min ?? "2000");
@@ -254,13 +253,13 @@ const Model = types
       }
     },
 
-    onMonthChange(val) {
-      self.month = +val || undefined;
+    onMonthChange(e) {
+      self.month = +e.target.value || undefined;
       self.updateResult();
     },
 
-    onYearChange(val) {
-      self.year = +val || undefined;
+    onYearChange(e) {
+      self.year = +e.target.value || undefined;
       self.updateResult();
     },
 
@@ -339,6 +338,7 @@ const HtxDateTime = inject("store")(
     const visibleStyle = item.perRegionVisible() ? { margin: "0 0 1em" } : { display: "none" };
     const visual = {
       style: { width: "auto", marginRight: "4px", borderColor: item.isValid ? undefined : "red" },
+      className: "ant-input",
     };
     const [minTime, maxTime] = [item.min, item.max].map((s) => s?.match(/\d?\d:\d\d/)?.[0]);
     const [dateInputValue, setDateInputValue] = useState("");
@@ -367,28 +367,36 @@ const HtxDateTime = inject("store")(
     return (
       <div className="htx-datetime" style={visibleStyle} ref={item.elementRef}>
         {item.showMonth && (
-          <Select
+          <select
             {...visual}
             name={`${item.name}-date`}
             disabled={disabled}
             value={item.month}
-            placeholder="Month..."
-            onChange={(val) => (disabled ? undefined : item.onMonthChange(val))}
-            options={item.months.map((month, index) => ({ value: index + 1, label: month }))}
-            isInline={true}
-          />
+            onChange={disabled ? undefined : item.onMonthChange}
+          >
+            <option value="">Month...</option>
+            {item.months.map((month, index) => (
+              <option key={month} value={index + 1}>
+                {month}
+              </option>
+            ))}
+          </select>
         )}
         {item.showYear && (
-          <Select
+          <select
             {...visual}
             name={`${item.name}-year`}
             disabled={disabled}
             value={item.year || ""}
-            placeholder="Year..."
-            onChange={(val) => (disabled ? undefined : item.onYearChange(val))}
-            options={item.years}
-            isInline={true}
-          />
+            onChange={disabled ? undefined : item.onYearChange}
+          >
+            <option value="">Year...</option>
+            {item.years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
         )}
         {item.showDate && (
           <input

@@ -13,7 +13,7 @@ import {
   useState,
 } from "react";
 import { IconPropertyAngle } from "@humansignal/icons";
-import { Checkbox, Select } from "@humansignal/ui";
+import { Checkbox } from "@humansignal/ui";
 import { Block, Elem, useBEM } from "../../../utils/bem";
 import { FF_DEV_2715, isFF } from "../../../utils/feature-flags";
 import { TimeDurationControl } from "../../TimeDurationControl/TimeDurationControl";
@@ -189,12 +189,17 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
           onChange={(v) => onChangeHandler(Number(v))}
         />
       ) : options ? (
-        <Select
+        <select
           value={value}
-          onChange={(val) => onChangeHandler(val)}
+          onChange={(e) => onChangeHandler(e.target.value)}
           className={block?.elem("select").toClassName()}
-          options={options}
-        />
+        >
+          {options.map((value, i) => (
+            <option key={`${value}-${i}`} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
       ) : null}
       <PropertyLabel label={label} />
     </Elem>

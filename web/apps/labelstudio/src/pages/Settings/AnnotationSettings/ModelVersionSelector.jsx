@@ -82,10 +82,9 @@ export const ModelVersionSelector = ({
             name={name}
             disabled={!versions.length && !models.length}
             value={version}
-            onChange={setVersion}
+            onChange={(e) => setVersion(e.target.value)}
             options={[...models, ...versions]}
-            placeholder={placeholder || "Please select model or predictions"}
-            isInProgress={loading}
+            placeholder={loading ? "Loading ..." : placeholder ? placeholder : "Please select model or predictions"}
             {...props}
           />
         </div>

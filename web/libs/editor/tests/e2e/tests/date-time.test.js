@@ -5,11 +5,6 @@ const { serialize, selectText } = require("./helpers");
 Feature("Date Time");
 
 const config = `<View>
-<style>
-[data-radix-popper-content-wrapper] {
-  z-index: 9999 !important;
-}
-</style>
 <Header>Select text to see related smaller DateTime controls for every region</Header>
 <Labels name="label" toName="text">
   <Label value="birth" background="green"/>
@@ -140,13 +135,13 @@ Scenario(
 
     AtOutliner.clickRegion(regions[0].text);
     // less than min
-    I.click(locate("[data-testid*=select-trigger][data-name=year-year]"));
-    I.dontSee("1999");
-    // less than max
-    I.dontSee("2023");
-    I.see("2022");
+    I.selectOption("select[name=year-year]", "1999");
+    assert.strictEqual("", await I.grabValueFrom("select[name=year-year]"));
+    // more than max
+    I.selectOption("select[name=year-year]", "2023");
+    assert.strictEqual("", await I.grabValueFrom("select[name=year-year]"));
     // exactly the same as max, should be correct
-    I.click("div[data-testid='select-option-2022']");
+    I.selectOption("select[name=year-year]", "2022");
     assert.strictEqual("2022", await I.grabValueFrom("select[name=year-year]"));
     I.pressKey("Escape");
 

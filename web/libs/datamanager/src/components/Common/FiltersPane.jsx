@@ -58,9 +58,6 @@ export const FiltersPane = injector(
         disabled={sidebarEnabled}
         content={<Filters />}
         openUpwardForShortViewport={false}
-        isChildValid={(ele) => {
-          return !!ele.closest("[data-radix-popper-content-wrapper]");
-        }}
       >
         <FiltersButton {...rest} size={size} />
       </Dropdown.Trigger>
