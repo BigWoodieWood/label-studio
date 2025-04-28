@@ -178,19 +178,19 @@ export const AnnotationButton = observer(
             {
               label: "Duplicate Annotation",
               onClick: duplicateAnnotation,
-              icon: <IconDuplicate width={20} height={20} />,
+              icon: <IconDuplicate width={16} height={20} />,
               enabled: showDuplicateAnnotation,
             },
             {
               label: "Copy Annotation Link",
               onClick: linkAnnotation,
-              icon: <IconLink />,
+              icon: <IconLink width={24} height={24} />,
               enabled: !isDraft && store.hasInterface("annotations:copy-link"),
             },
             {
               label: "Delete Annotation",
               onClick: deleteAnnotation,
-              icon: <IconTrashRect />,
+              icon: <IconTrashRect width={14} height={18} />,
               separator: true,
               danger: true,
               enabled: capabilities.enableAnnotationDelete && !isPrediction,

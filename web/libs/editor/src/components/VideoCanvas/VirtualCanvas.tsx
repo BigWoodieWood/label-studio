@@ -22,7 +22,7 @@ export const VirtualCanvas = forwardRef<HTMLCanvasElement, VirtualCanvasProps>((
 
     canvas.width = props.width;
     canvas.height = props.height;
-    canvas.style.background = "transparent";
+    canvas.style.background = "#efefef";
 
     canvasRef.current = canvas;
     rootRef.current?.appendChild(canvas);

@@ -12,13 +12,9 @@
   position: sticky;
   display: flex;
   box-sizing: border-box;
-  background-color: var(--color-neutral-background);
-  border-bottom: 1px solid var(--color-neutral-border);
-  transition: background-color 400ms ease-out;
-
-  &__spacer {
-    width: var(--spacing-tight);
-  }
+  background-color: var(--sand_0);
+  justify-content: space-evenly;
+  border-bottom: 1px solid var(--sand_300);
 
   &__context {
     flex: 1;
@@ -35,10 +31,6 @@
       display: flex;
       align-items: center;
     }
-
-    .button-ls {
-      height: 32px;
-    }
   }
 
   &__trigger {
@@ -50,18 +42,7 @@
     min-width: 240px;
     max-width: 240px;
     box-sizing: border-box;
-    border-right: 1px solid var(--color-neutral-border);
-    transition: all 150ms ease-out;
-
-    &:hover {
-      background-color: var(--color-neutral-emphasis-subtle);
-    }
-  }
-
-  &__logo {
-    color: var(--color-neutral-content);
-    height: 22px;
-    width: 142px;
+    box-shadow: 1px 0 0 0 rgb(0 0 0 / 10%);
   }
 
   &__user {
@@ -94,13 +75,12 @@
   margin-top: -8px;
   font-size: 14px;
   position: relative;
-  background: var(--color-primary-background);
-  color: var(--color-neutral-content);
+  background: var(--grape_100);
   line-height: 1.4em;
   transition: 0.2s all;
 
   .main-menu &:hover {
-    background: var(--color-primary-emphasis-subtle);
+    background: var(--grape_100);
   }
 }
 

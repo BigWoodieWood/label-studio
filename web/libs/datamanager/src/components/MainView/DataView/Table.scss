@@ -3,7 +3,8 @@
   display: flex;
   overflow: hidden;
   flex-direction: column;
-  background: var(--color-neutral-background);
+  background: var(--sand_0);
+  margin-bottom: 2.5rem;
 }
 
 .no-results {
@@ -14,14 +15,9 @@
   align-items: center;
 
   &__description {
-    h3 {
-      color: var(--color-neutral-content);
-    }
-
     font-size: 16px;
     text-align: center;
-    color: var(--color-neutral-content-subtler);
-    margin-bottom: 8px;
+    color: rgb(var(--black-raw) / 60%);
   }
 }
 
@@ -33,7 +29,7 @@
   align-items: center;
   font-size: 16px;
   text-align: center;
-  color: var(--color-neutral-content-subtler);
+  color: var(--sand_600);
 
   .button-dm {
     color: var(--primary_link);

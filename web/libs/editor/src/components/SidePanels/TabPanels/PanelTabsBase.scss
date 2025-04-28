@@ -3,12 +3,12 @@
 .tabs-panel {
   --header-height: 24px;
   --header-border-radius: 0;
-  --header-background: var(--color-neutral-surface-inset);
-  --icon-color: var(--color-neutral-icon);
-  --handle-size-hover: 2px;
+  --header-background: var(--sand_200);
+  --icon-color: var(--sand_500);
 
   height: 100%;
   z-index: 10;
+  background-color: var(--sand_0);
   pointer-events: all;
 
   &__header {
@@ -20,7 +20,7 @@
     font-size: 13px;
     font-weight: 700;
     line-height: 16px;
-    color: var(--color-neutral-content-subtler);
+    color: var(--sand_600);
     user-select: none;
     position: sticky;
     align-items: center;
@@ -29,8 +29,8 @@
     padding: 4px;
 
     &:hover {
-      --icon-color: var(--color-primary-icon);
-      --header-background: var(--color-primary-emphasis-subtle);
+      --icon-color: var(--grape_500);
+      --header-background: var(--grape_0);
     }
 
     &_collapsed {
@@ -40,7 +40,7 @@
       padding: 0;
       cursor: pointer;
 
-      --icon-color: var(--color-neutral-icon);
+      --icon-color: var(--sand_400);
 
       svg {
         transform: rotate(180deg);
@@ -52,7 +52,7 @@
   &__header-left {
     display: flex;
     align-items: center;
-    gap: var(--spacing-tighter);
+    gap: var(--spacing-small-x, 4px);
   }
 
   &__header-left {
@@ -63,13 +63,13 @@
     padding: 4px;
 
     &_left {
-      border-right: 1px solid var(--color-neutral-border);
+      border-right: 1px solid var(--sand_300);
 
       --header-border-radius: 0 4px 4px 0;
     }
 
     &_right {
-      border-left: 1px solid var(--color-neutral-border);
+      border-left: 1px solid var(--sand_300);
 
       --header-border-radius: 4px 0 0 4px;
     }
@@ -79,7 +79,7 @@
     top: 0;
     left: 0;
     position: absolute;
-    border: 1px solid var(--color-neutral-border);
+    border: 1px solid var(--sand_300);
     box-shadow: 0 6px 10px 4px rgb(38 38 38 / 15%), 0 2px 3px rgb(38 38 38 / 30%);
 
     & .tabs-panel_hidden {
@@ -94,11 +94,11 @@
     background: none;
     height: calc(100% - 16px);
 
-    --icon-color: var(--color-neutral-subtlest);
+    --icon-color: var(--sand_400);
 
     &:hover {
-      --icon-color: var(--color-primary-icon);
-      --header-background: var(--color-primary-emphasis-subtle);
+      --icon-color: var(--grape_500);
+      --header-background: var(--grape_0);
     }
   }
 
@@ -124,7 +124,7 @@
       cursor: pointer;
 
       &::before {
-        color: var(--color-neutral-background);
+        color: var(--sand_0);
         font-size: 16px;
         font-weight: 500;
         padding: 4px 16px;
@@ -132,7 +132,7 @@
         z-index: 100;
         white-space: nowrap;
         border-radius: 4px;
-        background-color: var(--color-neutral-inverted-background);
+        background-color: var(--sand_900);
         content: attr(data-tooltip);
         left: 50%;
         transform: translate(-50%, -110%);
@@ -207,6 +207,7 @@
 
   &__resizer {
     --size: 12px;
+    --visual-size: 2px;
 
     z-index: 10;
     position: absolute;
@@ -300,7 +301,7 @@
       height: 6px;
       display: none;
       position: absolute;
-      background-color: var(--color-primary-border);
+      background-color: var(--grape_500);
       border-radius: 100%;
     }
 
@@ -316,7 +317,7 @@
     &[data-resize="top"]::before,
     &[data-resize="bottom"]::before {
       top: 50%;
-      height: var(--handle-size-hover);
+      height: var(--visual-size);
       transform: translate(0, -50%);
       width: calc(100% + var(--size));
       left: calc(var(--size) / 2 * -1);
@@ -325,7 +326,7 @@
     &[data-resize="left"]::before,
     &[data-resize="right"]::before {
       left: 50%;
-      width: var(--handle-size-hover);
+      width: var(--visual-size);
       transform: translate(-50%, 0);
       height: calc(100% + var(--size));
       top: calc(var(--size) / 2 * -1);
@@ -348,11 +349,12 @@
 
     &:hover::before,
     &_drag::before {
-      background-color: var(--color-primary-border-subtle);
+      background-color: var(--grape_500);
       content: '';
       width: calc(100% + 50px);
-      height: var(--handle-size-hover);
+      height: 3px;
       position: absolute;
+      border-radius: 3px;
       transform: translate(0, -50%);
       cursor: ns-resize;
     }
@@ -365,7 +367,8 @@
     width: 100%;
     height: 6px;
     position: absolute;
-    background-color: var(--color-primary-border-subtle);
+    background-color: var(--grape_500);
+    border-radius: 6px;
   }
 
   &_dragBottom::after {

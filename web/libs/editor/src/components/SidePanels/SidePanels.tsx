@@ -97,7 +97,6 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
   const rootRef = useRef<HTMLDivElement>();
   const [snap, setSnap] = useState<"left" | "right" | undefined>();
   const localSnap = useRef(snap);
-  localSnap.current = snap;
   const [panelData, setPanelData] = useState<PanelSize>({
     outliner: restorePanel("outliner", {
       top: 0,
@@ -435,6 +434,10 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
   }, [panelData, commonProps, panelsHidden, sidepanelsCollapsed, positioning, panelMaxWidth]);
 
   useEffect(() => {
+    localSnap.current = snap;
+  }, [snap]);
+
+  useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
@@ -508,7 +511,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
                   }
 
                   return (
-                    <Elem key={key} name="wrapper" mod={{ align: key, snap: snap === key && snap !== undefined }}>
+                    <Elem key={key} name="wrapper" mod={{ align: key, snap: snap === key }}>
                       {content}
                     </Elem>
                   );

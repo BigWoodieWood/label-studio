@@ -3,9 +3,8 @@
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  box-shadow: 0 -1px 0 var(--color-neutral-border) inset;
-  background: var(--color-neutral-surface-inset);
-  padding: 2px 0 0 2px;
+  box-shadow: 0 -1px 0 #D9D9D9 inset;
+  background: var(--sand_200);
 
   &-content {
     &__draggable {
@@ -20,31 +19,26 @@
   &__droppable {
     display: flex;
     overflow: hidden;
-    gap: 2px;
   }
 
   &__list {
     display: flex;
     min-width: 0;
-    gap: 2px;
   }
 
   &__item {
-    background-color: var(--color-neutral-surface);
-    color: var(--color-neutral-content-subtler);
+    color: rgb(0 0 0 / 50%);
     width: 100%;
     overflow: hidden;
     cursor: pointer;
     position: relative;
-    box-shadow: -1px 0 0 var(--color-neutral-border) inset, 1px 0 0 var(--color-neutral-border) inset, 0 1px 0 var(--color-neutral-border-subtle) inset, 0 -3px 0 var(--color-neutral-border) inset;
-    border-top-left-radius: var(--corner-radius-small);
-    border-top-right-radius: var(--corner-radius-small);
+    box-shadow: -0.5px 0 0 #D9D9D9 inset, 0.5px 0 0 #D9D9D9 inset;
 
     &_active {
-      color: var(--color-neutral-content);
+      color: black;
       cursor: default;
-      background-color: var(--color-neutral-background);
-      box-shadow: -1px 0 0 var(--color-neutral-border) inset, 1px 0 0 var(--color-neutral-border) inset, 0 1px 0 var(--color-neutral-border) inset;
+      background-color: var(--white);
+      box-shadow: -0.5px 0 0 #D9D9D9 inset, 0.5px 0 0 #D9D9D9 inset;
 
       & .tabs-dm__item-right-button {
         display: flex;
@@ -104,24 +98,20 @@
     padding: 0;
     border: none;
     outline: none;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    align-self: center;
-    color: var(--color-neutral-content-subtler);
+    color: var(--black_15) !important;
     background: none;
-    transition: all 150ms ease-out;
 
     &:focus {
       box-shadow: none;
     }
 
     &:hover {
-      background-color: var(--color-primary-emphasis-subtle);
-      color: var(--color-primary-content);
-      border: 0;
+      color: rgb(0 0 0 / 35%) !important;
     }
   }
 
@@ -129,14 +119,14 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    position: absolute;
+    position: absolute; 
     bottom: 0;
     z-index: 1000;
     width: 100%;
     right: 0;
     left: 0;
-    background: var(--color-neutral-background);
-    border-top: 1px solid var(--color-neutral-border);
+    background: var(--sand_200);
+    border-top: 1px solid var(--sand_300);
     padding: .625rem 1rem;
   }
 }

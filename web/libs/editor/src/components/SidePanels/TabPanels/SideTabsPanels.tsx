@@ -265,7 +265,6 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
           maxHeight,
           alignment: setDetached ? undefined : panel.alignment,
         });
-        setSnap(undefined);
       });
     },
     [updatePanel, checkSnap, panelData, positioning],
@@ -317,7 +316,6 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
               ? clamp(h, DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_MAX_HEIGHT)
               : panelData[panelKey].height,
           });
-          setSnap(undefined);
         });
       });
     },
@@ -502,7 +500,6 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
         viewportSize.current.height = clientHeight ?? 0;
         setViewportSizeMatch(checkContentFit());
         setPanelMaxWidth(rootRef.current.clientWidth * 0.4);
-        setSnap(undefined);
       });
     });
 
@@ -580,11 +577,7 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
                     return <Fragment key={panelType}>{content}</Fragment>;
                   }
                   return (
-                    <Elem
-                      key={panelType}
-                      name="wrapper"
-                      mod={{ align: panelType, snap: !lockPanelContents && snap === panelType && snap !== undefined }}
-                    >
+                    <Elem key={panelType} name="wrapper" mod={{ align: panelType, snap: snap === panelType }}>
                       {content}
                     </Elem>
                   );

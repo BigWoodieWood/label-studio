@@ -75,6 +75,7 @@ export const instruments = {
         marginRight: 4,
       },
       icon: IconChevronDown,
+      color: "var(--black)",
     };
     return (
       <FieldsButton

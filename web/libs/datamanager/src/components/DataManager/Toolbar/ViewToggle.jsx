@@ -15,7 +15,7 @@ export const ViewToggle = viewInjector(
         value={view.type}
         onChange={(e) => view.setType(e.target.value)}
         {...rest}
-        style={{ "--button-padding": "0 var(--spacing-tighter)" }}
+        style={{ "--button-padding": "0 var(--spacing-small-x, 4px)" }}
       >
         <Tooltip title="List view">
           <div>

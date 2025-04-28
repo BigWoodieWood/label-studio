@@ -6,7 +6,7 @@
   &__content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-wide);
+    gap: var(--spacing-large);
     max-width: 660px;
 
     h1 {
@@ -17,20 +17,20 @@
 }
 
 .accountSettingsPadding {
-  padding: var(--spacing-wide);
+  padding: var(--spacing-large);
 }
 
 .sectionContent {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: var(--spacing-wide);
+  gap: var(--spacing-large);
 }
 
 .flexRow {
   display: flex;
   align-items: center;
-  gap: var(--spacing-wide);
+  gap: var(--spacing-large);
 
   &.flexEnd {
     justify-content: flex-end;

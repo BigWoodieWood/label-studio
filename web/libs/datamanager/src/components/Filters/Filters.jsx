@@ -81,7 +81,7 @@ export const Filters = injector(({ views, currentView, filters }) => {
               size="small"
               about="Pin to sidebar"
               onClick={() => views.expandFilters()}
-              style={{ display: "inline-flex", alignItems: "center", padding: 0, width: "var(--button-height)" }}
+              style={{ display: "inline-flex", alignItems: "center" }}
               icon={<Icon icon={IconChevronRight} size={18} />}
             />
           </Tooltip>

@@ -15,7 +15,7 @@
     margin-top: 5px;
     font-size: 14px;
     line-height: 22px;
-    color: var(--color-neutral-subtler);
+    color: var(--sand_500);
   }
 
   &__field {
@@ -48,7 +48,7 @@
 
   &[data-required] &__text::after {
     content: "Required";
-    color: var(--color-neutral-content-subtler);
+    color: var(--sand_500);
   }
 
   &_placement_right {

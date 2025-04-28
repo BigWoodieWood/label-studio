@@ -1,6 +1,5 @@
 .label-ls {
   margin-bottom: 0;
-  color: var(--color-neutral-content);
 
   &__text {
     display: flex;
@@ -11,17 +10,16 @@
 
   &__description {
     font-size: 0.875rem;
-    color: var(--color-neutral-content-subtler);
+    color: var(--sand_600);
     font-weight: 400;
     line-height: 140%;
 
     a {
-      color: var(--color-primary-content);
+      color: var(--grape_500);
       text-decoration: underline;
 
       &:hover {
         text-decoration: none;
-        color: var(--color-primary-content-hover);
       }
     }
   }

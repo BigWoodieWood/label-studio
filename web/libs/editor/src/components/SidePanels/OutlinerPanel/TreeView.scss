@@ -13,11 +13,10 @@
     position: relative;
     max-width: 100%;
     box-sizing: border-box;
-    transition: all 150ms ease-out;
 
     &:hover,
     &-selected {
-      background-color: var(--selection-color, var(--color-neutral-emphasis-subtle));
+      background-color: var(--selection-color, var(--sand_100));
     }
 
     &:hover .outliner-item__controls {
@@ -52,7 +51,7 @@
   &-node {
     &-content-wrapper {
       flex: 1;
-      padding: var(--spacing-tighter);
+      padding: var(--spacing-small-x, 4px);
       display: flex;
       align-items: flex-start;
     }
@@ -101,13 +100,6 @@
   &__node {
     border: 1px dashed transparent;
 
-    &_type_tool {
-      .tree-iconEle,
-      .outliner-item__title {
-        color: var(--color-neutral-content);
-      }
-    }
-
     &_hidden {
       opacity: 0.4;
     }
@@ -131,7 +123,7 @@
     min-height: 32px;
     align-items: center;
     justify-content: space-between;
-    gap: var(--spacing-tighter);
+    gap: var(--spacing-small-x, 4px);
   }
 
   &__index {
@@ -140,19 +132,19 @@
     display: flex;
     flex: none;
     font-size: 9px;
-    color: var(--color-sand-000); // TODO: Revisit this with a css variable that can be calculated against --text-color for a dynamically high contrast value.
+    color: var(--sand_0);
     text-align: center;
     align-items: center;
     border-radius: 4px;
     justify-content: center;
-    background-color: var(--text-color, var(--color-neutral-inverted-background));
+    background-color: var(--text-color, var(--sand_900));
   }
 
   &__title {
     align-items: center;
     display: inline-flex;
     flex: 1;
-    color: var(--text-color, var(--color-neutral-content));
+    color: var(--text-color, var(--sand_900));
     min-width: 50px;
   }
 
@@ -163,7 +155,7 @@
 
   &__text {
     margin-left: 5px;
-    color: var(--color-neutral-content);
+    color: var(--sand_900);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -271,7 +263,7 @@
 
   &_hidden {
     & .ocr {
-      background: var(--color-neutral-background);
+      background: var(--sand_0);
     }
   }
 }

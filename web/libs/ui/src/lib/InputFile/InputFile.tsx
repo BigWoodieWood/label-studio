@@ -38,6 +38,7 @@ export const InputFile = forwardRef(({ name, className, text, onChange, ...props
         name={name}
         {...props}
         onChange={onChange}
+        tabIndex={-1}
       />
     </label>
   );

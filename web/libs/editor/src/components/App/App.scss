@@ -1,16 +1,11 @@
 @import "../../assets/styles/global";
 
-body {
-  background: var(--color-neutral-background);
-}
-
 .editor {
-  --main-bg-color: var(--color-neutral-surface);
+  --main-bg-color: var(--sand_100);
   --sticky-items-offset: 48px;
   --topbar-height: 48px;
   --bottombar-height: 0;
 
-  color: var(--color-neutral-content);
   width: 100%;
   height: 100%;
   min-width: 320px;
@@ -18,11 +13,11 @@ body {
   display: flex;
   flex-flow: column nowrap;
   align-items: stretch;
-  background-color: transparent;
+  background-color: var(--main-bg-color);
 
   &_fullscreen {
     position: absolute;
-    background: var(--color-neutral-surface);
+    background: var(--sand_0);
     top: 0;
     left: 0;
     width: 100%;
@@ -74,9 +69,9 @@ body {
   &__infobar {
     padding: 6px 1em 7px;
     font-size: 14px;
-    color: var(--color-neutral-content-subtler);
+    color: var(--sand_600);
     background-color: var(--main-bg-color);
-    border-top: 1px solid var(--color-neutral-border);
+    border-top: 1px solid var(--sand_300);
     position: sticky;
     bottom: 0;
     z-index: 5;
@@ -94,10 +89,10 @@ body {
   &__key {
     padding: 0 4px;
     height: 16px;
-    color: var(--color-neutral-content);
+    color: var(--sand_900);
     display: inline-flex;
     align-items: center;
-    background: var(--color-neutral-background);
+    background: var(--sand_0);
     border-radius: 2px;
     font-weight: bold;
     font-size: 12px;
@@ -126,8 +121,8 @@ body {
   flex-flow: column;
   z-index: 100;
   align-self: stretch;
-  background-color: var(--color-neutral-background);
-  border-left: 1px solid var(--color-neutral-border);
+  background-color: var(--sand_0);
+  border-left: 1px solid var(--sand_300);
 
   @include respond("phone") {
     margin-left: 0;
@@ -153,12 +148,4 @@ body {
     width: 0;
     min-width: auto;
   }
-}
-
-:global(.ant-result-title) {
-  color: var(--color-neutral-content);
-}
-
-:global(.ant-result-success .ant-result-icon>.anticon) {
-  color: var(--color-positive-icon);
 }

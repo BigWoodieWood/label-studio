@@ -1,11 +1,11 @@
 .filters {
-  background-color: var(--color-neutral-background);
+  background-color: white;
   position: relative;
 
   &:not(&_sidebar) {
-    padding-top: var(--spacing-tight);
+    padding-top: 10px;
     min-width: 400px;
-    border-radius: var(--corner-radius-small);
+    border-radius: 2px;
     box-shadow: 0 3px 6px -4px rgb(0 0 0 / 12%),
       0 6px 16px 0 rgb(0 0 0 / 8%), 0 9px 28px 8px var(--black_5);
   }
@@ -14,8 +14,8 @@
     width: 100%;
 
     .filter-line {
-      padding-right: var(--spacing-tight);
-      padding-left: var(--spacing-tight);
+      padding-right: 10px;
+      padding-left: 10px;
       align-items: stretch;
 
       .ant-divider {
@@ -31,6 +31,10 @@
         flex-direction: column;
       }
 
+      &__remove {
+        height: 56px;
+      }
+
       &__group {
         flex: 1;
         padding: 2px 0;
@@ -41,41 +45,31 @@
 
   &__actions {
     display: flex;
-    margin-top: var(--spacing-base);
-    padding: 0 var(--spacing-tight) var(--spacing-tight);
+    margin-top: 10px;
+    padding: 0 10px 10px;
     justify-content: space-between;
-
-    .button-dm {
-      border: 1px solid var(--color-neutral-border);
-
-      &:hover {
-        border: 1px solid var(--color-neutral-border);
-      }
-    }
   }
 
   &__empty {
-    padding: 0 var(--spacing-tight);
+    padding: 0 10px;
     font-size: 14px;
-    color: var(--color-neutral-content-subtler);
+    color: #585858;
   }
 
   &__list {
-    padding: var(--spacing-tight) var(--spacing-tight) var(--spacing-tighter);
+    padding: 0 10px;
 
     &_withFilters {
       display: grid;
-      grid-template-columns: 75px min-content min-content 1fr min-content;
-      grid-gap: 4px;
+      grid-template-columns: 65px min-content min-content 1fr min-content;
+      grid-gap: 3px 4px;
     }
   }
 
   &_sidebar &__list {
-    padding: var(--spacing-base) var(--spacing-tight) var(--spacing-tighter);
-
     &_withFilters {
       grid-template-columns: 1fr 1fr 24px;
-      grid-row-gap: 4px;
+      grid-row-gap: 5px;
       grid-auto-flow: row;
       align-items: center;
     }
@@ -85,7 +79,7 @@
 .filter-data-tag {
   margin: 1px;
   font-size: 12px;
-  padding: 2px 4px;
+  padding: 3px 5px;
   display: inline-flex;
   align-items: center;
 }

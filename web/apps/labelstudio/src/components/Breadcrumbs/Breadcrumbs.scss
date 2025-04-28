@@ -46,11 +46,7 @@
 
       & > span,
       & > a {
-        color: var(--color-neutral-content-subtler);
-
-        &:hover {
-          color: var(--color-primary-content-hover);
-        }
+        color: var(--sand_600) !important;
       }
     }
 
@@ -72,10 +68,10 @@
   &__item > span,
   &__item > a {
     text-decoration: none;
-    color: var(--color-neutral-content);
+    color: var(--sand_900);
 
-    a {
-      color: var(--color-primary-content);
+    &:hover {
+      color: var(--grape_500) !important;
     }
   }
 
@@ -90,7 +86,7 @@
     content: "/";
     height: 16px;
     display: block;
-    color: var(--color-neutral-content-subtlest);
+    color: var(--sand_600);
     position: absolute;
     transform: translate3d(0, -50%, 0);
     text-align: center;

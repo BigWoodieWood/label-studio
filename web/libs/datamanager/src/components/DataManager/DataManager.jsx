@@ -45,7 +45,7 @@ const switchInjector = inject(({ store }) => {
 
 const ProjectSummary = summaryInjector((props) => {
   return (
-    <Space size="large" style={{ paddingRight: "1em", color: "var(--color-neutral-content-subtle)" }}>
+    <Space size="large" style={{ paddingRight: "1em" }}>
       {props.cloudSync && (
         <Space size="small" style={{ fontSize: 12, fontWeight: 400, opacity: 0.8 }}>
           Storage sync
@@ -97,7 +97,7 @@ const TabsSwitch = switchInjector(
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 style={{
-                  background: snapshot.isDragging,
+                  background: snapshot.isDragging && "#ddd",
                   ...provided.draggableProps.style,
                 }}
               >

@@ -5,17 +5,16 @@
 
   &__model-exists-info {
     margin-bottom: 20px;
-    background: var(--color-neutral-background);
-    color: var(--color-negative-content);
+    background: var(--sand_0);
     padding: 10px 20px;
-    border: 1px solid var(--color-neutral-border);
+    border: 1px solid var(--sand_300);
     border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
   }
-
+ 
   &__title-block {
     margin: 20px 0;
     margin-top: 0;
@@ -23,7 +22,6 @@
 
   &__title {
     font-weight: 500;
-    color: var(--color-neutral-content);
   }
 }
 
@@ -42,7 +40,7 @@
   }
 
   &__status {
-    color: var(--color-neutral-content);
+    color: var(--sand_500);
     display: flex;
     align-items: center;
     margin-right: 10px;
@@ -61,20 +59,20 @@
     background-color: var(--indicator-color);
 
     &_state_CO {
-      --indicator-color: var(--color-positive-surface);
+      --indicator-color: var(--success_color);
     }
 
     &_state_DI {
-      --indicator-color: var(--color-warning-surface);
+      --indicator-color: var(--canteloupe_400);
     }
 
     &_state_ER {
-      --indicator-color: var(--color-negative-surface);
+      --indicator-color: var(--danger_color);
     }
 
     &_state_TR,
     &_state_PR {
-      --indicator-color: var(--color-primary-surface);
+      --indicator-color: var(--grape_500);
 
       position: relative;
 

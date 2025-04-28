@@ -5,11 +5,10 @@
   z-index: 150;
   font-weight: 500;
   overflow: visible;
-  background-color: var(--color-neutral-background);
+  background-color: var(--white);
   min-width: fit-content;
   font-size: 14px;
-  border-bottom: 1px solid var(--color-neutral-border);
-  color: var(--color-neutral-content);
+  border-bottom: 1px solid #D8D5DD;
 
   &__extra {
     flex: 1;
@@ -20,7 +19,7 @@
   }
 
   &__column-extra {
-    margin: 0 2px 0 10px;
+    margin-left: 10px;
     display: flex;
     align-items: center;
   }
