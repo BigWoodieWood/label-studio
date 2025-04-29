@@ -30,6 +30,11 @@ export const FF_LSDV_4711 = "fflag_fix_all_lsdv_4711_cors_errors_accessing_task_
  * Enables "Enterprise Awareness" features
  */
 export const FF_LSDV_E_297 = "fflag_feat_front_lsdv_e_297_increase_oss_to_enterprise_adoption_short";
+
+/**
+ * Project list search
+ */
+export const FF_PROD_281 = "fflag_feat_front_prod_281_project_list_search_19072023_short";
 //// END OF LEGACY FLAGS ////
 
 /**
@@ -62,3 +67,23 @@ export const FF_HOMEPAGE = "fflag_all_feat_dia_1777_ls_homepage_short";
  * Sample datasets UI for the import flow
  */
 export const FF_SAMPLE_DATASETS = "fflag_feat_dia_1920_project_creation_sample_data_short";
+
+/**
+ * JSON preview window for the import flow
+ */
+export const FF_JSON_PREVIEW = "fflag_feat_dia_1925_view_sample_raw_json_short";
+
+/**
+ * Optimizes the way projects list is loaded
+ */
+export const FF_USE_NEW_PROJECTS_COUNTS_API = "fflag_feat_front_optic_1351_use_new_projects_counts_api_short";
+
+/**
+ * Allow to resize spans in Text tag
+ */
+export const FF_ADJUSTABLE_SPANS = "fflag_feat_front_leap_1973_adjustable_spans_090425_short";
+
+/**
+ * Enables the theme toggle in the UI
+ */
+export const FF_THEME_TOGGLE = "fflag_feat_front_optic_1217_theme_toggle_short";
