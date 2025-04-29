@@ -42,6 +42,19 @@ class ImportStorageListAPI(generics.ListCreateAPIView):
         StorageClass.ensure_storage_statuses(storages)
         return storages
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        # inject the LSE billing limit as a header, to check if adding a new storage is possible
+        if hasattr(request, 'billing_checks'):
+            try:
+                billing_checks = request.billing_checks
+                limit_reached = billing_checks['import_storages']['reached']
+                response['x-ls-limit-reached'] = limit_reached
+            except Exception as e:
+                logger.error(f"Can't get billing checks: {e}", exc_info=True)
+
+        return response
+
 
 class ImportStorageDetailAPI(generics.RetrieveUpdateDestroyAPIView):
     """RUD storage by pk specified in URL"""
@@ -86,6 +99,19 @@ class ExportStorageListAPI(generics.ListCreateAPIView):
         storage = serializer.save()
         if settings.SYNC_ON_TARGET_STORAGE_CREATION:
             storage.sync()
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        # inject the LSE billing limit as a header, to check if adding a new storage is possible
+        if hasattr(request, 'billing_checks'):
+            try:
+                billing_checks = request.billing_checks
+                limit_reached = billing_checks['export_storages']['reached']
+                response['x-ls-limit-reached'] = limit_reached
+            except Exception as e:
+                logger.error(f"Can't get billing checks: {e}", exc_info=True)
+
+        return response
 
 
 class ExportStorageDetailAPI(generics.RetrieveUpdateDestroyAPIView):
