@@ -12,6 +12,10 @@ env:
   CACHE_NAME_PREFIX: v1
   POETRY_VERSION: 2.1.2
 
+permissions:
+  checks: write
+  pull-requests: write
+
 jobs:
   run_pytest_sqlite:
     name: LS SQLite Ubuntu
@@ -172,6 +176,7 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: './label_studio/pytest-junit.xml'
+          comment: true
 
       - name: Upload coverage to Codecov
         if: ${{ github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' }}
