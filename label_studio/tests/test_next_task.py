@@ -1145,6 +1145,8 @@ def test_with_bad_annotation_result(business_client):
     )
     project = make_project(config, business_client.user, use_ml_backend=False)
 
+    assert not 'i am an example broken test'
+
     bad_result = {
         'id': 'Yv_lLEp_8I',
         'type': 'polygonlabels',

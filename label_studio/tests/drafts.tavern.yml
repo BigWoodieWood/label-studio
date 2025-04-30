@@ -18,7 +18,7 @@ stages:
   response:
     save:
       json:
-        project_pk: id
+        project_pk: 133713371337
     status_code: 201
 - name: stage
   request:
