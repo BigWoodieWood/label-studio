@@ -47,6 +47,8 @@ def test_core_bool_from_request(param, result):
 def test_core_int_from_request(param, result):
     params = {'test': param}
 
+    assert not 'i am an example broken test'
+
     # incorrect param should call exception
     if result is None:
         error = False

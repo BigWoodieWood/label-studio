@@ -81,7 +81,6 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: './label_studio/pytest-junit.xml'
-          annotate_only: true
 
   run_pytest_postgresql:
     name: LS PostgreSQL Ubuntu
@@ -173,7 +172,6 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: './label_studio/pytest-junit.xml'
-          annotate_only: true
 
       - name: Upload coverage to Codecov
         if: ${{ github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' }}
@@ -253,4 +251,3 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: './label_studio/pytest-junit.xml'
-          annotate_only: true
