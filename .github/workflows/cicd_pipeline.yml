@@ -222,6 +222,9 @@ jobs:
     name: "Tests"
     needs:
       - changed_files
+    permissions:
+      checks: write
+      pull-requests: write
     if: needs.changed_files.outputs.src == 'true'
     uses: ./.github/workflows/tests.yml
     with:
