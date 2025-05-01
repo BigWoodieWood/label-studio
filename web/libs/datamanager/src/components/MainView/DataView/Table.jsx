@@ -13,6 +13,7 @@ import { Tag } from "../../Common/Tag/Tag";
 import { Tooltip } from "@humansignal/ui";
 import { IconQuestionOutline } from "@humansignal/icons";
 import { GridView } from "../GridView/GridView";
+import { ScatterView } from "../ScatterView/ScatterView";
 import "./Table.scss";
 import { Button } from "../../Common/Button/Button";
 import { useState } from "react";
@@ -295,7 +296,7 @@ export const DataView = injector(
             col.original.resetWidth();
           }}
         />
-      ) : (
+      ) : viewType === "grid" ? (
         <GridView
           view={view}
           data={data}
@@ -304,6 +305,13 @@ export const DataView = injector(
           onChange={(id) => view.toggleSelected(id)}
           hiddenFields={hiddenColumns}
           stopInteractions={isLocked}
+        />
+      ) : (
+        <ScatterView
+          view={view}
+          data={data}
+          loadMore={loadMore}
+          onChange={(id) => view.toggleSelected(id)}
         />
       );
 

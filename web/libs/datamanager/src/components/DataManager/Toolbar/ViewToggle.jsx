@@ -31,6 +31,13 @@ export const ViewToggle = viewInjector(
             </RadioGroup.Button>
           </div>
         </Tooltip>
+        <Tooltip title="Scatter view">
+          <div>
+            <RadioGroup.Button value="scatter">
+              <span style={{ fontSize: 14 }}>• • •</span>
+            </RadioGroup.Button>
+          </div>
+        </Tooltip>
       </RadioGroup>
     );
   }),

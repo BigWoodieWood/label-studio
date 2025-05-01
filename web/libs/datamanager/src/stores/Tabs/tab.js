@@ -21,7 +21,7 @@ export const Tab = types
 
     key: types.optional(types.string, guidGenerator),
 
-    type: types.optional(types.enumeration(["list", "grid"]), "list"),
+    type: types.optional(types.enumeration(["list", "grid", "scatter"]), "list"),
 
     target: types.optional(types.enumeration(["tasks", "annotations"]), "tasks"),
 
