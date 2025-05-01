@@ -183,10 +183,24 @@ export const ScatterView: FC<ScatterViewProps> = observer(
 
           // Update triggers tell Deck.gl when to re-evaluate accessors
           updateTriggers: {
-            getRadius: [hoveredId, view.selected], 
-            getFillColor: [hoveredId, palette], 
-            getLineColor: [hoveredId, view.selected], 
-            getLineWidth: [hoveredId, view.selected], 
+            getRadius: [hoveredId, view.selected],
+            getFillColor: [hoveredId, palette, view.selected],
+            getLineColor: [hoveredId, view.selected],
+            getLineWidth: [hoveredId, view.selected],
+          },
+
+          // Explicitly trigger redraw when numericPoints array reference changes.
+          // This helps ensure updates when filters change the dataset.
+          _dataDiff: (newData, oldData) => {
+            // If the data array reference has changed, treat the entire dataset as new.
+            // This forces a full update when filters change the `numericPoints` array.
+            if (newData !== oldData) {
+              // Deck.gl expects an array of ranges indicating changed data.
+              // For a full refresh, return [{ startRow: 0 }].
+              return [{ startRow: 0 }]; 
+            }
+            // If references are the same, return an empty array to indicate no changes via this hint.
+            return []; 
           },
         }),
         // TODO: Add TextLayer, IconLayer etc. here later if needed
