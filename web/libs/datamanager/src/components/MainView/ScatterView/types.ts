@@ -4,6 +4,7 @@ export interface TaskData {
   text?: string;
   image?: string;
   category?: string;
+  // Allow flexible task data structures from various projects
   [key: string]: any;
 }
 

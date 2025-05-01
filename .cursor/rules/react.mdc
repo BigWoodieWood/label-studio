@@ -125,4 +125,22 @@ globs: **/*.jsx,**/*.tsx
 - Keep components focused on a single responsibility
 - Document complex logic with clear comments
 - Follow the project's folder structure and naming conventions
-- Prefer controlled components over uncontrolled ones 
+- Prefer controlled components over uncontrolled ones
+
+## Readability & Formatting
+
+- Always run `make fmt-all` (Prettier/Biome/Ruff) before committing.
+- Use spaces around binary operators and after commas: `const xs = pts.map(p => p.data.x);` not `pts.map(p=>p.data.x)`.
+- Limit line length to 100 chars; break long expressions.
+
+## Declarative Rendering vs Imperative Canvas
+
+- Prefer **declarative SVG** (or a React-first charting lib such as `@visx/xy-chart`, `recharts`, `nivo`) for 2-D data‐viz inside React.  
+- Use `<canvas>` / WebGL only when the point count or performance proves SVG insufficient (≈10-15 k nodes).  
+- When falling back to Canvas keep render code in a pure utility (no React imports) and drive it via props/state.
+
+## Documentation & Comments
+
+- Top-level JSDoc for every exported component/hook explaining props & side-effects.
+- Inline comments for non-obvious math / transforms.  
+- Avoid redundant comments; prefer expressive variable names. 
