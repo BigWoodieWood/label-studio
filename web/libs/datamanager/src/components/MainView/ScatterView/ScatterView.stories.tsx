@@ -1,30 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ScatterView } from "./ScatterView";
+import type { TaskPoint } from "./types";
+// Import the actual component props type
+import type { ScatterViewProps } from "./ScatterView";
 
-// Define the expected props interface for ScatterView
-interface ScatterViewProps {
-  data: Array<{
-    id: string;
-    data?: {
-      x?: number;
-      y?: number;
-      text?: string;
-      image?: string;
-      category?: string;
-      [key: string]: any;
-    };
-    [key: string]: any;
-  }>;
-  view: {
-    toggleSelected: (id: string) => void;
-    selected: {
-      isSelected: (id: string) => boolean;
-    };
-    [key: string]: any;
-  };
-  onChange?: (id: string) => void;
-  loadMore?: () => Promise<void>;
-}
+// Use the imported props type, making onChange optional for stories
+type StoryProps = Omit<ScatterViewProps, 'onChange'> & {
+  onChange?: ScatterViewProps['onChange'];
+};
 
 /**
  * ScatterView is a component that displays tasks as points on a 2D scatter plot.
@@ -32,22 +15,22 @@ interface ScatterViewProps {
  */
 const meta: Meta<typeof ScatterView> = {
   component: ScatterView,
-  title: "DataManager/Views/ScatterView",
+  title: "DataManager/Views/ScatterView (Deck.gl)",
   tags: ["autodocs"],
   parameters: {
-    layout: "fullscreen",
+    layout: "padded",
   },
   argTypes: {
     data: { control: "object" },
     onChange: { action: "pointSelected" },
   },
-} as Meta<ScatterViewProps>;
+} as Meta<StoryProps>; // Use the derived story props type
 
 export default meta;
-type Story = StoryObj<typeof ScatterView>;
+type Story = StoryObj<StoryProps>; // Use the derived story props type
 
 // Mock data
-const generateMockData = (count: number, categories = 4) => {
+const generateMockData = (count: number, categories = 4): TaskPoint[] => {
   const result = [];
   const categoryLabels = ["animal", "vehicle", "landscape", "interior"];
   
@@ -88,13 +71,19 @@ const mockView = {
 };
 
 /**
- * Default story showing a scatter plot with clustered data points
+ * Default story showing a Deck.gl scatter plot with clustered data points.
+ * Wrap in a div with size for DeckGL.
  */
 export const Default: Story = {
   args: {
     data: generateMockData(40),
     view: mockView,
   },
+  render: (args) => (
+    <div style={{ height: "600px", width: "100%", position: "relative" }}>
+      <ScatterView {...args} />
+    </div>
+  ),
 };
 
 /**
@@ -105,6 +94,11 @@ export const FewPoints: Story = {
     data: generateMockData(8, 2),
     view: mockView,
   },
+  render: (args) => (
+    <div style={{ height: "600px", width: "100%", position: "relative" }}>
+      <ScatterView {...args} />
+    </div>
+  ),
 };
 
 /**
@@ -115,6 +109,11 @@ export const ManyPoints: Story = {
     data: generateMockData(200),
     view: mockView,
   },
+  render: (args) => (
+    <div style={{ height: "600px", width: "100%", position: "relative" }}>
+      <ScatterView {...args} />
+    </div>
+  ),
 };
 
 /**
@@ -125,6 +124,11 @@ export const NoData: Story = {
     data: [],
     view: mockView,
   },
+  render: (args) => (
+    <div style={{ height: "600px", width: "100%", position: "relative" }}>
+      <ScatterView {...args} />
+    </div>
+  ),
 };
 
 /**
@@ -139,6 +143,11 @@ export const MissingCoordinates: Story = {
     ],
     view: mockView,
   },
+  render: (args) => (
+    <div style={{ height: "600px", width: "100%", position: "relative" }}>
+      <ScatterView {...args} />
+    </div>
+  ),
 };
 
 /**
@@ -154,12 +163,9 @@ export const WithSelection: Story = {
       },
     },
   },
-  render: (args: ScatterViewProps) => {
-    // Update the ScatterView to handle selection highlighting
-    return (
-      <div style={{ width: "100%", height: "600px" }}>
-        <ScatterView {...args} />
-      </div>
-    );
-  },
+  render: (args) => (
+    <div style={{ height: "600px", width: "100%", position: "relative" }}>
+      <ScatterView {...args} />
+    </div>
+  ),
 }; 
