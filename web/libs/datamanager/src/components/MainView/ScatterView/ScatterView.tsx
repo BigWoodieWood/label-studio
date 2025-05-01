@@ -184,10 +184,10 @@ export const ScatterView: FC<ScatterViewProps> = observer(
 
           // Update triggers tell Deck.gl when to re-evaluate accessors
           updateTriggers: {
-            getRadius: [hoveredId, view.selected],
-            getFillColor: [hoveredId, palette, view.selected],
-            getLineColor: [hoveredId, view.selected],
-            getLineWidth: [hoveredId, view.selected],
+            getRadius: [hoveredId, view.selected, numericPoints.length],
+            getFillColor: [hoveredId, palette, view.selected, numericPoints.length],
+            getLineColor: [hoveredId, view.selected, numericPoints.length],
+            getLineWidth: [hoveredId, view.selected, numericPoints.length],
           },
         }),
         // TODO: Add TextLayer, IconLayer etc. here later if needed
@@ -264,6 +264,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     return (
       <Block name="scatter-view">
         <DeckGL
+          key={`scatter-${numericPoints.length}`}
           layers={layers}
           views={new OrthographicView({ id: "ortho-view" })}
           initialViewState={initialViewState}
