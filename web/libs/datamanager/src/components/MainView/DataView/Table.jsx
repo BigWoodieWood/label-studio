@@ -265,8 +265,14 @@ export const DataView = injector(
       [commonDecoration],
     );
 
-    const content =
-      view.root.isLabeling || viewType === "list" ? (
+    const content = viewType === "scatter" ? (
+        <ScatterView
+          view={view}
+          data={data}
+          loadMore={loadMore}
+          onChange={(id) => view.toggleSelected(id)}
+        />
+      ) : view.root.isLabeling || viewType === "list" ? (
         <Table
           view={view}
           data={data}
@@ -307,11 +313,34 @@ export const DataView = injector(
           stopInteractions={isLocked}
         />
       ) : (
-        <ScatterView
+        <Table
           view={view}
           data={data}
+          rowHeight={70}
+          total={total}
           loadMore={loadMore}
-          onChange={(id) => view.toggleSelected(id)}
+          fitContent={isLabeling}
+          columns={columns}
+          hiddenColumns={hiddenColumns}
+          cellViews={CellViews}
+          decoration={decoration}
+          order={view.ordering}
+          focusedItem={focusedItem}
+          isItemLoaded={isItemLoaded}
+          sortingEnabled={view.type === "list"}
+          columnHeaderExtra={columnHeaderExtra}
+          selectedItems={selectedItems}
+          onSelectAll={onSelectAll}
+          onSelectRow={onRowSelect}
+          onRowClick={onRowClick}
+          stopInteractions={isLocked}
+          onTypeChange={(col, type) => col.original.setType(type)}
+          onColumnResize={(col, width) => {
+            col.original.setWidth(width);
+          }}
+          onColumnReset={(col) => {
+            col.original.resetWidth();
+          }}
         />
       );
 

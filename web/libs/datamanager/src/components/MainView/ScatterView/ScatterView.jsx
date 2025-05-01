@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import { useEffect, useRef, useState } from "react";
 import { Block } from "../../../utils/bem";
+import { getRoot } from "mobx-state-tree";
 
 import "./ScatterView.scss";
 
@@ -80,8 +81,21 @@ export const ScatterView = observer(({ data = [], view, onChange }) => {
   useScatterInteractions({
     canvasRef,
     pointsRef,
-    onHover:setHoveredId,
-    onSelect:id=>onChange?.(id),
+    onHover: setHoveredId,
+    onSelect: (id) => {
+      // First toggle selection via parent callback
+      onChange?.(id);
+
+      // Find full task object by id
+      const item = data.find((t) => t.id === id);
+      if (item) {
+        // Mimic Table's behavior – open labeling editor
+        const root = getRoot(view);
+        if (root?.startLabeling) {
+          root.startLabeling(item);
+        }
+      }
+    },
   });
 
   const hoveredPointDetails = hoveredId ? pointsRef.current.find(p=>p.id===hoveredId) : null;
