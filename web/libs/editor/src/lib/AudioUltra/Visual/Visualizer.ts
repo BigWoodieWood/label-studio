@@ -80,6 +80,7 @@ export class Visualizer extends Events<VisualizerEvents> {
   private lastRenderedScrollLeftPx = 0;
   private _container!: HTMLElement;
   private _loader!: HTMLElement;
+  private _frameDrawnDebounceId: number | null = null;
 
   timelineHeight: number = defaults.timelineHeight;
   timelinePlacement: TimelineOptions["placement"] = "top";
@@ -225,14 +226,16 @@ export class Visualizer extends Events<VisualizerEvents> {
     this.seekLocked = false;
   }
 
-  draw(dry = false, forceDraw = false) {
-    if (this.isDestroyed) return;
-    if (this.drawing && !forceDraw) return warn("Concurrent render detected");
+  draw(redraw = true, forceDraw = false) {
+    if (!this.wf.loaded || this.isDestroyed) return;
+    if (this.drawing) {
+      return;
+    }
 
     this.drawing = true;
 
     setTimeout(async () => {
-      if (!dry) {
+      if (!redraw) {
         this.drawMiddleLine();
 
         if (this.wf.playing && this.autoCenter) {
@@ -250,6 +253,21 @@ export class Visualizer extends Events<VisualizerEvents> {
       this.transferImage();
 
       this.drawing = false;
+
+      // Debounce frameDrawn invocation
+      if (this._frameDrawnDebounceId) cancelAnimationFrame(this._frameDrawnDebounceId);
+      this._frameDrawnDebounceId = requestAnimationFrame(() => {
+        this.wf.invoke("frameDrawn", [
+          {
+            width: this.width,
+            height: this.height,
+            zoom: this.zoom,
+            scroll: this.scrollLeft,
+          },
+        ]);
+        this._frameDrawnDebounceId = null; // Clear ID after execution
+      });
+
     });
   }
 
@@ -268,6 +286,9 @@ export class Visualizer extends Events<VisualizerEvents> {
     this.removeEvents();
     this.layers.forEach((layer) => layer.remove());
     this.wrapper.remove();
+
+    // Cancel any pending frameDrawn event on destroy
+    if (this._frameDrawnDebounceId) cancelAnimationFrame(this._frameDrawnDebounceId);
 
     super.destroy();
   }
@@ -674,13 +695,16 @@ export class Visualizer extends Events<VisualizerEvents> {
     this.wrapper.style.overflowX = "scroll";
     this.wrapper.style.overflowY = "hidden";
 
-    const mainLayer = this.getLayer("main") as Layer;
-    // The parent element scrolls natively, and the canvas is redrawn accordingly.
+    const mainLayer = this.layers.get("main")!;
+
     // To maintain its position during scrolling, the element must use "sticky" positioning.
-    mainLayer.canvas.style.position = "sticky";
-    mainLayer.canvas.style.top = "0";
-    mainLayer.canvas.style.left = "0";
-    mainLayer.canvas.style.zIndex = "2";
+    // Only apply styles if it's an HTMLElement
+    if (mainLayer.canvas instanceof HTMLElement) {
+        mainLayer.canvas.style.position = "sticky";
+        mainLayer.canvas.style.top = "0";
+        mainLayer.canvas.style.left = "0";
+        mainLayer.canvas.style.zIndex = "2";
+    }
     // Adds a scroll filler element to adjust the size of the scrollable area
     this.scrollFiller = document.createElement("div");
     this.scrollFiller.style.position = "absolute";
@@ -688,7 +712,10 @@ export class Visualizer extends Events<VisualizerEvents> {
     this.scrollFiller.style.height = `${BROWSER_SCROLLBAR_WIDTH}px`;
     this.scrollFiller.style.top = "100%";
     this.scrollFiller.style.minHeight = "1px";
-    mainLayer.canvas.style.zIndex = "1";
+    // Only apply styles if it's an HTMLElement
+    if (mainLayer.canvas instanceof HTMLElement) {
+        mainLayer.canvas.style.zIndex = "1";
+    }
     this.wrapper.appendChild(this.scrollFiller);
   }
 
@@ -880,7 +907,14 @@ export class Visualizer extends Events<VisualizerEvents> {
 
   private playHeadMove = (e: MouseEvent, cursor: Cursor) => {
     if (!this.wf.loaded) return;
-    if (e.target && this.container.contains(e.target)) {
+    // Ensure target is a Node and container is an HTMLElement before calling contains
+    let targetIsInsideContainer = false;
+    // Check if _container exists and has the contains method
+    if (e.target instanceof Node && this._container && typeof this._container.contains === 'function') {
+        targetIsInsideContainer = this._container.contains(e.target);
+    }
+
+    if (targetIsInsideContainer) {
       const { x, y } = cursor;
       const { playhead, playheadPadding, height } = this;
       const playHeadTop = this.reservedSpace - playhead.capHeight - playhead.capPadding;
@@ -894,11 +928,12 @@ export class Visualizer extends Events<VisualizerEvents> {
         if (!playhead.isHovered) {
           playhead.invoke("mouseEnter", [e]);
         }
-        this.draw(true);
       } else if (playhead.isHovered) {
         playhead.invoke("mouseLeave", [e]);
-        this.draw(true);
       }
+    } else if (this.playhead.isHovered) {
+      // If the mouse leaves the container area entirely
+      this.playhead.invoke("mouseLeave", [e]);
     }
   };
 
