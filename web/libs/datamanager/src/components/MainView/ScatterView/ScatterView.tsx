@@ -37,7 +37,8 @@ interface ScatterViewModel {
  * Replace with actual RootStore type if available.
  */
 interface RootStoreWithLabeling {
-  startLabeling?: (item: TaskPoint) => void;
+  // Allow startLabeling to potentially accept just an ID
+  startLabeling?: (itemOrId: TaskPoint | { id: string | number }) => void;
   closeLabeling?: () => void;
   // Access to the currently selected task ID (adjust path if needed)
   dataStore?: {
@@ -152,7 +153,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
 
     // Deck.gl Layer definition
     const layers = useMemo(() => {
-      if (!numericPoints) return [];
+      if (!numericPoints || numericPoints.length === 0) return [];
 
       return [
         new ScatterplotLayer<TaskPoint>({
@@ -187,20 +188,6 @@ export const ScatterView: FC<ScatterViewProps> = observer(
             getFillColor: [hoveredId, palette, view.selected],
             getLineColor: [hoveredId, view.selected],
             getLineWidth: [hoveredId, view.selected],
-          },
-
-          // Explicitly trigger redraw when numericPoints array reference changes.
-          // This helps ensure updates when filters change the dataset.
-          _dataDiff: (newData, oldData) => {
-            // If the data array reference has changed, treat the entire dataset as new.
-            // This forces a full update when filters change the `numericPoints` array.
-            if (newData !== oldData) {
-              // Deck.gl expects an array of ranges indicating changed data.
-              // For a full refresh, return [{ startRow: 0 }].
-              return [{ startRow: 0 }]; 
-            }
-            // If references are the same, return an empty array to indicate no changes via this hint.
-            return []; 
           },
         }),
         // TODO: Add TextLayer, IconLayer etc. here later if needed
@@ -247,8 +234,8 @@ export const ScatterView: FC<ScatterViewProps> = observer(
                 root?.closeLabeling?.();
               } else {
                 // Otherwise, open the editor for the new item
-                const item = clickedObject; // Already have the object from PickingInfo
-                root?.startLabeling?.(item);
+                // Pass only the ID, let startLabeling find the live node
+                root?.startLabeling?.({ id: clickedId });
               }
             }
           }, 0); // Defer execution slightly

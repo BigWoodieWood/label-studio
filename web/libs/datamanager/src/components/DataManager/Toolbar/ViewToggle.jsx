@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import { RadioGroup } from "../../Common/RadioGroup/RadioGroup";
-import { IconGrid, IconList } from "@humansignal/icons";
+import { IconGrid, IconList, IconEllipsisVertical } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
 
 const viewInjector = inject(({ store }) => ({
@@ -34,7 +34,7 @@ export const ViewToggle = viewInjector(
         <Tooltip title="Scatter view">
           <div>
             <RadioGroup.Button value="scatter">
-              <span style={{ fontSize: 14 }}>• • •</span>
+              <IconEllipsisVertical />
             </RadioGroup.Button>
           </div>
         </Tooltip>
