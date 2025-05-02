@@ -15,10 +15,6 @@ export interface TaskPoint {
   data: TaskData;
 }
 
-export interface ScatterPalette {
-  colors: string[];
-}
-
 export interface ScatterSettings {
   classField: string;
 } 

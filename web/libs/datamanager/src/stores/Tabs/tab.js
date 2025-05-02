@@ -12,6 +12,18 @@ import { clamp } from "../../utils/helpers";
 const THRESHOLD_MIN = 0;
 const THRESHOLD_MIN_DIFF = 0.001;
 
+// Define state specific to Scatter view
+const ScatterState = types
+  .model("ScatterState", {
+    activePointId: types.maybeNull(types.number),
+    // Future state properties for scatter can go here (zoom, target, etc.)
+  })
+  .actions((self) => ({
+    setActivePointId(id) {
+      self.activePointId = id;
+    },
+  }));
+
 export const Tab = types
   .model("View", {
     id: StringOrNumberID,
@@ -45,6 +57,8 @@ export const Tab = types
     semantic_search: types.optional(types.array(CustomJSON), []),
     threshold: types.optional(types.maybeNull(ThresholdType), null),
     scatterSettings: types.maybeNull(CustomJSON),
+    // Add the ScatterState model for ScatterView as an optional property
+    scatter: types.maybe(ScatterState),
   })
   .volatile(() => {
     const defaultWidth = getComputedStyle(document.body)
@@ -407,6 +421,9 @@ export const Tab = types
 
     afterCreate() {
       self.snapshot = self.serialize();
+      if (self.type === 'scatter' && !self.scatter) {
+        self.scatter = ScatterState.create({});
+      }
     },
 
     save: flow(function* ({ reload, interaction } = {}) {

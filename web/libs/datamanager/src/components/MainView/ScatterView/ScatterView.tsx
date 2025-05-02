@@ -11,12 +11,12 @@ import { getRoot } from "mobx-state-tree";
 
 // Deck.gl imports
 import DeckGL from "@deck.gl/react";
-import { ScatterplotLayer } from "@deck.gl/layers";
+import { ScatterplotLayer, PolygonLayer } from "@deck.gl/layers";
 import { OrthographicView } from "@deck.gl/core";
 
 import "./ScatterView.scss";
 
-import type { TaskPoint, ScatterPalette, ScatterSettings } from "./types";
+import type { TaskPoint, ScatterSettings } from "./types";
 import type { PickingInfo, ViewStateChangeParameters } from "@deck.gl/core";
 import { ScatterSettingsButton } from "./ScatterSettingsButton";
 import { useScatterSelection } from "./useScatterSelection";
@@ -26,8 +26,12 @@ import {
   RADIUS,
   STROKE_WIDTH,
   OPACITY,
-  TOOLTIP_STYLE
+  TOOLTIP_STYLE,
+  SELECTION_RECT_FILL,
+  SELECTION_RECT_STROKE
 } from './scatter-tokens';
+import { PositionType } from "./utils";
+import { selectionRectToPolygon, SelectionRectangle } from "./useScatterSelection";
 import { IconError, IconCloseCircleOutline } from "@humansignal/icons";
 
 /**
@@ -103,9 +107,6 @@ const calculateBounds = (points: TaskPoint[]): [[number, number], [number, numbe
   return [[minX, minY], [maxX, maxY]];
 };
 
-// Helper type for position coordinates to make TypeScript happy
-type PositionType = [number, number, number];
-
 // Layer constants
 const LAYER_ID = {
   BASE: "base-points",
@@ -113,6 +114,7 @@ const LAYER_ID = {
   SELECTED: "selected-points",
   ACTIVE: "active-point",
   HOVERED: "hovered-point",
+  SELECTION_BOX: "selection-box",
 };
 
 /* Helper hook to create scatter layers
@@ -132,14 +134,15 @@ const LAYER_ID = {
  * This separation allows for efficient updates when only certain states change
  * (e.g., only redrawing the hover layer when the mouse moves)
  */
-function useScatterLayers(
+const useScatterLayers = (
   numericPoints: TaskPoint[],
   activeId: string | null,
   hoveredId: string | null,
   view: ScatterViewModel,
   settings: ScatterSettings,
-  selectionVersion: number
-) {
+  selectionVersion: number,
+  selectionRectangle: SelectionRectangle | null
+): (ScatterplotLayer<TaskPoint> | PolygonLayer)[] => {
   return useMemo(() => {
     if (!numericPoints || numericPoints.length === 0) return [];
 
@@ -168,7 +171,7 @@ function useScatterLayers(
     };
 
     // Create layers in draw order (bottom to top)
-    return [
+    const layers = [
       // 1. Base layer: all regular points (excluding special state points)
       new ScatterplotLayer<TaskPoint>({
         ...commonProps,
@@ -244,8 +247,26 @@ function useScatterLayers(
           },
         }),
       ] : []),
+
+      // 5. Selection rectangle (visible during shift+drag)
+      ...(selectionRectangle ? [
+        new PolygonLayer({
+          id: LAYER_ID.SELECTION_BOX,
+          data: [selectionRectangle],
+          pickable: false,
+          stroked: true,
+          filled: true,
+          getFillColor: SELECTION_RECT_FILL,
+          getLineColor: SELECTION_RECT_STROKE,
+          getLineWidth: 1,
+          lineWidthUnits: 'pixels',
+          getPolygon: selectionRectToPolygon,
+          parameters: { depthTest: false } as any,
+        }),
+      ] : []),
     ];
-  }, [numericPoints, hoveredId, view.selected, settings.classField, activeId, selectionVersion]);
+    return layers;
+  }, [numericPoints, hoveredId, view.selected, settings.classField, activeId, selectionVersion, selectionRectangle]);
 }
 
 /**
@@ -257,6 +278,13 @@ function useScatterLayers(
  */
 export const ScatterView: FC<ScatterViewProps> = observer(
   ({ data = [], view, onChange }) => {
+    // Ensure scatter state exists for scatter views
+    useEffect(() => {
+      if (view.type === 'scatter' && !view.scatter) {
+        view.root.viewsStore.createScatterStateForView(view.id);
+      }
+    }, [view]);
+    
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [initialViewState, setInitialViewState] = useState<any>(null);
     const [viewState, setViewState] = useState<any>(null); // Controlled view state
@@ -315,41 +343,70 @@ export const ScatterView: FC<ScatterViewProps> = observer(
       setDeckKey((k) => k + 1);
     }, [numericPoints.length > 0]);
 
-    // Use the new hook to manage selection and active
+    // Get the active point ID from the view model
+    const activePointIdFromView = view.scatter?.activePointId;
+
+    // Use the refactored hook, passing state and setter from the view model
     const {
       onClick: handleClickUnified,
       onDragStart,
       onDrag,
       onDragEnd,
-      activeId,
+      // activeId is no longer returned by the hook
       selectionVersion,
+      selectionRectangle,
     } = useScatterSelection({
       numericPoints,
+      // Pass the current active ID from the view model
+      activePointId: activePointIdFromView,
+      // Pass the setter function from the view model
+      // Ensure view.scatter exists before accessing setActivePointId
+      // Update type annotation for id to number | null
+      setActivePointId: useCallback((id: number | null) => view.scatter?.setActivePointId(id), [view.scatter]),
       onToggleSelect: (id) => onChange?.(id),
-      onActiveChange: (id) => {
-        // Defer root interactions to let DeckGL event processing finish
-        setTimeout(() => {
-          const root = getRoot<RootStoreWithLabeling>(view);
-          if (!id) return;
-          if (root.dataStore?.selected?.id === id) {
-            root?.closeLabeling?.();
-          } else {
-            root?.startLabeling?.({ id });
-          }
-        }, 0);
-      },
+      // onActiveChange is removed as the hook no longer calls it
       isSelected: (id) => view.selected?.isSelected(id) ?? false,
       onClearSelection: () => view.clearSelection()
     });
 
+    // Effect to react to changes in the activePointId from the view model
+    useEffect(() => {
+      const root = getRoot<RootStoreWithLabeling>(view);
+      const selectedInStore = root.dataStore?.selected?.id;
+      const currentActiveId = view.scatter?.activePointId; // Get the latest value
+
+      // Use setTimeout to defer root interactions, similar to the previous approach
+      const timerId = setTimeout(() => {
+        if (currentActiveId) {
+          // Only start labeling if the active point is not already the selected one in the store
+          // Compare potentially number with string/number from store - ensure consistent comparison or types
+          if (String(selectedInStore) !== String(currentActiveId)) {
+            // Remove parseInt - pass the ID as its original type (now number)
+            root?.startLabeling?.({ id: currentActiveId });
+          }
+        } else {
+          // If activeId became null in the view model and something was selected in the store, close labeling
+          if (selectedInStore) {
+            root?.closeLabeling?.();
+          }
+        }
+      }, 0);
+
+      // Cleanup the timeout if the effect re-runs or component unmounts
+      return () => clearTimeout(timerId);
+
+    // Depend on the active ID from the view model and the view itself (for root access)
+    }, [activePointIdFromView, view]);
+
     // Split points into separate arrays by category for proper visual stacking
     const layers = useScatterLayers(
       numericPoints,
-      activeId,
+      activePointIdFromView, // Use ID from view model
       hoveredId,
       view,
       settings,
-      selectionVersion
+      selectionVersion,
+      selectionRectangle
     );
     
     // Clean up WebGL context on unmount
@@ -451,6 +508,9 @@ export const ScatterView: FC<ScatterViewProps> = observer(
         <Block name="scatter-view" elem="no-data">Calculating view...</Block>
       );
     }
+
+    // DEBUG: Log the activePointId from the view model just before rendering DeckGL
+    // console.log(`[ScatterView Render] Active Point ID from view model: ${view.scatter?.activePointId}`);
 
     return (
       <Block name="scatter-view">

@@ -71,3 +71,7 @@ export const TOOLTIP_STYLE = {
   borderRadius: '6px',
   marginTop: '20px'
 } as const; 
+
+/** Selection rectangle colors */
+export const SELECTION_RECT_FILL: [number, number, number, number] = [249, 115, 22, 40]; // Orange with transparency
+export const SELECTION_RECT_STROKE: [number, number, number, number] = [249, 115, 22, 255]; // Solid orange 

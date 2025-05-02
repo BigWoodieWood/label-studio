@@ -1,15 +1,35 @@
 import { useCallback, useState, useRef, useEffect } from "react";
 import type { TaskPoint } from "./types";
 
+// Rectangle drag selection coordinates
+export interface SelectionRectangle {
+  start: [number, number];
+  current: [number, number];
+}
+
+// Helper function to convert selection rectangle to polygon coordinates
+export function selectionRectToPolygon(rect: SelectionRectangle): [number, number, number][] {
+  const { start, current } = rect;
+  // Create polygon vertices in counter-clockwise order (required for PolygonLayer)
+  return [
+    [start[0], start[1], 0],
+    [current[0], start[1], 0],
+    [current[0], current[1], 0],
+    [start[0], current[1], 0],
+  ];
+}
+
 export interface ScatterSelectionConfig {
   numericPoints: TaskPoint[];
+  /** The currently active point ID from the view model */
+  activePointId: number | null;
+  /** Callback to set the active point ID in the view model */
+  setActivePointId: (id: number | null) => void;
   /**
    * Callback used to toggle selection in the parent view.
    * Typically maps to `view.toggleSelected(id)`.
    */
   onToggleSelect?: (id: string) => void;
-  /** Callback to be called when active point changes */
-  onActiveChange?: (id: string | null) => void;
   /** Predicate to check if id is currently selected */
   isSelected?: (id: string) => boolean;
   /** Optional callback to clear all selections */
@@ -23,31 +43,49 @@ export interface ScatterSelectionHandlers {
   onDragEnd: (info: any, event: { srcEvent: MouseEvent }) => void;
 }
 
+// Define the return type for the hook
+interface ScatterSelectionResult extends ScatterSelectionHandlers {
+  selectionVersion: number;
+  selectionRectangle: SelectionRectangle | null;
+}
+
 /**
  * Hook that encapsulates CTRL+click single selection, SHIFT+drag rectangle selection, and active point logic.
  * Returns event handlers ready to be passed directly to <DeckGL /> props.
  */
 export const useScatterSelection = (
   config: ScatterSelectionConfig,
-): ScatterSelectionHandlers & { activeId: string | null, selectionVersion: number } => {
-  const { numericPoints, onToggleSelect, onActiveChange, isSelected, onClearSelection } = config;
-  const [activeId, setActiveId] = useState<string | null>(null);
+): ScatterSelectionResult => {
+  // Read activeId and setter from config, remove internal state management for it
+  const {
+    numericPoints,
+    activePointId,
+    setActivePointId,
+    onToggleSelect,
+    isSelected,
+    onClearSelection
+  } = config;
+  
+  // Remove internal state for activeId: const [activeId, setActiveId] = useState<string | null>(null);
   const [selectionVersion, setSelectionVersion] = useState(0);
   const dragStart = useRef<[number, number] | null>(null);
   const isDragging = useRef(false);
+  const [selectionRectangle, setSelectionRectangle] = useState<SelectionRectangle | null>(null);
 
   const commitActive = useCallback(
-    (newId: string | null) => {
-      setActiveId(newId);
-      onActiveChange?.(newId);
+    (newId: number | null) => {
+      // Call the setter from the view model
+      setActivePointId(newId);
+      // No need to call onActiveChange here, ScatterView will react to view.scatter.activePointId changes
     },
-    [onActiveChange],
+    [setActivePointId], // Depend only on the stable setter function
   );
 
   const onClick = useCallback(
     (info: any, event: { srcEvent: MouseEvent }) => {
       if (!info.object) return;
-      const clickedId: string = info.object.id;
+      // Remove .toString() - use the ID as its original type (likely number)
+      const clickedId = info.object.id;
       const isCtrl = event.srcEvent.ctrlKey || event.srcEvent.metaKey;
       const isShift = event.srcEvent.shiftKey;
       const isAlt = event.srcEvent.altKey;
@@ -55,45 +93,66 @@ export const useScatterSelection = (
       if (isShift) {
         if (isAlt) {
           // Shift + Alt → deselect only
-          if (isSelected?.(clickedId)) {
-            onToggleSelect?.(clickedId);
+          if (isSelected?.(clickedId.toString())) {
+            onToggleSelect?.(clickedId.toString());
             setSelectionVersion((v) => v + 1);
           }
           return;
         }
 
         // Add-only selection (no deselect)
-        if (!isSelected?.(clickedId)) {
-          onToggleSelect?.(clickedId);
+        if (!isSelected?.(clickedId.toString())) {
+          onToggleSelect?.(clickedId.toString());
           setSelectionVersion((v) => v + 1);
         }
         return;
       }
 
       if (isCtrl) {
-        onToggleSelect?.(clickedId);
+        onToggleSelect?.(clickedId.toString());
         setSelectionVersion((v) => v + 1);
         return;
       }
 
       // Plain click -> active point
-      commitActive(clickedId);
+      // Compare with activePointId from config before committing
+      if (activePointId !== clickedId) {
+          commitActive(clickedId);
+      } else {
+          // Clicking the already active point might mean deselecting it
+          commitActive(null);
+      }
     },
-    [onToggleSelect, commitActive, isSelected],
+    // Dependencies updated to use activePointId from config
+    [onToggleSelect, commitActive, isSelected, activePointId],
   );
 
   const onDragStart = useCallback(
     (info: any, event: { srcEvent: MouseEvent }) => {
       if (!event.srcEvent.shiftKey) return; // rectangle selection only when shift is held
       if (!info.coordinate) return;
-      dragStart.current = info.coordinate as [number, number];
+      
+      const startCoords = info.coordinate as [number, number];
+      dragStart.current = startCoords;
       isDragging.current = true;
+      
+      // Initialize selection rectangle
+      setSelectionRectangle({
+        start: startCoords,
+        current: startCoords,
+      });
     },
     [],
   );
 
   const onDrag = useCallback((info: any, event: { srcEvent: MouseEvent }) => {
-    // no-op; could be used to render rectangle overlay in future
+    // Update selection rectangle during drag
+    if (isDragging.current && dragStart.current && info.coordinate) {
+      setSelectionRectangle({
+        start: dragStart.current,
+        current: info.coordinate as [number, number],
+      });
+    }
   }, []);
 
   const onDragEnd = useCallback(
@@ -101,13 +160,15 @@ export const useScatterSelection = (
       if (!isDragging.current || !dragStart.current) {
         isDragging.current = false;
         dragStart.current = null;
+        setSelectionRectangle(null);
         return;
       }
-
+ 
       if (!info.coordinate) {
         // Pointer released outside the canvas – safely cancel the drag
         isDragging.current = false;
         dragStart.current = null;
+        setSelectionRectangle(null);
         return;
       }
 
@@ -144,18 +205,21 @@ export const useScatterSelection = (
 
       isDragging.current = false;
       dragStart.current = null;
+      setSelectionRectangle(null);
     },
     [numericPoints, onToggleSelect, isSelected],
   );
 
-  // Add ESC key handler to clear selection
+  // Add ESC key handler to clear selection AND active point
   useEffect(() => {
     if (!onClearSelection) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClearSelection();
+        onClearSelection?.(); // Use optional chaining
         setSelectionVersion(v => v + 1);
+        // Also clear the active point in the view model on ESC
+        setActivePointId(null); // Pass null
       }
     };
 
@@ -163,14 +227,14 @@ export const useScatterSelection = (
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClearSelection]);
+  }, [onClearSelection, setActivePointId]);
 
   return {
     onClick,
     onDragStart,
     onDrag,
     onDragEnd,
-    activeId,
     selectionVersion,
+    selectionRectangle,
   };
 }; 
