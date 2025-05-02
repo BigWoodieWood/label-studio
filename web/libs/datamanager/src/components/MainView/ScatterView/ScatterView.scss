@@ -23,11 +23,35 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, 0.9);
     padding: 16px;
     border-radius: 6px;
     text-align: center;
     max-width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    > .scatter-view__message-icon {
+      padding: 16px;
+      width: 48px;
+      height: 48px;
+      display: block;
+      margin: 0 auto 8px;
+    }
+  }
+  
+  &__message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 500px;
+    margin: 50px auto;
+    padding: 32px;
+    border-radius: 16px;
+    background-color: var(--dm-canvas-background, #f0f0f0);
   }
   
   &__controls {

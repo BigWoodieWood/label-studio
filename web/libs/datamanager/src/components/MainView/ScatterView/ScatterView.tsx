@@ -26,7 +26,9 @@ import {
   RADIUS,
   STROKE_WIDTH,
   OPACITY,
+  TOOLTIP_STYLE
 } from './scatter-tokens';
+import { IconError, IconCloseCircleOutline } from "@humansignal/icons";
 
 /**
  * Interface for the MobX view model passed to ScatterView.
@@ -101,6 +103,8 @@ const calculateBounds = (points: TaskPoint[]): [[number, number], [number, numbe
   return [[minX, minY], [maxX, maxY]];
 };
 
+// Helper type for position coordinates to make TypeScript happy
+type PositionType = [number, number, number];
 
 /**
  * ScatterView component renders tasks as points using Deck.gl for high performance.
@@ -193,69 +197,121 @@ export const ScatterView: FC<ScatterViewProps> = observer(
         }, 0);
       },
       isSelected: (id) => view.selected?.isSelected(id) ?? false,
-      onClearSelection: () => {
-        // Check if we have any selected items before trying to clear
-        if (view.selected && typeof view.clearSelection === 'function') {
-          view.clearSelection();
-        } else if (view.selected && 'list' in view.selected && Array.isArray(view.selected.list) && view.selected.list.length > 0) {
-          // Alternative approach if clearSelection not available 
-          // Cast to any since we've verified the shape dynamically
-          const selectedList = (view.selected as any).list as string[];
-          selectedList.forEach(id => onChange?.(id));
-        }
-      },
+      onClearSelection: () => view.clearSelection()
     });
 
-    // Deck.gl Layer definition
+    // Split points into separate arrays by category for proper visual stacking
     const layers = useMemo(() => {
       if (!numericPoints || numericPoints.length === 0) return [];
 
+      // 1. Base layer: all points (excluding ones that will be in higher layers)
+      const basePoints = numericPoints.filter(
+        (p) => p.id !== activeId && !view.selected?.isSelected(p.id) && p.id !== hoveredId
+      );
+
+      // 2. Hovered point layer (if not already in selected or active)
+      const hoveredPoint = hoveredId && !view.selected?.isSelected(hoveredId) && hoveredId !== activeId
+        ? numericPoints.find((p) => p.id === hoveredId)
+        : null;
+
+      // 3. Selected points layer (excluding active point)
+      const selectedPoints = numericPoints.filter(
+        (p) => view.selected?.isSelected(p.id) && p.id !== activeId
+      );
+
+      // 4. Active point layer (top-most)
+      const activePoint = activeId 
+        ? numericPoints.find((p) => p.id === activeId)
+        : null;
+
+      // Common layer properties
+      const commonProps = {
+        pickable: true,
+        stroked: true,
+        filled: true,
+        radiusUnits: 'pixels' as const,
+        lineWidthUnits: 'pixels' as const,
+        getPosition: (d: TaskPoint) => [d.data.x, d.data.y, 0] as PositionType,
+        parameters: { depthTest: false } as any, // Disable depth testing - use painter's algorithm
+      };
+
+      // Build layers in drawing order (bottom to top)
       return [
+        // 1. Base layer: all regular points
         new ScatterplotLayer<TaskPoint>({
-          id: "scatter-plot",
-          data: numericPoints,
-          pickable: true,
+          ...commonProps,
+          id: "base-points",
+          data: basePoints,
           opacity: OPACITY,
-          stroked: true,
-          filled: true,
-          radiusUnits: "pixels",
-          lineWidthUnits: "pixels",
-          // Accessors using data points
-          getPosition: (d: TaskPoint) => [d.data.x, d.data.y, 0],
-          getRadius: (d: TaskPoint) => {
-            // Use point-specific radius if provided, otherwise token default
-            const baseRadius = typeof d.data.r === 'number' ? d.data.r : RADIUS.default;
-            // Active points get special active radius
-            return d.id === activeId ? (baseRadius + RADIUS.delta) : baseRadius;
-          },
+          getRadius: (d: TaskPoint) => typeof d.data.r === 'number' ? d.data.r : RADIUS.default,
           getFillColor: (d: TaskPoint) => {
             const idx = d.data.class
               ? hashString(d.data.class) % CATEGORY_COLORS.length
               : CATEGORY_COLORS.length - 1;
             return CATEGORY_COLORS[idx];
           },
-          getLineColor: (d: TaskPoint) => {
-            const isSelected = view.selected?.isSelected(d.id);
-            const isHovered = d.id === hoveredId;
-            const isActive = d.id === activeId;
-            if (isActive) return STROKE.active;
-            if (isSelected) return STROKE.selected;
-            if (isHovered) return STROKE.hovered;
-            return STROKE.default;
-          },
-          getLineWidth: (d: TaskPoint) => {
-            if (d.id === activeId) return STROKE_WIDTH.active;
-            if (view.selected?.isSelected(d.id)) return STROKE_WIDTH.selected;
-            if (d.id === hoveredId) return STROKE_WIDTH.hovered;
-            return STROKE_WIDTH.default;
-          },
+          getLineColor: STROKE.default,
+          getLineWidth: STROKE_WIDTH.default,
           updateTriggers: {
-            getRadius: [hoveredId, selectionVersion, activeId],
-            getFillColor: [hoveredId, settings.classField],
-            getLineColor: [hoveredId, selectionVersion, activeId],
-            getLineWidth: [hoveredId, selectionVersion, activeId],
+            getFillColor: [settings.classField],
           },
         }),
+
+        // 2. Hovered point layer
+        ...(hoveredPoint ? [
+          new ScatterplotLayer<TaskPoint>({
+            ...commonProps,
+            id: "hovered-point",
+            data: [hoveredPoint],
+            opacity: OPACITY,
+            getRadius: (d: TaskPoint) => typeof d.data.r === 'number' ? d.data.r : RADIUS.default + 1,
+            getFillColor: (d: TaskPoint) => {
+              const idx = d.data.class
+                ? hashString(d.data.class) % CATEGORY_COLORS.length
+                : CATEGORY_COLORS.length - 1;
+              return CATEGORY_COLORS[idx];
+            },
+            getLineColor: STROKE.hovered,
+            getLineWidth: STROKE_WIDTH.hovered,
+            updateTriggers: {
+              getFillColor: [settings.classField],
+            },
+          }),
+        ] : []),
+
+        // 3. Selected points layer
+        ...(selectedPoints.length > 0 ? [
+          new ScatterplotLayer<TaskPoint>({
+            ...commonProps,
+            id: "selected-points",
+            data: selectedPoints,
+            opacity: OPACITY,
+            getRadius: (d: TaskPoint) => {
+              const baseRadius = typeof d.data.r === 'number' ? d.data.r : RADIUS.default;
+              return baseRadius + RADIUS.selected_delta;
+            },
+            getFillColor: STROKE.selected,
+            getLineColor: STROKE.selected,
+            getLineWidth: STROKE_WIDTH.selected,
+          }),
+        ] : []),
+
+        // 4. Active point (top-most)
+        ...(activePoint ? [
+          new ScatterplotLayer<TaskPoint>({
+            ...commonProps,
+            id: "active-point",
+            data: [activePoint],
+            opacity: OPACITY,
+            getRadius: (d: TaskPoint) => {
+              const baseRadius = typeof d.data.r === 'number' ? d.data.r : RADIUS.default;
+              return baseRadius + RADIUS.active_delta;
+            },
+            getFillColor: STROKE.active,
+            getLineColor: STROKE.active,
+            getLineWidth: STROKE_WIDTH.active,
+          }),
+        ] : []),
       ];
     }, [numericPoints, hoveredId, view.selected, settings.classField, activeId, selectionVersion]);
     
@@ -311,13 +367,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
       if (!object) return null;
       return {
         text: `${object.data.text || `Task ${object.id}`}\nClass: ${object.data.class || 'N/A'}`,
-        style: { // Basic tooltip styling
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          color: 'white',
-          padding: '4px 8px',
-          fontSize: '12px',
-          borderRadius: '2px',
-        }
+        style: TOOLTIP_STYLE
       };
     }, []);
 
@@ -347,8 +397,14 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     // Render guard: need data and initialViewState
     if (numericPoints.length === 0) {
       return (
-        <Block name="scatter-view" elem="no-data">
-          {data.length === 0 ? "No tasks available." : "No coordinate data found."}
+        <Block name="scatter-view" elem="no-data" mod={{ empty: true }}>
+          <Block className="scatter-view__message">
+            <IconCloseCircleOutline className="scatter-view__message-icon" />
+            <h3>{data.length === 0 ? "No tasks found" : "No point coordinates available"}</h3>
+            <p>{data.length === 0 
+              ? "There are no tasks to display in the scatter plot." 
+              : "Tasks exist but don't contain the necessary coordinates (x,y) in task data for visualization."}</p>
+          </Block>
         </Block>
       );
     }
