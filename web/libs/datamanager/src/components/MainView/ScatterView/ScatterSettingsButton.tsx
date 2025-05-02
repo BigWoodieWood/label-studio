@@ -15,6 +15,10 @@ interface ScatterSettingsButtonProps {
   availableFields: string[];
 }
 
+/**
+ * Button that displays a settings dialog for ScatterView configuration
+ * Allows the user to configure which data field should be used for coloring points
+ */
 export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
   onSettingsChange,
   settings,
@@ -31,7 +35,6 @@ export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
   }, []);
 
   const handleSaveSettings = useCallback((newSettings: ScatterSettings) => {
-    console.log("ScatterSettingsButton received settings:", newSettings);
     onSettingsChange(newSettings);
   }, [onSettingsChange]);
 

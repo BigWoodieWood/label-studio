@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState, useCallback, useRef } from 'react';
 import { Button } from '../../Common/Button/Button';
 import { Modal } from '../../Common/Modal/Modal';
 import { Block, Elem } from '../../../utils/bem';
@@ -16,6 +16,10 @@ interface ScatterSettingsDialogProps {
   availableFields: string[];
 }
 
+/**
+ * Dialog for configuring ScatterView settings
+ * Allows users to select which field to use for point classification/coloring
+ */
 export const ScatterSettingsDialog: FC<ScatterSettingsDialogProps> = ({
   isOpen,
   onClose,
@@ -24,11 +28,10 @@ export const ScatterSettingsDialog: FC<ScatterSettingsDialogProps> = ({
   availableFields = [],
 }) => {
   const [formValues, setFormValues] = useState<ScatterSettings>(settings);
-  const formRef = React.useRef<HTMLFormElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleFieldChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
-    console.log("Selected new classField:", newValue);
     setFormValues(prev => ({
       ...prev,
       classField: newValue,
@@ -43,15 +46,12 @@ export const ScatterSettingsDialog: FC<ScatterSettingsDialogProps> = ({
       const selectElem = formRef.current.querySelector('select') as HTMLSelectElement;
       const currentClassField = selectElem ? selectElem.value : 'class';
       const currentFormValues = { classField: currentClassField };
-      console.log("Submitting settings:", currentFormValues);
       onSave(currentFormValues);
     }
     onClose();
   }, [onSave, onClose]);
 
   if (!isOpen) return null;
-
-  console.log("Dialog rendered with settings:", settings, "and formValues:", formValues);
 
   return (
     <Modal

@@ -1,7 +1,6 @@
 import { observer } from "mobx-react";
 import React, {
   useEffect,
-  useRef,
   useState,
   useMemo,
   FC,
@@ -129,12 +128,10 @@ export const ScatterView: FC<ScatterViewProps> = observer(
           ? JSON.parse((view as any).scatterSettings)
           : (view as any).scatterSettings;
         
-        console.log("Initializing from view.scatterSettings:", viewSettings);
         return {
           classField: viewSettings.classField || 'class',
         } as ScatterSettings;
       }
-      console.log("No view.scatterSettings found, using default");
       return { classField: 'class' };
     });
     
@@ -177,18 +174,15 @@ export const ScatterView: FC<ScatterViewProps> = observer(
 
     // Handle settings change
     const handleSettingsChange = useCallback((newSettings: ScatterSettings) => {
-      console.log("ScatterView.handleSettingsChange received:", newSettings);
       setSettings(newSettings);
       // Persist in the DataManager tab if available
       if (typeof (view as any).setScatterSettings === 'function') {
-        console.log("Persisting settings via view.setScatterSettings", newSettings);
         (view as any).setScatterSettings(newSettings);
       }
     }, [view]);
 
     // Filter data for points with valid numeric coordinates & make safe copies of needed properties
     const numericPoints: TaskPoint[] = useMemo(() => {
-      console.log("Recomputing points with classField:", settings.classField);
       return data
         .filter(t => t.data && typeof t.data.x === "number" && typeof t.data.y === "number")
         .map(t => ({
@@ -214,8 +208,6 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     const layers = useMemo(() => {
       if (!numericPoints || numericPoints.length === 0) return [];
 
-      console.log("Rebuilding scatter layer with classField:", settings.classField);
-      
       return [
         new ScatterplotLayer<TaskPoint>({
           id: "scatter-plot",

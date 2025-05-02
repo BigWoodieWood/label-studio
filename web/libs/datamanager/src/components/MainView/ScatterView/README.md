@@ -56,10 +56,44 @@ Initially, a custom implementation using the HTML Canvas API was developed. Howe
 *   Handles cases where no data or no coordinate data is available.
 *   Calculates an appropriate initial view state to fit the data.
 
+## Settings Implementation
+
+The ScatterView includes a configurable settings system that allows users to customize how data is visualized:
+
+1. **Settings Dialog**: A modal dialog (`ScatterSettingsDialog`) that provides a form interface for configuring visualization parameters:
+   - Currently supports selecting the data field to use for point classification/coloring
+   - Uses direct DOM access via form refs to ensure reliable value capture on submit
+
+2. **Settings Button**: A toolbar button (`ScatterSettingsButton`) that opens the settings dialog:
+   - Appears in the top-right corner of the ScatterView
+   - Uses the DataManager's common Button and Icon components for consistent styling
+
+3. **Settings Persistence**:
+   - Settings are stored in the DataManager Tab model using a `scatterSettings` field
+   - Settings are serialized using MST's CustomJSON type and persisted to the backend
+   - Settings are loaded when the view is initialized, providing a consistent experience across sessions
+
+4. **Dynamic Color Mapping**:
+   - Points are colored based on the selected class field (`settings.classField`)
+   - A hash function maps field values to colors from a predefined palette
+   - The `numericPoints` array is rebuilt when settings change to remap fields
+   - The Deck.gl layer update triggers ensure colors update immediately when settings change
+   
+5. **Technical Challenges**:
+   - React closure issues required careful handling of form values
+   - Deck.gl update triggers needed precise configuration to avoid WebGL context errors
+   - Tab model persistence required proper serialization/deserialization
+
+This implementation allows for future expansion of the settings system to include additional visualization parameters such as point size, opacity, or different color palettes.
+
 ## Future Work & TODOs
 
-*   Implement multi-selection (e.g., using Shift+click or lasso tool).
-*   Enhance the Settings UI with more options (e.g., point size, opacity, different palettes, selecting X/Y fields if needed).
+*   Enhance the Settings UI with more options:
+    - Allow selection of X/Y coordinates fields
+    - Configure point size scaling
+    - Adjust opacity and colors 
+    - Enable animation based on time field
+    - Add custom color mapping rules
 *   Investigate performance optimizations for extreme scales (e.g., data aggregation, layer optimizations).
 *   Consider adding other Deck.gl layers if needed (e.g., `TextLayer` for labels).
 *   Refine tooltip content and styling.
@@ -75,3 +109,93 @@ Initially, a custom implementation using the HTML Canvas API was developed. Howe
 *   **Performance:** Be mindful of performance implications, especially within layer accessors which run frequently. Avoid unnecessary computations. Use `useMemo` and `useCallback` appropriately.
 *   **Comments:** Add comments for non-obvious logic, especially around Deck.gl configurations, interaction handling, and state management integration.
 *   **Testing:** Consider adding Storybook stories for different data scenarios and unit/integration tests for key interactions.
+
+
+
+---------------------------------------------
+
+# Task Point System and Its Layers & Selection
+
+The ScatterView supports four distinct conceptual layers of points, each with its own visual representation and interaction pattern:
+
+### Data Layers
+
+1. **All Task Points**
+   - Represents *all* tasks in the project (potentially millions)
+   - Always visible as the base layer
+   - Colored using the configurable palette based on classification field
+   - Loaded via dedicated endpoint: \`GET /api/dm/scatter/tasks?project=<id>&fields=x,y,class,r,time\`
+
+2. **Filtered Task Points**
+   - Subset of tasks matching active Data Manager filters
+   - Visible only when at least one filter is active
+   - Rendered in ORANGE_DARK color
+   - Updated whenever filters change via \`POST /api/dm/scatter/filtered-ids\` 
+   - Uses same filter logic as main Data Manager views
+
+3. **Selected Task Points**
+   - Manually selected by user interactions
+   - Rendered in ORANGE color
+   - Synchronized with Data Manager's task selection system
+   - Supports both individual and rectangular selection
+
+4. **Active Point**
+   - Single point with open editor/labeling interface
+   - Rendered in RED color
+   - Corresponds to current task being labeled
+
+### User Interactions
+
+- **CTRL + Click**: Toggle selection state for individual point
+- **SHIFT + Drag**: Select all points within rectangular area
+- **Click** (no modifier): Set point as active and open editor
+
+### Technical Implementation
+
+#### Backend APIs
+
+- \`GET /api/dm/scatter/tasks\`: Returns lightweight task data for all points
+  - Query params: \`project\` (required), \`fields\` (configurable list of attributes)
+  - Response format: Array of \`{id, x, y, class, r, time}\` objects
+  
+- \`POST /api/dm/scatter/filtered-ids\`: Returns IDs of tasks matching filters
+  - Request body: \`{project, filters, ordering}\` (same schema as Task API)
+  - Response: \`{ids: [1, 42, 99, ...]}\`
+
+#### Frontend Store (MobX-state-tree)
+
+\`\`\`
+ScatterRootStore
+  ├─ allPoints        : Map<ID, Point>
+  ├─ filteredIds      : Set<ID>
+  ├─ selectedIds      : Set<ID>
+  ├─ activeId         : number | null
+  └─ ui               : { isLoading, error, ... }
+\`\`\`
+
+#### Rendering Layers (Deck.gl)
+
+Each point type is rendered as a separate \`ScatterplotLayer\` to optimize GPU instancing:
+
+| Layer Name    | Visibility  | Color                  | Data Source            |
+|---------------|-------------|------------------------|------------------------|
+| AllTaskLayer  | Always      | palette(class)         | allPoints              |
+| FilteredLayer | filters > 0 | ORANGE_DARK            | allPoints[filteredIds] |
+| SelectedLayer | selection   | ORANGE                 | allPoints[selectedIds] |
+| ActiveLayer   | activeId    | RED                    | allPoints[activeId]    |
+
+### Performance Considerations
+
+- Backend streams results in chunks for large datasets (NDJSON, gzip)
+- Minimal re-renders using appropriate \`updateTriggers\` for each layer
+- Efficient point filtering using Set lookups rather than array iterations
+- WebGL instancing ensures optimal GPU utilization
+
+### Settings Integration
+
+ScatterSettingsDialog will be extended with:
+- Class field selector (determines point coloring)
+- Radius field selector (optional)
+- Time field selector (for future temporal analysis)
+
+Settings are persisted in Tab.scatterSettings and affect both visualization and API requests.
