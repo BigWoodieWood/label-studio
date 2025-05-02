@@ -17,8 +17,9 @@ import { OrthographicView } from "@deck.gl/core";
 
 import "./ScatterView.scss";
 
-import type { TaskPoint, ScatterPalette } from "./types"; // CanvasPoint removed
+import type { TaskPoint, ScatterPalette, ScatterSettings } from "./types";
 import type { PickingInfo, ViewStateChangeParameters } from "@deck.gl/core";
+import { ScatterSettingsButton } from "./ScatterSettingsButton";
 
 /**
  * Interface for the MobX view model passed to ScatterView.
@@ -75,6 +76,20 @@ const hexToRgba = (hex: string, alpha = 255): [number, number, number, number] =
   return [r, g, b, alpha];
 };
 
+/**
+ * Simple hash function for strings
+ */
+const hashString = (str: string): number => {
+  let hash = 0;
+  if (str.length === 0) return hash;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+};
+
 // Function to calculate bounding box [[minX, minY], [maxX, maxY]]
 const calculateBounds = (points: TaskPoint[]): [[number, number], [number, number]] | null => {
   if (points.length === 0) return null;
@@ -104,57 +119,103 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [initialViewState, setInitialViewState] = useState<any>(null);
     const [viewState, setViewState] = useState<any>(null); // Controlled view state
+    const [deckKey, setDeckKey] = useState(0);
+    
+    // Settings state
+    const [settings, setSettings] = useState<ScatterSettings>(() => {
+      if ((view as any)?.scatterSettings) {
+        // Parse the stringified value if needed
+        const viewSettings = typeof (view as any).scatterSettings === 'string' 
+          ? JSON.parse((view as any).scatterSettings)
+          : (view as any).scatterSettings;
+        
+        console.log("Initializing from view.scatterSettings:", viewSettings);
+        return {
+          classField: viewSettings.classField || 'class',
+        } as ScatterSettings;
+      }
+      console.log("No view.scatterSettings found, using default");
+      return { classField: 'class' };
+    });
+    
+    // Extract available fields from data
+    const availableFields = useMemo(() => {
+      const fields = new Set<string>();
+      data.forEach(item => {
+        if (item.data) {
+          Object.keys(item.data).forEach(key => {
+            if (typeof item.data[key] === 'string') {
+              fields.add(key);
+            }
+          });
+        }
+      });
+      return Array.from(fields);
+    }, [data]);
 
-    // Color palette (consider moving to theme/constants)
+    // Define color palette
     const palette: ScatterPalette = useMemo(
       () => ({
-        animal: "#ff6b6b",
-        vehicle: "#48dbfb",
-        landscape: "#1dd1a1",
-        interior: "#feca57",
-        people: "#5f27cd",
-        food: "#ff9ff3",
-        default: "#3b82f6", // Default color
+        colors: [
+          "#ff6b6b", // red
+          "#48dbfb", // blue
+          "#1dd1a1", // green
+          "#feca57", // yellow
+          "#5f27cd", // purple
+          "#ff9ff3", // pink
+          "#54a0ff", // light blue
+          "#00d2d3", // teal
+          "#ff7f50", // coral
+          "#a29bfe", // lavender
+          "#badc58", // lime
+          "#f368e0", // magenta
+          "#3b82f6", // default blue
+        ],
       }),
       [],
     );
 
-    // Filter data for points with valid numeric coordinates
-    const numericPoints: TaskPoint[] = useMemo(
-      () =>
-        data.filter(
-          (t) =>
-            t.data &&
-            typeof t.data.x === "number" &&
-            typeof t.data.y === "number",
-        ),
-      [data],
-    );
-
-    // Calculate initial view state only when data is first loaded
-    useEffect(() => {
-      if (!initialViewState && numericPoints.length > 0) {
-        const bounds = calculateBounds(numericPoints);
-        if (bounds) {
-          const [[minX, minY], [maxX, maxY]] = bounds;
-          const initialVs = {
-            // Center the view on the data bounds
-            target: [(minX + maxX) / 2, (minY + maxY) / 2, 0],
-            // Adjust zoom to fit the data, simple heuristic, might need refinement
-            zoom: Math.log2(Math.min(500 / (maxX - minX || 1), 500 / (maxY - minY || 1))) - 1, // Adjust 500 based on container size
-            minZoom: -2, // Allow zooming out
-            maxZoom: 10, // Limit zoom in
-          };
-          setInitialViewState(initialVs);
-          setViewState(initialVs); // Also set the controlled state initially
-        }
+    // Handle settings change
+    const handleSettingsChange = useCallback((newSettings: ScatterSettings) => {
+      console.log("ScatterView.handleSettingsChange received:", newSettings);
+      setSettings(newSettings);
+      // Persist in the DataManager tab if available
+      if (typeof (view as any).setScatterSettings === 'function') {
+        console.log("Persisting settings via view.setScatterSettings", newSettings);
+        (view as any).setScatterSettings(newSettings);
       }
-    }, [numericPoints, initialViewState]); // Run when points load
+    }, [view]);
+
+    // Filter data for points with valid numeric coordinates & make safe copies of needed properties
+    const numericPoints: TaskPoint[] = useMemo(() => {
+      console.log("Recomputing points with classField:", settings.classField);
+      return data
+        .filter(t => t.data && typeof t.data.x === "number" && typeof t.data.y === "number")
+        .map(t => ({
+          // Create a safe copy with just the properties we need
+          id: t.id,
+          data: {
+            x: t.data.x,
+            y: t.data.y,
+            class: (t.data as any)[settings.classField] || '',
+            text: t.data.text,
+            time: t.data.time || 0,
+            r: t.data.r
+          }
+        }));
+    }, [data, settings.classField]); // When settings.classField changes, points get remapped
+    
+    // Increment deckKey whenever numericPoints identity changes
+    useEffect(() => {
+      setDeckKey((k) => k + 1);
+    }, [numericPoints.length > 0]);
 
     // Deck.gl Layer definition
     const layers = useMemo(() => {
       if (!numericPoints || numericPoints.length === 0) return [];
 
+      console.log("Rebuilding scatter layer with classField:", settings.classField);
+      
       return [
         new ScatterplotLayer<TaskPoint>({
           id: "scatter-plot",
@@ -167,12 +228,23 @@ export const ScatterView: FC<ScatterViewProps> = observer(
           lineWidthUnits: "pixels",
           // Accessors using data points
           getPosition: (d) => [d.data.x, d.data.y, 0],
-          getRadius: (d) => (view.selected?.isSelected(d.id) ? 7 : (d.id === hoveredId ? 6 : 5)),
+          getRadius: (d) => {
+            // Use custom radius if provided, otherwise use selection/hover based radius
+            if (typeof d.data.r === 'number') return d.data.r;
+            return view.selected?.isSelected(d.id) ? 7 : (d.id === hoveredId ? 6 : 5);
+          },
           getFillColor: (d) => {
             const isHovered = d.id === hoveredId;
             if (isHovered) return [255, 255, 255, 255]; // White fill on hover
-            const category = d.data.category || "default";
-            return hexToRgba(palette[category] || palette.default);
+            
+            // Get color based on class using hash function
+            if (d.data.class) {
+              const colorIndex = hashString(d.data.class) % palette.colors.length;
+              return hexToRgba(palette.colors[colorIndex]);
+            }
+            
+            // Default color (last color in palette)
+            return hexToRgba(palette.colors[palette.colors.length - 1]);
           },
           getLineColor: (d) => {
             const isSelected = view.selected?.isSelected(d.id);
@@ -184,22 +256,71 @@ export const ScatterView: FC<ScatterViewProps> = observer(
 
           // Update triggers tell Deck.gl when to re-evaluate accessors
           updateTriggers: {
+            // Simplify update triggers to avoid potential WebGL conflicts
+            getPosition: null,
             getRadius: [hoveredId, view.selected, numericPoints.length],
-            getFillColor: [hoveredId, palette, view.selected, numericPoints.length],
+            // Include settings.classField to ensure color updates
+            getFillColor: [hoveredId, settings.classField],
             getLineColor: [hoveredId, view.selected, numericPoints.length],
             getLineWidth: [hoveredId, view.selected, numericPoints.length],
           },
         }),
         // TODO: Add TextLayer, IconLayer etc. here later if needed
       ];
-    }, [numericPoints, hoveredId, view.selected, palette]);
+    }, [numericPoints, hoveredId, view.selected, palette, settings.classField]); // Add settings.classField dependency
+    
+    // Clean up WebGL context on unmount
+    useEffect(() => {
+      return () => {
+        // Cleanup function
+        setViewState(null);
+        setInitialViewState(null);
+      };
+    }, []);
+    
+    // Calculate initial view state ONLY when numericPoints first becomes non-empty
+    useEffect(() => {
+      // Only proceed if initial state is null AND we now have points
+      if (!initialViewState && numericPoints.length > 0) {
+        const bounds = calculateBounds(numericPoints);
+        if (bounds) {
+          const [[minX, minY], [maxX, maxY]] = bounds;
+          const minZoomAllowed = -2;
+          const maxZoomAllowed = 10;
+          const rangeX = maxX - minX || 1;
+          const rangeY = maxY - minY || 1;
+          // Compute a zoom level that fits the points within ~500px viewport
+          let computedZoom = Math.log2(Math.min(500 / rangeX, 500 / rangeY)) - 1;
+          // Clamp zoom to avoid values outside of allowed range which may trigger deck.gl assertions
+          computedZoom = Math.max(Math.min(computedZoom, maxZoomAllowed), minZoomAllowed);
+
+          const initialVs = {
+            target: [(minX + maxX) / 2, (minY + maxY) / 2, 0],
+            zoom: computedZoom,
+            minZoom: minZoomAllowed,
+            maxZoom: maxZoomAllowed,
+          };
+          setInitialViewState(initialVs);
+          setViewState(initialVs); // Set controlled state at the same time
+        }
+      }
+      // Dependency ensures this runs only when points appear or initial state is reset elsewhere
+    }, [numericPoints.length > 0, initialViewState]); 
+
+    // Effect: if numericPoints becomes empty, reset initial view so DeckGL unmounts
+    useEffect(() => {
+      if (numericPoints.length === 0 && initialViewState) {
+        setInitialViewState(null);
+        setViewState(null);
+      }
+    }, [numericPoints.length, initialViewState]);
 
     // Tooltip Content
     const getTooltip = useCallback((info: PickingInfo) => {
       const object = info.object as TaskPoint | undefined;
       if (!object) return null;
       return {
-        text: `${object.data.text || `Task ${object.id}`}\nCategory: ${object.data.category || 'N/A'}`,
+        text: `${object.data.text || `Task ${object.id}`}\nClass: ${object.data.class || 'N/A'}`,
         style: { // Basic tooltip styling
           backgroundColor: 'rgba(0,0,0,0.8)',
           color: 'white',
@@ -254,40 +375,45 @@ export const ScatterView: FC<ScatterViewProps> = observer(
         setViewState(newViewState);
       }, []);
 
-    // Don't render until initial view state is calculated
+    // Render guard: need data and initialViewState
+    if (numericPoints.length === 0) {
+      return (
+        <Block name="scatter-view" elem="no-data">
+          {data.length === 0 ? "No tasks available." : "No coordinate data found."}
+        </Block>
+      );
+    }
+
     if (!initialViewState) {
-        return (
-            <Block name="scatter-view" elem="no-data">Calculating view...</Block>
-        );
+      return (
+        <Block name="scatter-view" elem="no-data">Calculating view...</Block>
+      );
     }
 
     return (
       <Block name="scatter-view">
+        {/* Settings button */}
+        <Block name="scatter-view-toolbar">
+          <ScatterSettingsButton
+            settings={settings}
+            onSettingsChange={handleSettingsChange}
+            availableFields={availableFields}
+          />
+        </Block>
+        
         <DeckGL
-          key={`scatter-${numericPoints.length}`}
+          key={`scatter-${deckKey}`}
           layers={layers}
           views={new OrthographicView({ id: "ortho-view" })}
           initialViewState={initialViewState}
-          viewState={viewState} // Pass controlled state
-          onViewStateChange={handleViewStateChange} // Update controlled state
-          controller={true} // Enable panning & zooming
+          viewState={viewState}
+          onViewStateChange={handleViewStateChange}
+          controller
           getTooltip={getTooltip}
           onClick={handleClick}
           onHover={handleHover}
           style={{ position: "relative", width: "100%", height: "100%" }}
         />
-
-        {/* Message shown when no data points with coordinates are available */}
-        {numericPoints.length === 0 && (
-          <Block name="scatter-view" elem="no-data">
-            No coordinate data found! Tasks should have x and y values in their
-            data object.<br />
-            {data.length > 0
-              ? `Found ${data.length} tasks but none have coordinates.`
-              : "No tasks available."}
-          </Block>
-        )}
-        {/* Optional: Could add HTML overlay for point count or other info */}
       </Block>
     );
   },

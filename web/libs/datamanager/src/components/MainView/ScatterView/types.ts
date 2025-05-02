@@ -3,7 +3,9 @@ export interface TaskData {
   y: number;
   text?: string;
   image?: string;
-  category?: string;
+  class?: string;
+  time?: number;
+  r?: number;
   // Allow flexible task data structures from various projects
   [key: string]: any;
 }
@@ -14,5 +16,9 @@ export interface TaskPoint {
 }
 
 export interface ScatterPalette {
-  [category: string]: string;
+  colors: string[];
+}
+
+export interface ScatterSettings {
+  classField: string;
 } 

@@ -44,6 +44,7 @@ export const Tab = types
     deletable: true,
     semantic_search: types.optional(types.array(CustomJSON), []),
     threshold: types.optional(types.maybeNull(ThresholdType), null),
+    scatterSettings: types.maybeNull(CustomJSON),
   })
   .volatile(() => {
     const defaultWidth = getComputedStyle(document.body)
@@ -206,6 +207,7 @@ export const Tab = types
         gridWidth: self.gridWidth,
         semantic_search: self.semantic_search?.toJSON() ?? [],
         threshold: self.threshold?.toJSON(),
+        scatterSettings: self.scatterSettings != null ? JSON.stringify(self.scatterSettings) : null,
       };
 
       if (self.saved || apiVersion === 1) {
@@ -227,6 +229,11 @@ export const Tab = types
     snapshot: {},
   }))
   .actions((self) => ({
+    setScatterSettings(settings) {
+      self.scatterSettings = settings;
+      self.save();
+    },
+
     lock() {
       self.locked = true;
     },
