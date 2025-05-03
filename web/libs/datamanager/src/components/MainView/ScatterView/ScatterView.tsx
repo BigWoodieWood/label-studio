@@ -32,7 +32,9 @@ import {
 } from './scatter-tokens';
 import { PositionType } from "./utils";
 import { selectionRectToPolygon, SelectionRectangle } from "./useScatterSelection";
-import { IconError, IconCloseCircleOutline } from "@humansignal/icons";
+import { IconCloseCircleOutline, IconRefresh } from "@humansignal/icons";
+import { useScatterBaseData } from "./useScatterBaseData";
+import { Button } from "../../Common/Button/Button";
 
 /**
  * Interface for the MobX view model passed to ScatterView.
@@ -124,7 +126,7 @@ const LAYER_ID = {
  * 2. Control the visual stacking order (z-index) of points
  * 3. Apply different visual treatments to points based on their state
  * 4. Ensure proper hit testing and interaction behavior
- * 
+ *
  * The layering approach follows the "painter's algorithm" where we draw from back to front:
  * - Base layer: Regular points with category colors
  * - Selected layer: Points the user has explicitly selected
@@ -321,7 +323,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     }, [data]);
 
     // Filter data for points with valid numeric coordinates & make safe copies of needed properties
-    const numericPoints: TaskPoint[] = useMemo(() => {
+    const numericPointsFiltered: TaskPoint[] = useMemo(() => {
       return data
         .filter(t => t.data && typeof t.data.x === "number" && typeof t.data.y === "number")
         .map(t => ({
@@ -333,10 +335,18 @@ export const ScatterView: FC<ScatterViewProps> = observer(
             class: (t.data as any)[settings.classField] || '',
             text: t.data.text,
             time: t.data.time || 0,
-            r: t.data.r
-          }
+            r: t.data.r,
+          },
         }));
     }, [data, settings.classField]);
+
+    // load base points via API
+    const projectId = (view as any)?.root?.SDK?.projectId;
+    const { basePoints, loading: baseLoading, reload } = useScatterBaseData(projectId, settings);
+
+    const numericPoints: TaskPoint[] = useMemo(() => {
+      return [...basePoints, ...numericPointsFiltered];
+    }, [basePoints, numericPointsFiltered]);
     
     // Increment deckKey whenever numericPoints identity changes
     useEffect(() => {
@@ -521,6 +531,13 @@ export const ScatterView: FC<ScatterViewProps> = observer(
             onSettingsChange={handleSettingsChange}
             availableFields={availableFields}
           />
+          <Button
+            icon={<IconRefresh />}
+            onClick={reload}
+            waiting={baseLoading}
+            size="compact"
+          >
+          </Button>
         </Block>
         
         <DeckGL

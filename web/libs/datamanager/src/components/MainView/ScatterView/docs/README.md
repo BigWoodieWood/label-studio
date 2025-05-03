@@ -86,6 +86,32 @@ The ScatterView includes a configurable settings system that allows users to cus
 
 This implementation allows for future expansion of the settings system to include additional visualization parameters such as point size, opacity, or different color palettes.
 
+## Recent Enhancements
+
+* **Multi-layer rendering** – Points are now split into dedicated
+  `ScatterplotLayer`s (base, selected, active, hovered).  Painter's
+  algorithm (`depthTest:false`) guarantees stacking order without depth-buffer
+  artefacts.
+* **Rectangle Selection UX** – `PolygonLayer` draws a semi-transparent
+  orange rectangle while *Shift + dragging*; points inside are added to
+  the selection (`Shift + Alt` removes).
+* **Tokenised Styling** – All colours, stroke widths and radii are
+  defined in `scatter-tokens.ts` (`CATEGORY_COLORS`, `STROKE`, `RADIUS`,
+  `SELECTION_RECT_*`) for easy theming.
+* **Utilities Extraction** – Geometry helpers (`selectionRectToPolygon`,
+  `PositionType`) and colour converters live in `utils.ts`; selection
+  hook owns its rectangle types.
+* **Keyboard & Mouse Shortcuts**
+  | Gesture                | Behaviour                              |
+  |------------------------|----------------------------------------|
+  | `Ctrl + Click`         | Toggle single-point selection          |
+  | `Shift + Drag`         | Add points inside rectangle            |
+  | `Shift + Alt + Drag`   | Remove points inside rectangle         |
+  | `Esc`                  | Clear selection                        |
+
+These changes improve clarity, maintainability and user feedback when
+working with dense point clouds.
+
 ## Future Work & TODOs
 
 *   Enhance the Settings UI with more options:
@@ -172,17 +198,6 @@ ScatterRootStore
   ├─ activeId         : number | null
   └─ ui               : { isLoading, error, ... }
 \`\`\`
-
-#### Rendering Layers (Deck.gl)
-
-Each point type is rendered as a separate \`ScatterplotLayer\` to optimize GPU instancing:
-
-| Layer Name    | Visibility  | Color                  | Data Source            |
-|---------------|-------------|------------------------|------------------------|
-| AllTaskLayer  | Always      | palette(class)         | allPoints              |
-| FilteredLayer | filters > 0 | ORANGE_DARK            | allPoints[filteredIds] |
-| SelectedLayer | selection   | ORANGE                 | allPoints[selectedIds] |
-| ActiveLayer   | activeId    | RED                    | allPoints[activeId]    |
 
 ### Performance Considerations
 

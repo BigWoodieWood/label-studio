@@ -56,8 +56,10 @@ export const Tab = types
     deletable: true,
     semantic_search: types.optional(types.array(CustomJSON), []),
     threshold: types.optional(types.maybeNull(ThresholdType), null),
+
+    // User-configurable and persistent settings for the Scatter view (e.g., color field)
     scatterSettings: types.maybeNull(CustomJSON),
-    // Add the ScatterState model for ScatterView as an optional property
+    // Runtime state for the Scatter view related to current interaction (e.g., active point ID)
     scatter: types.maybe(ScatterState),
   })
   .volatile(() => {

@@ -312,37 +312,7 @@ export const DataView = injector(
           hiddenFields={hiddenColumns}
           stopInteractions={isLocked}
         />
-      ) : (
-        <Table
-          view={view}
-          data={data}
-          rowHeight={70}
-          total={total}
-          loadMore={loadMore}
-          fitContent={isLabeling}
-          columns={columns}
-          hiddenColumns={hiddenColumns}
-          cellViews={CellViews}
-          decoration={decoration}
-          order={view.ordering}
-          focusedItem={focusedItem}
-          isItemLoaded={isItemLoaded}
-          sortingEnabled={view.type === "list"}
-          columnHeaderExtra={columnHeaderExtra}
-          selectedItems={selectedItems}
-          onSelectAll={onSelectAll}
-          onSelectRow={onRowSelect}
-          onRowClick={onRowClick}
-          stopInteractions={isLocked}
-          onTypeChange={(col, type) => col.original.setType(type)}
-          onColumnResize={(col, width) => {
-            col.original.setWidth(width);
-          }}
-          onColumnReset={(col) => {
-            col.original.resetWidth();
-          }}
-        />
-      );
+      ) : null;
 
     useShortcut("dm.focus-previous", () => {
       if (document.activeElement !== document.body) return;
