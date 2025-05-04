@@ -48,7 +48,7 @@ export async function fetchScatterPoints(
     classField, 
     abortSignal,
     page = 1,
-    pageSize = 1000,
+    pageSize = 10000,
     onProgress 
   } = options;
 
