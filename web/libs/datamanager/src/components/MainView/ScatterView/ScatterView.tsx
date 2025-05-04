@@ -54,7 +54,7 @@ interface ScatterViewModel {
  */
 interface RootStoreWithLabeling {
   // Allow startLabeling to potentially accept just an ID
-  startLabeling?: (itemOrId: TaskPoint | { id: string | number }) => void;
+  startLabeling?: (itemOrId: TaskPoint | { id: string | number }, options?: { pushState?: boolean }) => void;
   closeLabeling?: () => void;
   // Access to the currently selected task ID (adjust path if needed)
   dataStore?: {
@@ -385,14 +385,46 @@ export const ScatterView: FC<ScatterViewProps> = observer(
       const selectedInStore = root.dataStore?.selected?.id;
       const currentActiveId = view.scatter?.activePointId; // Get the latest value
 
-      // Use setTimeout to defer root interactions, similar to the previous approach
       const timerId = setTimeout(() => {
         if (currentActiveId) {
           // Only start labeling if the active point is not already the selected one in the store
           // Compare potentially number with string/number from store - ensure consistent comparison or types
           if (String(selectedInStore) !== String(currentActiveId)) {
-            // Remove parseInt - pass the ID as its original type (now number)
-            root?.startLabeling?.({ id: currentActiveId });
+            const taskStoreAny = (root as any).taskStore;
+            if (!taskStoreAny) return;
+
+            const existingModel = taskStoreAny.list?.find?.((t: any) => t.id === currentActiveId);
+
+            const performLabelingHeavy = (taskModel: any) => {
+              // Heavy path – switches DM into labeling mode (used when not yet labeling)
+              root?.startLabeling?.(taskModel, { pushState: false });
+            };
+
+            const performLabelingLight = (taskModel: any) => {
+              // Light path – we are already in labeling mode, just update LSF selection
+              try {
+                // Mark the task selected in store without triggering full reloads
+                if (typeof taskStoreAny.setSelected === "function") {
+                  taskStoreAny.setSelected(taskModel);
+                }
+                // Tell LSF to switch task
+                root?.SDK?.startLabeling?.();
+              } catch (err) {
+                console.error(err);
+                // fallback to heavy path
+                performLabelingHeavy(taskModel);
+              }
+            };
+
+            const isAlreadyLabeling = (root as any)?.isLabeling === true;
+
+            const perform = isAlreadyLabeling ? performLabelingLight : performLabelingHeavy;
+
+            if (existingModel) {
+              perform(existingModel);
+            } else if (typeof taskStoreAny.loadTask === "function") {
+              taskStoreAny.loadTask(currentActiveId).then(perform).catch(console.error);
+            }
           }
         } else {
           // If activeId became null in the view model and something was selected in the store, close labeling
@@ -436,7 +468,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
         if (bounds) {
           const [[minX, minY], [maxX, maxY]] = bounds;
           const minZoomAllowed = -2;
-          const maxZoomAllowed = 10;
+          const maxZoomAllowed = 100;
           const rangeX = maxX - minX || 1;
           const rangeY = maxY - minY || 1;
           // Compute a zoom level that fits the points within ~500px viewport

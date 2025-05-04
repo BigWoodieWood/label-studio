@@ -23,6 +23,11 @@ interface UseScatterBaseDataResult {
   reload: () => void;
 }
 
+// Simple in-memory cache keyed by `${projectId}-${classField}` so that
+// switching away from ScatterView and back doesn't trigger another long
+// network fetch.  `reload()` will explicitly clear the cache.
+const scatterCache = new Map<string, TaskPoint[]>();
+
 /**
  * Hook that loads all task points for the scatter plot base layer.
  * 
@@ -44,6 +49,14 @@ export function useScatterBaseData(
   // Define load function that handles pagination, errors, and cleanup
   const load = useCallback(() => {
     if (!projectId) return;
+    
+    const cacheKey = `${projectId}-${settings.classField}`;
+
+    // If we already have cached points, use them immediately and skip fetch
+    if (scatterCache.has(cacheKey)) {
+      setBasePoints(scatterCache.get(cacheKey)!);
+      return;
+    }
     
     // Cancel any in-flight request
     abortRef.current?.abort();
@@ -74,6 +87,9 @@ export function useScatterBaseData(
           // Update state so UI reflects progress
           setBasePoints(accumulated);
           
+          // Cache the fully loaded array for next mount
+          scatterCache.set(cacheKey, accumulated);
+          
           // Prepare for next page or exit
           hasMore = result.hasMore;
           currentPage++;
@@ -98,5 +114,12 @@ export function useScatterBaseData(
     return () => abortRef.current?.abort();
   }, [load]);
 
-  return { basePoints, loading, reload: load };
+  // Wrapper around reload that clears cache first
+  const reloadWithClear = useCallback(() => {
+    if (!projectId) return;
+    scatterCache.delete(`${projectId}-${settings.classField}`);
+    load();
+  }, [load, projectId, settings.classField]);
+
+  return { basePoints, loading, reload: reloadWithClear };
 } 

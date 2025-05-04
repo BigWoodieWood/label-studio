@@ -83,9 +83,9 @@ export const useScatterSelection = (
 
   const onClick = useCallback(
     (info: any, event: { srcEvent: MouseEvent }) => {
-      if (!info.object) return;
-      // Remove .toString() - use the ID as its original type (likely number)
-      const clickedId = info.object.id;
+      if (!info.object || !info.object.id) return;
+      // Convert string id to number before passing to MST
+      const clickedId = parseInt(info.object.id, 10);
       const isCtrl = event.srcEvent.ctrlKey || event.srcEvent.metaKey;
       const isShift = event.srcEvent.shiftKey;
       const isAlt = event.srcEvent.altKey;

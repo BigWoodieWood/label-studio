@@ -230,6 +230,155 @@ Add a *"Cloud"* option to the *Add view* menu (Toolbar or Tab creation modal).  
 
 >  Because Data Manager keeps most logic in stores, implementing a new view is mainly **pure UI work**.  No changes to backend APIs are necessary if you already have `(x, y)` per task.
 
+
+### HOW startLabeling() PROPAGATES FROM Table.jsx  →  Task selection →  LabelStudio
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 1.  ENTRY POINT  –  Table.jsx                                               │
+╰──────────────────────────────────────────────────────────────────────────────╯
+When the user clicks a row (or presses shortcuts) in the data-table, Table.jsx
+invokes:
+
+  getRoot(view).startLabeling(item);        // 124, 321, 329  ‑- Table.jsx
+  //               ↑      ↑
+  //               │      └─ «item» is either a Task or an Annotation snapshot
+  //               └───────── MST root (the AppStore instance)
+
+This call jumps straight into AppStore.startLabeling().
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 2.  AppStore.startLabeling()                                                │
+╰──────────────────────────────────────────────────────────────────────────────╯
+File excerpt:                                                         
+```350:430:web/libs/datamanager/src/stores/AppStore.js
+      const nextAction = () => {
+        self.SDK.setMode("labeling");   // switch DM into “labeling” mode
+
+        if (item?.id && !item.isSelected) {
+          const labelingParams = { pushState: options?.pushState };
+
+          // Row can represent either an Annotation (has task_id) or a Task
+          if (isDefined(item.task_id)) {
+            labelingParams.annotationID = item.id;
+            labelingParams.taskID       = item.task_id;
+          } else {
+            labelingParams.taskID       = item.id;
+          }
+          self.setTask(labelingParams); // (see section 3)
+        } else {
+          self.closeLabeling();         // toggle-off if clicked again
+        }
+      };
+```
+Safeguards:
+• Confirms that labeling is configured, no task is currently being loaded,
+  and (feature-flag) no unsaved LSF comment exists (opens a modal otherwise).
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 3.  AppStore.setTask()  – picks / loads the task and syncs URL              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```180:259:web/libs/datamanager/src/stores/AppStore.js
+setTask: flow(function* ({ taskID, annotationID, pushState }) {
+  // 3-A URL state
+  if (pushState !== false) {
+    History.navigate({ task: taskID, annotation: annotationID ?? null, ... });
+  }
+
+  // 3-B Load / select in MST stores
+  if (annotationID !== undefined)
+       self.annotationStore.setSelected(annotationID);
+  else self.taskStore.setSelected(taskID);
+
+  // 3-C Ensure full task JSON is present
+  const taskPromise = self.taskStore.loadTask(taskID, {
+                      select: !!taskID && !!annotationID });
+  ...
+  yield taskPromise.then(async () => {         // wait for REST call
+      /* after task is in store & LSF exists */
+      self.LSF?.setLSFTask(self.taskStore.selected, currentAnnotationID);
+  });
+});
+```
+
+Important details:
+
+• taskStore is an MST model defined in `DataStores/tasks.js`  
+  – Internally it’s a generic DataStore mixin that holds:
+    - `list` (array of Task models)  
+    - `selectedId` / `highlightedId` (primitives)  
+    - helpers like `setSelected()`, `loadTask()`, `focusPrev/Next()`, etc.
+
+• `loadTask()` fetches `/api/tasks/<id>` if not already cached, merges the
+  payload into the list, sets loading flags, and finally returns the Task
+  instance. (See lines 150-181 in tasks.js.)
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 4.  taskStore.setSelected()                                                 │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```53:73:web/libs/datamanager/src/mixins/DataStore/DataStore.js
+setSelected(val) {
+  let selected = typeof val === "number"
+      ? self.list.find(t => t.id === val) ?? getRoot(self).taskStore.loadTask(val)
+      : val;
+
+  if (selected && selected.id !== self.selected?.id) {
+    self.selected = selected;           // writes selectedId primitive
+    self.highlighted = selected;
+    getRoot(self).SDK.invoke("taskSelected");
+  }
+}
+```
+Thus the chosen Task becomes `taskStore.selected`, accessible anywhere via
+`getRoot(..).taskStore.selected`.
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 5.  Hand-off to the Editor (Label Studio Front-end)                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+After the task JSON is fully loaded, `setTask()` calls:
+
+  self.LSF?.setLSFTask(task, annotationID);
+
+`self.LSF` is an instance of `LSFWrapper` (sdk/lsf-sdk.js).  
+During application bootstrap DM-SDK created it:
+
+```410:web/libs/datamanager/src/sdk/dm-sdk.js
+this.lsf = new LSFWrapper(this, element, { task, preload, isLabelStream });
+```
+
+Inside LSFWrapper:
+
+```320:380:web/libs/datamanager/src/sdk/lsf-sdk.js
+setLSFTask(task, annotationID, fromHistory, selectPrediction = false) {
+  const lsfTask = taskToLSFormat(task);             // convert DM → LS schema
+  ...
+  this.lsf.assignTask(task);                        // sync meta
+  this.lsf.initializeStore(lsfTask);                // feed JSON into LS core
+  this.setAnnotation(annotationID, ...);            // choose annotation/pred.
+}
+```
+
+Label Studio (embedded as `this.lsf.lsfInstance`) now displays the task,
+pre-selects the proper annotation (or creates a new one), and the user can
+start labeling.
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ 6.  Summary Flow                                                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+1. Table row / shortcut → `AppStore.startLabeling(item)`  
+2. Verifies prerequisites, switches DataManager mode to "labeling".  
+3. Delegates to `setTask()` which  
+   a) pushes URL state,  
+   b) marks selection in `taskStore` / `annotationStore`,  
+   c) fetches full task JSON via REST if needed.  
+4. Once loaded, `LSFWrapper.setLSFTask()` is invoked to hand the data to the
+   embedded Label Studio editor.  
+5. Editor (lsfInstance) renders the task, ready for annotation.
+
+All task objects therefore live in `taskStore.list`; the currently active one
+is `taskStore.selected`.  Selection changes propagate to the UI and Label
+Studio through MST reactions and the explicit `setLSFTask()` bridge.
+
+
 ---
 
 ## Coding conventions & best practices
@@ -247,3 +396,4 @@ Add a *"Cloud"* option to the *Add view* menu (Toolbar or Tab creation modal).  
 * [TensorFlow Embedding Projector](https://projector.tensorflow.org/) – UX inspiration.
 * MobX-state-tree docs – <https://mobx-state-tree.js.org>.
 * React-window docs – <https://react-window.vercel.app/>.
+

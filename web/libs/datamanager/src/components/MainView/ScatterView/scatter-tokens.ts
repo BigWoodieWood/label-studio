@@ -40,7 +40,7 @@ export const STROKE: Record<'default'|'hovered'|'selected'|'active', Color> = {
   default: [156, 163, 175, 255], // gray-400 (#9ca3af)
   selected: [249, 115, 22, 255], // orange-500 (#f97316)
   hovered: [239, 68, 68, 255],   // red-500 (#ef4444)
-  active: [220, 38, 38, 255],    // red-600 (#dc2626)
+  active: [255, 0, 0, 255],    // red-600 (#dc2626)
 };
 
 /** Geometry for points */
