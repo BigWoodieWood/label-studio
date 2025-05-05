@@ -148,14 +148,17 @@ const useScatterLayers = (
   return useMemo(() => {
     if (!numericPoints || numericPoints.length === 0) return [];
 
-    // For large datasets, use Sets for faster lookups
+    // Normalize ID types to strings for robust comparisons
+    const strActiveId = activeId != null ? String(activeId) : null;
+    const strHoveredId = hoveredId != null ? String(hoveredId) : null;
+    
     const isSelected = (id: string) => view.selected?.isSelected(id) ?? false;
-    const isActive = (id: string) => id === activeId;
-    const isHovered = (id: string) => id === hoveredId;
+    const isActive = (id: string | number) => String(id) === strActiveId;
+    const isHovered = (id: string | number) => String(id) === strHoveredId;
     
     // Pre-compute points for each layer
-    const activePoint = activeId ? numericPoints.find(p => p.id === activeId) : null;
-    const hoveredPoint = hoveredId ? numericPoints.find(p => p.id === hoveredId) : null;
+    const activePoint = strActiveId ? numericPoints.find(p => String(p.id) === strActiveId) : null;
+    const hoveredPoint = strHoveredId ? numericPoints.find(p => String(p.id) === strHoveredId) : null;
     
     // Filter points into their respective layers - each point appears in exactly one layer
     const selectedPoints = numericPoints.filter(p => isSelected(p.id) && !isActive(p.id) && !isHovered(p.id));
