@@ -1,26 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useAtom } from "jotai";
 import { CodeEditor } from "@humansignal/ui";
 import { PlaygroundPreview } from "./PlaygroundPreview";
-
-const DEFAULT_CONFIG = '<View>\n  <!-- Paste your XML config here -->\n</View>';
-
-// Supported query params:
-// ?config (base64), ?configUrl (URL), ?interfaces=comma,separated,list
-function getQueryParams() {
-  return new URLSearchParams(window.location.search);
-}
-
-const getInterfacesFromParams = (params: URLSearchParams): string[] => {
-  const interfacesParam = params.get("interfaces");
-  if (!interfacesParam) return ["side-column"];
-  return interfacesParam.split(",").map((s) => s.trim()).filter(Boolean);
-};
+import {
+  configAtom,
+  loadingAtom,
+  errorAtom,
+  interfacesAtom,
+} from "../atoms/configAtoms";
+import { getQueryParams, getInterfacesFromParams } from "../utils/query";
 
 export const PlaygroundApp = () => {
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [interfaces, setInterfaces] = useState<string[]>(["side-column"]);
+  const [config, setConfig] = useAtom(configAtom);
+  const [loading, setLoading] = useAtom(loadingAtom);
+  const [error, setError] = useAtom(errorAtom);
+  const [interfaces, setInterfaces] = useAtom(interfacesAtom);
 
   useEffect(() => {
     const params = getQueryParams();
@@ -53,7 +47,8 @@ export const PlaygroundApp = () => {
       }
     }
     loadConfig();
-  }, []);
+    // eslint-disable-next-line
+  }, [setConfig, setError, setLoading, setInterfaces]);
 
   return (
     <div className="flex h-screen w-screen">
