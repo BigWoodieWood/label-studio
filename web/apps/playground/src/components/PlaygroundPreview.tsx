@@ -45,7 +45,7 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
   }, [config, loading, error, interfaces]);
 
   return (
-    <div className="bg-primary-background border border-border min-h-[400px] flex flex-col items-center justify-center">
+    <div className="min-h-full flex flex-col items-center justify-center">
       {error ? (
         <div className="text-danger-foreground text-body-medium">{error}</div>
       ) : loading ? (

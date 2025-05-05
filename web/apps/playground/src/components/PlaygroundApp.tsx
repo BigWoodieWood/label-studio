@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAtom } from "jotai";
 import { CodeEditor } from "@humansignal/ui";
 import { PlaygroundPreview } from "./PlaygroundPreview";
@@ -9,12 +9,16 @@ import {
   interfacesAtom,
 } from "../atoms/configAtoms";
 import { getQueryParams, getInterfacesFromParams } from "../utils/query";
+import { cnm } from "@humansignal/shad/utils";
+import styles from "./PlaygroundApp.module.scss";
 
 export const PlaygroundApp = () => {
   const [config, setConfig] = useAtom(configAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
   const [error, setError] = useAtom(errorAtom);
   const [interfaces, setInterfaces] = useAtom(interfacesAtom);
+  const [editorWidth, setEditorWidth] = useState(50); // percent
+  const dragging = useRef(false);
 
   useEffect(() => {
     const params = getQueryParams();
@@ -50,22 +54,62 @@ export const PlaygroundApp = () => {
     // eslint-disable-next-line
   }, [setConfig, setError, setLoading, setInterfaces]);
 
+  // Draggable divider logic
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!dragging.current) return;
+      const percent = (e.clientX / window.innerWidth) * 100;
+      setEditorWidth(Math.max(20, Math.min(80, percent)));
+    };
+    const onMouseUp = () => {
+      dragging.current = false;
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
   return (
-    <div className="flex h-screen w-screen">
-      <div className="flex flex-col flex-1 border-r border-border min-w-0">
-        <h2 className="m-0 p-tight text-heading-medium">LabelStudio Config Editor</h2>
-        <CodeEditor
-          value={config}
-          onChange={(_editor, _data, value) => setConfig(value)}
-          options={{ mode: "xml", lineNumbers: true }}
-          border
-          controlled
-        />
+    <div className={cnm("flex flex-col h-screen w-screen", {
+      [styles.root]: true
+    })}>
+      {/* Minimal top bar */}
+      <div className="flex items-center h-10 px-tight text-heading-medium select-none">
+        <span className="font-semibold tracking-tight text-body-medium">LabelStudio Playground</span>
       </div>
-      <div className="flex flex-col flex-2 min-w-0">
-        <h2 className="m-0 p-tight text-heading-medium">Preview</h2>
-        <div className="p-tight">
-          <PlaygroundPreview config={config} loading={loading} error={error} interfaces={interfaces} />
+      {/* Editor/Preview split */}
+      <div className="flex flex-1 min-h-0 min-w-0 relative border-t border-neutral-border">
+        {/* Editor Panel */}
+        <div
+          className="flex flex-col min-w-0 h-full"
+          style={{ width: `${editorWidth}%` }}
+        >
+          <div className="flex-1 min-h-0 min-w-0">
+            <CodeEditor
+              value={config}
+              onChange={(_editor, _data, value) => setConfig(value)}
+              options={{ mode: "xml", lineNumbers: true }}
+              border={false}
+              controlled
+            />
+          </div>
+        </div>
+        {/* Divider */}
+        <div
+          className="w-2 cursor-col-resize bg-neutral-border hover:bg-neutral-border-bold transition-colors duration-100 z-10"
+          onMouseDown={() => (dragging.current = true)}
+          role="separator"
+          aria-orientation="vertical"
+          tabIndex={-1}
+        />
+        {/* Preview Panel */}
+        <div className="flex flex-col min-w-0 h-full" style={{ width: `${100 - editorWidth}%` }}>
+          <div className="flex-1 min-h-0 min-w-0">
+            <PlaygroundPreview config={config} loading={loading} error={error} interfaces={interfaces} />
+          </div>
         </div>
       </div>
     </div>

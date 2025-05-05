@@ -1,0 +1,10 @@
+.root {
+  :global(.react-codemirror2 .CodeMirror) {
+    border: none;
+    border-radius: 0;
+  }
+}
+
+body {
+  border: 1px solid var(--color-neutral-border);
+}
