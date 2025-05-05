@@ -37,8 +37,8 @@
     "extract-antd-no-reset": "nx extract-antd-no-reset editor",
     "storybook:serve": "nx storybook storybook",
     "storybook:build": "nx build-storybook storybook",
-    "playground:serve": "nx serve playground",
-    "playground:build": "nx build playground"
+    "playground:serve": "FRONTEND_HOSTNAME=http://localhost:4200 MODE=standalone nx run playground:serve:development",
+    "playground:build": "NODE_ENV=production MODE=standalone nx run playground:build:production"
   },
   "husky": {
     "hooks": {

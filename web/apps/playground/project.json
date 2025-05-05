@@ -48,6 +48,7 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "playground:build",
+        "port": 4200,
         "hmr": true
       },
       "configurations": {
