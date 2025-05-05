@@ -36,7 +36,9 @@
     "design-tokens": "nx design-tokens ui",
     "extract-antd-no-reset": "nx extract-antd-no-reset editor",
     "storybook:serve": "nx storybook storybook",
-    "storybook:build": "nx build-storybook storybook"
+    "storybook:build": "nx build-storybook storybook",
+    "playground:serve": "nx serve playground",
+    "playground:build": "nx build playground"
   },
   "husky": {
     "hooks": {
