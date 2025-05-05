@@ -93,7 +93,6 @@ export const PlaygroundApp = () => {
               onChange={(_editor, _data, value) => setConfig(value)}
               options={{ mode: "xml", lineNumbers: true }}
               border={false}
-              controlled
             />
           </div>
         </div>
