@@ -79,13 +79,6 @@
           "codeCoverage": true
         }
       }
-    },
-    "version": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "apps/playground",
-        "command": "node ../../tools/version/version.mjs"
-      }
     }
   },
   "tags": []
