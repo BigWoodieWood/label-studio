@@ -82,6 +82,7 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
   const tooltipText = visible && !collapsed ? "Collapse" : "Expand";
   const settings = props.currentEntity?.store?.settings || props.currentEntity?.settings;
   const [bottomCollapsed, setBottomCollapsed] = useState(false);
+  const TABS_ROW_HEIGHT = 33; // px, should match your CSS
 
   handlers.current = {
     onResize,
@@ -96,6 +97,13 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
   keyRef.current = key;
 
   const style = useMemo(() => {
+    // If bottom panel and collapsed, only show tabs row
+    if (isBottomPanel && bottomCollapsed) {
+      return {
+        height: `${TABS_ROW_HEIGHT}px`,
+        zIndex,
+      };
+    }
     const dynamicStyle = visible
       ? {
           height: locked ? DEFAULT_PANEL_HEIGHT : collapsed ? "100%" : (height ?? "100%"),
@@ -110,7 +118,7 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
       ...dynamicStyle,
       zIndex,
     };
-  }, [width, height, visible, locked, collapsed, zIndex]);
+  }, [width, height, visible, locked, collapsed, zIndex, isBottomPanel, bottomCollapsed]);
 
   const coordinates = useMemo(() => {
     return detached && !locked
