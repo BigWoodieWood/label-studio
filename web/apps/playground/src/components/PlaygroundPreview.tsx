@@ -53,6 +53,7 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
         interfaces,
         settings: {
           forceBottomPanel: true,
+          collapsibleBottomPanel: true,
         },
       });
     }

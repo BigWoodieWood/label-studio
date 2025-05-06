@@ -41,6 +41,8 @@ const SettingsModel = types
 
     forceBottomPanel: types.optional(types.boolean, false),
 
+    collapsibleBottomPanel: types.optional(types.boolean, false),
+
     sidePanelMode: types.optional(
       types.enumeration([SIDEPANEL_MODE_REGIONS, SIDEPANEL_MODE_LABELS]),
       SIDEPANEL_MODE_REGIONS,

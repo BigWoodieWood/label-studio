@@ -115,7 +115,7 @@ export const PlaygroundApp = () => {
         </div>
         {/* Divider */}
         <div
-          className="w-2 cursor-col-resize bg-neutral-border hover:bg-neutral-border-bold transition-colors duration-100 z-10"
+          className="w-2 cursor-col-resize bg-neutral-border-subtler hover:bg-neutral-border-subtle transition-colors duration-100 z-10"
           onMouseDown={() => (dragging.current = true)}
           role="separator"
           aria-orientation="vertical"
