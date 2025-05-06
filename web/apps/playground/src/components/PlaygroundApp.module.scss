@@ -3,6 +3,10 @@
     border: none;
     border-radius: 0;
   }
+
+  :global(.lsf-tabs-panel__body) {
+    height: 100%;
+  }
 }
 
 body {

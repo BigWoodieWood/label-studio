@@ -2,15 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAtom } from "jotai";
 import { CodeEditor } from "@humansignal/ui";
 import { PlaygroundPreview } from "./PlaygroundPreview";
-import {
-  configAtom,
-  loadingAtom,
-  errorAtom,
-  interfacesAtom,
-} from "../atoms/configAtoms";
+import { configAtom, loadingAtom, errorAtom, interfacesAtom } from "../atoms/configAtoms";
 import { getQueryParams, getInterfacesFromParams } from "../utils/query";
+import { completeAfter, completeIfInTag } from "../utils/codeEditor";
+import tags from "../utils/schema.json";
+
 import { cnm } from "@humansignal/shad/utils";
 import styles from "./PlaygroundApp.module.scss";
+
 
 export const PlaygroundApp = () => {
   const [config, setConfig] = useAtom(configAtom);
@@ -19,6 +18,7 @@ export const PlaygroundApp = () => {
   const [interfaces, setInterfaces] = useAtom(interfacesAtom);
   const [editorWidth, setEditorWidth] = useState(50); // percent
   const dragging = useRef(false);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const params = getQueryParams();
@@ -30,6 +30,7 @@ export const PlaygroundApp = () => {
       if (configParam) {
         try {
           const decoded = atob(configParam);
+
           setConfig(decoded);
         } catch (e) {
           setError("Failed to decode base64 config. Are you sure it's a valid base64 string?");
@@ -73,9 +74,11 @@ export const PlaygroundApp = () => {
   }, []);
 
   return (
-    <div className={cnm("flex flex-col h-screen w-screen", {
-      [styles.root]: true
-    })}>
+    <div
+      className={cnm("flex flex-col h-screen w-screen", {
+        [styles.root]: true,
+      })}
+    >
       {/* Minimal top bar */}
       <div className="flex items-center h-10 px-tight text-heading-medium select-none">
         <span className="font-semibold tracking-tight text-body-medium">LabelStudio Playground</span>
@@ -83,16 +86,30 @@ export const PlaygroundApp = () => {
       {/* Editor/Preview split */}
       <div className="flex flex-1 min-h-0 min-w-0 relative border-t border-neutral-border">
         {/* Editor Panel */}
-        <div
-          className="flex flex-col min-w-0 h-full"
-          style={{ width: `${editorWidth}%` }}
-        >
+        <div className="flex flex-col min-w-0 h-full" style={{ width: `${editorWidth}%` }}>
           <div className="flex-1 min-h-0 min-w-0">
             <CodeEditor
+              ref={editorRef}
               value={config}
               onChange={(_editor, _data, value) => setConfig(value)}
-              options={{ mode: "xml", lineNumbers: true }}
               border={false}
+              // @ts-ignore
+              autoCloseTags
+              smartIndent
+              detach
+              extensions={["hint", "xml-hint"]}
+              options={{
+                mode: "xml",
+                theme: "default",
+                lineNumbers: true,
+                extraKeys: {
+                  "'<'": completeAfter,
+                  "' '": completeIfInTag,
+                  "'='": completeIfInTag,
+                  "Ctrl-Space": "autocomplete",
+                },
+                hintOptions: { schemaInfo: tags },
+              }}
             />
           </div>
         </div>

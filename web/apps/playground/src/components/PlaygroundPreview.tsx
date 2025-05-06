@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { unmountComponentAtNode } from "react-dom";
 import type { FC } from "react";
 import { generateSampleTaskFromConfig } from "../utils/generateSampleTask";
 
@@ -23,7 +24,7 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
         lsfInstance.current.destroy();
         lsfInstance.current = null;
         if (rootRef.current) {
-          rootRef.current.innerHTML = "";
+          unmountComponentAtNode(rootRef.current);
         }
       }
       if (rafId.current !== null) {
@@ -66,7 +67,7 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
   }, [config, loading, error, interfaces]);
 
   return (
-    <div className="min-h-full flex flex-col items-center justify-center">
+    <div className="h-full flex flex-col items-center justify-center">
       {error ? (
         <div className="text-danger-foreground text-body-medium">{error}</div>
       ) : loading ? (
