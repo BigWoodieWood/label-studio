@@ -80,11 +80,11 @@ export const PlaygroundApp = () => {
       })}
     >
       {/* Minimal top bar */}
-      <div className="flex items-center h-10 px-tight text-heading-medium select-none">
+      <div className="flex items-center h-10 px-tight text-heading-medium select-none border-b border-neutral-border">
         <span className="font-semibold tracking-tight text-body-medium">LabelStudio Playground</span>
       </div>
       {/* Editor/Preview split */}
-      <div className="flex flex-1 min-h-0 min-w-0 relative border-t border-neutral-border">
+      <div className="flex flex-1 min-h-0 min-w-0 relative">
         {/* Editor Panel */}
         <div className="flex flex-col min-w-0 h-full" style={{ width: `${editorWidth}%` }}>
           <div className="flex-1 min-h-0 min-w-0">
