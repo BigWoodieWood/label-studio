@@ -19,7 +19,7 @@ export const configureStore = async (params, events) => {
   params = { ...params };
 
   // Support forceBottomPanel option
-  if (params.forceBottomPanel) {
+  if (params?.settings?.forceBottomPanel) {
     params.bottomSidePanel = true;
     params.settings = { ...(params.settings || {}), forceBottomPanel: true };
   }

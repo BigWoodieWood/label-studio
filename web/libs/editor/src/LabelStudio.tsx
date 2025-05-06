@@ -39,7 +39,9 @@ type LSFOptions = Record<string, any> & {
   user?: LSFUser;
   users?: LSFUser[];
   task?: LSFTask;
-  forceBottomPanel?: boolean;
+  settings?: {
+    forceBottomPanel?: boolean;
+  };
 };
 
 export class LabelStudio {
