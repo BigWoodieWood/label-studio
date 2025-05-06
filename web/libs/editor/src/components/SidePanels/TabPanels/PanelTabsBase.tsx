@@ -344,10 +344,9 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
             </Elem>
           </>
         )}
-        {visible && !collapsed && !bottomCollapsed && (
+        {visible && !collapsed && (
           <Elem name="body">
             {lockPanelContents && <Elem name="shield" />}
-            {/* Pass collapse/expand state and handlers to Tabs using React.cloneElement */}
             {(() => {
               const onlyChild = React.Children.only(children);
               if (React.isValidElement(onlyChild) && (onlyChild.type as any).displayName === "Tabs") {

@@ -241,7 +241,9 @@ export const Tabs = (props: BaseProps & { isBottomPanel?: boolean; bottomCollaps
             </Button>
           )}
         </Elem>
-        <Elem name="contents">{ActiveComponent && <ActiveComponent {...props} />}</Elem>
+        {!props.bottomCollapsed && (
+          <Elem name="contents">{ActiveComponent && <ActiveComponent {...props} />}</Elem>
+        )}
       </Block>
     </>
   );
