@@ -13,6 +13,7 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_MIN_HEIGHT, DEFAULT_PANEL_WIDTH, PA
 import { type BaseProps as OrigBaseProps, Side } from "./types";
 import { resizers } from "./utils";
 import "./PanelTabsBase.scss";
+import React from "react";
 
 const distance = (x1: number, x2: number, y1: number, y2: number) => {
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
@@ -20,6 +21,7 @@ const distance = (x1: number, x2: number, y1: number, y2: number) => {
 
 interface BasePropsWithChildren extends OrigBaseProps {
   children?: ReactNode;
+  isBottomPanel?: boolean;
 }
 
 export const PanelTabsBase: FC<BasePropsWithChildren> = ({
@@ -54,6 +56,7 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
   dragTop,
   dragBottom,
   lockPanelContents,
+  isBottomPanel,
   ...props
 }) => {
   const headerRef = useRef<HTMLDivElement>();
@@ -290,96 +293,89 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
     [onVisibilityChange, key, visible],
   );
 
-  return renderPanelTabsBase();
-
-  function renderPanelTabsBase(): JSX.Element {
-    return (
-      // @ts-expect-error Block is a valid React component
-      <Block ref={panelRef} name="tabs-panel" mod={mods} style={{ ...style, ...coordinates }}>
-        {/* @ts-expect-error Elem is a valid React component */}
-        <Elem name="content">
-          {!locked && collapsedHeader && (
-            <>
-              {isChildOfGroup && visible && (
-                <Elem
-                  name="grouped-top"
-                  ref={resizeGroup}
-                  mod={{ drag: "grouped-top" === resizing }}
-                  data-resize={"grouped-top"}
-                />
-              )}
+  return (
+    <Block ref={panelRef} name="tabs-panel" mod={mods} style={{ ...style, ...coordinates }}>
+      <Elem name="content">
+        {(!locked && collapsedHeader) && (
+          <>
+            {isChildOfGroup && visible && (
               <Elem
-                ref={headerRef}
-                onClick={() => {
-                  if (collapsed) handleGroupPanelToggle();
-                }}
-                id={key}
-                mod={{ collapsed }}
-                name="header"
-              >
-                <Elem name="header-left">
-                  {!collapsed && <Elem name="icon" style={{ pointerEvents: "none" }} tag={IconOutlinerDrag} />}
-                  {!visible && !collapsed && <Elem name="title">{panelViews.map((view) => view.title).join(" ")}</Elem>}
-                </Elem>
-                <Elem name="header-right">
-                  {(!detached || collapsed) && (
-                    <Elem
-                      name="toggle"
-                      mod={{ detached, collapsed, alignment }}
-                      onClick={handleGroupPanelToggle}
-                      data-tooltip={`${tooltipText} Group`}
-                    >
-                      {Side.left === alignment ? <IconChevronLeft /> : <IconChevronRight />}
-                    </Elem>
-                  )}
-                  {!collapsed && (
-                    <Elem
-                      name="toggle"
-                      mod={{ detached, collapsed, alignment }}
-                      onClick={handlePanelToggle}
-                      data-tooltip={tooltipText}
-                    >
-                      {visible ? <IconCollapseSmall /> : <IconExpandSmall />}
-                    </Elem>
-                  )}
-                  {settings?.collapsibleBottomPanel && (
-                    <Elem
-                      name="toggle"
-                      mod={{ collapsed: bottomCollapsed, alignment }}
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        setBottomCollapsed(v => !v);
-                      }}
-                      data-tooltip={bottomCollapsed ? "Expand Bottom Panel" : "Collapse Bottom Panel"}
-                    >
-                      {bottomCollapsed ? <IconExpandSmall /> : <IconCollapseSmall />}
-                    </Elem>
-                  )}
-                </Elem>
+                name="grouped-top"
+                ref={resizeGroup}
+                mod={{ drag: "grouped-top" === resizing }}
+                data-resize={"grouped-top"}
+              />
+            )}
+            <Elem
+              ref={headerRef}
+              onClick={() => {
+                if (collapsed) handleGroupPanelToggle();
+              }}
+              id={key}
+              mod={{ collapsed }}
+              name="header"
+            >
+              <Elem name="header-left">
+                {!collapsed && <Elem name="icon" style={{ pointerEvents: "none" }} tag={IconOutlinerDrag} />}
+                {!visible && !collapsed && <Elem name="title">{panelViews.map((view) => view.title).join(" ")}</Elem>}
               </Elem>
-            </>
-          )}
-          {visible && !collapsed && !bottomCollapsed && (
-            <Elem name="body">
-              {lockPanelContents && <Elem name="shield" />}
-              {children}
+              <Elem name="header-right">
+                {(!detached || collapsed) && (
+                  <Elem
+                    name="toggle"
+                    mod={{ detached, collapsed, alignment }}
+                    onClick={handleGroupPanelToggle}
+                    data-tooltip={`${tooltipText} Group`}
+                  >
+                    {Side.left === alignment ? <IconChevronLeft /> : <IconChevronRight />}
+                  </Elem>
+                )}
+                {!collapsed && (
+                  <Elem
+                    name="toggle"
+                    mod={{ detached, collapsed, alignment }}
+                    onClick={handlePanelToggle}
+                    data-tooltip={tooltipText}
+                  >
+                    {visible ? <IconCollapseSmall /> : <IconExpandSmall />}
+                  </Elem>
+                )}
+              </Elem>
             </Elem>
-          )}
-        </Elem>
-        {visible && !positioning && !locked && (
-          <Elem name="resizers" ref={resizerRef} mod={{ locked: positioning || locked }}>
-            {resizers.map((res) => {
-              const shouldRender = collapsed
-                ? false
-                : ((res === "left" || res === "right") && alignment !== res) || detached;
-
-              return shouldRender ? (
-                <Elem key={res} name="resizer" mod={{ drag: res === resizing }} data-resize={res} />
-              ) : null;
-            })}
+          </>
+        )}
+        {visible && !collapsed && !bottomCollapsed && (
+          <Elem name="body">
+            {lockPanelContents && <Elem name="shield" />}
+            {/* Pass collapse/expand state and handlers to Tabs using React.cloneElement */}
+            {(() => {
+              const onlyChild = React.Children.only(children);
+              if (React.isValidElement(onlyChild) && (onlyChild.type as any).displayName === "Tabs") {
+                return React.cloneElement(onlyChild, {
+                  isBottomPanel: isBottomPanel as boolean,
+                  bottomCollapsed,
+                  setBottomCollapsed,
+                  settings,
+                } as Partial<typeof onlyChild.props>);
+              }
+              return children;
+            })()}
           </Elem>
         )}
-      </Block>
-    );
-  }
+      </Elem>
+      {visible && !positioning && !locked && (
+        <Elem name="resizers" ref={resizerRef} mod={{ locked: positioning || locked }}>
+          {resizers.map((res) => {
+            const shouldRender = collapsed
+              ? false
+              : ((res === "left" || res === "right") && alignment !== res) || detached;
+
+            return shouldRender ? (
+              <Elem key={res} name="resizer" mod={{ drag: res === resizing }} data-resize={res} />
+            ) : null;
+          })}
+        </Elem>
+      )}
+    </Block>
+  );
 };

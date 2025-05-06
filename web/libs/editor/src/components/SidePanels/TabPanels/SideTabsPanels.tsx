@@ -560,7 +560,7 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
             {panelsHidden !== true && panelBreakPoint ? (
               <>
                 <Elem name="wrapper">
-                  <PanelTabsBase {...emptyBaseProps}>
+                  <PanelTabsBase {...emptyBaseProps} isBottomPanel={true}>
                     <Tabs {...emptyBaseProps} />
                   </PanelTabsBase>
                 </Elem>
