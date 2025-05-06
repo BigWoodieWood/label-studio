@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { FC } from "react";
+import { generateSampleTaskFromConfig } from "../utils/generateSampleTask";
 
 interface PlaygroundPreviewProps {
   config: string;
@@ -11,35 +12,55 @@ interface PlaygroundPreviewProps {
 export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading, error, interfaces }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const lsfInstance = useRef<any>(null);
+  const rafId = useRef<number | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
     let LabelStudio: any;
     let dependencies: any;
 
-    async function loadLSF() {
-      dependencies = await import("@humansignal/editor");
-      LabelStudio = (window as any).LabelStudio || dependencies.LabelStudio;
-      if (!LabelStudio || !rootRef.current) return;
+    function cleanup() {
       if (lsfInstance.current) {
         lsfInstance.current.destroy();
         lsfInstance.current = null;
+        if (rootRef.current) {
+          rootRef.current.innerHTML = "";
+        }
       }
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+    }
+
+    async function loadLSF() {
+      dependencies = await import("@humansignal/editor");
+      LabelStudio = dependencies.LabelStudio;
+      if (!LabelStudio || !rootRef.current) return;
+      cleanup();
+      const sampleTask = generateSampleTaskFromConfig(config);
+      const annotations = sampleTask.annotation
+        ? [{ id: 1, result: [sampleTask.annotation] }]
+        : [{ id: 1, result: [] }];
       lsfInstance.current = new LabelStudio(rootRef.current, {
         config,
-        task: { id: 1, data: {}, annotations: [], predictions: [] },
+        task: {
+          id: 1,
+          data: sampleTask.data,
+          annotations,
+          predictions: [],
+        },
         interfaces,
       });
     }
+
     if (!loading && !error && config) {
-      loadLSF();
+      rafId.current = requestAnimationFrame(() => {
+        loadLSF();
+      });
     }
+
     return () => {
-      isMounted = false;
-      if (lsfInstance.current) {
-        lsfInstance.current.destroy();
-        lsfInstance.current = null;
-      }
+      cleanup();
     };
     // eslint-disable-next-line
   }, [config, loading, error, interfaces]);
