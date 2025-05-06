@@ -35,10 +35,11 @@ type LSFTask = any;
 // but it's not types yet, so here is some excerpt of its params
 type LSFOptions = Record<string, any> & {
   interfaces: string[];
-  keymap: Keymap;
-  user: LSFUser;
-  users: LSFUser[];
-  task: LSFTask;
+  keymap?: any;
+  user?: LSFUser;
+  users?: LSFUser[];
+  task?: LSFTask;
+  forceBottomPanel?: boolean;
 };
 
 export class LabelStudio {

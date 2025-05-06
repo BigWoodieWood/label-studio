@@ -51,6 +51,7 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
           predictions: [],
         },
         interfaces,
+        forceBottomPanel: true,
       });
     }
 
