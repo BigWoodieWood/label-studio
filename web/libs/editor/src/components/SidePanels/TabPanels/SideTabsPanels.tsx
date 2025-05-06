@@ -75,14 +75,16 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
   const [breakPointActiveTab, setBreakPointActiveTab] = useState(0);
   const localSnap = useRef(snap);
   const collapsedSideRef = useRef(collapsedSide);
+  const settings = currentEntity?.store?.settings || currentEntity?.settings;
 
   collapsedSideRef.current = collapsedSide;
   localSnap.current = snap;
   useRegionsCopyPaste(currentEntity);
 
   const panelBreakPoint = useMemo(() => {
+    if (settings?.forceBottomPanel) return true;
     return viewportSizeMatch || screenSizeMatch.matches;
-  }, [viewportSizeMatch, screenSizeMatch.matches]);
+  }, [viewportSizeMatch, screenSizeMatch.matches, settings?.forceBottomPanel]);
 
   const updatePanel = useCallback(
     (name: string, patch: Partial<PanelBBox>) => {
