@@ -81,7 +81,10 @@ export const PanelTabsBase: FC<BasePropsWithChildren> = ({
   const collapsedHeader = !(collapsed && !isParentOfCollapsedPanel);
   const tooltipText = visible && !collapsed ? "Collapse" : "Expand";
   const settings = props.currentEntity?.store?.settings || props.currentEntity?.settings;
-  const [bottomCollapsed, setBottomCollapsed] = useState(false);
+  const [bottomCollapsed, setBottomCollapsed] = useState(() => {
+    if (isBottomPanel && settings?.defaultCollapsedBottomPanel) return true;
+    return false;
+  });
   const TABS_ROW_HEIGHT = 33; // px, should match your CSS
 
   handlers.current = {
