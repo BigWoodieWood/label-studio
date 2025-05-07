@@ -206,8 +206,8 @@ export const Tabs = (props: BaseProps & { isBottomPanel?: boolean; bottomCollaps
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (!dragging.current) return;
-      const deltaY = e.clientY - startY.current;
-      const newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight.current - deltaY));
+      const deltaY = startY.current - e.clientY;
+      const newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight.current + deltaY));
       setPanelHeight(newHeight);
     };
     const onMouseUp = () => {
@@ -238,19 +238,12 @@ export const Tabs = (props: BaseProps & { isBottomPanel?: boolean; bottomCollaps
       <Block name="tabs">
         {!props.bottomCollapsed && props.isBottomPanel && props.settings?.collapsibleBottomPanel && (
           <div
-            className="w-full h-2 cursor-row-resize bg-neutral-border-subtler hover:bg-neutral-border-subtle transition-colors duration-100 relative z-10"
+            className="w-full h-2 cursor-row-resize bg-neutral-border-subtler hover:bg-neutral-border-subtle transition-colors duration-100 relative select-none z-10"
             onMouseDown={handleMouseDown}
             onDoubleClick={handleDividerDoubleClick}
             role="separator"
             aria-orientation="horizontal"
             tabIndex={-1}
-            style={{
-              marginTop: '-1px',
-              marginBottom: '-1px',
-              borderTop: '1px solid var(--color-neutral-border)',
-              borderBottom: '1px solid var(--color-neutral-border)',
-              pointerEvents: 'auto',
-            }}
           />
         )}
         <Elem name="tabs-row">
