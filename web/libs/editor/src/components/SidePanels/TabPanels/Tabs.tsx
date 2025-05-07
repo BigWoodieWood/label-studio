@@ -190,62 +190,14 @@ const Tab = ({
   );
 };
 
-export const Tabs = (props: BaseProps & { isBottomPanel?: boolean; bottomCollapsed?: boolean; setBottomCollapsed?: (v: boolean) => void; settings?: any }) => {
+export const Tabs = (props: BaseProps & { isBottomPanel?: boolean; bottomCollapsed?: boolean; setBottomCollapsed?: (v: boolean) => void; settings?: any; panelHeight?: number }) => {
   const ActiveComponent = props.locked
     ? props.panelViews[props.breakPointActiveTab].component
     : props.panelViews?.find((view) => view.active)?.component;
 
-  const [panelHeight, setPanelHeight] = useState(300); // Default height in pixels
-  const dragging = useRef(false);
-  const startY = useRef(0);
-  const startHeight = useRef(0);
-  const DEFAULT_HEIGHT = 300; // Default height in pixels
-  const MIN_HEIGHT = 100; // Minimum height in pixels
-  const MAX_HEIGHT = 800; // Maximum height in pixels
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!dragging.current) return;
-      const deltaY = startY.current - e.clientY;
-      const newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight.current + deltaY));
-      setPanelHeight(newHeight);
-    };
-    const onMouseUp = () => {
-      dragging.current = false;
-    };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, []);
-
-  const handleDividerDoubleClick = () => {
-    setPanelHeight(DEFAULT_HEIGHT);
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragging.current = true;
-    startY.current = e.clientY;
-    startHeight.current = panelHeight;
-  };
-
   return (
     <>
       <Block name="tabs">
-        {!props.bottomCollapsed && props.isBottomPanel && props.settings?.collapsibleBottomPanel && (
-          <div
-            className="w-full h-2 cursor-row-resize bg-neutral-border-subtler hover:bg-neutral-border-subtle transition-colors duration-100 relative select-none z-10"
-            onMouseDown={handleMouseDown}
-            onDoubleClick={handleDividerDoubleClick}
-            role="separator"
-            aria-orientation="horizontal"
-            tabIndex={-1}
-          />
-        )}
         <Elem name="tabs-row">
           {props.panelViews.map((view, index) => {
             const { component: Component } = view;
@@ -290,7 +242,7 @@ export const Tabs = (props: BaseProps & { isBottomPanel?: boolean; bottomCollaps
           )}
         </Elem>
         {!props.bottomCollapsed && (
-          <Elem name="contents" style={{ height: `${panelHeight}px`, overflow: 'auto' }}>
+          <Elem name="contents" style={{ overflow: 'auto' }}>
             {ActiveComponent && <ActiveComponent {...props} />}
           </Elem>
         )}

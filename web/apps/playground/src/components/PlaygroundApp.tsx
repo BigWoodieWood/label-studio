@@ -10,7 +10,6 @@ import tags from "../utils/schema.json";
 import { cnm } from "@humansignal/shad/utils";
 import styles from "./PlaygroundApp.module.scss";
 
-
 export const PlaygroundApp = () => {
   const [config, setConfig] = useAtom(configAtom);
   const [loading, setLoading] = useAtom(loadingAtom);
