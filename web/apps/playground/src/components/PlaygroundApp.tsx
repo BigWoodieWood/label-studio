@@ -73,6 +73,10 @@ export const PlaygroundApp = () => {
     };
   }, []);
 
+  const handleDividerDoubleClick = () => {
+    setEditorWidth(50); // Reset to 50/50 split
+  };
+
   return (
     <div
       className={cnm("flex flex-col h-screen w-screen", {
@@ -117,6 +121,7 @@ export const PlaygroundApp = () => {
         <div
           className="w-2 cursor-col-resize bg-neutral-border-subtler hover:bg-neutral-border-subtle transition-colors duration-100 z-10"
           onMouseDown={() => (dragging.current = true)}
+          onDoubleClick={handleDividerDoubleClick}
           role="separator"
           aria-orientation="vertical"
           tabIndex={-1}
