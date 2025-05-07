@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAtom } from "jotai";
-import { CodeEditor } from "@humansignal/ui";
+import { CodeEditor, ThemeToggle } from "@humansignal/ui";
 import { PlaygroundPreview } from "./PlaygroundPreview";
 import { configAtom, loadingAtom, errorAtom, interfacesAtom } from "../atoms/configAtoms";
 import { getQueryParams, getInterfacesFromParams } from "../utils/query";
@@ -83,8 +83,9 @@ export const PlaygroundApp = () => {
       })}
     >
       {/* Minimal top bar */}
-      <div className="flex items-center h-10 px-tight text-heading-medium select-none border-b border-neutral-border">
+      <div className="flex items-center h-10 px-tight text-heading-medium justify-between select-none border-b border-neutral-border">
         <span className="font-semibold tracking-tight text-body-medium">LabelStudio Playground</span>
+        <ThemeToggle />
       </div>
       {/* Editor/Preview split */}
       <div className="flex flex-1 min-h-0 min-w-0 relative">
