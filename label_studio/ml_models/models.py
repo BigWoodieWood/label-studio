@@ -184,6 +184,8 @@ class ModelRun(models.Model):
 
     completed_at = models.DateTimeField(_('completed at'), null=True, default=None)
 
+    recreate_predictions = models.BooleanField(_('recreate predictions'), default=True)
+
     def has_permission(self, user):
         return user.active_organization == self.organization
 
