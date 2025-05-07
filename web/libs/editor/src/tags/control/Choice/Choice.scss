@@ -82,8 +82,22 @@ body :global(.ant-checkbox-checked .ant-checkbox-inner) {
   border-color: var(--color-primary-surface);
 }
 
+
 body :global(.ant-checkbox-checked)::after {
   border: 1px solid var(--color-primary-surface);
+}
+
+body :global(.ant-checkbox-checked.ant-checkbox-disabled .ant-checkbox-inner) {
+  background-color: var(--color-primary-surface) !important;
+  border-color: var(--color-primary-border) !important;
+}
+
+body :global(.ant-checkbox-checked.ant-checkbox-disabled .ant-checkbox-inner::after) {
+  border-color: var(--color-primary-surface-content);
+}
+
+body :global(.ant-checkbox.ant-checkbox-disabled .ant-checkbox-inner) {
+  border-color: var(--color-neutral-border) !important;
 }
 
 :global(.ant-checkbox-wrapper span + span) {
