@@ -71,7 +71,7 @@ export const TabSelectedItems = types
     toggleMany(ids) {
       ids.forEach(id => {
         if (self.map.has(id)) self.map.delete(id);
-        else                   self.map.set(id, true);
+        else self.map.set(id, true);
       });
       self._invokeChangeEvent();
     },

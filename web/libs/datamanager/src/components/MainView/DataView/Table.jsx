@@ -267,7 +267,12 @@ export const DataView = injector(
 
     const content =
       viewType === "scatter" ? (
-        <ScatterView view={view} data={data} loadMore={loadMore} onChange={(id) => view.toggleSelected(id)} />
+        <ScatterView
+          view={view}
+          data={data}
+          onChange={(id) => view.toggleSelected(id)}
+          onBulkChange={(ids) => view.toggleMany(ids)}
+        />
       ) : view.root.isLabeling || viewType === "list" ? (
         <Table
           view={view}

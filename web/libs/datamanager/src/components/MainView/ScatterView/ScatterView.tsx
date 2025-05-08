@@ -61,8 +61,8 @@ export interface ScatterViewProps {
   view: ScatterViewModel;
   /** Callback invoked when a point is clicked, passing the task ID. */
   onChange?: (id: string) => void;
-  /** Callback invoked when scrolling near the edge (currently TODO). */
-  loadMore?: () => Promise<void>;
+  /** Callback invoked when points are selected in bulk. */
+  onBulkChange?: (ids: string[]) => void;
 }
 
 // Function to calculate bounding box [[minX, minY], [maxX, maxY]]
@@ -89,7 +89,7 @@ const calculateBounds = (points: TaskPoint[]): [[number, number], [number, numbe
  * shows tooltips, and integrates with the labeling workflow.
  */
 export const ScatterView: FC<ScatterViewProps> = observer(
-  ({ data = [], view, onChange }) => {
+  ({ data = [], view, onChange, onBulkChange }) => {
     // Ensure scatter state exists for scatter views
     useEffect(() => {
       if (view.type === 'scatter' && !view.scatter) {
@@ -186,8 +186,10 @@ export const ScatterView: FC<ScatterViewProps> = observer(
       // Ensure view.scatter exists before accessing setActivePointId
       // Update type annotation for id to number | null
       setActivePointId: useCallback((id: number | null) => view.scatter?.setActivePointId(id), [view.scatter]),
-      onToggleSelect: (id) => onChange?.(id),
-      // onActiveChange is removed as the hook no longer calls it
+      // One point selection
+      onToggleSelect: (id) => { onChange?.(id); console.log("onToggleSelect", id); },
+      // Provide bulk selection to improve performance
+      onBulkToggleSelect: (ids) => onBulkChange && onBulkChange?.(ids),
       isSelected: (id) => view.selected?.isSelected(id) ?? false,
       onClearSelection: () => view.clearSelection()
     });
@@ -413,7 +415,6 @@ export const ScatterView: FC<ScatterViewProps> = observer(
           layers={layers}
           views={new OrthographicView({ id: "ortho-view" })}
           initialViewState={initialViewState}
-          viewState={viewState}
           onViewStateChange={handleViewStateChange}
           controller
           getTooltip={getTooltip}

@@ -201,9 +201,7 @@ export const useScatterSelection = (
       }
 
       if (idsToUpdate.length) {
-        onBulkToggleSelect?.(idsToUpdate) ??
-          idsToUpdate.forEach(id => onToggleSelect?.(id));
-
+        onBulkToggleSelect?.(idsToUpdate);
         setSelectionVersion(v => v + 1);
       }
 
@@ -211,7 +209,7 @@ export const useScatterSelection = (
       dragStart.current = null;
       setSelectionRectangle(null);
     },
-    [numericPoints, onToggleSelect, isSelected, onBulkToggleSelect],
+    [numericPoints, isSelected, onBulkToggleSelect],
   );
 
   // Add ESC key handler to clear selection AND active point
