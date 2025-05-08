@@ -1,8 +1,9 @@
-import React, { FC, useState, useCallback, useRef } from 'react';
-import { Button } from '../../Common/Button/Button';
-import { Modal } from '../../Common/Modal/Modal';
-import { Block, Elem } from '../../../utils/bem';
-import { Space } from '../../Common/Space/Space';
+import type React from "react";
+import { type FC, useState, useCallback, useRef } from "react";
+import { Button } from "../../Common/Button/Button";
+import { Modal } from "../../Common/Modal/Modal";
+import { Block, Elem } from "../../../utils/bem";
+import { Space } from "../../Common/Space/Space";
 
 interface ScatterSettings {
   classField: string;
@@ -32,24 +33,27 @@ export const ScatterSettingsDialog: FC<ScatterSettingsDialogProps> = ({
 
   const handleFieldChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
-    setFormValues(prev => ({
+    setFormValues((prev) => ({
       ...prev,
       classField: newValue,
     }));
   }, []);
 
-  const handleSubmit = useCallback((e?: React.FormEvent) => {
-    e?.preventDefault();
-    
-    if (formRef.current) {
-      // Get values directly from the form to avoid closure issues
-      const selectElem = formRef.current.querySelector('select') as HTMLSelectElement;
-      const currentClassField = selectElem ? selectElem.value : 'class';
-      const currentFormValues = { classField: currentClassField };
-      onSave(currentFormValues);
-    }
-    onClose();
-  }, [onSave, onClose]);
+  const handleSubmit = useCallback(
+    (e?: React.FormEvent) => {
+      e?.preventDefault();
+
+      if (formRef.current) {
+        // Get values directly from the form to avoid closure issues
+        const selectElem = formRef.current.querySelector("select") as HTMLSelectElement;
+        const currentClassField = selectElem ? selectElem.value : "class";
+        const currentFormValues = { classField: currentClassField };
+        onSave(currentFormValues);
+      }
+      onClose();
+    },
+    [onSave, onClose],
+  );
 
   if (!isOpen) return null;
 
@@ -61,8 +65,12 @@ export const ScatterSettingsDialog: FC<ScatterSettingsDialogProps> = ({
       closeOnClickOutside
       footer={
         <Space align="end">
-          <Button onClick={onClose} size="compact">Cancel</Button>
-          <Button onClick={handleSubmit} look="primary" size="compact">Save</Button>
+          <Button onClick={onClose} size="compact">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} look="primary" size="compact">
+            Save
+          </Button>
         </Space>
       }
     >
@@ -82,4 +90,4 @@ export const ScatterSettingsDialog: FC<ScatterSettingsDialogProps> = ({
       </form>
     </Modal>
   );
-}; 
+};

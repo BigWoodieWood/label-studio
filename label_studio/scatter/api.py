@@ -1,25 +1,24 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
+from core.permissions import ViewClassPermission, all_permissions
+from core.utils.common import int_from_request
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from projects.models import Project
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-
-from projects.models import Project
 from tasks.models import Task
-from core.permissions import ViewClassPermission, all_permissions
-from core.utils.common import int_from_request
 
+from .constants import ALLOWED_API_PARAMS, DIRECT_DB_FIELDS
 from .serializers import ScatterTaskSerializer
-from .constants import DIRECT_DB_FIELDS, ALLOWED_API_PARAMS
 
 
 class ScatterPagination(PageNumberPagination):
     """Pagination with default page size 1000 (can be overridden via ?page_size)."""
 
     page_size = 1000
-    page_size_query_param = "page_size"
+    page_size_query_param = 'page_size'
     max_page_size = 10000
 
 
@@ -44,7 +43,7 @@ class ScatterTasksAPI(generics.ListAPIView):
     # ---------------------------------------------------------------------
 
     def _project_id(self) -> int:
-        return int_from_request(self.request.GET, "project", None)
+        return int_from_request(self.request.GET, 'project', None)
 
     def _validate_and_build_fields_map(self) -> Dict[str, str]:
         """Validate incoming query params and build mapping api_name -> native_key."""
@@ -55,7 +54,7 @@ class ScatterTasksAPI(generics.ListAPIView):
                 if native_key:
                     params[api_name] = native_key
         # Ensure mandatory x & y
-        if "x" not in params or "y" not in params:
+        if 'x' not in params or 'y' not in params:
             from rest_framework.exceptions import ValidationError
 
             raise ValidationError("Query parameters 'x' and 'y' are required.")
@@ -68,16 +67,17 @@ class ScatterTasksAPI(generics.ListAPIView):
     def initial(self, request, *args, **kwargs):
         """Called at the beginning of the view lifecycle; good place to set instance vars."""
         super().initial(request, *args, **kwargs)
-        
+
         # Validate project and build fields map early
         project_id = self._project_id()
         if not project_id:
             from rest_framework.exceptions import ValidationError
+
             raise ValidationError("Query parameter 'project' is required.")
 
         self.project = get_object_or_404(Project, pk=project_id)
         self.check_object_permissions(request, self.project)
-        
+
         # Store fields map for both queryset building and serializer context
         self.fields_map = self._validate_and_build_fields_map()
 
@@ -89,8 +89,8 @@ class ScatterTasksAPI(generics.ListAPIView):
         qs = (
             Task.objects.for_user(self.request.user)
             .filter(project=self.project)
-            .only("id", "data", *direct_cols)
-            .order_by("id")  # stable ordering for pagination
+            .only('id', 'data', *direct_cols)
+            .order_by('id')  # stable ordering for pagination
         )
         return qs
 
@@ -100,7 +100,7 @@ class ScatterTasksAPI(generics.ListAPIView):
 
     def get_serializer_context(self):  # type: ignore[override]
         ctx = super().get_serializer_context()
-        ctx["requested"] = self.fields_map
+        ctx['requested'] = self.fields_map
         return ctx
 
     def paginate_queryset(self, queryset):  # type: ignore[override]
@@ -112,9 +112,9 @@ class ScatterTasksAPI(generics.ListAPIView):
     def get_paginated_response(self, data):  # type: ignore[override]
         return Response(
             {
-                "total": self._total_count,
-                "page_size": self.paginator.get_page_size(self.request),
-                "page": int(self.request.GET.get("page", 1)),
-                "tasks": data,
+                'total': self._total_count,
+                'page_size': self.paginator.get_page_size(self.request),
+                'page': int(self.request.GET.get('page', 1)),
+                'tasks': data,
             }
         )

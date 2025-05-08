@@ -23,8 +23,11 @@ The `ScatterView` component provides a 2D scatter plot visualization for tasks w
 
 ### Key Concepts
 
-1.  **Data Format:** The component expects an array of `TaskPoint` objects (defined in `./types.ts`). Each task *must* have `data.x` and `data.y` properties containing numerical coordinates to be rendered. Optional fields like `data.class` (or others configured via settings) can be used for styling.
-2.  **Rendering:** `DeckGL` from `@deck.gl/react` is the main container. The `ScatterplotLayer` is configured with accessors (`getPosition`, `getFillColor`, `getRadius`, etc.) that map `TaskPoint` data to visual properties.
+1.  **Data Format:** The component expects an array of `TaskPoint` objects (defined in `utils/types.ts`). Each task *must* have `data.x` and `data.y` properties containing numerical coordinates to be rendered. Optional fields like `data.class` (or others configured via settings) can be used for styling.
+2.  **Rendering:** `DeckGL` from `@deck.gl/react` is the main container. The rendering logic is split into dedicated hooks located in `ScatterViewLayers.tsx`:
+    * `useScatterLayers` – base, selected, and active points
+    * `useHoverLayer` – single hovered point (updates frequently)
+    * `useSelectionRectangleLayer` – temporary rectangle shown while `Shift`-dragging
 3.  **View State:** Panning and zooming are handled by Deck.gl's built-in controller. The component maintains a controlled `viewState` and calculates an `initialViewState` to automatically frame the data upon loading.
 4.  **Interactions:**
     *   **Hover:** `onHover` callback updates the `hoveredId` state, triggering visual feedback (point enlargement, outline changes) via layer accessors. Tooltips are displayed using `getTooltip`.
@@ -98,9 +101,7 @@ This implementation allows for future expansion of the settings system to includ
 * **Tokenised Styling** – All colours, stroke widths and radii are
   defined in `scatter-tokens.ts` (`CATEGORY_COLORS`, `STROKE`, `RADIUS`,
   `SELECTION_RECT_*`) for easy theming.
-* **Utilities Extraction** – Geometry helpers (`selectionRectToPolygon`,
-  `PositionType`) and colour converters live in `utils.ts`; selection
-  hook owns its rectangle types.
+* **Utilities Extraction** – Geometry helpers now live in `utils/` and layer hooks have moved to `ScatterViewLayers.tsx` under the view folder.
 * **Keyboard & Mouse Shortcuts**
   | Gesture                | Behaviour                              |
   |------------------------|----------------------------------------|

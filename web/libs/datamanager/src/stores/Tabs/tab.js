@@ -466,6 +466,21 @@ export const Tab = types
     markSaved() {
       self.saved = true;
     },
+
+    toggleSelectedBulk(ids) {
+      console.log("toggleSelectedBulk1", ids);
+      ids.forEach(id => {
+        if (self.selected.list.has(id)) self.selected.list.delete(id);
+        else self.selected.list.add(id);
+      });
+      console.log("toggleSelectedBulk2", ids);
+    },
+
+    setSelectedBulk(ids) {
+      console.log("setSelectedBulk1", ids);
+      self.selected.list.replace(ids);
+      console.log("setSelectedBulk2", ids);
+    },
   }))
   .preProcessSnapshot((snapshot) => {
     if (snapshot === null) return snapshot;

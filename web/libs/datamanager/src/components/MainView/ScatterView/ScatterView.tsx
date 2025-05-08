@@ -5,48 +5,34 @@ import React, {
   useMemo,
   FC,
   useCallback,
+  useRef,
 } from "react";
 import { Block } from "../../../utils/bem";
 import { getRoot } from "mobx-state-tree";
 
 // Deck.gl imports
 import DeckGL from "@deck.gl/react";
-import { ScatterplotLayer, PolygonLayer } from "@deck.gl/layers";
 import { OrthographicView } from "@deck.gl/core";
+import type { PickingInfo, ViewStateChangeParameters } from "@deck.gl/core";
 
 import "./ScatterView.scss";
 
-import type { TaskPoint, ScatterSettings } from "./types";
-import type { PickingInfo, ViewStateChangeParameters } from "@deck.gl/core";
+import type { TaskPoint, ScatterSettings } from "./utils/types";
 import { ScatterSettingsButton } from "./ScatterSettingsButton";
-import { useScatterSelection } from "./useScatterSelection";
-import {
-  CATEGORY_COLORS,
-  STROKE,
-  RADIUS,
-  STROKE_WIDTH,
-  OPACITY,
-  TOOLTIP_STYLE,
-  SELECTION_RECT_FILL,
-  SELECTION_RECT_STROKE
-} from './scatter-tokens';
-import { PositionType } from "./utils";
-import { selectionRectToPolygon, SelectionRectangle } from "./useScatterSelection";
+import { useScatterSelection } from "./hooks/useScatterSelection";
+import { 
+  TOOLTIP_STYLE
+} from './utils/scatter-tokens';
 import { IconCloseCircleOutline, IconRefresh } from "@humansignal/icons";
-import { useScatterBaseData } from "./useScatterBaseData";
+import { useScatterBaseData } from "./hooks/useScatterBaseData";
 import { Button } from "../../Common/Button/Button";
-
-/**
- * Interface for the MobX view model passed to ScatterView.
- * Defines the essential properties needed for selection state.
- */
-interface ScatterViewModel {
-  selected?: {
-    isSelected: (id: string) => boolean;
-  };
-  // Allow access to root methods like startLabeling
-  [key: string]: any;
-}
+import {
+  useScatterLayers,
+  useHoverLayer,
+  useSelectionRectangleLayer,
+  useCombinedLayers,
+  type ScatterViewModel,
+} from "./ScatterViewLayers";
 
 /**
  * Interface for the root store, assuming it has a startLabeling method.
@@ -79,20 +65,6 @@ export interface ScatterViewProps {
   loadMore?: () => Promise<void>;
 }
 
-/**
- * Simple hash function for strings
- */
-const hashString = (str: string): number => {
-  let hash = 0;
-  if (str.length === 0) return hash;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
-};
-
 // Function to calculate bounding box [[minX, minY], [maxX, maxY]]
 const calculateBounds = (points: TaskPoint[]): [[number, number], [number, number]] | null => {
   if (points.length === 0) return null;
@@ -108,171 +80,6 @@ const calculateBounds = (points: TaskPoint[]): [[number, number], [number, numbe
   if (minY === maxY) { minY -= 0.5; maxY += 0.5; }
   return [[minX, minY], [maxX, maxY]];
 };
-
-// Layer constants
-const LAYER_ID = {
-  BASE: "base-points",
-  FILTERED: "filtered-points",
-  SELECTED: "selected-points",
-  ACTIVE: "active-point",
-  HOVERED: "hovered-point",
-  SELECTION_BOX: "selection-box",
-};
-
-/* Helper hook to create scatter layers
- * This hook manages the creation of multiple specialized layers for the scatter plot visualization.
- * We use separate layers for different point states (base, selected, active, hovered) to:
- * 1. Optimize rendering performance by only updating layers that change
- * 2. Control the visual stacking order (z-index) of points
- * 3. Apply different visual treatments to points based on their state
- * 4. Ensure proper hit testing and interaction behavior
- *
- * The layering approach follows the "painter's algorithm" where we draw from back to front:
- * - Base layer: Regular points with category colors
- * - Selected layer: Points the user has explicitly selected
- * - Active layer: The currently active point (being edited/focused)
- * - Hovered layer: The point currently under the mouse cursor
- *
- * This separation allows for efficient updates when only certain states change
- * (e.g., only redrawing the hover layer when the mouse moves)
- */
-const useScatterLayers = (
-  numericPoints: TaskPoint[],
-  activeId: string | null,
-  hoveredId: string | null,
-  view: ScatterViewModel,
-  settings: ScatterSettings,
-  selectionVersion: number,
-  selectionRectangle: SelectionRectangle | null
-): (ScatterplotLayer<TaskPoint> | PolygonLayer)[] => {
-  return useMemo(() => {
-    if (!numericPoints || numericPoints.length === 0) return [];
-
-    // Normalize ID types to strings for robust comparisons
-    const strActiveId = activeId != null ? String(activeId) : null;
-    const strHoveredId = hoveredId != null ? String(hoveredId) : null;
-    
-    const isSelected = (id: string) => view.selected?.isSelected(id) ?? false;
-    const isActive = (id: string | number) => String(id) === strActiveId;
-    const isHovered = (id: string | number) => String(id) === strHoveredId;
-    
-    // Pre-compute points for each layer
-    const activePoint = strActiveId ? numericPoints.find(p => String(p.id) === strActiveId) : null;
-    const hoveredPoint = strHoveredId ? numericPoints.find(p => String(p.id) === strHoveredId) : null;
-    
-    // Filter points into their respective layers - each point appears in exactly one layer
-    const selectedPoints = numericPoints.filter(p => isSelected(p.id) && !isActive(p.id) && !isHovered(p.id));
-    const basePoints = numericPoints.filter(p => !isSelected(p.id) && !isActive(p.id) && !isHovered(p.id));
-
-    // Common properties shared by all layers
-    const commonProps = {
-      pickable: true,
-      stroked: true, 
-      filled: true,
-      radiusUnits: 'pixels' as const,
-      lineWidthUnits: 'pixels' as const,
-      getPosition: (d: TaskPoint) => [d.data.x, d.data.y, 0] as PositionType,
-      parameters: { depthTest: false } as any, // Disable depth testing - use painter's algorithm
-    };
-
-    // Create layers in draw order (bottom to top)
-    const layers = [
-      // 1. Base layer: all regular points (excluding special state points)
-      new ScatterplotLayer<TaskPoint>({
-        ...commonProps,
-        id: LAYER_ID.BASE,
-        data: basePoints,
-        opacity: OPACITY,
-        getRadius: (d: TaskPoint) => typeof d.data.r === 'number' ? d.data.r : RADIUS.default,
-        getFillColor: (d: TaskPoint) => {
-          const idx = d.data.class
-            ? hashString(d.data.class) % CATEGORY_COLORS.length
-            : CATEGORY_COLORS.length - 1;
-          return CATEGORY_COLORS[idx];
-        },
-        getLineColor: STROKE.default,
-        getLineWidth: STROKE_WIDTH.default,
-        updateTriggers: {
-          getFillColor: [settings.classField],
-        },
-      }),
-
-      // 2. Selected points layer
-      ...(selectedPoints.length > 0 ? [
-        new ScatterplotLayer<TaskPoint>({
-          ...commonProps,
-          id: LAYER_ID.SELECTED,
-          data: selectedPoints,
-          opacity: OPACITY,
-          getRadius: (d: TaskPoint) => {
-            const baseRadius = typeof d.data.r === 'number' ? d.data.r : RADIUS.default;
-            return baseRadius + RADIUS.selected_delta;
-          },
-          getFillColor: STROKE.selected,
-          getLineColor: STROKE.selected,
-          getLineWidth: STROKE_WIDTH.selected,
-        }),
-      ] : []),
-
-      // 3. Active point
-      ...(activePoint ? [
-        new ScatterplotLayer<TaskPoint>({
-          ...commonProps,
-          id: LAYER_ID.ACTIVE,
-          data: [activePoint],
-          opacity: OPACITY,
-          getRadius: (d: TaskPoint) => {
-            const baseRadius = typeof d.data.r === 'number' ? d.data.r : RADIUS.default;
-            return baseRadius + RADIUS.active_delta;
-          },
-          getFillColor: STROKE.active,
-          getLineColor: STROKE.active,
-          getLineWidth: STROKE_WIDTH.active,
-        }),
-      ] : []),
-
-      // 4. Hovered point (top-most, even above active)
-      ...(hoveredPoint ? [
-        new ScatterplotLayer<TaskPoint>({
-          ...commonProps,
-          id: LAYER_ID.HOVERED,
-          data: [hoveredPoint],
-          opacity: OPACITY,
-          getRadius: (d: TaskPoint) => typeof d.data.r === 'number' ? d.data.r : RADIUS.default + 1,
-          getFillColor: (d: TaskPoint) => {
-            const idx = d.data.class
-              ? hashString(d.data.class) % CATEGORY_COLORS.length
-              : CATEGORY_COLORS.length - 1;
-            return CATEGORY_COLORS[idx];
-          },
-          getLineColor: STROKE.hovered,
-          getLineWidth: STROKE_WIDTH.hovered,
-          updateTriggers: {
-            getFillColor: [settings.classField],
-          },
-        }),
-      ] : []),
-
-      // 5. Selection rectangle (visible during shift+drag)
-      ...(selectionRectangle ? [
-        new PolygonLayer({
-          id: LAYER_ID.SELECTION_BOX,
-          data: [selectionRectangle],
-          pickable: false,
-          stroked: true,
-          filled: true,
-          getFillColor: SELECTION_RECT_FILL,
-          getLineColor: SELECTION_RECT_STROKE,
-          getLineWidth: 1,
-          lineWidthUnits: 'pixels',
-          getPolygon: selectionRectToPolygon,
-          parameters: { depthTest: false } as any,
-        }),
-      ] : []),
-    ];
-    return layers;
-  }, [numericPoints, hoveredId, view.selected, settings.classField, activeId, selectionVersion, selectionRectangle]);
-}
 
 /**
  * ScatterView component renders tasks as points using Deck.gl for high performance.
@@ -294,6 +101,9 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     const [initialViewState, setInitialViewState] = useState<any>(null);
     const [viewState, setViewState] = useState<any>(null); // Controlled view state
     const [deckKey, setDeckKey] = useState(0);
+    
+    // Add debounce timer ref for hover handling
+    const hoverTimerRef = useRef<number | null>(null);
     
     // Settings state
     const [settings, setSettings] = useState<ScatterSettings>(() => {
@@ -443,16 +253,21 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     // Depend on the active ID from the view model and the view itself (for root access)
     }, [activePointIdFromView, view]);
 
-    // Split points into separate arrays by category for proper visual stacking
-    const layers = useScatterLayers(
+    // Create the different layer types
+    const scatterLayers = useScatterLayers(
       numericPoints,
-      activePointIdFromView, // Use ID from view model
-      hoveredId,
+      activePointIdFromView,
       view,
       settings,
-      selectionVersion,
-      selectionRectangle
+      selectionVersion
     );
+    
+    const selectionLayer = useSelectionRectangleLayer(selectionRectangle);
+    
+    const hoverLayer = useHoverLayer(numericPoints, hoveredId, settings);
+    
+    // Combine layers for final rendering
+    const layers = useCombinedLayers(scatterLayers, selectionLayer, hoverLayer);
     
     // Clean up WebGL context on unmount
     useEffect(() => {
@@ -500,7 +315,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
       }
     }, [numericPoints.length, initialViewState]);
 
-    // Tooltip Content
+    // Tooltip Content - Keep this optimized and simple
     const getTooltip = useCallback((info: PickingInfo) => {
       const object = info.object as TaskPoint | undefined;
       if (!object) return null;
@@ -510,9 +325,30 @@ export const ScatterView: FC<ScatterViewProps> = observer(
       };
     }, []);
 
-    // Hover Handler
+    // Hover Handler - Debounce hover events to reduce state updates
     const handleHover = useCallback((info: PickingInfo) => {
-      setHoveredId(info.object ? (info.object as TaskPoint).id : null);
+      const newHoveredId = info.object ? (info.object as TaskPoint).id : null;
+      
+      // Clear any existing timer
+      if (hoverTimerRef.current !== null) {
+        window.clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+      
+      // Set a small debounce delay to avoid excessive hover updates
+      hoverTimerRef.current = window.setTimeout(() => {
+        setHoveredId(newHoveredId);
+        hoverTimerRef.current = null;
+      }, 20); // 20ms debounce
+    }, []);
+    
+    // Clean up the hover timer on unmount
+    useEffect(() => {
+      return () => {
+        if (hoverTimerRef.current !== null) {
+          window.clearTimeout(hoverTimerRef.current);
+        }
+      };
     }, []);
 
     // View State Change Handler
@@ -553,9 +389,6 @@ export const ScatterView: FC<ScatterViewProps> = observer(
         <Block name="scatter-view" elem="no-data">Calculating view...</Block>
       );
     }
-
-    // DEBUG: Log the activePointId from the view model just before rendering DeckGL
-    // console.log(`[ScatterView Render] Active Point ID from view model: ${view.scatter?.activePointId}`);
 
     return (
       <Block name="scatter-view">

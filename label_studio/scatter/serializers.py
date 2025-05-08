@@ -1,5 +1,6 @@
+from typing import Any, Dict
+
 from rest_framework import serializers
-from typing import Dict, Any
 
 
 class ScatterTaskSerializer(serializers.BaseSerializer):
@@ -9,13 +10,13 @@ class ScatterTaskSerializer(serializers.BaseSerializer):
     """
 
     def to_representation(self, obj):  # type: ignore[override]
-        requested: Dict[str, str] = self.context["requested"]  # {"x": "embedding_x", ...}
+        requested: Dict[str, str] = self.context['requested']  # {"x": "embedding_x", ...}
 
-        rep: Dict[str, Any] = {"id": obj.id}
+        rep: Dict[str, Any] = {'id': obj.id}
 
         for api_name, native_key in requested.items():
             # Skip ``id`` if user redundantly sends it.
-            if api_name == "id":
+            if api_name == 'id':
                 continue
 
             # First, try to resolve as a direct attribute on the Task instance (DB column)
@@ -24,9 +25,9 @@ class ScatterTaskSerializer(serializers.BaseSerializer):
             else:
                 # Fallback to Task.data lookup (JSONField)
                 value = obj.data.get(native_key)
-                
+
                 # Convert numeric fields to float as needed
-                if api_name in ("x", "y", "r") and value is not None:
+                if api_name in ('x', 'y', 'r') and value is not None:
                     try:
                         rep[api_name] = float(value)
                     except (ValueError, TypeError):

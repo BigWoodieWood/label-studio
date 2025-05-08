@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { ScatterView } from "./ScatterView";
-import type { TaskPoint } from "./types";
+import type { TaskPoint } from "./utils/types";
 // Import the actual component props type
 import type { ScatterViewProps } from "./ScatterView";
 
 // Use the imported props type, making onChange optional for stories
-type StoryProps = Omit<ScatterViewProps, 'onChange'> & {
-  onChange?: ScatterViewProps['onChange'];
+type StoryProps = Omit<ScatterViewProps, "onChange"> & {
+  onChange?: ScatterViewProps["onChange"];
 };
 
 /**
@@ -33,32 +33,32 @@ type Story = StoryObj<StoryProps>; // Use the derived story props type
 const generateMockData = (count: number, categories = 4): TaskPoint[] => {
   const result = [];
   const categoryLabels = ["animal", "vehicle", "landscape", "interior"];
-  
+
   for (let c = 0; c < categories; c++) {
     // Create a cluster for each category
     const centerX = Math.random() * 0.6 + 0.2; // between 0.2 and 0.8
     const centerY = Math.random() * 0.6 + 0.2; // between 0.2 and 0.8
-    
+
     const pointsPerCategory = Math.floor(count / categories);
-    
+
     for (let i = 0; i < pointsPerCategory; i++) {
       // Add some randomness within the cluster
       const x = centerX + (Math.random() - 0.5) * 0.2;
       const y = centerY + (Math.random() - 0.5) * 0.2;
-      
+
       result.push({
         id: `${c}-${i}`,
         data: {
           text: `Sample task ${c}-${i}`,
-          image: `https://picsum.photos/id/${(c * 10) + i}/200/300`,
+          image: `https://picsum.photos/id/${c * 10 + i}/200/300`,
           x: Math.max(0, Math.min(1, x)), // ensure between 0 and 1
           y: Math.max(0, Math.min(1, y)), // ensure between 0 and 1
           category: categoryLabels[c % categoryLabels.length],
-        }
+        },
       });
     }
   }
-  
+
   return result;
 };
 
@@ -168,4 +168,4 @@ export const WithSelection: Story = {
       <ScatterView {...args} />
     </div>
   ),
-}; 
+};

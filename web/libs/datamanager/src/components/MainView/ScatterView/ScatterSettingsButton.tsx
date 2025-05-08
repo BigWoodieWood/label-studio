@@ -1,9 +1,9 @@
-import React, { FC, useState, useCallback } from 'react';
-import { IconSettings } from '@humansignal/icons';
-import { ScatterSettingsDialog } from './ScatterSettingsDialog';
-import { Block } from '../../../utils/bem';
-import { Button } from '../../Common/Button/Button';
-import { Icon } from '../../Common/Icon/Icon';
+import { type FC, useState, useCallback } from "react";
+import { IconSettings } from "@humansignal/icons";
+import { ScatterSettingsDialog } from "./ScatterSettingsDialog";
+import { Block } from "../../../utils/bem";
+import { Button } from "../../Common/Button/Button";
+import { Icon } from "../../Common/Icon/Icon";
 
 interface ScatterSettings {
   classField: string;
@@ -34,9 +34,12 @@ export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
     setShowDialog(false);
   }, []);
 
-  const handleSaveSettings = useCallback((newSettings: ScatterSettings) => {
-    onSettingsChange(newSettings);
-  }, [onSettingsChange]);
+  const handleSaveSettings = useCallback(
+    (newSettings: ScatterSettings) => {
+      onSettingsChange(newSettings);
+    },
+    [onSettingsChange],
+  );
 
   return (
     <Block name="scatter-settings">
@@ -46,7 +49,7 @@ export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
         onClick={handleOpenDialog}
         aria-label="Scatter view settings"
       />
-      
+
       {showDialog && (
         <ScatterSettingsDialog
           isOpen={showDialog}
@@ -58,4 +61,4 @@ export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
       )}
     </Block>
   );
-}; 
+};
