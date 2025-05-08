@@ -1,16 +1,18 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { unmountComponentAtNode } from "react-dom";
 import type { FC } from "react";
 import { generateSampleTaskFromConfig } from "../utils/generateSampleTask";
+import { useAtomValue } from "jotai";
+import { configAtom, errorAtom, loadingAtom, interfacesAtom } from "../atoms/configAtoms";
 
-interface PlaygroundPreviewProps {
-  config: string;
-  loading: boolean;
-  error: string | null;
-  interfaces: string[];
-}
+type PlaygroundPreviewProps = {};
 
-export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading, error, interfaces }) => {
+export const PlaygroundPreview: FC<PlaygroundPreviewProps> = memo(() => {
+  const config = useAtomValue(configAtom);
+  const loading = useAtomValue(loadingAtom);
+  const error = useAtomValue(errorAtom);
+  const interfaces = useAtomValue(interfacesAtom);
+
   const rootRef = useRef<HTMLDivElement>(null);
   const lsfInstance = useRef<any>(null);
   const rafId = useRef<number | null>(null);
@@ -20,12 +22,15 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
     let dependencies: any;
 
     function cleanup() {
+      if (typeof window !== "undefined" && (window as any).LabelStudio) {
+        delete (window as any).LabelStudio;
+      }
+      if (rootRef.current) {
+        unmountComponentAtNode(rootRef.current);
+      }
       if (lsfInstance.current) {
         lsfInstance.current.destroy();
         lsfInstance.current = null;
-        if (rootRef.current) {
-          unmountComponentAtNode(rootRef.current);
-        }
       }
       if (rafId.current !== null) {
         cancelAnimationFrame(rafId.current);
@@ -34,6 +39,7 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
     }
 
     async function loadLSF() {
+      console.time("loadLSF");
       dependencies = await import("@humansignal/editor");
       LabelStudio = dependencies.LabelStudio;
       if (!LabelStudio || !rootRef.current) return;
@@ -57,6 +63,7 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
           defaultCollapsedBottomPanel: true,
         },
       });
+      console.timeEnd("loadLSF");
     }
 
     if (!loading && !error && config) {
@@ -82,4 +89,4 @@ export const PlaygroundPreview: FC<PlaygroundPreviewProps> = ({ config, loading,
       )}
     </div>
   );
-};
+}, () => true);

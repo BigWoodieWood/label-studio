@@ -1,6 +1,5 @@
 import { configure } from "mobx";
-import { destroy } from "mobx-state-tree";
-import { render, unmountComponentAtNode } from "react-dom";
+import { applyAction } from "mobx-state-tree";
 import { toCamelCase } from "strman";
 
 import { LabelStudio as LabelStudioReact } from "./Component";
@@ -11,8 +10,6 @@ import { Hotkey } from "./core/Hotkey";
 import defaultOptions from "./defaultOptions";
 import { destroy as destroySharedStore } from "./mixins/SharedChoiceStore/mixin";
 import { EventInvoker } from "./utils/events";
-import { FF_LSDV_4620_3_ML, isFF } from "./utils/feature-flags";
-import { cleanDomAfterReact, findReactKey } from "./utils/reactCleaner";
 import { isDefined } from "./utils/utilities";
 
 declare global {
@@ -57,6 +54,7 @@ export class LabelStudio {
   options: Partial<LSFOptions>;
   root: Element | string;
   store: any;
+  reactRoot: any;
 
   destroy: (() => void) | null = () => {};
   events = new EventInvoker();
@@ -118,25 +116,17 @@ export class LabelStudio {
       if (isRendered) {
         clearRenderedApp();
       }
-      render(<App store={this.store} />, rootElement);
+      // Create new root for React 18
+      this.reactRoot = createRoot(rootElement);
+      const AppComponent = App as any;
+      this.reactRoot.render(<AppComponent store={this.store} />);
     };
 
     const clearRenderedApp = () => {
-      if (!rootElement.childNodes?.length) return;
-
-      const childNodes = [...rootElement.childNodes];
-      // cleanDomAfterReact needs this key to be sure that cleaning affects only current react subtree
-      const reactKey = findReactKey(childNodes[0]);
-
-      unmountComponentAtNode(rootElement);
-      /*
-        Unmounting doesn't help with clearing React's fibers
-        but removing the manually helps
-        @see https://github.com/facebook/react/pull/20290 (similar problem)
-        That's maybe not relevant in version 18
-       */
-      cleanDomAfterReact(childNodes, reactKey);
-      cleanDomAfterReact([rootElement], reactKey);
+      if (this.reactRoot) {
+        this.reactRoot.unmount();
+        this.reactRoot = null;
+      }
     };
 
     renderApp();
@@ -149,28 +139,80 @@ export class LabelStudio {
     });
 
     this.destroy = () => {
-      if (isFF(FF_LSDV_4620_3_ML)) {
-        clearRenderedApp();
+      // Clear any pending timeouts/intervals
+      if (this.store?.timeouts) {
+        Object.values(this.store.timeouts).forEach((timeoutId: unknown) => {
+          if (typeof timeoutId === 'number') {
+            clearTimeout(timeoutId);
+          }
+        });
       }
+      if (this.store?.intervals) {
+        Object.values(this.store.intervals).forEach((intervalId: unknown) => {
+          if (typeof intervalId === 'number') {
+            clearInterval(intervalId);
+          }
+        });
+      }
+
+      // Remove all event listeners
+      Object.keys(this.events.events).forEach(eventName => {
+        this.events.removeAll(eventName);
+      });
+
+      // Clear rendered app
+      clearRenderedApp();
+
+      // Destroy shared store
       destroySharedStore();
-      if (isFF(FF_LSDV_4620_3_ML)) {
-        /*
-           It seems that destroying children separately helps GC to collect garbage
-           ...
-         */
-        this.store.selfDestroy();
+
+      // Destroy store and its children using actions
+      if (this.store) {
+        try {
+          // First destroy children to prevent circular references
+          if (this.store.annotationStore) {
+            applyAction(this.store, {
+              name: "destroyAnnotationStore",
+              path: "/annotationStore",
+              args: [],
+            });
+          }
+          if (this.store.relationStore) {
+            applyAction(this.store, {
+              name: "destroyRelationStore",
+              path: "/relationStore",
+              args: [],
+            });
+          }
+          if (this.store.settings) {
+            applyAction(this.store, {
+              name: "destroySettings",
+              path: "/settings",
+              args: [],
+            });
+          }
+
+          // Then destroy the main store
+          applyAction(this.store, {
+            name: "destroy",
+            path: "",
+            args: [],
+          });
+        } catch (e) {
+          console.error("Error destroying store:", e);
+        }
       }
-      destroy(this.store);
+
+      // Unbind all hotkeys
       Hotkey.unbindAll();
-      if (isFF(FF_LSDV_4620_3_ML)) {
-        /*
-            ...
-            as well as nulling all these this.store
-         */
-        this.store = null;
-        this.destroy = null;
-        LabelStudio.instances.delete(this);
-      }
+
+      // Clear references
+      this.store = null;
+      this.destroy = null;
+      window.Htx = null;
+
+      // Remove from instances set
+      LabelStudio.instances.delete(this);
     };
   }
 
