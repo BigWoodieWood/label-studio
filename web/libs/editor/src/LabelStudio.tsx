@@ -1,5 +1,6 @@
 import { configure } from "mobx";
 import { applyAction } from "mobx-state-tree";
+import { createRoot } from "react-dom/client";
 import { toCamelCase } from "strman";
 
 import { LabelStudio as LabelStudioReact } from "./Component";

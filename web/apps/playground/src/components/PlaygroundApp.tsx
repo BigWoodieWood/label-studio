@@ -20,6 +20,7 @@ const TopBar = memo(() => {
     <div className="flex items-center h-10 px-tight text-heading-medium justify-between select-none border-b border-neutral-border">
       <span className="font-semibold tracking-tight text-body-medium">LabelStudio Playground</span>
       <div className="flex items-center gap-2">
+        <Select options={selectOptions as any} value="light" />
         <ThemeToggle />
       </div>
     </div>
