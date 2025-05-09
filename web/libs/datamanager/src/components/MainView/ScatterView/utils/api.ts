@@ -19,6 +19,8 @@ export interface ScatterFetchOptions {
   pageSize?: number;
   /** Callback fired with progress information */
   onProgress?: (current: number, total: number) => void;
+  /** DataManager instance providing apiCall (preferred over window.fetch) */
+  datamanager?: { apiCall: (...args: any[]) => Promise<any> };
 }
 
 export interface ScatterFetchResult {
@@ -49,32 +51,48 @@ export async function fetchScatterPoints(
     abortSignal,
     page = 1,
     pageSize = 10000,
-    onProgress 
+    onProgress,
+    datamanager,
   } = options;
 
-  const queryParams = new URLSearchParams({
-    project: String(project),
+  // Build params object once so we can reuse in either apiCall or fetch
+  const paramsObject: Record<string, string | number> = {
+    project,
     x: "x",
     y: "y",
     class: classField,
     text: "text",
     r: "r",
-    page: String(page),
-    page_size: String(pageSize)
-  });
+    page,
+    page_size: pageSize,
+  };
 
-  const resp = await fetch(`/api/scatter/tasks?${queryParams.toString()}`, {
-    signal: abortSignal,
-  });
+  // Response placeholder
+  let json: any;
 
-  if (!resp.ok) {
-    throw new Error(`Scatter API error ${resp.status}`);
+  if (datamanager?.apiCall) {
+    // Prefer DataManager apiCall according to DataManager API usage conventions
+    json = await datamanager.apiCall("scatterTasks", paramsObject, undefined, {
+      allowToCancel: true,
+      alwaysExpectJSON: true,
+    });
+  } else {
+    // Fallback to plain fetch for environments where DataManager is not available (e.g. Storybook)
+    const queryParams = new URLSearchParams(Object.entries(paramsObject).map(([k, v]) => [k, String(v)]));
+    const resp = await fetch(`/api/scatter/tasks?${queryParams.toString()}`, {
+      signal: abortSignal,
+    });
+
+    if (!resp.ok) {
+      throw new Error(`Scatter API error ${resp.status}`);
+    }
+
+    json = await resp.json();
   }
 
-  const json = await resp.json();
   const tasks = json.tasks as any[];
   const total: number = json.total;
-  const actualPageSize: number = json.page_size;
+  const actualPageSize: number = json.page_size ?? pageSize;
 
   // Map API response to TaskPoint format
   const points: TaskPoint[] = tasks.map((t) => ({
@@ -96,6 +114,6 @@ export async function fetchScatterPoints(
     total,
     page,
     pageSize: actualPageSize,
-    hasMore: points.length === actualPageSize && (page * actualPageSize) < total
+    hasMore: points.length === actualPageSize && page * actualPageSize < total,
   };
 } 

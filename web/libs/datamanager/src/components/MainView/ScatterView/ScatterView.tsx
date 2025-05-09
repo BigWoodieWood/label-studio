@@ -154,8 +154,9 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     }, [data, settings.classField]);
 
     // load base points via API
-    const projectId = (view as any)?.root?.SDK?.projectId;
-    const { basePoints, loading: baseLoading, reload } = useScatterBaseData(projectId, settings);
+    const datamanager = (view as any)?.root?.SDK;
+    const projectId = datamanager?.projectId;
+    const { basePoints, loading: baseLoading, reload } = useScatterBaseData(projectId, settings, datamanager);
 
     const numericPoints: TaskPoint[] = useMemo(() => {
       return [...basePoints, ...numericPointsFiltered];
@@ -411,7 +412,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
         </Block>
         
         <DeckGL
-          key={`scatter-${deckKey}`}
+          key={`s catter-${deckKey}`}
           layers={layers}
           views={new OrthographicView({ id: "ortho-view" })}
           initialViewState={initialViewState}

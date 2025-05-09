@@ -171,5 +171,12 @@ export const APIConfig = {
       path: "/../comments/:id",
       method: "delete",
     },
+
+    /** Scatter tasks for scatter plot */
+    scatterTasks: {
+      path: "/scatter/tasks",
+      gateway: "/api",
+      method: "get",
+    },
   },
 };

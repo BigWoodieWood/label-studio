@@ -36,11 +36,13 @@ const scatterCache = new Map<string, TaskPoint[]>();
  * 
  * @param projectId - Current project ID (undefined before project loaded)
  * @param settings - Scatter view settings with classField for categorization
+ * @param datamanager - Optional datamanager object
  * @returns Object with basePoints array, loading state, and reload function
  */
 export function useScatterBaseData(
   projectId: number | undefined,
   settings: ScatterSettings,
+  datamanager?: { apiCall: (...args: any[]) => Promise<any> },
 ): UseScatterBaseDataResult {
   const [basePoints, setBasePoints] = useState<TaskPoint[]>([]);
   const [loading, setLoading] = useState(false);
@@ -79,6 +81,7 @@ export function useScatterBaseData(
             classField: settings.classField,
             abortSignal: ctrl.signal,
             page: currentPage,
+            datamanager,
           });
 
           // Add this page's points to our accumulated array
@@ -106,7 +109,7 @@ export function useScatterBaseData(
 
     // Start the fetching process
     fetchAllPages();
-  }, [projectId, settings.classField]);
+  }, [projectId, settings.classField, datamanager]);
 
   // Trigger initial load and handle cleanup on unmount
   useEffect(() => {

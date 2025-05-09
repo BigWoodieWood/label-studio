@@ -7,19 +7,26 @@ export const CATEGORY_COLORS_OPACITY = 0.75;
 
 /** Base colors without opacity applied */
 const BASE_CATEGORY_COLORS: Color[] = [
-  [255, 107, 107, 255], // red (#ff6b6b)
-  [72, 219, 251, 255],  // blue (#48dbfb)
-  [254, 202, 87, 255],  // yellow (#feca57)
-  [162, 155, 254, 255], // lavender (#a29bfe)
-  [255, 127, 80, 255],  // coral (#ff7f50)
-  [255, 105, 180, 255], // hotpink (#ff69b4)
-  [186, 85, 211, 255],  // mediumorchid (#ba55d3)
-  [60, 179, 113, 255],  // mediumseagreen (#3cb371)
-  [0, 128, 128, 255],   // teal (#008080)
-  [106, 90, 205, 255],  // slateblue (#6a5acd)
-  [0, 255, 0, 255],     // lime (#00ff00)
-  [0, 206, 209, 255],   // darkturquoise (#00ced1)
-  [205, 133, 63, 255],  // peru (#cd853f)
+  [72, 219, 251, 255],    // blue (#48dbfb)
+  [163, 210, 169, 255],   // intermediate blue-yellow
+  [254, 202, 87, 255],    // yellow (#feca57)
+  [208, 178, 170, 255],   // intermediate yellow-lavender
+  [162, 155, 254, 255],   // lavender (#a29bfe)
+  [208, 130, 217, 255],   // intermediate lavender-hotpink
+  [255, 105, 180, 255],   // hotpink (#ff69b4)
+  [220, 95, 195, 255],    // intermediate hotpink-mediumorchid
+  [186, 85, 211, 255],    // mediumorchid (#ba55d3)
+  [123, 132, 162, 255],   // intermediate mediumorchid-mediumseagreen
+  [60, 179, 113, 255],    // mediumseagreen (#3cb371)
+  [30, 153, 120, 255],    // intermediate mediumseagreen-teal
+  [0, 128, 128, 255],     // teal (#008080)
+  [53, 109, 166, 255],    // intermediate teal-slateblue
+  [106, 90, 205, 255],    // slateblue (#6a5acd)
+  [53, 172, 102, 255],    // intermediate slateblue-lime
+  [0, 255, 0, 255],       // lime (#00ff00)
+  [0, 230, 104, 255],     // intermediate lime-darkturquoise
+  [0, 206, 209, 255],     // darkturquoise (#00ced1)
+  [36, 212, 230, 255],    // additional turquoise variant
 ];
 
 /** Helper function to apply opacity to colors */
