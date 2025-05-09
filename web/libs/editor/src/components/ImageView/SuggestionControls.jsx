@@ -73,15 +73,15 @@ export const SuggestionControls = observer(({ item, useLayer }) => {
         <Rect x={0} y={0} width={64} height={32} fill="#000" cornerRadius={16} />
         <ControlButton
           onClick={() => item.annotation.rejectSuggestion(item.id)}
-          fill="#DD0000"
-          iconColor="#fff"
+          fill="#CC5E46"
+          iconColor="#FFFFFF"
           icon={IconCross}
         />
         <ControlButton
           x={32}
           onClick={() => item.annotation.acceptSuggestion(item.id)}
-          fill="#98C84E"
-          iconColor="#fff"
+          fill="#287A72"
+          iconColor="#FFFFFF"
           icon={IconCheck}
         />
       </Group>
@@ -102,7 +102,7 @@ const ControlButton = ({ x = 0, fill, iconColor, onClick, icon }) => {
   const [img, setImg] = useState(new window.Image());
   const imageSize = 16;
   const imageOffset = 32 / 2 - imageSize / 2;
-  const color = chroma(iconColor ?? "#fff");
+  const color = chroma(iconColor ?? "#FFFFFF");
   const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
