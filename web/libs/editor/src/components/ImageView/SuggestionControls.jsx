@@ -113,7 +113,8 @@ const ControlButton = ({ x = 0, fill, iconColor, onClick, icon }) => {
     };
     iconImage.width = 12;
     iconImage.height = 12;
-    iconImage.src = icon;
+    // Convert svg to base64 data URL
+    iconImage.src = `data:image/svg+xml;base64,${btoa(icon)}`;
   }, [icon]);
 
   const applyFilter = useCallback(
