@@ -1,6 +1,6 @@
 {
-  "message": "feat: OPTIC-1217: Implement Color design tokens as CSS variables and Dark Mode (#6550)",
-  "commit": "2e8e35e16d766b02d1c4bca558ed692a8af3cb3a",
-  "date": "2025-04-28T16:46:57.000Z",
-  "branch": "develop"
+  "message": "fix: OPTIC-2153: UI Bug: Screen Goes Blank When Filtering by Predicted Model Version in Label Studio Projects (#7477)",
+  "commit": "b26746e9fd4f84d88b96a777c1d2e515253fc79c",
+  "date": "2025-05-06T17:40:24.000Z",
+  "branch": "ls-release/1.18.0"
 }
