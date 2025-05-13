@@ -25,9 +25,7 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 from tasks.models import Annotation
 from users.models import User
@@ -239,12 +237,6 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     serializer_class = OrganizationMemberSerializer
     http_method_names = ['delete', 'get']
-
-    @property
-    def permission_classes(self):
-        if self.request.method == 'DELETE':
-            return [IsAuthenticated, HasObjectPermission]
-        return api_settings.DEFAULT_PERMISSION_CLASSES
 
     def get_queryset(self):
         return OrganizationMember.objects.filter(organization=self.parent_object)
