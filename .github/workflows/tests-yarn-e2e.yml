@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
+          fetch-depth: 0
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
@@ -37,41 +38,31 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      - name: Install e2e dependencies
-        working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}/libs/editor/tests/e2e
-        run: yarn install
-
-      - name: Run LSO server
-        id: run-lso-server
-        run: |
-          container_id=$(docker run --rm -d -p 8080:8080 heartexlabs/label-studio:develop)
-          echo "container_id=${container_id}" >> $GITHUB_OUTPUT
-
-      - name: Run LSF server
-        id: run-lsf-server
-        timeout-minutes: 2
+      - name: Build editor
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         env:
           NODE_ENV: production
           BUILD_NO_MINIMIZATION: true
+          NX_VERBOSE_LOGGING: true
         run: |
-          set -xeuo pipefail
+          yarn nx run editor:build:production --parallel=3
 
-          yarn lsf:serve &
-          pid=$!
-          echo "pid=${pid}" >> $GITHUB_OUTPUT
+      - name: Install e2e dependencies
+        working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}/libs/editor/tests/e2e
+        run: yarn install --frozen-lockfile --prefer-offline
 
-          while ! curl -s -o /dev/null -L "http://localhost:3000"; do
-            echo "=> Waiting for service to become available"
-            sleep 2s
-          done
+      - name: Serve built editor
+        uses: ./.github/actions/serve-frontend
+        with:
+          directory: ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
 
       - name: Run tests
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         env:
           HEADLESS: true
+          CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress-cache
         run: |
-          yarn test:e2e
+          yarn test:e2e --parallel
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -79,12 +70,7 @@ jobs:
           name: e2e output
           path: "web/libs/editor/tests/e2e/output"
 
-      - name: Kill LSO server
+      - name: Kill server
         if: always()
         continue-on-error: true
-        run: docker rm -f "${{ steps.run-lso-server.outputs.container_id }}"
-
-      - name: Kill LSF server
-        if: always()
-        continue-on-error: true
-        run: kill -9 "${{ steps.run-lsf-server.outputs.pid }}"
+        run: kill -9 "${{ steps.serve.outputs.pid }}"

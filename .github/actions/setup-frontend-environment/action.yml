@@ -1,5 +1,5 @@
 name: Setup frontend environment
-description: Setup frontend environment
+description: Setup frontend environment with optimized caching
 
 inputs:
   node-version:
@@ -22,6 +22,7 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: "${{ inputs.node-version }}"
+        cache: 'yarn'
 
     - name: Upgrade Yarn
       env:
@@ -37,14 +38,27 @@ runs:
     - name: Configure yarn cache
       uses: actions/cache@v4
       with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        path: |
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          ${{ inputs.directory }}/node_modules
+          ${{ inputs.directory }}/.yarn/cache
+          ${{ inputs.directory }}/.yarn/unplugged
         key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/yarn.lock') }}
-
-    - name: Print Yarn cache size
-      shell: bash
-      run: du -d 0 -h ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ inputs.node-version }}-
 
     - name: Install yarn dependencies
       working-directory: "${{ inputs.directory }}"
       shell: bash
-      run: yarn install --frozen-lockfile
+      run: |
+        yarn install --frozen-lockfile --prefer-offline --network-timeout 300000
+
+    - name: Configure NX cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ inputs.directory }}/.nx/cache
+          ${{ inputs.directory }}/.nx/daemon
+        key: nx-cache-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          nx-cache-${{ runner.os }}-

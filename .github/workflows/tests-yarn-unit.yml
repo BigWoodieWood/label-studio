@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
+          fetch-depth: 0
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
@@ -39,5 +40,8 @@ jobs:
 
       - name: Run tests
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          JEST_CACHE_DIR: ${{ github.workspace }}/.jest-cache
         run: |
-          yarn test:unit
+          yarn test:unit --maxWorkers=4 --bail

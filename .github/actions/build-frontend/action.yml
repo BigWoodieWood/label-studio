@@ -1,0 +1,67 @@
+name: Build Frontend
+description: Build the Label Studio Frontend (LSF) with NX caching support
+
+inputs:
+  node-version:
+    description: Node.js version to use
+    default: "18"
+    required: false
+  yarn-version:
+    description: Yarn version to use
+    default: "1.22"
+    required: false
+  directory:
+    description: Frontend directory
+    default: "web"
+    required: false
+  nx-cache-key:
+    description: Key for NX cache
+    required: false
+    default: "nx-cache-${{ runner.os }}"
+
+outputs:
+  nx-cache-path:
+    description: Path to the NX cache directory
+    value: ${{ steps.nx-cache-path.outputs.path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup frontend environment
+      uses: ./.github/actions/setup-frontend-environment
+      with:
+        node-version: ${{ inputs.node-version }}
+        yarn-version: ${{ inputs.yarn-version }}
+        directory: ${{ inputs.directory }}
+
+    - name: Get NX cache directory path
+      id: nx-cache-path
+      shell: bash
+      run: echo "path=$(yarn nx show projects --json | jq -r '.[]' | sort | jq -R -s -c 'split("\n")[:-1]' | xargs yarn nx show project-graph --file=graph.json && echo "$(pwd)/.nx/cache")" >> $GITHUB_OUTPUT
+
+    - name: Configure NX cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.nx-cache-path.outputs.path }}
+        key: ${{ inputs.nx-cache-key }}-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ inputs.nx-cache-key }}-
+
+    - name: Build LSF
+      working-directory: ${{ inputs.directory }}
+      shell: bash
+      env:
+        NODE_ENV: production
+        BUILD_NO_SERVER: true
+        BUILD_NO_HASH: true
+        BUILD_NO_CHUNKS: true
+        BUILD_MODULE: true
+      run: |
+        yarn nx run editor:build:production
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: lsf-build
+        path: ${{ inputs.directory }}/dist/libs/editor
+        retention-days: 7

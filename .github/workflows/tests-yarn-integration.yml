@@ -30,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
+          fetch-depth: 0
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
@@ -37,28 +38,28 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      - name: Run server
-        id: run-server
-        timeout-minutes: 2
+      - name: Build editor
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        env:
+          NODE_ENV: production
+          BUILD_NO_MINIMIZATION: true
+          NX_VERBOSE_LOGGING: true
         run: |
-          set -xeuo pipefail
-          
-          yarn lsf:serve &
-          pid=$!
-          echo "pid=${pid}" >> $GITHUB_OUTPUT
-          
-          while ! curl -s -o /dev/null -L "http://localhost:3000"; do
-            echo "=> Waiting for service to become available"
-            sleep 2s
-          done
+          yarn nx run editor:build:production --parallel=3
+
+      - name: Serve built editor
+        uses: ./.github/actions/serve-frontend
+        with:
+          directory: ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
 
       - name: Run tests
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        env:
+          CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress-cache
         run: |
-          yarn test:integration
+          yarn test:integration --parallel
 
       - name: Kill server
         if: always()
         continue-on-error: true
-        run: kill -9 "${{ steps.run-server.outputs.pid }}"
+        run: kill -9 "${{ steps.serve.outputs.pid }}"
