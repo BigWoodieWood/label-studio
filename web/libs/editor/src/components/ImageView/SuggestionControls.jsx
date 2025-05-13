@@ -128,7 +128,7 @@ const ControlButton = ({ x = 0, fill, iconColor, onClick, icon }) => {
   useEffect(() => {
     let start;
     const duration = 150; // ms
-    const easeOut = t => 1 - Math.pow(1 - t, 2);
+    const easeOut = (t) => 1 - (1 - t) ** 2;
     const fromOpacity = animatedOpacity;
     const toOpacity = hovered ? 1 : 0.2;
     const fromFill = chroma(animatedFill);
@@ -140,9 +140,7 @@ const ControlButton = ({ x = 0, fill, iconColor, onClick, icon }) => {
       const t = Math.min(1, elapsed / duration);
       const eased = easeOut(t);
       setAnimatedOpacity(fromOpacity + (toOpacity - fromOpacity) * eased);
-      setAnimatedFill(
-        chroma.mix(fromFill, toFill, eased, 'rgb').hex()
-      );
+      setAnimatedFill(chroma.mix(fromFill, toFill, eased, "rgb").hex());
       if (t < 1) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
@@ -182,20 +180,20 @@ const ControlButton = ({ x = 0, fill, iconColor, onClick, icon }) => {
       width={32}
       height={32}
       onClick={onClick}
-      onMouseEnter={e => {
+      onMouseEnter={(e) => {
         setHovered(true);
         // Set cursor to pointer
         const stage = e.target.getStage();
         if (stage && stage.container()) {
-          stage.container().style.cursor = 'pointer';
+          stage.container().style.cursor = "pointer";
         }
       }}
-      onMouseLeave={e => {
+      onMouseLeave={(e) => {
         setHovered(false);
         // Reset cursor
         const stage = e.target.getStage();
         if (stage && stage.container()) {
-          stage.container().style.cursor = '';
+          stage.container().style.cursor = "";
         }
       }}
     >
