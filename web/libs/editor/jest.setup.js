@@ -68,9 +68,9 @@ window.HTMLMediaElement.prototype.canPlayType = function canPlayTypeMock(type) {
 };
 
 // Polyfill for TextEncoder and TextDecoder for Jest (Node 20+ has them, but jsdom may not expose them)
-if (typeof global.TextEncoder === 'undefined') {
-  global.TextEncoder = require('util').TextEncoder;
+if (typeof global.TextEncoder === "undefined") {
+  global.TextEncoder = require("util").TextEncoder;
 }
-if (typeof global.TextDecoder === 'undefined') {
-  global.TextDecoder = require('util').TextDecoder;
+if (typeof global.TextDecoder === "undefined") {
+  global.TextDecoder = require("util").TextDecoder;
 }
