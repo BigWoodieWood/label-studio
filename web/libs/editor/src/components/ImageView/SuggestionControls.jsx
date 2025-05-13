@@ -116,12 +116,12 @@ const ControlButton = ({ x = 0, fill, iconColor, onClick, icon }) => {
     iconImage.onload = () => {
       setImg(iconImage);
     };
-    iconImage.width = 12;
-    iconImage.height = 12;
+    iconImage.width = 20;
+    iconImage.height = 20;
 
-    const iconElement = React.createElement(icon, { color: iconColor, width: 12, height: 12 });
+    const iconElement = React.createElement(icon, { color: iconColor, width: 20, height: 20 });
     const svgString = ReactDOMServer.renderToStaticMarkup(iconElement);
-    const base64 = btoa(unescape(encodeURIComponent(svgString)));
+    const base64 = btoa(decodeURIComponent(encodeURIComponent(svgString)));
     iconImage.src = `data:image/svg+xml;base64,${base64}`;
   }, [icon, iconColor]);
 
