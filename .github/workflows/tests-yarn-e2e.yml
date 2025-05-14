@@ -75,4 +75,4 @@ jobs:
       - name: Kill server
         if: always()
         continue-on-error: true
-        run: kill -9 "${{ steps.serve.outputs.pid }}"
+        run: kill -9 "${{ steps.run-lsf-server.outputs.pid }}"
