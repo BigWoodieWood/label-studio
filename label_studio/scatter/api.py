@@ -13,6 +13,10 @@ from tasks.models import Task
 from .constants import ALLOWED_API_PARAMS, DIRECT_DB_FIELDS
 from .serializers import ScatterTaskSerializer
 
+from data_manager.functions import get_prepare_params, get_prepared_queryset
+from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
+
 
 class ScatterPagination(PageNumberPagination):
     """Pagination with default page size 1000 (can be overridden via ?page_size)."""
@@ -118,3 +122,45 @@ class ScatterTasksAPI(generics.ListAPIView):
                 'tasks': data,
             }
         )
+
+
+# -----------------------------------------------------------------------------
+# New API endpoint – Filtered IDs
+# -----------------------------------------------------------------------------
+
+class ScatterFilteredIDsAPI(APIView):
+    """Return **all task IDs** that match Data-Manager filters.
+
+    This endpoint acts as a lightweight companion to the paginated
+    :class:`ScatterTasksAPI` – it returns **only** the list of task IDs that
+    satisfy the current filter / ordering set in Data-Manager.  The frontend
+    uses it to render the *filtered* highlight layer in the scatter plot.
+
+    Request body (JSON):
+        project          (int,  required) – project ID
+        filters          (dict, optional) – DM filter DSL (see PrepareParams)
+        ordering         (list, optional) – ordering rules
+        selectedItems    (dict, optional) – DM selection payload (ignored here)
+
+    Response 200 JSON:
+        { "ids": [ 1, 42, 99, ... ] }
+    """
+
+    permission_required = ViewClassPermission(POST=all_permissions.tasks_view)
+
+    # We use POST to avoid query-string length limits with large filter payloads
+    def post(self, request, *args, **kwargs):  # type: ignore[override]
+        # 1. Validate & authorise project
+        project_id = request.data.get('project')
+        if not project_id:
+            raise ValidationError({"project": "This field is required."})
+
+        project = get_object_or_404(Project, pk=project_id)
+        self.check_object_permissions(request, project)
+
+        # 2. Build queryset
+        queryset = get_prepared_queryset(request, project).only('id')  # hint PG to ignore other cols
+
+        # 3. Stream ids (lower memory footprint)
+        ids = list(queryset.values_list('id', flat=True))
+        return Response({"ids": ids})

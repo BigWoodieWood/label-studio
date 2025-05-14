@@ -210,7 +210,7 @@ module.exports = composePlugins(
       // specifically when the warning originates from a file within node_modules.
       (warning) => 
         warning.module &&
-        warning.module.resource.includes('node_modules') &&
+        warning.module.resource.includes('wgsl_reflect') &&
         warning.message.includes('Failed to parse source map'),
       // You could add other specific warning types to ignore here if needed.
     ];

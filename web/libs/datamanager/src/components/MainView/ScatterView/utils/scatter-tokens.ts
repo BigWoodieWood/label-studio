@@ -2,11 +2,8 @@
 
 import type { Color } from '@deck.gl/core';
 
-/** Opacity value for category colors */
-export const CATEGORY_COLORS_OPACITY = 0.75;
-
 /** Base colors without opacity applied */
-const BASE_CATEGORY_COLORS: Color[] = [
+export const CATEGORY_COLORS: Color[] = [
   [72, 219, 251, 255],    // blue (#48dbfb)
   [163, 210, 169, 255],   // intermediate blue-yellow
   [254, 202, 87, 255],    // yellow (#feca57)
@@ -28,19 +25,6 @@ const BASE_CATEGORY_COLORS: Color[] = [
   [0, 206, 209, 255],     // darkturquoise (#00ced1)
   [36, 212, 230, 255],    // additional turquoise variant
 ];
-
-/** Helper function to apply opacity to colors */
-const applyOpacity = (colors: readonly Color[], opacity: number): Color[] => {
-  return colors.map(color => [
-    color[0],
-    color[1],
-    color[2],
-    Math.round(255 * opacity)
-  ]);
-};
-
-/** Ordered list of colours for categorical series with opacity applied */
-export const CATEGORY_COLORS: Color[] = applyOpacity(BASE_CATEGORY_COLORS, CATEGORY_COLORS_OPACITY);
 
 /** Stroke colour states */
 export const STROKE: Record<'default'|'hovered'|'selected'|'active', Color> = {
@@ -68,6 +52,9 @@ export const STROKE_WIDTH = {
 
 /** Opacity for points */
 export const OPACITY = 0.5; 
+
+/** Opacity for filtered points */
+export const FILTERED_OPACITY = 0.25;
 
 /** Tooltip style for points, deck.gl tooltip uses its own styles */
 export const TOOLTIP_STYLE = {

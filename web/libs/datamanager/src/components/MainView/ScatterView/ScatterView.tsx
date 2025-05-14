@@ -20,6 +20,7 @@ import "./ScatterView.scss";
 import type { TaskPoint, ScatterSettings } from "./utils/types";
 import { ScatterSettingsButton } from "./ScatterSettingsButton";
 import { useScatterSelection } from "./hooks/useScatterSelection";
+import { useScatterFilteredIds } from "./hooks/useScatterFilteredIds";
 import { 
   TOOLTIP_STYLE
 } from './utils/scatter-tokens';
@@ -107,14 +108,9 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     
     // Settings state
     const [settings, setSettings] = useState<ScatterSettings>(() => {
-      if ((view as any)?.scatterSettings) {
-        // Parse the stringified value if needed
-        const viewSettings = typeof (view as any).scatterSettings === 'string' 
-          ? JSON.parse((view as any).scatterSettings)
-          : (view as any).scatterSettings;
-        
+      if (view.scatterSettings) {
         return {
-          classField: viewSettings.classField || 'class',
+          classField: view.scatterSettings.classField || 'class',
         } as ScatterSettings;
       }
       return { classField: 'class' };
@@ -161,7 +157,17 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     const numericPoints: TaskPoint[] = useMemo(() => {
       return [...basePoints, ...numericPointsFiltered];
     }, [basePoints, numericPointsFiltered]);
-    
+
+    // Hook to keep filteredIds in sync with DM filters
+    useScatterFilteredIds(view, { datamanager });
+
+    const filteredVersion = view.scatter?.filteredVersion ?? 0;
+
+    const filteredIdsSet = useMemo<Set<string>>(
+      () => new Set((view.scatter?.filteredIds ?? []).map((id: number|string) => String(id))),
+      [view.scatter?.filteredIds, filteredVersion]
+    );
+
     // Increment deckKey whenever numericPoints identity changes
     useEffect(() => {
       setDeckKey((k) => k + 1);
@@ -259,15 +265,17 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     // Create the different layer types
     const scatterLayers = useScatterLayers(
       numericPoints,
-      activePointIdFromView,
+      activePointIdFromView != null ? String(activePointIdFromView) : null,
       view,
       settings,
-      selectionVersion
+      selectionVersion,
+      filteredIdsSet,
+      filteredVersion,
     );
     
     const selectionLayer = useSelectionRectangleLayer(selectionRectangle);
     
-    const hoverLayer = useHoverLayer(numericPoints, hoveredId, settings);
+    const hoverLayer = useHoverLayer(numericPoints, hoveredId);
     
     // Combine layers for final rendering
     const layers = useCombinedLayers(scatterLayers, selectionLayer, hoverLayer);
@@ -288,7 +296,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
         const bounds = calculateBounds(numericPoints);
         if (bounds) {
           const [[minX, minY], [maxX, maxY]] = bounds;
-          const minZoomAllowed = -2;
+          const minZoomAllowed = 4;
           const maxZoomAllowed = 100;
           const rangeX = maxX - minX || 1;
           const rangeY = maxY - minY || 1;
@@ -363,11 +371,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
     const handleSettingsChange = useCallback(
       (newSettings: ScatterSettings) => {
         setSettings(newSettings);
-
-        // Optional: persist inside the Data-Manager tab
-        if (typeof (view as any).setScatterSettings === "function") {
-          (view as any).setScatterSettings(newSettings);
-        }
+        view.setScatterSettings(newSettings);
       },
       [view],
     );

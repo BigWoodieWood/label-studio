@@ -16,11 +16,25 @@ const THRESHOLD_MIN_DIFF = 0.001;
 const ScatterState = types
   .model("ScatterState", {
     activePointId: types.maybeNull(types.number),
-    // Future state properties for scatter can go here (zoom, target, etc.)
+    /** IDs of tasks matching current DM filters; updated by ScatterView hook */
+    filteredIds: types.optional(types.array(types.number), []),
+    filteredVersion: types.optional(types.number, 0),
   })
   .actions((self) => ({
     setActivePointId(id) {
       self.activePointId = id;
+    },
+
+    /** Replace the whole filteredIds array with new content */
+    setFiltered(ids) {
+      self.filteredIds.replace(ids);
+      self.filteredVersion += 1;
+    },
+
+    /** Clear filteredIds when filters are removed */
+    clearFiltered() {
+      self.filteredIds.clear();
+      self.filteredVersion += 1;
     },
   }));
 
@@ -57,8 +71,6 @@ export const Tab = types
     semantic_search: types.optional(types.array(CustomJSON), []),
     threshold: types.optional(types.maybeNull(ThresholdType), null),
 
-    // User-configurable and persistent settings for the Scatter view (e.g., color field)
-    scatterSettings: types.maybeNull(CustomJSON),
     // Runtime state for the Scatter view related to current interaction (e.g., active point ID)
     scatter: types.maybe(ScatterState),
   })
@@ -223,7 +235,7 @@ export const Tab = types
         gridWidth: self.gridWidth,
         semantic_search: self.semantic_search?.toJSON() ?? [],
         threshold: self.threshold?.toJSON(),
-        scatterSettings: self.scatterSettings != null ? JSON.stringify(self.scatterSettings) : null,
+        scatter: self.scatter,
       };
 
       if (self.saved || apiVersion === 1) {
@@ -246,7 +258,7 @@ export const Tab = types
   }))
   .actions((self) => ({
     setScatterSettings(settings) {
-      self.scatterSettings = settings;
+      //self.scatter = settings;  // TODO: fix it! 
       self.save();
     },
 

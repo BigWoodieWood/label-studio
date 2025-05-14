@@ -7,17 +7,20 @@ import {
   STROKE, 
   RADIUS, 
   STROKE_WIDTH, 
+  FILTERED_OPACITY,
   OPACITY, 
   SELECTION_RECT_FILL, 
   SELECTION_RECT_STROKE 
 } from './utils/scatter-tokens';
 import { PositionType } from "./utils/utils";
 import { selectionRectToPolygon, type SelectionRectangle } from "./hooks/useScatterSelection";
+import { GL } from '@luma.gl/constants';
 
 // Layer identifiers for stable keys
 export const LAYER_ID = {
   BASE: "base-points",
   FILTERED: "filtered-points",
+  DIMMED: "dimmed-points",
   SELECTED: "selected-points",
   ACTIVE: "active-point",
   HOVERED: "hovered-point",
@@ -55,8 +58,10 @@ export function useScatterLayers(
   activeId: string | null,
   view: ScatterViewModel,
   settings: ScatterSettings,
-  selectionVersion: number
-): ScatterplotLayer<TaskPoint>[] {
+  selectionVersion: number,
+  filteredIdsSet: Set<string>,
+  filteredVersion: number,
+): Layer[] {
   return useMemo(() => {
     if (!numericPoints || numericPoints.length === 0) return [];
 
@@ -65,19 +70,22 @@ export function useScatterLayers(
     
     const isSelected = (id: string) => view.selected?.isSelected(id) ?? false;
     const isActive = (id: string | number) => String(id) === strActiveId;
-    
+    // Filter points into layers, considering filteredIdsSet
+    const isFiltered = (id: string | number) => filteredIdsSet.has(String(id));
+
     // Pre-compute points for each layer
     const activePoint = strActiveId ? numericPoints.find(p => String(p.id) === strActiveId) : null;
     
-    // Filter points into their respective layers - each point appears in exactly one layer
-    // Important: exclude hovered point to avoid flickering 
-    // (handled separately in useHoverLayer)
+    const filteredPoints = numericPoints.filter(
+      p => isFiltered(p.id) && !isSelected(p.id) && !isActive(p.id)
+    );
+
     const selectedPoints = numericPoints.filter(
       p => isSelected(p.id) && !isActive(p.id)
     );
-    
+
     const basePoints = numericPoints.filter(
-      p => !isSelected(p.id) && !isActive(p.id)
+      p => !isSelected(p.id) && !isActive(p.id) && !isFiltered(p.id)
     );
 
     // Common properties shared by all layers
@@ -88,7 +96,6 @@ export function useScatterLayers(
       radiusUnits: 'pixels' as const,
       lineWidthUnits: 'pixels' as const,
       getPosition: (d: TaskPoint) => [d.data.x, d.data.y, 0] as PositionType,
-      parameters: { depthTest: false } as any, // Disable depth testing - use painter's algorithm
     };
 
     // Create layers in draw order (bottom to top)
@@ -98,7 +105,6 @@ export function useScatterLayers(
         ...commonProps,
         id: LAYER_ID.BASE,
         data: basePoints,
-        opacity: OPACITY,
         getRadius: (d: TaskPoint) => typeof d.data.r === 'number' ? d.data.r : RADIUS.default,
         getFillColor: (d: TaskPoint) => {
           const idx = d.data.class
@@ -114,13 +120,48 @@ export function useScatterLayers(
         },
       }),
 
-      // 2. Selected points layer
+      // 2. Dimmed overlay rectangle for entire plot when filters active
+      ...(filteredPoints.length > 0 ? [
+        new PolygonLayer({
+          id: LAYER_ID.DIMMED,
+          data: [[[-100, -100], [100, -100], [100, 100], [-100, 100]]],
+          pickable: false,
+          stroked: false,
+          filled: true,
+          getPolygon: d => d,
+          getFillColor: [255, 255, 255, 205],
+          updateTriggers: { data: [filteredVersion] },
+        }),
+      ] : []),
+
+      // 3. Filtered points layer (appears only when filters active and not selected/active)
+      ...(filteredPoints.length > 0 ? [
+        new ScatterplotLayer<TaskPoint>({
+          ...commonProps,
+          id: LAYER_ID.FILTERED,
+          data: filteredPoints,
+          getRadius: (d: TaskPoint) => typeof d.data.r === 'number' ? d.data.r : RADIUS.default,
+          getFillColor: (d: TaskPoint) => {
+            const idx = d.data.class
+              ? hashString(d.data.class) % CATEGORY_COLORS.length
+              : CATEGORY_COLORS.length - 1;
+            return CATEGORY_COLORS[idx]
+          },
+          getLineColor: STROKE.default,
+          getLineWidth: STROKE_WIDTH.default,
+          updateTriggers: {
+            getFillColor: [settings.classField],
+            data: [filteredVersion],
+          },
+        }),
+      ] : []),
+
+      // 4. Selected points layer
       ...(selectedPoints.length > 0 ? [
         new ScatterplotLayer<TaskPoint>({
           ...commonProps,
           id: LAYER_ID.SELECTED,
           data: selectedPoints,
-          opacity: OPACITY,
           getRadius: (d: TaskPoint) => {
             const baseRadius = typeof d.data.r === 'number' ? d.data.r : RADIUS.default;
             return baseRadius + RADIUS.selected_delta;
@@ -134,13 +175,12 @@ export function useScatterLayers(
         }),
       ] : []),
 
-      // 3. Active point
+      // 5. Active point
       ...(activePoint ? [
         new ScatterplotLayer<TaskPoint>({
           ...commonProps,
           id: LAYER_ID.ACTIVE,
           data: [activePoint],
-          opacity: OPACITY,
           getRadius: (d: TaskPoint) => {
             const baseRadius = typeof d.data.r === 'number' ? d.data.r : RADIUS.default;
             return baseRadius + RADIUS.active_delta;
@@ -153,7 +193,14 @@ export function useScatterLayers(
     ];
     
     return layers;
-  }, [numericPoints, activeId, view.selected, settings.classField, selectionVersion]);
+  }, [
+    numericPoints, 
+    activeId, 
+    view.selected, 
+    settings.classField, 
+    selectionVersion, 
+    filteredVersion
+  ]);
 }
 
 /**
@@ -161,8 +208,7 @@ export function useScatterLayers(
  */
 export function useHoverLayer(
   numericPoints: TaskPoint[],
-  hoveredId: string | null,
-  settings: ScatterSettings
+  hoveredId: string | null
 ): ScatterplotLayer<TaskPoint> | null {
   return useMemo(() => {
     if (!hoveredId || !numericPoints) return null;
@@ -188,13 +234,9 @@ export function useHoverLayer(
         return CATEGORY_COLORS[idx];
       },
       getLineColor: STROKE.hovered,
-      getLineWidth: STROKE_WIDTH.hovered,
-      parameters: { depthTest: false } as any,
-      updateTriggers: {
-        getFillColor: [settings.classField],
-      },
+      getLineWidth: STROKE_WIDTH.hovered
     });
-  }, [hoveredId, numericPoints, settings.classField]);
+  }, [hoveredId, numericPoints]);
 }
 
 /**
@@ -217,7 +259,6 @@ export function useSelectionRectangleLayer(
       getLineWidth: 1,
       lineWidthUnits: 'pixels',
       getPolygon: selectionRectToPolygon,
-      parameters: { depthTest: false } as any,
     });
   }, [selectionRectangle]);
 }
@@ -227,7 +268,7 @@ export function useSelectionRectangleLayer(
  * Properly typed to handle different layer types
  */
 export function useCombinedLayers(
-  scatterLayers: ScatterplotLayer<TaskPoint>[],
+  scatterLayers: Layer[],
   selectionLayer: PolygonLayer | null,
   hoverLayer: ScatterplotLayer<TaskPoint> | null
 ): Layer[] {
