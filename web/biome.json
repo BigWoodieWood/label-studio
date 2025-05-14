@@ -10,7 +10,8 @@
       "**/tsconfig*",
       "libs/editor/examples/**/*.json",
       "libs/editor/src/examples/**/annotations/1.json",
-      "apps/labelstudio-e2e/**"
+      "apps/labelstudio-e2e/**",
+      ".yarn/**"
     ],
     "maxSize": 3670016
   },
