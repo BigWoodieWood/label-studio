@@ -38,7 +38,7 @@ docker-collectstatic-dev:
 
 # Install modules
 frontend-install:
-	cd web && yarn install --frozen-lockfile;
+	cd web && yarn install --immutable;
 
 # Alias for backward compatibility
 frontend-setup: frontend-install

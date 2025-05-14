@@ -8,7 +8,7 @@ inputs:
     required: false
   yarn-version:
     description: yarn version
-    default: "1.22"
+    default: "3.6.4"
     required: false
   directory:
     description: frontend directory
@@ -23,16 +23,19 @@ runs:
       with:
         node-version: "${{ inputs.node-version }}"
 
-    - name: Upgrade Yarn
-      env:
-        VERSION: "${{ inputs.yarn-version }}"
+    - name: Set Yarn version
       shell: bash
-      run: npm install -g "yarn@${VERSION}"
+      run: |
+        corepack enable
+        corepack prepare yarn@${{ inputs.yarn-version }} --activate
+        corepack yarn --version
+        which yarn
+        ls -l $(which yarn)
 
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       shell: bash
-      run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+      run: echo "dir=${{ inputs.directory }}/.yarn/cache" >> $GITHUB_OUTPUT
 
     - name: Configure yarn cache
       uses: actions/cache@v4
@@ -40,11 +43,22 @@ runs:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/yarn.lock') }}
 
+    - name: Install yarn dependencies
+      working-directory: "${{ inputs.directory }}"
+      shell: bash
+      run: yarn install --immutable
+
     - name: Print Yarn cache size
       shell: bash
       run: du -d 0 -h ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
-    - name: Install yarn dependencies
-      working-directory: "${{ inputs.directory }}"
+    - name: Debug Yarn version
       shell: bash
-      run: yarn install --frozen-lockfile
+      run: yarn --version
+
+    - name: Debug PATH and corepack
+      shell: bash
+      run: |
+        echo $PATH
+        which yarn
+        corepack --version

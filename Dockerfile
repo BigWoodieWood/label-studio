@@ -36,7 +36,7 @@ COPY web/yarn.lock .
 COPY web/tools tools
 RUN --mount=type=cache,target=${YARN_CACHE_FOLDER},sharing=locked \
     --mount=type=cache,target=${NX_CACHE_DIRECTORY},sharing=locked \
-    yarn install --prefer-offline --no-progress --pure-lockfile --frozen-lockfile --ignore-engines --non-interactive --production=false
+    yarn install --immutable --immutable-cache
 
 COPY web .
 COPY pyproject.toml ../pyproject.toml

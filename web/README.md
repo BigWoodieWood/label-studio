@@ -16,7 +16,7 @@ Datamanager is an advanced tool specifically for data exploration within Label S
 ## Installation Instructions
 
 1 - **Dependencies Installation:**
-- Execute `yarn install --frozen-lockfile` to install all necessary dependencies.
+- Execute `yarn install --immutable` to install all necessary dependencies.
 
 2 - **Environment Configuration (Optional for HMR):**
 - If you want to enable Hot Module Replacement (HMR), create an `.env` file in the root Label Studio directory.
