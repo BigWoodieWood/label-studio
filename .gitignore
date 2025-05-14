@@ -80,3 +80,12 @@ docker-compose.override.yml
 
 # Local Netlify folder
 .netlify
+
+# Yarn Berry (Yarn 2+) - non-zero-installs setup for all subdirectories
+**/.pnp.*
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/sdks
+!**/.yarn/versions
