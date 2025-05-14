@@ -1,5 +1,5 @@
 name: Setup frontend environment
-description: Setup frontend environment with optimized caching
+description: Setup frontend environment
 
 inputs:
   node-version:
@@ -35,4 +35,4 @@ runs:
       working-directory: "${{ inputs.directory }}"
       shell: 'bash'
       run: |
-        yarn install --frozen-lockfile --prefer-offline --network-timeout 300000
+        yarn install --frozen-lockfile --prefer-offline
