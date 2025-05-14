@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - "ls-release/**"
+      - 'ls-release/**'
   pull_request:
     types:
       - opened
@@ -13,7 +13,7 @@ on:
       - ready_for_review
     branches:
       - develop
-      - "ls-release/**"
+      - 'ls-release/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.pull_request.head.ref || github.ref }}
@@ -353,6 +353,7 @@ jobs:
             core.setOutput("id", release.id);
             core.setOutput("tag_name", release.tag_name);
 
+
       - name: Get previous GitHub ref
         id: previous-tag
         env:
@@ -444,6 +445,7 @@ jobs:
     uses: ./.github/workflows/tests-yarn-unit.yml
     with:
       head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
+    secrets: inherit
 
   tests-yarn-integration:
     name: "Tests"
@@ -453,6 +455,7 @@ jobs:
     uses: ./.github/workflows/tests-yarn-integration.yml
     with:
       head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
+    secrets: inherit
 
   tests-yarn-e2e:
     name: "Tests"
@@ -462,6 +465,7 @@ jobs:
     uses: ./.github/workflows/tests-yarn-e2e.yml
     with:
       head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
+    secrets: inherit
 
   check_gate:
     name: "Ready to merge"
