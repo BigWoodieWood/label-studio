@@ -6979,11 +6979,11 @@ __metadata:
 
 "typescript@patch:typescript@^4.5.3#~builtin<compat/typescript>":
   version: 4.5.3
-  resolution: "typescript@patch:typescript@npm%3A4.5.3#~builtin<compat/typescript>::version=4.5.3&hash=bcec9a"
+  resolution: "typescript@patch:typescript@npm%3A4.5.3#~builtin<compat/typescript>::version=4.5.3&hash=f1b8ea"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 331fbcce6dfcbb0be23b13d5c47ecb19cc9f5f0dddf5eef69970232f6762131cf03e0ff491d99816dfb4f8ee38b4e8e0bd78825b528cd07b2b2b754f40fc80ad
+  checksum: 377f8e295565a6583d2bf8cd24f76808b5d35fc783d5d4aaf5ae4431fb5a9c07df91aa8d302aa1c30183120912a208302e2fb9c3d0ea7beaab2ab5118ade0785
   languageName: node
   linkType: hard
 
