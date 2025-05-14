@@ -43,14 +43,14 @@ runs:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/yarn.lock') }}
 
+    - name: Print Yarn cache size
+      shell: bash
+      run: du -d 0 -h ${{ steps.yarn-cache-dir-path.outputs.dir }}
+
     - name: Install yarn dependencies
       working-directory: "${{ inputs.directory }}"
       shell: bash
       run: yarn install --immutable
-
-    - name: Print Yarn cache size
-      shell: bash
-      run: du -d 0 -h ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
     - name: Debug Yarn version
       shell: bash
