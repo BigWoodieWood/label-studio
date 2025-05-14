@@ -8,7 +8,7 @@ on:
         type: string
 
 env:
-  NODE: "18"
+  NODE: "22"
   FRONTEND_MONOREPO_DIR: "web"
 
 jobs:
@@ -30,7 +30,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
-          fetch-depth: 0
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
@@ -38,31 +37,34 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      - name: Build editor
+      - name: Run LSF server
+        id: run-lsf-server
+        timeout-minutes: 2
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         env:
           NODE_ENV: production
           BUILD_NO_MINIMIZATION: true
-          NX_VERBOSE_LOGGING: true
         run: |
-          yarn nx run editor:build:production --parallel=3
+          set -xeuo pipefail
+
+          yarn lsf:serve &
+          pid=$!
+          echo "pid=${pid}" >> $GITHUB_OUTPUT
+          while ! curl -s -o /dev/null -L "http://localhost:3000"; do
+            echo "=> Waiting for service to become available"
+            sleep 2s
+          done
 
       - name: Install e2e dependencies
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}/libs/editor/tests/e2e
         run: yarn install --frozen-lockfile --prefer-offline
 
-      - name: Serve built editor
-        uses: ./.github/actions/serve-frontend
-        with:
-          directory: ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
-
       - name: Run tests
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         env:
           HEADLESS: true
-          CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress-cache
         run: |
-          yarn test:e2e --parallel
+          yarn lsf:e2e
 
       - uses: actions/upload-artifact@v4
         if: always()
