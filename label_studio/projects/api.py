@@ -8,7 +8,6 @@ import drf_yasg.openapi as openapi
 from core.filters import ListFilter
 from core.label_config import config_essential_data_has_changed
 from core.mixins import GetParentObjectMixin
-from django.db.models import F
 from core.permissions import ViewClassPermission, all_permissions
 from core.redis import start_job_async_or_sync
 from core.utils.common import paginator, paginator_help, temporary_disconnect_all_signals
@@ -16,7 +15,8 @@ from core.utils.exceptions import LabelStudioDatabaseException, ProjectExistExce
 from core.utils.io import find_dir, find_file, read_yaml
 from data_manager.functions import filters_ordering_selected_items_exist, get_prepared_queryset
 from django.conf import settings
-from           django.db import IntegrityError
+from django.db import IntegrityError
+from django.db.models import F
 from django.http import Http404
 from django.utils.decorators import method_decorator
 from django_filters import CharFilter, FilterSet
