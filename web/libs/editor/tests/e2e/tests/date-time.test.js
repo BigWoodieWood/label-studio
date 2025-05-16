@@ -112,8 +112,7 @@ Scenario(
         rangeEnd: region.rangeEnd,
       });
       I.pressKey("Escape");
-      // to prevent from double-click region handling (its timeout is 0.45s)
-      I.wait(0.5);
+      I.wait(0.016);
     }
 
     I.say("Try to submit and observe validation errors about per-regions");

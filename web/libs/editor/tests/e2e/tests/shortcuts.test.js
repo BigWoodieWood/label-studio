@@ -277,8 +277,6 @@ Data(configParams).Scenario("Should work with existent regions.", async ({ I, La
     }
     I.say("Try to use shortcut at the start");
     I.click(locate(".ant-tag").withText("Shortcut"));
-    // eslint-disable-next-line
-    // pause();
 
     I.waitForValue('[name="comment"]', "Shortcut");
 

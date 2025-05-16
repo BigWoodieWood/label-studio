@@ -86,7 +86,7 @@ Scenario("Check Rect region for Image", async ({ I, LabelStudio, AtImageView, At
 
   // click on region's rect on the canvas
   AtImageView.clickAt(330, 80);
-  I.wait(1);
+  I.wait(0.016);
   AtOutliner.dontSeeSelectedRegion();
 });
 

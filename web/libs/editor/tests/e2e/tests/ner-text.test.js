@@ -136,11 +136,11 @@ Scenario("NERText", async ({ I, LabelStudio, AtOutliner, AtTopbar }) => {
 
   // @todo this hotkey doesn't work. why?
   // I.pressKey('R')
-  I.wait(5);
+  I.wait(0.016);
   AtOutliner.clickRegion("Alice");
   I.click("Create Relation");
   I.click(locate(".htx-highlight").withText("come"));
-  I.wait(1);
+  I.wait(0.016);
   I.click(locate(".htx-highlight").withText("come"));
 
   I.see("Relations (1)");

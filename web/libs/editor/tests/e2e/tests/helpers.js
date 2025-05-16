@@ -193,6 +193,9 @@ const waitForAudio = async () => {
     [...audios].map((audio) => {
       if (audio.readyState === 4) return Promise.resolve(true);
       return new Promise((resolve) => {
+        if (!isNaN(audio.duration)) {
+          resolve(true);
+        }
         audio.addEventListener("durationchange", () => {
           resolve(true);
         });
@@ -854,7 +857,7 @@ async function doDrawingAction(I, { msg, fromX, fromY, toX, toY }) {
     await page.mouse.move(toX, toY);
     await page.mouse.up();
   });
-  I.wait(1); // Ensure that the tool is fully finished being created.
+  I.wait(0.016); // Ensure that the tool is fully finished being created.
 }
 
 // `mulberry32` (simple generator with a 32-bit state)

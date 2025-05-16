@@ -226,7 +226,7 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
         I.seeElement('[data-testid="phrase:3"] [aria-label="play"]');
         I.seeElement('[data-testid="phrase:4"] [aria-label="play"]');
 
-        I.wait(2);
+        I.wait(0.016);
 
         // Plays the second paragraph segment when the audio progresses to the second paragraph segment
         I.seeElement('[data-testid="phrase:1"] [aria-label="pause"]');
@@ -235,7 +235,7 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
         I.seeElement('[data-testid="phrase:3"] [aria-label="play"]');
         I.seeElement('[data-testid="phrase:4"] [aria-label="play"]');
 
-        I.wait(2);
+        I.wait(0.016);
 
         // Plays the third paragraph segment when the audio progresses to the third paragraph segment
         I.seeElement('[data-testid="phrase:2"] [aria-label="pause"]');
@@ -318,6 +318,8 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
         I.wait(1);
 
         AtAudioView.clickPauseButton();
+
+        I.wait(1);
 
         const scrollPosition = await I.executeScript((selector) => {
           const element = document.querySelector(selector);

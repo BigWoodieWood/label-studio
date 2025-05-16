@@ -335,6 +335,7 @@ Data(layoutVariations).Scenario(
     I.click(locate("[aria-label='rotate-right']"));
     AtOutliner.seeRegions(1);
 
+    I.wait(0.1);
     await compareSize(I, AtImageView, "Dimensions must be equal in landscape", "landscape, rotated");
 
     I.say("Change to vertcal layout");
@@ -346,11 +347,13 @@ Data(layoutVariations).Scenario(
     AtSettings.close();
 
     AtOutliner.seeRegions(1);
+    I.wait(0.1);
     await compareSize(I, AtImageView, "Dimensions must be equal in portrait", "portrait");
 
     I.click(locate("[aria-label='rotate-right']"));
 
     AtOutliner.seeRegions(1);
+    I.wait(0.1);
     await compareSize(I, AtImageView, "Dimensions must be equal after rotation in portrain", "portrait, rotated");
   },
 );

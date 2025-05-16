@@ -335,7 +335,7 @@ Scenario("No errors during brush export in MIG", async ({ I, LabelStudio, AtImag
 
   // Brush might not have a chanve to finish whatewer it's
   // doing, so it's safer to wait a little before exporting it
-  I.wait(2);
+  I.wait(0.016);
 
   const result = await LabelStudio.serialize();
 

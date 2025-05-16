@@ -58,7 +58,7 @@ module.exports = {
     I.moveMouse(this._stageBbox.x + x + shiftX, this._stageBbox.y + this._stageBbox.height / 2, 3);
     if (shouldRelease === false) return;
     I.pressMouseUp();
-    I.wait(1);
+    I.wait(0.016);
   },
 
   /**
@@ -73,7 +73,7 @@ module.exports = {
     y = y !== undefined ? y : this._stageBbox.height / 2;
     I.scrollPageToTop();
     I.clickAt(this._stageBbox.x + x, this._stageBbox.y + y);
-    I.wait(1); // We gotta  wait here because clicks on the canvas are not processed immediately
+    I.wait(0.016); // We gotta  wait here because clicks on the canvas are not processed immediately
   },
 
   clickAtBeginning() {
@@ -242,6 +242,7 @@ module.exports = {
     this.toggleControlsMenu();
     I.clearField(this._volumeInputSelector);
     I.fillField(this._volumeInputSelector, value);
+    I.seeInField(this._volumeInputSelector, value);
     this.toggleControlsMenu();
   },
 
