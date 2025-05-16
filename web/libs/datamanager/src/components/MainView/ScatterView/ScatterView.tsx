@@ -350,7 +350,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(
       hoverTimerRef.current = window.setTimeout(() => {
         setHoveredId(newHoveredId);
         hoverTimerRef.current = null;
-      }, 20); // 20ms debounce
+      }, 5); // 5ms debounce
     }, []);
     
     // Clean up the hover timer on unmount

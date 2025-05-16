@@ -1,5 +1,70 @@
-Implementation Plan – Filtered-Tasks Layer for ScatterView
-=========================================================
+# Implementation Plan – Filtered-Tasks Layer for ScatterView
+
+## Notes on Implementation
+
+- **Dimming via PolygonLayer Overlay:**
+  - Instead of reducing the opacity of the base points layer directly (which caused blending and rendering issues in Deck.gl), we now use a full-plot white `PolygonLayer` with partial opacity as an overlay. This dims the entire scatter plot background when filters are active, while keeping filtered and selected points visually distinct and crisp.
+  - This approach avoids the pitfalls of per-point alpha blending and ensures consistent appearance across browsers and GPU configs.
+  - The overlay is triggered by the presence of filtered points (`filteredIds.length > 0`) and is controlled by the `filteredVersion` update trigger for immediate reactivity.
+  - The opacity value for the overlay is set to match the intended dimming effect (e.g., 50% or as defined in tokens).
+
+---
+
+## Status Checklist (as of latest review)
+
+- [x] **Backend**
+  - [x] `ScatterFilteredIDsAPI` implemented in `label_studio/scatter/api.py`
+  - [x] URL registered in `label_studio/scatter/urls.py` as `/api/scatter/filtered-ids`
+  - [x] Permission check and 400 on missing project
+  - [x] Uses `get_prepare_params` / `get_prepared_queryset` for queryset
+  - [x] Returns flat list of IDs in `{ ids: [...] }`
+- [x] **SDK / API config**
+  - [x] `scatterFilteredIds` endpoint declared in `web/libs/datamanager/src/sdk/api-config.js`
+- [x] **Tab Model**
+  - [x] `ScatterState` model in `src/stores/Tabs/tab.js` has `filteredIds` and `filteredVersion`
+  - [x] Actions `setFiltered(ids)` and `clearFiltered()` bump `filteredVersion`
+  - [x] `serialize()` includes `scatter: self.scatter` for round-trip
+- [x] **TabStore**
+  - [x] `createScatterStateForView(viewId)` ensures `view.scatter` is initialized
+- [x] **Hook**
+  - [x] `useScatterFilteredIds` in `ScatterView/hooks` subscribes via MobX `reaction` to `[filterSnapshot, ordering, projectId]` and fires immediately
+  - [x] Calls `datamanager.apiCall('scatterFilteredIds', {}, body, {allowToCancel: true})`
+  - [x] On success: `view.scatter.setFiltered(ids)`; on error or no project: `view.scatter.clearFiltered()`
+- [x] **Rendering**
+  - [x] `useScatterLayers` splits points into base, filtered, selected, active
+  - [x] **Dimming is achieved by a full-plot white `PolygonLayer` overlay when `filteredIds` non-empty, not by changing base layer opacity**
+  - [x] Adds a `ScatterplotLayer` (`LAYER_ID.FILTERED`) for filtered points
+  - [x] Both dimming and filtered layers use `updateTriggers: { data: [filteredVersion] }`
+- [x] **Tokens**
+  - [x] `FILTERED_OPACITY` (0.25) defined in `scatter-tokens.ts`
+  - [x] `STROKE.hovered` and `STROKE_WIDTH.hovered` used for hovered-point border
+- [x] **UI Behaviour**
+  - [x] Hook fires immediately when filters/ordering/project change
+  - [x] Layers re-render automatically via `filteredVersion` in `useMemo` / `updateTriggers`
+- [ ] **Testing & QA**
+  - [ ] Backend unit tests for missing project / permissions / large sets
+  - [ ] Storybook scenario with filter applied (mock API)
+  - [ ] RTL/Cypress tests for `useScatterFilteredIds` and layer appearance
+
+---
+
+## Layer Draw-Order (bottom → top)
+
+```
+ 1. BASE            – all points
+ 2. DIMMED          – full-plot PolygonLayer overlay (opacity 0.5) when filters active
+ 3. FILTERED        – filtered ⊄ selected
+ 4. SELECTED        – selected ⊄ active
+ 5. ACTIVE          – single active point
+ 6. HOVERED         – current cursor target
+ 7. SELECTION_BOX   – drag rectangle (PolygonLayer)
+```
+
+- **Note:** The DIMMED layer is a white, semi-transparent rectangle covering the plot bounds, rendered above the base points but below filtered/selected/active/hovered points. This ensures the dimming effect is visually correct and performant.
+
+---
+
+## (Original plan follows for reference)
 
 High-level Goal
 ---------------
@@ -107,9 +172,9 @@ Location: `ScatterView/hooks/useScatterFilteredIds.ts`
         .then(res => view.scatter.setFiltered(res.ids));
     }, [project, filters.snapshot, ordering.snapshot]);
 
-3.3 Events / “signal” origin
+3.3 Events / "signal" origin
 ----------------------------
-`Tab.filters` is an observable;  `useScatterFilteredIds` simply *reacts*
+`Tab.filters` is an observable; `useScatterFilteredIds` simply *reacts*
 to its MobX changes. No explicit SDK event is required.
 
 ────────────────────────────────────────────────────────────────
