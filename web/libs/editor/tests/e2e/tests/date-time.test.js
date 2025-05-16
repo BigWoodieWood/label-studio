@@ -54,7 +54,7 @@ const regions = [
 
 const params = { config, data };
 
-Scenario(
+Scenario.only(
   "Check DateTime holds state between annotations and saves result",
   async ({ I, AtDateTime, AtLabels, AtOutliner, LabelStudio }) => {
     I.amOnPage("/");

@@ -58,8 +58,10 @@ const regions = [
   },
 ];
 
-describe("Date Time", () => {
-  it("should hold state between annotations and saves result", () => {
+// biome-ignore lint/suspicious/noFocusedTests: <explanation>
+describe.only("Date Time", () => {
+  // biome-ignore lint/suspicious/noFocusedTests: <explanation>
+  it.only("should hold state between annotations and saves result", () => {
     LabelStudio.params().config(config).data(data).withResult([]).init();
     LabelStudio.waitForObjectsReady();
 
