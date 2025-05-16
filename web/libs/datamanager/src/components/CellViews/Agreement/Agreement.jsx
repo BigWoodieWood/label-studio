@@ -3,7 +3,10 @@ import { useSDK } from "../../../providers/SDKProvider";
 import { cn } from "../../../utils/bem";
 import { isDefined } from "../../../utils/utils";
 import "./Agreement.scss";
-import { useCallback } from "react";
+import { useState } from "react";
+import { Popover } from "@humansignal/ui";
+import { ff } from "@humansignal/core";
+import { FF_AVERAGE_AGREEMENT_SCORE_POPOVER } from "../../../utils/feature-flags";
 
 const agreement = (p) => {
   if (!isDefined(p)) return "zero";
@@ -26,18 +29,33 @@ export const Agreement = (cell) => {
   const sdk = useSDK();
   const agreementCN = cn("agreement");
   const scoreElem = agreementCN.elem("score");
-  const handleClick = useCallback(
-    (e) => {
-      sdk.invoke("agreementCellClick", e, task);
-    },
-    [sdk, task],
+  const [content, setContent] = useState(null);
+  const isAgreementPopoverEnabled =
+    window.APP_SETTINGS.billing?.enterprise && ff.isActive(FF_AVERAGE_AGREEMENT_SCORE_POPOVER);
+
+  const handleClick = isAgreementPopoverEnabled
+    ? (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        sdk.invoke("agreementCellClick", { task }, (jsx) => setContent(jsx));
+      }
+    : undefined;
+
+  const score = (
+    <span className={clsx(scoreElem.toString(), scoreElem.mod({ [agreement(value)]: true }).toString())}>
+      {isDefined(value) ? `${formatNumber(value)}%` : ""}
+    </span>
   );
 
   return (
     <div className={agreementCN.toString()} onClick={handleClick}>
-      <span className={clsx(scoreElem.toString(), scoreElem.mod({ [agreement(value)]: true }).toString())}>
-        {isDefined(value) ? `${formatNumber(value)}%` : ""}
-      </span>
+      {isAgreementPopoverEnabled ? (
+        <Popover trigger={score} align="start">
+          {content}
+        </Popover>
+      ) : (
+        score
+      )}
     </div>
   );
 };
