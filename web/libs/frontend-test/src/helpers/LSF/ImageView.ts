@@ -135,7 +135,8 @@ export const ImageView = {
       drawingArea
         .trigger("mousemove", point[0], point[1], { eventConstructor: "MouseEvent", ...options })
         .trigger("mousedown", point[0], point[1], { eventConstructor: "MouseEvent", buttons: 1, ...options })
-        .trigger("mouseup", point[0], point[1], { eventConstructor: "MouseEvent", buttons: 1, ...options });
+        .trigger("mouseup", point[0], point[1], { eventConstructor: "MouseEvent", buttons: 1, ...options })
+        .wait(0.016);
     });
   },
 
@@ -153,6 +154,82 @@ export const ImageView = {
       this.drawPolygon(realPoints, autoclose, options);
     });
   },
+
+  /**
+   * Mousedown - mousemove - mouseup drawing through the list of points on the ImageView. Works in couple of lookForStage.
+   * @example
+   * await  AtImageView.lookForStage();
+   * AtImageView.drawThroughPoints([[50,50],[200,100],[50,200],[300,300]]);
+   * @param {number[][]} points - list of pairs of coords
+   * @param {"steps"|"rate"} mode - mode of firing mousemove event
+   * @param {number} parameter - parameter for mode
+   * @param {MouseInteractionOptions} options - options for mousemove event
+   */
+  drawThroughPoints(points: [number, number][], mode = "steps", parameter = 1, options = {}) {
+    const drawingArea = this.drawingArea.scrollIntoView();
+
+    const calcSteps = {
+      steps: () => parameter,
+      rate: (p1, p2) => Math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) / parameter,
+    }[mode];
+    const startPoint = points[0];
+
+    drawingArea
+      .trigger("mousemove", startPoint[0], startPoint[1], { eventConstructor: "MouseEvent", ...options })
+      .trigger("mousedown", startPoint[0], startPoint[1], { eventConstructor: "MouseEvent", buttons: 1, ...options });
+    let i;
+    for (i = 1; i < points.length; i++) {
+      const prevPoint = points[i - 1];
+      const curPoint = points[i];
+      const steps = calcSteps(prevPoint, curPoint);
+
+      for (let k = 1; k <= steps; k++) {
+        const curX = prevPoint[0] + ((curPoint[0] - prevPoint[0]) * k) / steps;
+        const curY = prevPoint[1] + ((curPoint[1] - prevPoint[1]) * k) / steps;
+        drawingArea.trigger("mousemove", curX, curY, { eventConstructor: "MouseEvent", ...options }).wait(0.002);
+      }
+    }
+    drawingArea.trigger("mouseup", points[i - 1][0], points[i - 1][1], {
+      eventConstructor: "MouseEvent",
+      buttons: 1,
+      ...options,
+    });
+  },
+
+  get isTransformerThere() {
+    return cy.window().then((win) => {
+      const stage = win.Konva!.stages[0];
+      const anchors = stage.find("._anchor").filter((shape) => shape.getAttr("visible") !== false);
+
+      return !!anchors.length;
+    });
+  },
+
+  get isRotaterThere() {
+    return cy.window().then((win) => {
+      const stage = win.Konva!.stages[0];
+      const rotaters = stage.find(".rotater").filter((shape) => shape.getAttr("visible") !== false);
+
+      return !!rotaters.length;
+    });
+  },
+
+  hasTransformer() {
+    this.isTransformerThere.should("be.true");
+  },
+
+  hasNoTransformer() {
+    this.isTransformerThere.should("be.false");
+  },
+
+  shouldHaveTransformer(should = true) {
+    this.isTransformerThere.should("be.eq", should);
+  },
+
+  shouldHaveRotater(should = true) {
+    this.isRotaterThere.should("be.eq", should);
+  },
+
   /**
    * Captures a screenshot of an element to compare later
    * @param {string} name name of the screenshot

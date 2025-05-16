@@ -19,6 +19,9 @@ export const Hotkeys = {
   redo() {
     pressHotkey("{ctrl}{shift}z", "{command}{shift}z");
   },
+  unselect() {
+    pressHotkey("u");
+  },
   deleteRegion() {
     pressHotkey("{backspace}");
   },
