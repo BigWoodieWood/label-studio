@@ -58,8 +58,10 @@ class RichTextHelper {
   selectText(text) {
     return this.content.contains(text).then(($el) => {
       const el = $el[0];
-      const textElement = el.childNodes[0];
-      const startOffset = el.textContent.indexOf(text);
+      const textElement = [...el.childNodes].find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.includes(text),
+      ) as HTMLElement;
+      const startOffset = textElement.textContent.indexOf(text);
       const endOffset = startOffset + text.length;
       const document = el.ownerDocument;
       const range = document.createRange();
