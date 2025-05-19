@@ -127,7 +127,7 @@ for (const shapeName of Object.keys(shapes)) {
   shapesTable.add([shapeName]);
 }
 
-Data(shapesTable).only.Scenario(
+Data(shapesTable).Scenario(
   "Check transformer existing for different shapes, their amount and modes.",
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
