@@ -31,7 +31,6 @@ export const Agreement = (cell) => {
   const [content, setContent] = useState(null);
   const isAgreementPopoverEnabled =
     window.APP_SETTINGS.billing?.enterprise && ff.isActive(FF_AVERAGE_AGREEMENT_SCORE_POPOVER);
-  console.log(ff.isActive(FF_AVERAGE_AGREEMENT_SCORE_POPOVER));
 
   const handleClick = isAgreementPopoverEnabled
     ? (e) => {
