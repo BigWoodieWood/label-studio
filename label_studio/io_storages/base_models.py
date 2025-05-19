@@ -425,7 +425,7 @@ class ImportStorage(Storage):
 
             # skip if key has already been synced
             if n_tasks_linked := link_class.n_tasks_linked(key, self):
-                logger.debug('%s link %s already exists', self.__class__.__name__, key)
+                logger.debug('%s link %s already exists with %d tasks linked', self.__class__.__name__, key, n_tasks_linked)
                 tasks_existed += n_tasks_linked  # update progress counter
                 continue
 
