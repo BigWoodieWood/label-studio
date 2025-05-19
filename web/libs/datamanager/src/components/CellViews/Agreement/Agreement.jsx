@@ -1,18 +1,19 @@
-import clsx from "clsx";
 import { useSDK } from "../../../providers/SDKProvider";
-import { cn } from "../../../utils/bem";
 import { isDefined } from "../../../utils/utils";
-import "./Agreement.scss";
 import { useState } from "react";
 import { Popover } from "@humansignal/ui";
 import { ff } from "@humansignal/core";
 import { FF_AVERAGE_AGREEMENT_SCORE_POPOVER } from "../../../utils/feature-flags";
 
-const agreement = (p) => {
-  if (!isDefined(p)) return "zero";
-  if (p < 33) return "low";
-  if (p < 66) return "medium";
-  return "high";
+const LOW_AGREEMENT_SCORE = 33;
+const MEDIUM_AGREEMENT_SCORE = 66;
+
+export const agreementScoreTextColor = (percentage) => {
+  if (!isDefined(percentage)) return "text-neutral-content";
+  if (percentage < LOW_AGREEMENT_SCORE) return "text-negative-content";
+  if (percentage < MEDIUM_AGREEMENT_SCORE) return "text-warning-content";
+
+  return "text-positive-content";
 };
 
 const formatNumber = (num) => {
@@ -27,11 +28,10 @@ const formatNumber = (num) => {
 export const Agreement = (cell) => {
   const { value, original: task } = cell;
   const sdk = useSDK();
-  const agreementCN = cn("agreement");
-  const scoreElem = agreementCN.elem("score");
   const [content, setContent] = useState(null);
   const isAgreementPopoverEnabled =
     window.APP_SETTINGS.billing?.enterprise && ff.isActive(FF_AVERAGE_AGREEMENT_SCORE_POPOVER);
+  console.log(ff.isActive(FF_AVERAGE_AGREEMENT_SCORE_POPOVER));
 
   const handleClick = isAgreementPopoverEnabled
     ? (e) => {
@@ -42,13 +42,11 @@ export const Agreement = (cell) => {
     : undefined;
 
   const score = (
-    <span className={clsx(scoreElem.toString(), scoreElem.mod({ [agreement(value)]: true }).toString())}>
-      {isDefined(value) ? `${formatNumber(value)}%` : ""}
-    </span>
+    <span className={agreementScoreTextColor(value)}>{isDefined(value) ? `${formatNumber(value)}%` : ""}</span>
   );
 
   return (
-    <div className={agreementCN.toString()} onClick={handleClick}>
+    <div className="flex items-center" onClick={handleClick}>
       {isAgreementPopoverEnabled ? (
         <Popover trigger={score} align="start">
           {content}
