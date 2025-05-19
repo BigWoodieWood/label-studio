@@ -435,9 +435,10 @@ class ImportStorage(Storage):
             except (UnicodeDecodeError, json.decoder.JSONDecodeError) as exc:
                 logger.debug(exc, exc_info=True)
                 logger.warning(
-                    f'Error loading JSON from file "{key}".\nIf you\'re trying to import non-JSON data '
-                    f'(images, audio, text, etc.), edit storage settings and enable '
-                    f'"Treat every bucket object as a source file"'
+                    'Error loading JSON from file %s: %s. If you\'re trying to import non-JSON data '
+                    '(images, audio, text, etc.), edit storage settings and enable '
+                    '"Treat every bucket object as a source file"',
+                    key, exc
                 )
                 continue
 
