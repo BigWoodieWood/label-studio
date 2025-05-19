@@ -420,25 +420,26 @@ class ImportStorage(Storage):
             # w/o Dataflow
             # pubsub.push(topic, key)
             # -> GF.pull(topic, key) + env -> add_task()
-            logger.debug(f'Scanning key {key}')
+            logger.debug('Scanning key %s', key)
             self.info_update_progress(last_sync_count=tasks_created, tasks_existed=tasks_existed)
 
             # skip if task already exists
             if link_class.exists(key, self):
-                logger.debug(f'{self.__class__.__name__} link {key} already exists')
+                logger.debug('%s link %s already exists', self.__class__.__name__, key)
                 tasks_existed += 1  # update progress counter
                 continue
 
-            logger.debug(f'{self}: found new key {key}')
+            logger.debug('%s: found new key %s', self.__class__.__name__, key)
             try:
                 tasks_data = self.get_data(key)
             except (UnicodeDecodeError, json.decoder.JSONDecodeError) as exc:
                 logger.debug(exc, exc_info=True)
-                raise ValueError(
+                logger.warning(
                     f'Error loading JSON from file "{key}".\nIf you\'re trying to import non-JSON data '
                     f'(images, audio, text, etc.), edit storage settings and enable '
                     f'"Treat every bucket object as a source file"'
                 )
+                continue
 
             if not flag_set('fflag_feat_dia_2092_multitasks_per_storage_link'):
                 tasks_data = tasks_data[:1]
