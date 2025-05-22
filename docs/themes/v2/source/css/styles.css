@@ -2317,12 +2317,11 @@ code.hljs {
 
 #render-editor,
 .api-render-editor {
+  max-width: 1200px;
   border: none;
   background: var(--color-white);
-  min-width: 800px;
-  min-height: 800px;
-  width: 60vw !important;
-  height: 60vh !important;
+  width: 500px;
+  height: 500px;
   border-radius: 10px;
 }
 
