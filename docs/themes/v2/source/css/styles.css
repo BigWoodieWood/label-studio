@@ -2319,10 +2319,8 @@ code.hljs {
 .api-render-editor {
   border: none;
   background: var(--color-white);
-  min-width: 800px;
-  min-height: 800px;
-  width: 60vw !important;
-  height: 60vh !important;
+  width: clamp(600px, 60vw, 1200px);
+  height: clamp(600px, 60vh, 1200px);
   border-radius: 10px;
 }
 

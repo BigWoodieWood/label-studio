@@ -1,6 +1,18 @@
-const labelStudioPlaygroundUrl = "https://label-studio-playground.netlify.app/";
+// if localhost, use local playground
+function getLabelStudioPlaygroundUrl() {
+  if (window.location.hostname === "localhost") {
+    return "http://localhost:4200/";
+  }
+  if (window.location.hostname === "labelstud.io") {
+    return "https://labelstud.io/playground-app/";
+  }
+  // This is for preview deployments
+  return "https://label-studio-playground.netlify.app/";
+}
 
-function editorIframe(config, modal, full, id) {
+const labelStudioPlaygroundUrl = getLabelStudioPlaygroundUrl();
+
+function editorIframe(config, modal, id) {
   // generate new iframe
   const iframeTemplate = `<iframe id="render-editor-${id}" class="api-render-editor" style="display:none"></iframe>`;
 
@@ -8,10 +20,6 @@ function editorIframe(config, modal, full, id) {
 
   const iframe = document.querySelector(`#render-editor-${id}`);
   const spinner = modal.querySelector(".render-editor-loader");
-
-  if (full) {
-    iframe.style.width = `${window.innerWidth * 0.9}px`;
-  }
 
   iframe.addEventListener("load", function () {
     if (spinner) spinner.style.display = "none";
@@ -35,7 +43,7 @@ function showRenderEditor(config) {
 
   const modal = document.querySelector(`#preview-wrapper-${id}`);
 
-  editorIframe(config, modal, true, id);
+  editorIframe(config, modal, id);
 }
 
 (function () {

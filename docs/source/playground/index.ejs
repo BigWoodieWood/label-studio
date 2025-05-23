@@ -430,7 +430,19 @@ meta_description: Label Studio interactive demo and playground for data labeling
 
 
 <script>
-  const labelStudioPlaygroundUrl = 'https://label-studio-playground.netlify.app/';
+  // if localhost, use local playground
+  function getLabelStudioPlaygroundUrl() {
+    if (window.location.hostname === "localhost") {
+      return "http://localhost:4200/";
+    }
+    if (window.location.hostname === "labelstud.io") {
+      return "https://labelstud.io/playground-app/";
+    }
+    // This is for preview deployments
+    return "https://label-studio-playground.netlify.app/";
+  }
+
+  const labelStudioPlaygroundUrl = getLabelStudioPlaygroundUrl();
   const labelStudioPlayground = document.getElementById('label-studio-playground');
   const startTemplate = document.getElementById('start-template');
   const templateValue = encodeURIComponent(startTemplate.innerHTML.replace(/(\r\n|\n|\r)/gm, "<br>"));
