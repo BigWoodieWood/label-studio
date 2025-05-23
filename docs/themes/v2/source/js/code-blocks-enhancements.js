@@ -11,7 +11,7 @@ function getLabelStudioPlaygroundUrl() {
 }
 
 function normalizeNewlines(text) {
-  return text.replace(/(\r\n|\n|\r)/gm, "\n");
+  return text.replace(/(\r\n|\r)/gm, "\n");
 }
 
 function encodeConfig(text) {
