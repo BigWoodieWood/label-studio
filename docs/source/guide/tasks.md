@@ -57,7 +57,7 @@ You can import many types of data, including text, timeseries, audio, and image 
 
 \* *Cloud storage only*
 
-\+ *Label Studio Enterprise only*
+\+ *Label Studio Enterprise and Starter Cloud only*
 
 If you don't see a supported data or file type that you want to import, please let us know by submitting an issue to the <a className="no-go" href="https://github.com/humansignal/label-studio/issues">Label Studio Repository</a>.
 
