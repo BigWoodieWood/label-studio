@@ -12,9 +12,9 @@ meta_title: Time series video audio labeling
 
 ## This approach is deprecated
 
-This approach is completely deprecated. 
+This approach is completely deprecated.
 
-In Label Studio 1.20 we introduced new way to sync Timeseries with Video and Audio. See more details here:
+In Label Studio 1.20, we introduced a new way to sync timeseries with video and audio. See more details here:
 https://labelstud.io/templates/timeseries_audio_video
 
 
