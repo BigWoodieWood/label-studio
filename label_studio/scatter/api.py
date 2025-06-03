@@ -2,20 +2,19 @@ from typing import Any, Dict
 
 from core.permissions import ViewClassPermission, all_permissions
 from core.utils.common import int_from_request
+from data_manager.functions import get_prepared_queryset
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from projects.models import Project
 from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from tasks.models import Task
 
 from .constants import ALLOWED_API_PARAMS, DIRECT_DB_FIELDS
 from .serializers import ScatterTaskSerializer
-
-from data_manager.functions import get_prepare_params, get_prepared_queryset
-from rest_framework.views import APIView
-from rest_framework.exceptions import ValidationError
 
 
 class ScatterPagination(PageNumberPagination):
@@ -128,6 +127,7 @@ class ScatterTasksAPI(generics.ListAPIView):
 # New API endpoint – Filtered IDs
 # -----------------------------------------------------------------------------
 
+
 class ScatterFilteredIDsAPI(APIView):
     """Return **all task IDs** that match Data-Manager filters.
 
@@ -153,7 +153,7 @@ class ScatterFilteredIDsAPI(APIView):
         # 1. Validate & authorise project
         project_id = request.data.get('project')
         if not project_id:
-            raise ValidationError({"project": "This field is required."})
+            raise ValidationError({'project': 'This field is required.'})
 
         project = get_object_or_404(Project, pk=project_id)
         self.check_object_permissions(request, project)
@@ -163,4 +163,4 @@ class ScatterFilteredIDsAPI(APIView):
 
         # 3. Stream ids (lower memory footprint)
         ids = list(queryset.values_list('id', flat=True))
-        return Response({"ids": ids})
+        return Response({'ids': ids})

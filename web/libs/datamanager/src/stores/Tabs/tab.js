@@ -73,6 +73,9 @@ export const Tab = types
 
     // Runtime state for the Scatter view related to current interaction (e.g., active point ID)
     scatter: types.maybe(ScatterState),
+
+    // Persistent settings for ScatterView (class field)
+    scatterSettings: types.optional(CustomJSON, { classField: "class" }),
   })
   .volatile(() => {
     const defaultWidth = getComputedStyle(document.body)
@@ -236,6 +239,7 @@ export const Tab = types
         semantic_search: self.semantic_search?.toJSON() ?? [],
         threshold: self.threshold?.toJSON(),
         scatter: self.scatter,
+        scatterSettings: self.scatterSettings,
       };
 
       if (self.saved || apiVersion === 1) {
@@ -258,8 +262,8 @@ export const Tab = types
   }))
   .actions((self) => ({
     setScatterSettings(settings) {
-      //self.scatter = settings;  // TODO: fix it! 
-      self.save();
+      self.scatterSettings = settings; // store persistent settings
+      self.save(); // persist to backend
     },
 
     lock() {
@@ -439,7 +443,7 @@ export const Tab = types
 
     afterCreate() {
       self.snapshot = self.serialize();
-      if (self.type === 'scatter' && !self.scatter) {
+      if (self.type === "scatter" && !self.scatter) {
         self.scatter = ScatterState.create({});
       }
     },
@@ -481,7 +485,7 @@ export const Tab = types
 
     markSaved() {
       self.saved = true;
-    }
+    },
   }))
   .preProcessSnapshot((snapshot) => {
     if (snapshot === null) return snapshot;

@@ -54,9 +54,7 @@ interface ScatterSelectionResult extends ScatterSelectionHandlers {
  * Hook that encapsulates CTRL+click single selection, SHIFT+drag rectangle selection, and active point logic.
  * Returns event handlers ready to be passed directly to <DeckGL /> props.
  */
-export const useScatterSelection = (
-  config: ScatterSelectionConfig,
-): ScatterSelectionResult => {
+export const useScatterSelection = (config: ScatterSelectionConfig): ScatterSelectionResult => {
   // Read activeId and setter from config, remove internal state management for it
   const {
     numericPoints,
@@ -65,9 +63,9 @@ export const useScatterSelection = (
     onToggleSelect,
     isSelected,
     onClearSelection,
-    onBulkToggleSelect
+    onBulkToggleSelect,
   } = config;
-  
+
   // Remove internal state for activeId: const [activeId, setActiveId] = useState<string | null>(null);
   const [selectionVersion, setSelectionVersion] = useState(0);
   const dragStart = useRef<[number, number] | null>(null);
@@ -87,7 +85,7 @@ export const useScatterSelection = (
     (info: any, event: { srcEvent: MouseEvent }) => {
       if (!info.object || !info.object.id) return;
       // Convert string id to number before passing to MST
-      const clickedId = parseInt(info.object.id, 10);
+      const clickedId = Number.parseInt(info.object.id, 10);
       const isCtrl = event.srcEvent.ctrlKey || event.srcEvent.metaKey;
       const isShift = event.srcEvent.shiftKey;
       const isAlt = event.srcEvent.altKey;
@@ -119,33 +117,30 @@ export const useScatterSelection = (
       // Plain click -> active point
       // Compare with activePointId from config before committing
       if (activePointId !== clickedId) {
-          commitActive(clickedId);
+        commitActive(clickedId);
       } else {
-          // Clicking the already active point might mean deselecting it
-          commitActive(null);
+        // Clicking the already active point might mean deselecting it
+        commitActive(null);
       }
     },
     // Dependencies updated to use activePointId from config
     [onToggleSelect, commitActive, isSelected, activePointId],
   );
 
-  const onDragStart = useCallback(
-    (info: any, event: { srcEvent: MouseEvent }) => {
-      if (!event.srcEvent.shiftKey) return; // rectangle selection only when shift is held
-      if (!info.coordinate) return;
-      
-      const startCoords = info.coordinate as [number, number];
-      dragStart.current = startCoords;
-      isDragging.current = true;
-      
-      // Initialize selection rectangle
-      setSelectionRectangle({
-        start: startCoords,
-        current: startCoords,
-      });
-    },
-    [],
-  );
+  const onDragStart = useCallback((info: any, event: { srcEvent: MouseEvent }) => {
+    if (!event.srcEvent.shiftKey) return; // rectangle selection only when shift is held
+    if (!info.coordinate) return;
+
+    const startCoords = info.coordinate as [number, number];
+    dragStart.current = startCoords;
+    isDragging.current = true;
+
+    // Initialize selection rectangle
+    setSelectionRectangle({
+      start: startCoords,
+      current: startCoords,
+    });
+  }, []);
 
   const onDrag = useCallback((info: any, event: { srcEvent: MouseEvent }) => {
     // Update selection rectangle during drag
@@ -165,7 +160,7 @@ export const useScatterSelection = (
         setSelectionRectangle(null);
         return;
       }
- 
+
       if (!info.coordinate) {
         // Pointer released outside the canvas – safely cancel the drag
         isDragging.current = false;
@@ -202,7 +197,7 @@ export const useScatterSelection = (
 
       if (idsToUpdate.length) {
         onBulkToggleSelect?.(idsToUpdate);
-        setSelectionVersion(v => v + 1);
+        setSelectionVersion((v) => v + 1);
       }
 
       isDragging.current = false;
@@ -217,17 +212,17 @@ export const useScatterSelection = (
     if (!onClearSelection) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClearSelection?.(); // Use optional chaining
-        setSelectionVersion(v => v + 1);
+        setSelectionVersion((v) => v + 1);
         // Also clear the active point in the view model on ESC
         setActivePointId(null); // Pass null
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClearSelection, setActivePointId]);
 
@@ -239,4 +234,4 @@ export const useScatterSelection = (
     selectionVersion,
     selectionRectangle,
   };
-}; 
+};

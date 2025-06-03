@@ -1,9 +1,9 @@
 /**
  * Progressive loading hook for Scatter plot base points
- * 
+ *
  * This hook manages fetching ALL task points for the scatter plot's base layer,
  * handling pagination, loading state, cancellation, and component lifecycle.
- * 
+ *
  * Design goals:
  * - Incremental/streaming updates: UI updates as each page arrives
  * - Clean cancellation: Aborts in-flight requests on unmount or reload
@@ -30,10 +30,10 @@ const scatterCache = new Map<string, TaskPoint[]>();
 
 /**
  * Hook that loads all task points for the scatter plot base layer.
- * 
+ *
  * Fetches points from the API in pages, accumulating them over time.
  * Handles proper cancellation on unmount or when reload is called.
- * 
+ *
  * @param projectId - Current project ID (undefined before project loaded)
  * @param settings - Scatter view settings with classField for categorization
  * @param datamanager - Optional datamanager object
@@ -51,7 +51,7 @@ export function useScatterBaseData(
   // Define load function that handles pagination, errors, and cleanup
   const load = useCallback(() => {
     if (!projectId) return;
-    
+
     const cacheKey = `${projectId}-${settings.classField}`;
 
     // If we already have cached points, use them immediately and skip fetch
@@ -59,7 +59,7 @@ export function useScatterBaseData(
       setBasePoints(scatterCache.get(cacheKey)!);
       return;
     }
-    
+
     // Cancel any in-flight request
     abortRef.current?.abort();
     const ctrl = new AbortController();
@@ -86,13 +86,13 @@ export function useScatterBaseData(
 
           // Add this page's points to our accumulated array
           accumulated = [...accumulated, ...result.points];
-          
+
           // Update state so UI reflects progress
           setBasePoints(accumulated);
-          
+
           // Cache the fully loaded array for next mount
           scatterCache.set(cacheKey, accumulated);
-          
+
           // Prepare for next page or exit
           hasMore = result.hasMore;
           currentPage++;
@@ -125,4 +125,4 @@ export function useScatterBaseData(
   }, [load, projectId, settings.classField]);
 
   return { basePoints, loading, reload: reloadWithClear };
-} 
+}

@@ -48,11 +48,13 @@ export function useScatterFilteredIds(view: any, { datamanager }: Options = {}) 
     // MobX reaction: watch snapshot of filters + ordering + project ID
     const dispose = reaction(
       () => [toJS(view.filterSnapshot), toJS(view.ordering), dm.projectId],
-      () => { fetchIds(); },
-      { fireImmediately: true }
+      () => {
+        fetchIds();
+      },
+      { fireImmediately: true },
     );
 
     // Dispose on unmount
     return () => dispose();
   }, [view, datamanager]);
-} 
+}

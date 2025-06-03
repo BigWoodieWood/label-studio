@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .api import ScatterTasksAPI, ScatterFilteredIDsAPI
+from .api import ScatterFilteredIDsAPI, ScatterTasksAPI
 
 app_name = 'scatter'
 

@@ -1,6 +1,6 @@
 /**
  * Scatter API client
- * 
+ *
  * Provides a Promise-based API facade for fetching task points
  * for the scatter plot. Isolates network logic from UI components.
  */
@@ -38,22 +38,12 @@ export interface ScatterFetchResult {
 
 /**
  * Fetches a single page of task points from the `/api/scatter/tasks` endpoint.
- * 
+ *
  * @param options - Fetch options including project ID, field mappings, and pagination
  * @returns Promise resolving to points and pagination metadata
  */
-export async function fetchScatterPoints(
-  options: ScatterFetchOptions
-): Promise<ScatterFetchResult> {
-  const { 
-    project, 
-    classField, 
-    abortSignal,
-    page = 1,
-    pageSize = 10000,
-    onProgress,
-    datamanager,
-  } = options;
+export async function fetchScatterPoints(options: ScatterFetchOptions): Promise<ScatterFetchResult> {
+  const { project, classField, abortSignal, page = 1, pageSize = 10000, onProgress, datamanager } = options;
 
   // Build params object once so we can reuse in either apiCall or fetch
   const paramsObject: Record<string, string | number> = {
@@ -116,4 +106,4 @@ export async function fetchScatterPoints(
     pageSize: actualPageSize,
     hasMore: points.length === actualPageSize && page * actualPageSize < total,
   };
-} 
+}

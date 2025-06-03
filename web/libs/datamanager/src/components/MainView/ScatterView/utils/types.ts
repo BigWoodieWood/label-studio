@@ -17,4 +17,4 @@ export interface TaskPoint {
 
 export interface ScatterSettings {
   classField: string;
-} 
+}

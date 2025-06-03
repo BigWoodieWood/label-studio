@@ -1,5 +1,4 @@
 import { getRoot, types } from "mobx-state-tree";
-import { StringOrNumber } from "../types";
 
 export const TabSelectedItems = types
   .model("TabSelectedItems", {
@@ -69,7 +68,7 @@ export const TabSelectedItems = types
     },
 
     toggleMany(ids) {
-      ids.forEach(id => {
+      ids.forEach((id) => {
         if (self.map.has(id)) self.map.delete(id);
         else self.map.set(id, true);
       });
@@ -78,7 +77,7 @@ export const TabSelectedItems = types
 
     replaceAll(ids) {
       self.map.clear();
-      ids.forEach(id => self.map.set(id, true));
+      ids.forEach((id) => self.map.set(id, true));
       self._invokeChangeEvent();
     },
 
@@ -104,7 +103,7 @@ export const TabSelectedItems = types
     update(data) {
       self.all = data?.all ?? self.all;
       self.map.clear();
-      data?.[self.listName]?.forEach(id => self.map.set(id, true));
+      data?.[self.listName]?.forEach((id) => self.map.set(id, true));
       self._invokeChangeEvent();
     },
 
