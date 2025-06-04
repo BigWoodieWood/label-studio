@@ -30,7 +30,8 @@ export const AnnotationMixin = types.model("AnnotationMixin", {}).views((self) =
       }
 
       // return connected annotation, not the globally selected one
-      return Types.getParentOfTypeString(self, "Annotation");
+      // if a method was triggered inside history item which is not selected, we should traverse up to it
+      return Types.getParentOfTypeString(self, "Annotation") ?? Types.getParentOfTypeString(self, "HistoryItem");
     }
 
     const as = self.annotationStore;
