@@ -84,8 +84,8 @@ global.fetch = async (url: string) => {
     const params = new URLSearchParams(url.split("?")[1]);
     const timeColumn = params.get("time") || "None";
     const values = params.get("values");
-    let separator = params.get("sep") || ",";
-    let type = params.get("type") || "csv";
+    const separator = params.get("sep") || ",";
+    const type = params.get("type") || "csv";
     const timeFormat = params.get("tf");
     const columns = values?.split(separator) || [];
     const data = generateTimeseriesData(timeColumn, columns, {
