@@ -1237,7 +1237,7 @@ const Overview = observer(({ item, data, series }) => {
     // Upside-down house handle at top (pentagon like audio player)
     cursorLine.current
       .append("polygon")
-      .attr("points", "-4,0 4,0 4,7 1,10 -1,10 -4,7") // Upside-down house shape (1.5x wider)
+      .attr("points", "-4,0 4,0 4,7 1,10 -1,10 -4,7")
       .attr("fill", cursorColor);
   }, [node]);
 
