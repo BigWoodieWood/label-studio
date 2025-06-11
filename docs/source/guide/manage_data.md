@@ -42,6 +42,26 @@ When you filter or sort the data before you label it, you modify which tasks and
 
 <img src="/images/data-manager-filters.png" class="gif-border">
 
+<div class="enterprise-only">
+
+In Label Studio Enterprise, you can also filter on individual annotation results within a task.
+
+<img src="/images/data-manager-filters-lse.png" class="gif-border" >
+
+In Label Studio Open-Source and Starter Cloud, the `Annotation results` filter is an unstructured text search across all annotations for the task. The example above is not achievable using `Annotation results`.
+
+The following tags are supported:
+- all `Labels` tags (ex. `Labels`, `ParagraphLabels`, ...)
+- `Choices`
+- `Taxonomy`
+- `Rating`
+
+Known limitations:
+- [Taxonomies loaded using `apiUrl`](/templates/taxonomy) will not be detected.
+
+
+</div>
+
 ### Example: Label new data first
 Sort the data in your project by date to focus on labeling the newest data first.
 
