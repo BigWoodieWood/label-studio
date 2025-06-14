@@ -94,6 +94,7 @@ class BaseUserSerializer(FlexFieldsModelSerializer):
             'username',
             'email',
             'last_activity',
+            'custom_hotkeys',
             'avatar',
             'initials',
             'phone',
@@ -103,7 +104,7 @@ class BaseUserSerializer(FlexFieldsModelSerializer):
             'date_joined',
         )
 
-
+        
 class BaseUserSerializerUpdate(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
         read_only_fields = ('email',)
@@ -115,5 +116,68 @@ class UserSimpleSerializer(BaseUserSerializer):
         fields = ('id', 'first_name', 'last_name', 'email', 'avatar')
 
 
+class HotkeysSerializer(serializers.Serializer):
+    custom_hotkeys = serializers.DictField(required=True)
+
+    def validate_custom_hotkeys(self, custom_hotkeys):
+        """
+        Validates the hotkey format.
+        Expected format: {"section:action": {"key": "key_combination", "active": boolean}}
+        The "active" field is optional and defaults to true.
+        """
+        if not isinstance(custom_hotkeys, dict):
+            raise serializers.ValidationError("custom_hotkeys must be a dictionary")
+    
+        section_hotkeys = {}  # Keep track of hotkeys by section
+    
+        for action_key, hotkey_data in custom_hotkeys.items():
+            # Validate action key format (section:action)
+            if not isinstance(action_key, str) or not action_key:
+                raise serializers.ValidationError(f"Action key '{action_key}' must be a non-empty string")
+        
+            # Check if the action key follows the section:action format
+            if ':' not in action_key:
+                raise serializers.ValidationError(f"Action key '{action_key}' must be in 'section:action' format")
+        
+            section, action = action_key.split(':', 1)
+        
+            # Validate hotkey data format
+            if not isinstance(hotkey_data, dict):
+                raise serializers.ValidationError(f"Hotkey data for '{action_key}' must be a dictionary")
+        
+            # Check for key in hotkey data
+            if 'key' not in hotkey_data:
+                raise serializers.ValidationError(f"Missing 'key' in hotkey data for '{action_key}'")
+            
+            key_combo = hotkey_data['key']
+        
+            # Get active status, default to True if not specified
+            active = hotkey_data.get('active', True)
+        
+            # Validate key combination
+            if not isinstance(key_combo, str) or not key_combo:
+                raise serializers.ValidationError(f"Key combination for '{action_key}' must be a non-empty string")
+        
+            # Validate active flag if provided
+            if 'active' in hotkey_data and not isinstance(active, bool):
+                raise serializers.ValidationError(f"Active flag for '{action_key}' must be a boolean")
+        
+            # Check for duplicate hotkeys within the same section
+            if section not in section_hotkeys:
+                section_hotkeys[section] = []
+            
+            # Only check for duplicates if the hotkey is active
+            if active:
+                if key_combo in section_hotkeys[section]:
+                    raise serializers.ValidationError(
+                        f"Duplicate hotkey '{key_combo}' in section '{section}'. "
+                        f"Each section must have unique hotkeys."
+                    )
+                
+                section_hotkeys[section].append(key_combo)
+            
+        return custom_hotkeys
+
+        
 UserSerializer = load_func(settings.USER_SERIALIZER)
 UserSerializerUpdate = load_func(settings.USER_SERIALIZER_UPDATE)

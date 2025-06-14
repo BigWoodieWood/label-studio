@@ -14,9 +14,11 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 from users.functions import check_avatar
 from users.models import User
-from users.serializers import UserSerializer, UserSerializerUpdate
+from users.serializers import UserSerializer, UserSerializerUpdate, HotkeysSerializer
+
 
 logger = logging.getLogger(__name__)
 
@@ -294,3 +296,21 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         return super(UserWhoAmIAPI, self).get(request, *args, **kwargs)
+
+
+class UserHotkeysAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Update the current user's hotkeys"""
+        serializer = HotkeysSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Update the user's profile
+            user = request.user
+            user.custom_hotkeys = serializer.validated_data['custom_hotkeys']
+            user.save()
+            
+            return Response({'custom_hotkeys': user.custom_hotkeys})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

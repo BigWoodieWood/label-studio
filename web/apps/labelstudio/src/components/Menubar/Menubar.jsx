@@ -4,6 +4,7 @@ import {
   IconBook,
   IconFolder,
   IconHome,
+  IconHotkeys,
   IconPersonInCircle,
   IconPin,
   IconTerminal,
@@ -31,6 +32,7 @@ import { FF_HOMEPAGE } from "../../utils/feature-flags";
 import { pages } from "@humansignal/app-common";
 import { isFF } from "../../utils/feature-flags";
 import { ff } from "@humansignal/core";
+import { openHotkeyHelp } from "@humansignal/app-common/pages/AccountSettings/sections/Hotkeys/Help";
 
 export const MenubarContext = createContext();
 
@@ -144,14 +146,19 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
 
           <div className={menubarContext}>
             <LeftContextMenu className={contextItem.mod({ left: true })} />
-
             <RightContextMenu className={contextItem.mod({ right: true })} />
           </div>
 
           <div className={menubarClass.elem("spacer").toString()} />
-
+          
           {ff.isActive(ff.FF_THEME_TOGGLE) && <ThemeToggle />}
 
+          <div className={menubarClass.elem("hotkeys")}>
+            <div className={menubarClass.elem("hotkeys-button")}>
+              <a href="#" onClick={() => { openHotkeyHelp() }}><IconHotkeys /></a>
+            </div>
+          </div>
+          
           <Dropdown.Trigger
             ref={useMenuRef}
             align="right"
@@ -161,7 +168,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
                   icon={<IconSettings />}
                   label="Account &amp; Settings"
                   href={pages.AccountSettingsPage.path}
-                />
+                />                
                 {/* <Menu.Item label="Dark Mode"/> */}
                 <Menu.Item icon={<IconDoor />} label="Log Out" href={absoluteURL("/logout")} data-external />
                 {showNewsletterDot && (

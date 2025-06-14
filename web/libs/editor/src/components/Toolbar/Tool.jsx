@@ -26,16 +26,17 @@ export const Tool = ({
   label,
   shortcut,
   onClick,
-}) => {
+}) => {  
   let currentShortcut = shortcut;
   const dynamic = tool?.dynamic ?? false;
   const { expanded, alignment } = useContext(ToolbarContext);
   const [hovered, setHovered] = useState(false);
 
   const shortcutView = useMemo(() => {
-    if (!isDefined(shortcut)) return null;
-
-    const combos = shortcut.split(",").map((s) => s.trim());
+    const sc = hotkeys.lookupKey(shortcut);
+    if (!isDefined(sc)) return null;
+    
+    const combos = sc.split(",").map((s) => s.trim());
 
     return (
       <Elem name="shortcut">
@@ -60,15 +61,16 @@ export const Tool = ({
 
   useEffect(() => {
     const removeShortcut = () => {
-      if (currentShortcut && hotkeys.hasKey(currentShortcut)) {
-        hotkeys.removeKey(currentShortcut);
+      if (currentShortcut && hotkeys.hasKeyByName(currentShortcut)) {
+        hotkeys.removeNamed(currentShortcut);
       }
     };
 
     removeShortcut();
     currentShortcut = shortcut;
-    if (shortcut && !hotkeys.hasKey(shortcut)) {
-      hotkeys.addKey(
+
+    if (shortcut && !hotkeys.hasKeyByName(shortcut)) {
+      hotkeys.addNamed(
         shortcut,
         () => {
           if (!tool?.disabled && !tool?.annotation?.isDrawing) {
@@ -77,8 +79,7 @@ export const Tool = ({
             }
             onClick?.();
           }
-        },
-        label,
+        }
       );
     }
 
@@ -90,13 +91,13 @@ export const Tool = ({
   useEffect(() => {
     const removeShortcuts = () => {
       Object.keys(extraShortcuts).forEach((key) => {
-        if (hotkeys.hasKey(key)) hotkeys.removeKey(key);
+        if (hotkeys.hasKeyByName(key)) hotkeys.removeNamed(key);
       });
     };
 
     const addShortcuts = () => {
       Object.entries(extraShortcuts).forEach(([key, [label, fn]]) => {
-        if (!hotkeys.hasKey(key)) hotkeys.overwriteKey(key, fn, label);
+        if (!hotkeys.hasKeyByName(key)) hotkeys.overwriteNamed(key, fn, label);
       });
     };
 

@@ -439,6 +439,19 @@ export default types
         }
       });
 
+      hotkeys.addNamed("region:lock", () => {
+        const c = self.annotationStore.selected;
+
+        if (c && !c.isLinkingMode) {
+	  c.lockSelectedRegions();
+        }
+      });
+
+      hotkeys.addNamed("region:next", () => {
+	const c = self.annotationStore.selected;
+	
+      });
+      
       hotkeys.addNamed("region:visibility-all", () => {
         const { selected } = self.annotationStore;
         selected.regionStore.toggleVisibility();
