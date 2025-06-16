@@ -7,6 +7,7 @@ export const API_CONFIG = {
     updateUserAvatar: "POST:/users/:pk/avatar",
     deleteUserAvatar: "DELETE:/users/:pk/avatar",
     me: "/current-user/whoami",
+    hotkeys: "POST:/current-user/hotkeys",
 
     // Organization
     memberships: "/organizations/:pk/memberships",

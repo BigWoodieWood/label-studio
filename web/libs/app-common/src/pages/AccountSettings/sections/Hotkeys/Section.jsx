@@ -1,29 +1,57 @@
 
-import { useCallback, useEffect, useState, useRef } from "react";
 import React from "react";
-import ReactDOM from "react-dom";
 import clsx from "clsx";
-import { ToastType, useToast } from "@humansignal/ui";
-import { API } from "apps/labelstudio/src/providers/ApiProvider";
-import { atomWithMutation } from "jotai-tanstack-query";
-import { useAtomValue } from "jotai";
-
-// Shadcn UI components
 import { Button } from "@humansignal/ui";
-import { Label, Input, Toggle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@humansignal/ui";
-
-import { Switch } from "@humansignal/shad/components/ui/switch";
-import { Separator } from "@humansignal/shad/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@humansignal/shad/components/ui/card";
-import { Badge } from "@humansignal/shad/components/ui/badge";
-import { Skeleton } from "@humansignal/shad/components/ui/skeleton";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@humansignal/shad/components/ui/dialog";
-import { Alert, AlertDescription, AlertTitle } from "@humansignal/shad/components/ui/alert";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@humansignal/shad/components/ui/dropdown-menu";
-
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardFooter 
+} from "@humansignal/shad/components/ui/card";
 import { HotkeyItem } from "./Item";
 
-
+/**
+ * HotkeySection Component
+ * 
+ * Displays a section of hotkeys grouped by subgroups within a card layout.
+ * Provides functionality to edit, toggle, and save hotkeys within the section.
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.section - Section configuration object
+ * @param {string} props.section.id - Unique identifier for the section
+ * @param {string} props.section.title - Display title for the section
+ * @param {string} props.section.description - Description text for the section
+ * @param {Array} props.hotkeys - Array of hotkey objects for this section
+ * @param {string} props.hotkeys[].id - Unique identifier for each hotkey
+ * @param {string} [props.hotkeys[].subgroup] - Optional subgroup for organizing hotkeys
+ * @param {string|null} props.editingHotkeyId - ID of currently editing hotkey, null if none
+ * @param {Function} props.onEditHotkey - Callback when user starts editing a hotkey
+ * @param {Function} props.onSaveHotkey - Callback when user saves hotkey changes
+ * @param {Function} props.onCancelEdit - Callback when user cancels hotkey editing
+ * @param {Function} props.onSaveSection - Callback when user saves section changes
+ * @param {Function} props.onToggleHotkey - Callback when user toggles hotkey enabled/disabled
+ * @param {boolean} props.hasChanges - Whether the section has unsaved changes
+ * 
+ * @returns {JSX.Element} Rendered HotkeySection component
+ * 
+ * @example
+ * <HotkeySection
+ *   section={{ id: "editor", title: "Editor", description: "Text editing shortcuts" }}
+ *   hotkeys={[
+ *     { id: "1", subgroup: "navigation", ... },
+ *     { id: "2", subgroup: "editing", ... }
+ *   ]}
+ *   editingHotkeyId={null}
+ *   onEditHotkey={(id) => setEditingId(id)}
+ *   onSaveHotkey={(hotkey) => saveHotkey(hotkey)}
+ *   onCancelEdit={() => setEditingId(null)}
+ *   onSaveSection={(sectionId) => saveSection(sectionId)}
+ *   onToggleHotkey={(id) => toggleHotkey(id)}
+ *   hasChanges={true}
+ * />
+ */
 export const HotkeySection = ({ 
   section, 
   hotkeys, 
@@ -35,7 +63,12 @@ export const HotkeySection = ({
   onToggleHotkey,
   hasChanges 
 }) => {
-  // Group hotkeys by subgroup
+  /**
+   * Groups hotkeys by their subgroup property
+   * Hotkeys without a subgroup are placed in the 'default' group
+   * 
+   * @returns {Object} Object with subgroup names as keys and arrays of hotkeys as values
+   */
   const groupedHotkeys = hotkeys.reduce((groups, hotkey) => {
     const subgroup = hotkey.subgroup || 'default';
     if (!groups[subgroup]) {
@@ -45,12 +78,24 @@ export const HotkeySection = ({
     return groups;
   }, {});
 
-  // Get sorted subgroups (with 'default' always first)
+  /**
+   * Gets sorted subgroup names with 'default' always appearing first
+   * Other subgroups are sorted alphabetically
+   * 
+   * @returns {string[]} Sorted array of subgroup names
+   */
   const subgroups = Object.keys(groupedHotkeys).sort((a, b) => {
     if (a === 'default') return -1;
     if (b === 'default') return 1;
     return a.localeCompare(b);
   });
+
+  /**
+   * Handles the save section button click
+   */
+  const handleSaveSection = () => {
+    onSaveSection(section.id);
+  };
 
   return (
     <Card className="mb-6">
@@ -58,24 +103,16 @@ export const HotkeySection = ({
         <CardTitle>{section.title}</CardTitle>
         <CardDescription>{section.description}</CardDescription>
       </CardHeader>
+      
       <CardContent>
         <div>
-          {subgroups.map((subgroup, index) => (
-            <div key={subgroup} className={clsx(
-              subgroup !== 'default' && "mt-4 pt-2 border rounded-md border-border p-3"
-            )}>
-              {subgroup !== 'default' && (
-                <div className="mb-3">
-                  <div className="text-sm font-medium mb-1 capitalize">
-                    {HOTKEY_SUBGROUPS[subgroup]?.title || subgroup}
-                  </div>
-                  {HOTKEY_SUBGROUPS[subgroup]?.description && (
-                    <div className="text-xs text-muted-foreground">
-                      {HOTKEY_SUBGROUPS[subgroup].description}
-                    </div>
-                  )}
-                </div>
+          {subgroups.map((subgroup) => (
+            <div 
+              key={subgroup} 
+              className={clsx(
+                subgroup !== 'default' && "mt-4 pt-2 border rounded-md border-border p-3"
               )}
+            >
               {groupedHotkeys[subgroup].map(hotkey => (
                 <HotkeyItem 
                   key={hotkey.id}
@@ -97,11 +134,11 @@ export const HotkeySection = ({
           )}
         </div>
       </CardContent>
+      
       <CardFooter className="flex justify-end">
         <Button 
           variant="default" 
-          
-          onClick={() => onSaveSection(section.id)}
+          onClick={handleSaveSection}
           disabled={!hasChanges}
         >
           Save

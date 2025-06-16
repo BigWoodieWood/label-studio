@@ -3,7 +3,7 @@ import { ToastType, useToast } from "@humansignal/ui";
 
 // Shadcn UI components
 import { Button } from "@humansignal/ui";
-import { Card, CardContent, CardHeader } from "@humansignal/shad/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@humansignal/shad/components/ui/card";
 import { Badge } from "@humansignal/shad/components/ui/badge";
 import { Skeleton } from "@humansignal/shad/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@humansignal/shad/components/ui/dialog";
@@ -26,6 +26,7 @@ export const HotkeysManager = () => {
   const [globalEnabled, setGlobalEnabled] = useState(true);
   const [dirtyState, setDirtyState] = useState({});
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [autoTranslatePlatforms, setAutoTranslatePlatforms] = useState(true);
   const [duplicateConfirmDialog, setDuplicateConfirmDialog] = useState({
     open: false,
     hotkeyId: null,
@@ -71,8 +72,12 @@ export const HotkeysManager = () => {
     // Get all modified hotkeys, not just from one section
     const modifiedHotkeys = getModifiedHotkeys(hotkeys);
     
+    // Check if settings changed from defaults
+    const defaultAutoTranslate = true; // Default value
+    const settingsChanged = autoTranslatePlatforms !== defaultAutoTranslate;
+    
     // If nothing was modified, return success without API call
-    if (modifiedHotkeys.length === 0) {
+    if (modifiedHotkeys.length === 0 && !settingsChanged) {
       return { ok: true, data: { message: "No changes to save" } };
     }
     
@@ -88,12 +93,22 @@ export const HotkeysManager = () => {
       };
     });
     
+    // Prepare request body
+    const requestBody = {
+      custom_hotkeys: customHotkeys
+    };
+    
+    // Only include settings if they changed from defaults
+    if (settingsChanged) {
+      requestBody.hotkey_settings = {
+        autoTranslatePlatforms: autoTranslatePlatforms
+      };
+    }
+    
     try {
-      // Call the API to save all modified hotkeys
+      // Call the API to save all modified hotkeys and settings
       const response = await api.callApi('hotkeys', { 
-        body: {
-          custom_hotkeys: customHotkeys
-        }
+        body: requestBody
       });
       
       return {
@@ -136,6 +151,10 @@ export const HotkeysManager = () => {
         DEFAULT_HOTKEYS, 
         window.APP_SETTINGS.user.customHotkeys
       );
+      
+      // Load the platform translation setting
+      const platformSetting = window.APP_SETTINGS.user.hotkeySettings?.autoTranslatePlatforms;
+      setAutoTranslatePlatforms(platformSetting !== undefined ? platformSetting : true);
       
       setIsLoading(true);
       setHotkeys(updatedHotkeys);
@@ -201,11 +220,29 @@ export const HotkeysManager = () => {
     setGlobalEnabled(allEnabled);
   };
 
+  // Handle platform translation toggle
+  const handleTogglePlatformTranslation = async () => {
+    const newState = !autoTranslatePlatforms;
+    setAutoTranslatePlatforms(newState);
+    
+    // Mark as having changes
+    setDirtyState({
+      ...dirtyState,
+      settings: true
+    });
+    
+    toast.show({ 
+      message: `Platform translation ${newState ? 'enabled' : 'disabled'}`, 
+      type: ToastType.success 
+    });
+  };
+
   // Handle resetting all hotkeys to defaults
   const handleResetToDefaults = () => {
-    const confirmMessage = hasUnsavedChanges 
-      ? "Are you sure you want to reset all hotkeys to their default values? This will discard all unsaved changes and cannot be undone."
-      : "Are you sure you want to reset all hotkeys to their default values? This cannot be undone.";
+    const hasChanges = hasUnsavedChanges || dirtyState.settings;
+    const confirmMessage = hasChanges 
+      ? "Are you sure you want to reset all hotkeys and settings to their default values? This will discard all unsaved changes and cannot be undone."
+      : "Are you sure you want to reset all hotkeys and settings to their default values? This cannot be undone.";
       
     if (!confirm(confirmMessage)) {
       return;
@@ -213,16 +250,17 @@ export const HotkeysManager = () => {
     
     setHotkeys([...DEFAULT_HOTKEYS]);
     setGlobalEnabled(true);
+    setAutoTranslatePlatforms(true);
     setDirtyState({});
     
     toast.show({ 
-      message: "All hotkeys have been reset to defaults", 
+      message: "All hotkeys and settings have been reset to defaults", 
       type: ToastType.success 
     });
   };
 
   // Check if any section has unsaved changes
-  const hasUnsavedChanges = Object.keys(dirtyState).length > 0;
+  const hasUnsavedChanges = Object.keys(dirtyState).some(key => key !== 'settings');
 
   // Helper function to get section title by ID
   const getSectionTitle = (sectionId) => {
@@ -316,7 +354,7 @@ export const HotkeysManager = () => {
     setIsLoading(true);
     
     try {
-      // Save ALL modified hotkeys, not just this section
+      // Save ALL modified hotkeys and settings, not just this section
       const result = await saveHotkeysToAPI();
 
       if (result.ok) {
@@ -325,19 +363,22 @@ export const HotkeysManager = () => {
         delete newDirtyState[sectionId];
         setDirtyState(newDirtyState);
         
+        const sectionName = sectionId === 'settings' ? 'Settings' : 
+                           HOTKEY_SECTIONS.find(s => s.id === sectionId)?.title;
+        
         toast.show({ 
-          message: `${HOTKEY_SECTIONS.find(s => s.id === sectionId)?.title} shortcuts saved`, 
+          message: `${sectionName} saved`, 
           type: ToastType.success 
         });
       } else {
         toast.show({ 
-          message: `Failed to save shortcuts: ${result.error || "Unknown error"}`, 
+          message: `Failed to save: ${result.error || "Unknown error"}`, 
           type: ToastType.error 
         });
       }
     } catch (error) {
       toast.show({ 
-        message: `Error saving shortcuts: ${error.message}`, 
+        message: `Error saving: ${error.message}`, 
         type: ToastType.error 
       });
     } finally {
@@ -347,11 +388,21 @@ export const HotkeysManager = () => {
 
   // Handle exporting hotkeys
   const handleExportHotkeys = () => {
-    // Create a JSON string of the hotkeys
-    const hotkeyJson = JSON.stringify(hotkeys, null, 2);
+    // Create export data including settings
+    const exportData = {
+      hotkeys: hotkeys,
+      settings: {
+        autoTranslatePlatforms: autoTranslatePlatforms
+      },
+      exportedAt: new Date().toISOString(),
+      version: "1.0"
+    };
+    
+    // Create a JSON string of the export data
+    const exportJson = JSON.stringify(exportData, null, 2);
     
     // Create a blob with the JSON
-    const blob = new Blob([hotkeyJson], { type: 'application/json' });
+    const blob = new Blob([exportJson], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     
     // Create a temporary link and click it to download the file
@@ -369,18 +420,27 @@ export const HotkeysManager = () => {
   };
   
   // Handle importing hotkeys
-  const handleImportHotkeys = async (importedHotkeys) => {
+  const handleImportHotkeys = async (importedData) => {
     try {
       setIsLoading(true);
       
+      // Handle both old format (just hotkeys array) and new format (with settings)
+      const importedHotkeys = Array.isArray(importedData) ? importedData : importedData.hotkeys;
+      const importedSettings = importedData.settings || {};
+      
       // Update local state
       setHotkeys(importedHotkeys);
+      
+      // Update settings if provided
+      if (importedSettings.autoTranslatePlatforms !== undefined) {
+        setAutoTranslatePlatforms(importedSettings.autoTranslatePlatforms);
+      }
       
       // Check if any hotkey is disabled to determine global state
       const allEnabled = importedHotkeys.every(hotkey => hotkey.active);
       setGlobalEnabled(allEnabled);
       
-      // Save all modified hotkeys to API
+      // Save all imported data to API
       const result = await saveHotkeysToAPI();
       
       if (!result.ok) {
@@ -412,7 +472,7 @@ export const HotkeysManager = () => {
               Keyboard Hotkeys
             </h2>
             <p className="text-muted-foreground">
-              Click on any hotkey to edit it. Click "Cancel" to exit editing.
+              Customize your keyboard shortcuts to speed up your workflow. Click on any hotkey below to assign a new key combination that works best for you.
             </p>
           </div>
           <div className="flex gap-3">
@@ -434,6 +494,19 @@ export const HotkeysManager = () => {
         
         {isLoading && hotkeys.length === 0 ? (
           <div className="space-y-3">
+            {/* Platform settings skeleton */}
+            <Card>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-6 w-[250px]" />
+                <Skeleton className="h-4 w-[300px]" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-5 w-[180px] mb-2" />
+                <Skeleton className="h-4 w-[250px]" />
+              </CardContent>
+            </Card>
+            
+            {/* Hotkey sections skeleton */}
             {HOTKEY_SECTIONS.map(section => (
               <Card key={section.id}>
                 <CardHeader className="pb-2">
@@ -452,7 +525,8 @@ export const HotkeysManager = () => {
             ))}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6">            
+            {/* Hotkey Sections */}
             {HOTKEY_SECTIONS.map(section => (
               <HotkeySection
                 key={section.id}

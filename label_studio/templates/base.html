@@ -127,7 +127,7 @@
 
   function lookupHotkey (lookup) {
       // Check if custom hotkeys exist and the lookup is in there
-      if (window.APP_SETTINGS?.user.customHotkeys && lookup in window.APP_SETTINGS.user.customHotkeys) {
+      if (window.APP_SETTINGS?.user?.customHotkeys && lookup in window.APP_SETTINGS.user.customHotkeys) {
           const hotkeyValue = window.APP_SETTINGS.user.customHotkeys[lookup];
           
           // If active is explicitly false, return a copy with key set to null
@@ -170,9 +170,7 @@
       avatar: "{{user.avatar_url|safe}}",
       {% endif %}
     },
-
-      lookupHotkey: lookupHotkey,
-      
+    lookupHotkey: lookupHotkey,
     debug: {{settings.DEBUG|yesno:"true,false"}},
     hostname: "{{settings.HOSTNAME}}",
     version: {{ versions|json_dumps_ensure_ascii|safe }},

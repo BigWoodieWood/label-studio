@@ -118,7 +118,7 @@ class UserSimpleSerializer(BaseUserSerializer):
 
 class HotkeysSerializer(serializers.Serializer):
     custom_hotkeys = serializers.DictField(required=True)
-
+    
     def validate_custom_hotkeys(self, custom_hotkeys):
         """
         Validates the hotkey format.
