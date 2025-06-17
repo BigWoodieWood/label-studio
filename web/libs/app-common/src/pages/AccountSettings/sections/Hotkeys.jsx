@@ -301,7 +301,7 @@ export const HotkeysManager = () => {
     // Update the hotkey
     const updatedHotkeys = hotkeys.map(h => {
       if (h.id === hotkeyId) {
-        return { ...h, key: newKey };
+        return { ...h, key: newKey, mac: newKey };
       }
       return h;
     });

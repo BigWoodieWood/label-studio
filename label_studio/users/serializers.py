@@ -128,8 +128,6 @@ class HotkeysSerializer(serializers.Serializer):
         if not isinstance(custom_hotkeys, dict):
             raise serializers.ValidationError("custom_hotkeys must be a dictionary")
     
-        section_hotkeys = {}  # Keep track of hotkeys by section
-    
         for action_key, hotkey_data in custom_hotkeys.items():
             # Validate action key format (section:action)
             if not isinstance(action_key, str) or not action_key:
@@ -161,20 +159,7 @@ class HotkeysSerializer(serializers.Serializer):
             # Validate active flag if provided
             if 'active' in hotkey_data and not isinstance(active, bool):
                 raise serializers.ValidationError(f"Active flag for '{action_key}' must be a boolean")
-        
-            # Check for duplicate hotkeys within the same section
-            if section not in section_hotkeys:
-                section_hotkeys[section] = []
-            
-            # Only check for duplicates if the hotkey is active
-            if active:
-                if key_combo in section_hotkeys[section]:
-                    raise serializers.ValidationError(
-                        f"Duplicate hotkey '{key_combo}' in section '{section}'. "
-                        f"Each section must have unique hotkeys."
-                    )
-                
-                section_hotkeys[section].append(key_combo)
+                    
             
         return custom_hotkeys
 
