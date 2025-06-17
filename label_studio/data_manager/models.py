@@ -93,7 +93,7 @@ class Filter(models.Model):
         related_name='children',
         null=True,
         blank=True,
-        db_index=False,  # added in a separate migration
+        db_index=False,
         help_text='Optional parent filter to create one-level hierarchy (child filters are AND-merged with parent)',
     )
 
