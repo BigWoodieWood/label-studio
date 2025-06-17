@@ -13,8 +13,6 @@ export const DEFAULT_HOTKEYS = [
   { id: 900, section: "data_manager", element: "dm.toggle-bulk-sidebar-minimization", label: "Toggle Bulk Sidebar", key: "shift+.", description: "Minimize or expand bulk actions sidebar", active: true },
   
   // Region Management
-  { id: 1000, section: "regions", element: "region:next", label: "Next Region", key: "tab", description: "Go to the next region in the list", active: true },
-  { id: 1001, section: "regions", element: "region:prev", label: "Previous Region", key: "shift+tab", description: "Go to the previous region in the list", active: true },
   { id: 1100, section: "regions", element: "region:delete-all", label: "Delete All Regions", key: "ctrl+backspace", description: "Remove all regions", active: true },
   { id: 1200, section: "regions", element: "region:focus", label: "Focus First Region", key: "enter", description: "Move focus to the first focusable region", active: true },
   { id: 1300, section: "regions", element: "region:relation", label: "Create Region Relation", key: "alt+r", description: "Create a relation between selected regions", active: true },

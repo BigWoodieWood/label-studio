@@ -447,11 +447,6 @@ export default types
         }
       });
 
-      hotkeys.addNamed("region:next", () => {
-	const c = self.annotationStore.selected;
-	
-      });
-      
       hotkeys.addNamed("region:visibility-all", () => {
         const { selected } = self.annotationStore;
         selected.regionStore.toggleVisibility();

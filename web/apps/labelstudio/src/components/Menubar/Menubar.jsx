@@ -155,7 +155,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
 
           <div className={menubarClass.elem("hotkeys")}>
             <div className={menubarClass.elem("hotkeys-button")}>
-              <a href="#" onClick={() => { openHotkeyHelp() }}><IconHotkeys /></a>
+              <a href="#" onClick={() => { openHotkeyHelp(["annotation", "data_manager", "regions", "tools", "audio", "video", "timeseries", "image_gallery"]) }}><IconHotkeys /></a>
             </div>
           </div>
           

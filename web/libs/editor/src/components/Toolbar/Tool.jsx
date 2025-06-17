@@ -34,6 +34,7 @@ export const Tool = ({
 
   const shortcutView = useMemo(() => {
     const sc = hotkeys.lookupKey(shortcut);
+
     if (!isDefined(sc)) return null;
     
     const combos = sc.split(",").map((s) => s.trim());
@@ -97,7 +98,7 @@ export const Tool = ({
 
     const addShortcuts = () => {
       Object.entries(extraShortcuts).forEach(([key, [label, fn]]) => {
-        if (!hotkeys.hasKeyByName(key)) hotkeys.overwriteNamed(key, fn, label);
+        if (!hotkeys.hasKeyByName(key)) hotkeys.overwriteNamed(key, fn);
       });
     };
 

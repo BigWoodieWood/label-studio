@@ -271,24 +271,24 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
     /**
      * Add hotkey from keymap
      */
-    addNamed(name: string, func: keymaster.KeyHandler, scope?: string) {
-      const hotkey = Hotkey.keymap[name];
-	if (isDefined(hotkey)) {
-	    
-        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
+      addNamed(name: string, func: keymaster.KeyHandler, scope?: string) {
+	  const hotkey = Hotkey.keymap[name];
+	  
+	  if (isDefined(hotkey)) {
+	      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
+	      
+              this.addKey(shortcut, func, hotkey.description, scope);
 
-        this.addKey(shortcut, func, hotkey.description, scope);
+              if (hotkey.modifier) {
+		  this.addKey(`${hotkey.modifier}+${shortcut}`, func, hotkey.modifierDescription, scope);
+              }
 
-        if (hotkey.modifier) {
-          this.addKey(`${hotkey.modifier}+${shortcut}`, func, hotkey.modifierDescription, scope);
-        }
-
-	    // if (name == "tool:move")
-	    // 	debugger;
-      } else {
-        throw new Error(`Unknown named hotkey ${hotkey}`);
-      }
-    },
+	      // if (name == "tool:move")
+	      // 	debugger;
+	  } else {
+              throw new Error(`Unknown named hotkey ${hotkey}`);
+	  }
+      },
 
 
       lookupKey(name: string) {

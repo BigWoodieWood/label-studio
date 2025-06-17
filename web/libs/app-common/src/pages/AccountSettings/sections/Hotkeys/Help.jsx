@@ -157,10 +157,7 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
         {/* Modal Footer */}
         <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-end">
-            <Button
-              onClick={handleCustomizeClick}
-              variant="neutral"
-            >
+            <Button onClick={handleCustomizeClick}>
               Customize Hotkeys
             </Button>
           </div>
@@ -180,7 +177,8 @@ const determineSectionsToShow = (sectionOrUrl) => {
   
   if (sectionOrUrl) {
     // Check if input is a URL
-    if (sectionOrUrl.startsWith('http') || sectionOrUrl.startsWith('/')) {
+    if (typeof sectionOrUrl === 'string' &&
+        (sectionOrUrl.startsWith('http') || sectionOrUrl.startsWith('/'))) {
       // Apply URL-to-section mapping
       for (const mapping of URL_TO_SECTION_MAPPING) {
         if (mapping.regex.test(sectionOrUrl)) {

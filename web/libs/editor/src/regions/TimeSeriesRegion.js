@@ -79,8 +79,17 @@ const Model = types
     },
 
     afterUnselectRegion() {
-      hotkeys.unbindAll();
-
+      [
+	"ts:grow-left",
+	"ts:grow-right",
+	"ts:shrink-left",
+	"ts:shrink-right",
+	"ts:grow-left-largre",
+	"ts:grow-right-largre",
+	"ts:shrink-left-largre",
+	"ts:shrink-right-largre"
+      ].forEach(sc => hotkeys.removeNamed(sc));
+      
       self.parent.updateView();
     },
 
