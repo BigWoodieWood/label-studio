@@ -176,11 +176,13 @@ class ViewSerializer(serializers.ModelSerializer):
         for filter_data in filters_data:
             is_root = filter_data.get('parent') in (None, '')
 
-            # Assign ordering index only to root filters
-            filter_data['index'] = next_index if is_root else None
-
             if is_root:
+                # Assign ordering index
+                filter_data['index'] = next_index
                 next_index += 1
+            else:
+                # For children we don't specify index, it'll default to 0
+                filter_data.pop('index', None)
 
             filter_group.filters.add(Filter.objects.create(**filter_data))
 

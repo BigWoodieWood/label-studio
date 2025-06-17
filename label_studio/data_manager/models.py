@@ -96,14 +96,8 @@ class Filter(models.Model):
         help_text='Optional parent filter to create one-level hierarchy (child filters are AND-merged with parent)',
     )
 
-    # `index` is now only meaningful for **root** filters (parent is NULL)
-    index = models.IntegerField(
-        _('index'),
-        null=True,
-        blank=True,
-        default=None,
-        help_text='Display order among root filters only',
-    )
+    # Order of the filter inside its group. Not used for child filters.
+    index = models.IntegerField(_('index'), default=0, help_text='To keep filter order')
     column = models.CharField(_('column'), max_length=1024, help_text='Field name')
     type = models.CharField(_('type'), max_length=1024, help_text='Field type')
     operator = models.CharField(_('operator'), max_length=1024, help_text='Filter operator')
