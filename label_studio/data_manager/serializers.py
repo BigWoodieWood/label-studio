@@ -142,15 +142,15 @@ class ViewSerializer(serializers.ModelSerializer):
             roots = instance.filter_group.filters.filter(parent__isnull=True).order_by('index')
             children = instance.filter_group.filters.filter(parent__isnull=False)
             for f in list(roots) + list(children):
-                filters['items'].append(
-                    {
-                        'filter': f.column,
-                        'operator': f.operator,
-                        'type': f.type,
-                        'value': f.value,
-                        'parent': f.parent_id,
-                    }
-                )
+                item = {
+                    'filter': f.column,
+                    'operator': f.operator,
+                    'type': f.type,
+                    'value': f.value,
+                }
+                if f.parent_id:
+                    item['parent'] = f.parent_id
+                filters['items'].append(item)
             result['data']['filters'] = filters
 
         selected_items = result.pop('selected_items', {})
