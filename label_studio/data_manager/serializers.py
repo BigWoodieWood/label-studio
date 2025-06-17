@@ -121,6 +121,7 @@ class ViewSerializer(serializers.ModelSerializer):
                             'operator': f.get('operator', ''),
                             'type': f.get('type', ''),
                             'value': f.get('value', {}),
+                            'parent': f.get('parent'),
                         }
                     )
 
@@ -137,13 +138,17 @@ class ViewSerializer(serializers.ModelSerializer):
             filters.pop('filters', [])
             filters.pop('id', None)
 
-            for f in instance.filter_group.filters.order_by('index'):
+            # Root filters first (ordered by index), followed by child filters (any order)
+            roots = instance.filter_group.filters.filter(parent__isnull=True).order_by('index')
+            children = instance.filter_group.filters.filter(parent__isnull=False)
+            for f in list(roots) + list(children):
                 filters['items'].append(
                     {
                         'filter': f.column,
                         'operator': f.operator,
                         'type': f.type,
                         'value': f.value,
+                        'parent': f.parent_id,
                     }
                 )
             result['data']['filters'] = filters
@@ -159,11 +164,25 @@ class ViewSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def _create_filters(filter_group, filters_data):
-        filter_index = 0
+        """Create Filter objects inside the provided ``filter_group``.
+
+        * For **root** filters (``parent`` is ``None``) we enumerate the
+          ``index`` so that the UI can preserve left-to-right order.
+        * For **child** filters we leave ``index`` as ``None`` – they are not
+          shown in the top-level ordering bar.
+        """
+
+        next_index = 0
         for filter_data in filters_data:
-            filter_data['index'] = filter_index
+            is_root = filter_data.get('parent') in (None, '')
+
+            # Assign ordering index only to root filters
+            filter_data['index'] = next_index if is_root else None
+
+            if is_root:
+                next_index += 1
+
             filter_group.filters.add(Filter.objects.create(**filter_data))
-            filter_index += 1
 
     def create(self, validated_data):
         with transaction.atomic():
