@@ -22,6 +22,14 @@ from label_studio.core.utils.common import round_floats
 
 
 class FilterSerializer(serializers.ModelSerializer):
+    # Allow children filters to reference parent by root-filter index instead of DB id
+    parent_index = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+        write_only=True,
+        help_text='Index of the parent filter inside the same FilterGroup (alternative to `parent` PK)',
+    )
+
     class Meta:
         model = Filter
         fields = '__all__'
@@ -122,6 +130,7 @@ class ViewSerializer(serializers.ModelSerializer):
                             'type': f.get('type', ''),
                             'value': f.get('value', {}),
                             'parent': f.get('parent'),
+                            'parent_index': f.get('parent_index'),
                         }
                     )
 
@@ -172,17 +181,53 @@ class ViewSerializer(serializers.ModelSerializer):
           shown in the top-level ordering bar.
         """
 
+        # Pass 1 — create root filters (no parent/parent_index) and build index→object map
+        index_to_filter = {}
         next_index = 0
         for filter_data in filters_data:
-            is_root = filter_data.get('parent') in (None, '')
+            is_root = filter_data.get('parent') in (None, '') and filter_data.get('parent_index') in (None, '')
 
-            # Assign ordering index only to root filters
-            filter_data['index'] = next_index if is_root else None
+            if not is_root:
+                continue
 
-            if is_root:
-                next_index += 1
+            # Enumerate root filters for stable ordering
+            filter_data['index'] = next_index
+            next_index += 1
 
-            filter_group.filters.add(Filter.objects.create(**filter_data))
+            # Remove helper key before model instantiation
+            filter_data.pop('parent_index', None)
+
+            root_obj = Filter.objects.create(**filter_data)
+            filter_group.filters.add(root_obj)
+            index_to_filter[root_obj.index] = root_obj
+
+        # Pass 2 — create child filters, resolving parent via `parent` PK or `parent_index`
+        for filter_data in filters_data:
+            has_parent_pk = filter_data.get('parent') not in (None, '')
+            has_parent_index = filter_data.get('parent_index') not in (None, '')
+
+            if not (has_parent_pk or has_parent_index):
+                # Already processed as a root filter
+                continue
+
+            fixed_data = filter_data.copy()
+
+            if has_parent_pk:
+                parent_obj = filter_group.filters.get(id=fixed_data['parent'])
+            else:
+                parent_idx = fixed_data.get('parent_index')
+                parent_obj = index_to_filter.get(parent_idx)
+                if parent_obj is None:
+                    raise serializers.ValidationError(
+                        f'parent_index={parent_idx} does not correspond to any root filter',
+                    )
+
+            fixed_data['parent'] = parent_obj
+            fixed_data['index'] = None  # Child filters do not participate in top-level ordering
+            fixed_data.pop('parent_index', None)
+
+            child_obj = Filter.objects.create(**fixed_data)
+            filter_group.filters.add(child_obj)
 
     def create(self, validated_data):
         with transaction.atomic():
