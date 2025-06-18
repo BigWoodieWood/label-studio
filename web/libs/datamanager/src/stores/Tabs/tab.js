@@ -8,7 +8,7 @@ import { TabSelectedItems } from "./tab_selected_items";
 import { History } from "../../utils/history";
 import { CustomJSON, StringOrNumberID, ThresholdType } from "../types";
 import { clamp } from "../../utils/helpers";
-import { FF_ANNOTATION_RESULTS_FILTERING, FF_BETTER_USER_FILTER, isFF } from "../../utils/feature-flags";
+import { FF_ANNOTATION_RESULTS_FILTERING, isFF } from "../../utils/feature-flags";
 
 const THRESHOLD_MIN = 0;
 const THRESHOLD_MIN_DIFF = 0.001;
@@ -113,9 +113,9 @@ export const Tab = types
       return self.filters.filter((f) => {
         const targetMatches = f.target === self.target;
         const annotationResultsOK = isFF(FF_ANNOTATION_RESULTS_FILTERING) || !f.field.isAnnotationResultsFilterColumn;
-        const parentIndexOK = isFF(FF_BETTER_USER_FILTER) || f.parent_index == null;
+        const isRoot = f.parent_index == null;
 
-        return targetMatches && annotationResultsOK && parentIndexOK;
+        return targetMatches && annotationResultsOK && isRoot;
       });
     },
 
