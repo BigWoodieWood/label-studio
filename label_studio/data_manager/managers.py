@@ -268,9 +268,9 @@ def apply_filters(queryset, filters, project, request):
     # convert conjunction to orm statement
     custom_filter_expressions = load_func(settings.DATA_MANAGER_CUSTOM_FILTER_EXPRESSIONS)
 
-    for _filter in filters.items:
+    for index, _filter in enumerate(filters.items):
         # combine child filters with their parent in the same filter expression
-        index = _filter.index if _filter.index is not None else _filter.parent_index
+        index = _filter.parent_index if _filter.parent_index is not None else index
         filter_expressions = index_to_filter_expressions[index]
 
         # we can also have annotations filters

@@ -17,6 +17,7 @@ class Filter(BaseModel):
     operator: str
     type: str
     value: Union[StrictInt, StrictFloat, StrictBool, StrictStr, FilterIn, list]
+    parent_index: Optional[int] = None
 
 
 class ConjunctionEnum(Enum):
