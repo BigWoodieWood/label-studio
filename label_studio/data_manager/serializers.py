@@ -158,7 +158,7 @@ class ViewSerializer(serializers.ModelSerializer):
                     'value': f.value,
                 }
                 if f.parent_id:
-                    item['parent'] = f.parent_id
+                    item['parent_index'] = roots.values_list('id', flat=True).index(f.parent_id)
                 filters['items'].append(item)
             result['data']['filters'] = filters
 
