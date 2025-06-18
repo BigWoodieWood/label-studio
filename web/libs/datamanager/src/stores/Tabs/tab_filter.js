@@ -21,11 +21,6 @@ const getOperatorDefaultValue = (operator) => {
 
 export const TabFilter = types
   .model("TabFilter", {
-    /**
-     * Backend primary key. Undefined until the filter is saved and the API returns it.
-     */
-    id: types.maybeNull(types.number),
-
     filter: types.reference(TabFilterType),
     operator: types.maybeNull(Operators),
     value: types.maybeNull(FilterValueType),

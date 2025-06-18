@@ -392,7 +392,7 @@ export const Tab = types
       const parentIdx = self.filters.indexOf(parentFilter);
 
       const filter = TabFilter.create({
-        filter: filterType.id ?? filterType,
+        filter: filterType,
         parent_index: parentIdx,
       });
 
