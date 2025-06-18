@@ -31,6 +31,8 @@ const GroupWrapper = ({ children, wrap = false }) => {
 };
 
 export const FilterLine = observer(({ filter, availableFilters, index, view, sidebar, dropdownClassName }) => {
+  const childFilters = filter.view.filters.filter((f) => f.parent_index === index);
+
   return (
     <Block name="filter-line" tag={Fragment}>
       <GroupWrapper wrap={sidebar}>
@@ -74,24 +76,22 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
         <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} />
 
         {/* Render child filters (join filters) inline */}
-        {filter.view.filters
-          .filter((f) => (f.parent && f.parent === filter.id) || f.localParent === filter)
-          .map((child, idx) => {
-            console.debug("[DM] render child filter", { parent: filter, child });
-            return (
-              <Elem name="column" key={`child-${idx}`} mix="value">
-                <Tag size="small" className="filters-data-tag" color="#1d91e4" style={{ marginRight: 4 }}>
-                  {child.field.title}
-                </Tag>
-                <FilterOperation
-                  filter={child}
-                  value={child.currentValue}
-                  operator={child.operator}
-                  field={child.field}
-                />
-              </Elem>
-            );
-          })}
+        {childFilters.map((child, idx) => {
+          console.debug("[DM] render child filter", { parent: filter, child });
+          return (
+            <Elem name="column" key={`child-${idx}`} mix="value">
+              <Tag size="small" className="filters-data-tag" color="#1d91e4" style={{ marginRight: 4 }}>
+                {child.field.title}
+              </Tag>
+              <FilterOperation
+                filter={child}
+                value={child.currentValue}
+                operator={child.operator}
+                field={child.field}
+              />
+            </Elem>
+          );
+        })}
       </GroupWrapper>
       <Elem name="remove">
         <Button

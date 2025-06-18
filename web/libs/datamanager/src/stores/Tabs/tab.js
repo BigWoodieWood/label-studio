@@ -114,7 +114,8 @@ export const Tab = types
         return self.filters.filter((f) => f.target === self.target);
       }
       return self.filters.filter(
-        (f) => f.target === self.target && !f.field.isAnnotationResultsFilterColumn && !f.parent && !f.localParent,
+        (f) =>
+          f.target === self.target && !f.field.isAnnotationResultsFilterColumn && !f.parent && f.parent_index == null,
       );
     },
 
@@ -384,17 +385,16 @@ export const Tab = types
      * Used internally to materialize join filters.
      */
     createChildFilterForType(filterType, parentFilter) {
+      const parentIdx = self.filters.indexOf(parentFilter);
+
       const filter = TabFilter.create({
         filter: filterType.id ?? filterType,
-        parent: null,
+        parent_index: parentIdx,
       });
-
-      // keep local link until we know the backend id
-      filter.setLocalParent(parentFilter);
 
       self.filters.push(filter);
 
-      console.debug("[DM] child filter instantiated", { parentFilter, child: filter });
+      console.debug("[DM] child filter instantiated", { parentFilterIndex: parentIdx, child: filter });
 
       return filter;
     },
@@ -421,7 +421,10 @@ export const Tab = types
 
     deleteFilter(filter) {
       // Recursively delete child filters first
-      const childFilters = self.filters.filter((f) => (f.parent && f.parent === filter.id) || f.localParent === filter);
+      const parentIdx = self.filters.indexOf(filter);
+      const childFilters = self.filters.filter(
+        (f) => (f.parent && f.parent === filter.id) || f.parent_index === parentIdx,
+      );
 
       childFilters.forEach((child) => {
         self.deleteFilter(child);
@@ -496,7 +499,9 @@ export const Tab = types
         .filter((c) => joinFilters.includes(c.alias))
         .forEach((col) => {
           const exists = self.filters.find(
-            (f) => (f.parent === rootFilter.id || f.localParent === rootFilter) && f.filter.field.id === col.id,
+            (f) =>
+              (f.parent === rootFilter.id || f.parent_index === self.filters.indexOf(rootFilter)) &&
+              f.filter.field.id === col.id,
           );
 
           console.debug("[DM] join-filter check", { col: col.id, exists });

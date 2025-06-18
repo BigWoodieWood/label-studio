@@ -31,10 +31,9 @@ export const TabFilter = types
     value: types.maybeNull(FilterValueType),
 
     /**
-     * Backend id of the parent filter (root filter). For child filters only.
-     * For yet-unsaved children this is null until the parent receives its backend id.
+     * Index within the filters list of the parent filter (root filter). For child filters only.
      */
-    parent: types.maybeNull(types.number),
+    parent_index: types.maybeNull(types.number),
   })
   .views((self) => ({
     get field() {
@@ -103,9 +102,6 @@ export const TabFilter = types
     wasValid: false,
     saved: false,
     saving: false,
-
-    /** Temporary link to the parent TabFilter instance while the backend id is unknown */
-    localParent: null,
   }))
   .actions((self) => ({
     afterAttach() {
@@ -215,10 +211,6 @@ export const TabFilter = types
     saveDelayed: debounce(() => {
       self.save();
     }, 300),
-
-    setLocalParent(parent) {
-      self.localParent = parent;
-    },
   }))
   .preProcessSnapshot((sn) => {
     return { ...sn, value: sn.value ?? null };
