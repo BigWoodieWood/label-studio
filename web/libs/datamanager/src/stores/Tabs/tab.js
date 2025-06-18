@@ -113,7 +113,9 @@ export const Tab = types
       if (isFF(FF_ANNOTATION_RESULTS_FILTERING)) {
         return self.filters.filter((f) => f.target === self.target);
       }
-      return self.filters.filter((f) => f.target === self.target && !f.field.isAnnotationResultsFilterColumn);
+      return self.filters.filter(
+        (f) => f.target === self.target && !f.field.isAnnotationResultsFilterColumn && !f.parent && !f.localParent,
+      );
     },
 
     get currentOrder() {
@@ -370,12 +372,31 @@ export const Tab = types
       const filterType = self.availableFilters[0];
       const filter = TabFilter.create({
         filter: filterType,
-        view: self.id,
       });
 
       self.filters.push(filter);
 
       if (filter.isValidFilter) self.save();
+    },
+
+    /**
+     * Create a new filter row for the provided filter *type* (column).
+     * Used internally to materialize join filters.
+     */
+    createChildFilterForType(filterType, parentFilter) {
+      const filter = TabFilter.create({
+        filter: filterType.id ?? filterType,
+        parent: null,
+      });
+
+      // keep local link until we know the backend id
+      filter.setLocalParent(parentFilter);
+
+      self.filters.push(filter);
+
+      console.debug("[DM] child filter instantiated", { parentFilter, child: filter });
+
+      return filter;
     },
 
     toggleColumn(column) {
@@ -399,11 +420,19 @@ export const Tab = types
     }),
 
     deleteFilter(filter) {
-      const index = self.filters.findIndex((f) => f === filter);
+      // Recursively delete child filters first
+      const childFilters = self.filters.filter((f) => (f.parent && f.parent === filter.id) || f.localParent === filter);
 
-      self.filters.splice(index, 1);
-      destroy(filter);
-      self.save();
+      childFilters.forEach((child) => {
+        self.deleteFilter(child);
+      });
+
+      const index = self.filters.findIndex((f) => f === filter);
+      if (index > -1) {
+        self.filters.splice(index, 1);
+        destroy(filter);
+        self.save();
+      }
     },
 
     afterAttach() {
@@ -451,6 +480,39 @@ export const Tab = types
 
     markSaved() {
       self.saved = true;
+    },
+
+    /**
+     * Create child filters for a given root filter according to its column's `join_filters` metadata.
+     */
+    applyJoinFilters(rootFilter) {
+      const column = rootFilter.filter.field;
+      const joinFilters = column?.join_filters ?? [];
+
+      if (!Array.isArray(joinFilters) || joinFilters.length === 0) return;
+
+      // NOTE: using targetColumns instead of columns means that annotation results columns cannot be used in join_filters, but seems fine for now
+      self.targetColumns
+        .filter((c) => joinFilters.includes(c.alias))
+        .forEach((col) => {
+          const exists = self.filters.find(
+            (f) => (f.parent === rootFilter.id || f.localParent === rootFilter) && f.filter.field.id === col.id,
+          );
+
+          console.debug("[DM] join-filter check", { col: col.id, exists });
+
+          if (!exists) {
+            const filterType = self.availableFilters.find((ft) => ft.field.id === col.id);
+
+            if (filterType) {
+              const childFilter = self.createChildFilterForType(filterType, rootFilter);
+
+              childFilter.setOperator(rootFilter.operator);
+
+              console.debug("[DM] join-filter created", { parent: rootFilter.id, child: childFilter });
+            }
+          }
+        });
     },
   }))
   .preProcessSnapshot((snapshot) => {

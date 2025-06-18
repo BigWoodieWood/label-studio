@@ -75,6 +75,8 @@ export const TabColumn = types
     target: types.enumeration(["tasks", "annotations"]),
     orderable: types.optional(types.boolean, true),
     help: types.maybeNull(types.string),
+    // List of column aliases whose filters should be joined automatically when a filter is created for this column
+    join_filters: types.maybeNull(types.array(types.string)),
   })
   .views((self) => ({
     get hidden() {

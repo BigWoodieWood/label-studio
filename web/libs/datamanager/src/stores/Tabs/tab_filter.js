@@ -21,9 +21,20 @@ const getOperatorDefaultValue = (operator) => {
 
 export const TabFilter = types
   .model("TabFilter", {
+    /**
+     * Backend primary key. Undefined until the filter is saved and the API returns it.
+     */
+    id: types.maybeNull(types.number),
+
     filter: types.reference(TabFilterType),
     operator: types.maybeNull(Operators),
     value: types.maybeNull(FilterValueType),
+
+    /**
+     * Backend id of the parent filter (root filter). For child filters only.
+     * For yet-unsaved children this is null until the parent receives its backend id.
+     */
+    parent: types.maybeNull(types.number),
   })
   .views((self) => ({
     get field() {
@@ -92,6 +103,9 @@ export const TabFilter = types
     wasValid: false,
     saved: false,
     saving: false,
+
+    /** Temporary link to the parent TabFilter instance while the backend id is unknown */
+    localParent: null,
   }))
   .actions((self) => ({
     afterAttach() {
@@ -121,6 +135,9 @@ export const TabFilter = types
       if (typeChanged) {
         self.setDefaultValue();
         self.setOperator(self.component[0].key);
+
+        // Spawn child filters (join_filters) via view action to stay within MST action boundaries
+        self.view.applyJoinFilters(self);
       }
 
       if (filterChanged) {
@@ -198,6 +215,10 @@ export const TabFilter = types
     saveDelayed: debounce(() => {
       self.save();
     }, 300),
+
+    setLocalParent(parent) {
+      self.localParent = parent;
+    },
   }))
   .preProcessSnapshot((sn) => {
     return { ...sn, value: sn.value ?? null };
