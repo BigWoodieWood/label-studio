@@ -378,6 +378,9 @@ export const Tab = types
 
       self.filters.push(filter);
 
+      // Immediately materialize join filters for the default column, if any
+      self.applyJoinFilters(filter);
+
       if (filter.isValidFilter) self.save();
     },
 
@@ -500,14 +503,13 @@ export const Tab = types
         .filter((c) => joinFilters.includes(c.alias))
         .forEach((col) => {
           const exists = self.filters.find(
-            (f) =>
-              (f.parent === rootFilter.id || f.parent_index === self.filters.indexOf(rootFilter)) &&
-              f.filter.field.id === col.id,
+            (f) => f.parent_index === self.filters.indexOf(rootFilter) && f.filter.field.id === col.id,
           );
 
           console.debug("[DM] join-filter check", { col: col.id, exists });
 
-          if (!exists) {
+          // if (!exists) {
+          if (1) {
             const filterType = self.availableFilters.find((ft) => ft.field.id === col.id);
 
             if (filterType) {
@@ -519,6 +521,16 @@ export const Tab = types
             }
           }
         });
+    },
+
+    /** Remove any child filters previously created */
+    clearJoinFilters(rootFilter) {
+      const childFilters = self.filters.filter((f) => f.parent_index === self.filters.indexOf(rootFilter));
+
+      childFilters.forEach((child) => {
+        console.debug("[DM] join-filter removed", { child });
+        self.deleteFilter(child);
+      });
     },
   }))
   .preProcessSnapshot((snapshot) => {

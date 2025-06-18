@@ -111,6 +111,9 @@ export const TabFilter = types
     setFilter(value, save = true) {
       if (!isDefined(value)) return;
 
+      // Remove previous child filters
+      self.view.clearJoinFilters(self);
+
       const previousFilterType = self.filter.currentType;
       const previousFilter = self.filter.id;
 
@@ -120,15 +123,15 @@ export const TabFilter = types
       const filterChanged = previousFilter !== self.filter.id;
 
       if (typeChanged || filterChanged) {
+        // Spawn child filters (join_filters)
+        self.view.applyJoinFilters(self);
+
         self.markUnsaved();
       }
 
       if (typeChanged) {
         self.setDefaultValue();
         self.setOperator(self.component[0].key);
-
-        // Spawn child filters (join_filters) via view action to stay within MST action boundaries
-        self.view.applyJoinFilters(self);
       }
 
       if (filterChanged) {
