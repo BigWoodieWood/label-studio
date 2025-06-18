@@ -4,8 +4,8 @@ import logging
 import re
 from collections import defaultdict
 from datetime import datetime
-from typing import ClassVar
 from functools import reduce
+from typing import ClassVar
 
 import ujson as json
 from core.feature_flags import flag_set
