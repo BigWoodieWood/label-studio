@@ -110,10 +110,6 @@ export const Tab = types
     },
 
     get currentFilters() {
-      if (isFF(FF_ANNOTATION_RESULTS_FILTERING)) {
-        return self.filters.filter((f) => f.target === self.target);
-      }
-
       return self.filters.filter((f) => {
         const targetMatches = f.target === self.target;
         const annotationResultsOK = isFF(FF_ANNOTATION_RESULTS_FILTERING) || !f.field.isAnnotationResultsFilterColumn;
@@ -141,7 +137,8 @@ export const Tab = types
     },
 
     get filtersApplied() {
-      return self.validFilters.length;
+      // count only parent filters
+      return self.validFilters.filter((f) => f.parent_index == null).length;
     },
 
     get validFilters() {
