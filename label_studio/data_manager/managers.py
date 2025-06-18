@@ -2,8 +2,10 @@
 """
 import logging
 import re
+from collections import defaultdict
 from datetime import datetime
 from typing import ClassVar
+from functools import reduce
 
 import ujson as json
 from core.feature_flags import flag_set
@@ -261,11 +263,15 @@ def apply_filters(queryset, filters, project, request):
     if not filters:
         return queryset
 
+    index_to_filter_expressions: dict[int, list[Q]] = defaultdict(list)
+
     # convert conjunction to orm statement
-    filter_expressions = []
     custom_filter_expressions = load_func(settings.DATA_MANAGER_CUSTOM_FILTER_EXPRESSIONS)
 
     for _filter in filters.items:
+        # combine child filters with their parent in the same filter expression
+        index = _filter.index if _filter.index is not None else _filter.parent_index
+        filter_expressions = index_to_filter_expressions[index]
 
         # we can also have annotations filters
         if not _filter.filter.startswith('filter:tasks:') or _filter.value is None:
@@ -458,11 +464,13 @@ def apply_filters(queryset, filters, project, request):
     """
     if filters.conjunction == ConjunctionEnum.OR:
         result_filter = Q()
-        for filter_expression in filter_expressions:
+        for filter_expressions in index_to_filter_expressions.values():
+            filter_expression = reduce(lambda x, y: x & y, filter_expressions)
             result_filter.add(filter_expression, Q.OR)
         queryset = queryset.filter(result_filter)
     else:
-        for filter_expression in filter_expressions:
+        for filter_expressions in index_to_filter_expressions.values():
+            filter_expression = reduce(lambda x, y: x & y, filter_expressions)
             queryset = queryset.filter(filter_expression)
     return queryset
 
