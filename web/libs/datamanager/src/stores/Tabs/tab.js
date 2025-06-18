@@ -508,8 +508,7 @@ export const Tab = types
 
           console.debug("[DM] join-filter check", { col: col.id, exists });
 
-          // if (!exists) {
-          if (1) {
+          if (!exists) {
             const filterType = self.availableFilters.find((ft) => ft.field.id === col.id);
 
             if (filterType) {
