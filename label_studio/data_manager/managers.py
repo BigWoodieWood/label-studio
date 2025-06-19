@@ -263,15 +263,15 @@ def apply_filters(queryset, filters, project, request):
     if not filters:
         return queryset
 
-    index_to_filter_expressions: dict[int, list[Q]] = defaultdict(list)
+    parent_id_to_filter_expressions: dict[int, list[Q]] = defaultdict(list)
 
     # convert conjunction to orm statement
     custom_filter_expressions = load_func(settings.DATA_MANAGER_CUSTOM_FILTER_EXPRESSIONS)
 
-    for index, _filter in enumerate(filters.items):
+    for _filter in filters.items:
         # combine child filters with their parent in the same filter expression
-        index = _filter.parent_index if _filter.parent_index is not None else index
-        filter_expressions = index_to_filter_expressions[index]
+        parent_id = _filter.parent_id if _filter.parent_id is not None else _filter.id
+        filter_expressions = parent_id_to_filter_expressions[parent_id]
 
         # we can also have annotations filters
         if not _filter.filter.startswith('filter:tasks:') or _filter.value is None:
@@ -464,12 +464,12 @@ def apply_filters(queryset, filters, project, request):
     """
     if filters.conjunction == ConjunctionEnum.OR:
         result_filter = Q()
-        for filter_expressions in index_to_filter_expressions.values():
+        for filter_expressions in parent_id_to_filter_expressions.values():
             filter_expression = reduce(lambda x, y: x & y, filter_expressions)
             result_filter.add(filter_expression, Q.OR)
         queryset = queryset.filter(result_filter)
     else:
-        for filter_expressions in index_to_filter_expressions.values():
+        for filter_expressions in parent_id_to_filter_expressions.values():
             filter_expression = reduce(lambda x, y: x & y, filter_expressions)
             queryset = queryset.filter(filter_expression)
     return queryset

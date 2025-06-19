@@ -13,11 +13,13 @@ class FilterIn(BaseModel):
 
 
 class Filter(BaseModel):
+    id: Optional[int] = None  # Database ID of this filter (present in API responses)
+    parent_id: Optional[int] = None  # Parent filter DB ID (only for child filters)
+
     filter: str
     operator: str
     type: str
     value: Union[StrictInt, StrictFloat, StrictBool, StrictStr, FilterIn, list]
-    parent_index: Optional[int] = None
 
 
 class ConjunctionEnum(Enum):

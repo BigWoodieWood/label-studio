@@ -57,10 +57,12 @@ class View(ViewBaseModel, ProjectViewMixin):
             for f in self.filter_group.filters.all():
                 items.append(
                     dict(
+                        id=f.id,
                         filter=f.column,
                         operator=f.operator,
                         type=f.type,
                         value=f.value,
+                        parent_id=f.parent.id if f.parent else None,
                     )
                 )
             filters = dict(conjunction=self.filter_group.conjunction, items=items)
