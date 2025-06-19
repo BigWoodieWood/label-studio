@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import clsx from "clsx";
 import { Button } from "@humansignal/ui";
 import { KeyboardKey } from "./Key";
-import { DEFAULT_HOTKEYS, HOTKEY_SECTIONS, HOTKEY_SUBGROUPS, URL_TO_SECTION_MAPPING } from "./defaults";
+import { DEFAULT_HOTKEYS, HOTKEY_SECTIONS, URL_TO_SECTION_MAPPING } from "./defaults";
 
 /**
  * Main modal component that displays keyboard shortcuts
@@ -79,11 +79,11 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
                 {subgroup !== 'default' && (
                   <div className="mb-3">
                     <div className="text-sm font-medium mb-1 capitalize">
-                      {HOTKEY_SUBGROUPS[subgroup]?.title || subgroup}
+                      {HOTKEY_SECTIONS[subgroup]?.title || subgroup}
                     </div>
-                    {HOTKEY_SUBGROUPS[subgroup]?.description && (
+                    {HOTKEY_SECTIONS[subgroup]?.description && (
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {HOTKEY_SUBGROUPS[subgroup].description}
+                        {HOTKEY_SECTIONS[subgroup].description}
                       </div>
                     )}
                   </div>
