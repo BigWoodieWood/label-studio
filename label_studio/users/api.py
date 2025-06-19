@@ -298,6 +298,19 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
         return super(UserWhoAmIAPI, self).get(request, *args, **kwargs)
 
 
+@method_decorator(
+    name='post',
+    decorator=swagger_auto_schema(
+        tags=['Users'],
+        x_fern_sdk_group_name='users',
+        x_fern_sdk_method_name='update_hotkeys',
+        x_fern_audiences=['public'],
+        operation_summary='Update user hotkeys',
+        operation_description='Update the custom hotkeys configuration for the current user.',
+        request_body=HotkeysSerializer,
+        responses={200: HotkeysSerializer},
+    ),
+)
 class UserHotkeysAPI(APIView):
     permission_classes = [IsAuthenticated]
 
