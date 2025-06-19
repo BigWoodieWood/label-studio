@@ -4,7 +4,19 @@
     "mac": "command+b",
     "description": "Back for one second"
   },
-  "audio:playpause": {},
+  "audio:playpause": {
+    "key": "ctrl+p",
+    "mac": "command+p",
+    "description": "Play/pause"
+  },
+  "audio:step-backward": {
+    "key": "alt+a",
+    "description": "Go one step back"
+  },
+  "audio:step-forward": {
+    "key": "alt+d",
+    "description": "Go one step forward"
+  },
   "ts:grow-left": {
     "key": "left",
     "description": "Increase region to the left"
@@ -80,6 +92,11 @@
     "key": "alt+h",
     "description": "Toggle selected region visibility"
   },
+  "region:visibility-all": {
+    "key": "ctrl+h",
+    "mac": "ctrl+h",
+    "description": "Toggle all regions visibility"
+  },
   "region:lock": {
     "key": "alt+l",
     "description": "Lock selected region"
@@ -114,7 +131,8 @@
     "description": "Delete selected region"
   },
   "media:playpause": {
-    "key": "alt+space",
+    "key": "ctrl+alt+space",
+    "mac": "control+space",
     "description": "Play/pause"
   },
   "media:step-backward": {

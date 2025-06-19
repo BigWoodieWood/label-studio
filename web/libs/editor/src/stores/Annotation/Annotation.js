@@ -1,6 +1,5 @@
 import throttle from "lodash.throttle";
 import { destroy, detach, flow, getEnv, getParent, getRoot, isAlive, onSnapshot, types } from "mobx-state-tree";
-import Constants from "../../core/Constants";
 import { errorBuilder } from "../../core/DataValidator/ConfigValidator";
 import { guidGenerator } from "../../core/Helpers";
 import { Hotkey } from "../../core/Hotkey";
@@ -12,12 +11,10 @@ import Result from "../../regions/Result";
 import Utils from "../../utils";
 import {
   FF_DEV_1284,
-  FF_DEV_2432,
   FF_DEV_3391,
   FF_LLM_EPIC,
   FF_LSDV_3009,
   FF_LSDV_4583,
-  FF_LSDV_4988,
   FF_REVIEWER_FLOW,
   isFF,
 } from "../../utils/feature-flags";
@@ -26,6 +23,7 @@ import { CommentStore } from "../Comment/CommentStore";
 import RegionStore from "../RegionStore";
 import RelationStore from "../RelationStore";
 import { UserExtended } from "../UserStore";
+import { LinkingModes } from "./LinkingModes";
 
 const hotkeys = Hotkey("Annotations", "Annotations");
 
@@ -96,8 +94,8 @@ const TrackedState = types.model("TrackedState", {
   relationStore: types.optional(RelationStore, {}),
 });
 
-export const Annotation = types
-  .model("Annotation", {
+const _Annotation = types
+  .model("AnnotationBase", {
     id: types.identifier,
     // @todo this value used `guidGenerator(5)` as default value before
     // @todo but it calculates once, so all the annotations have the same pk
@@ -112,6 +110,7 @@ export const Annotation = types
     createdAgo: types.maybeNull(types.string),
     createdBy: types.optional(types.string, "Admin"),
     user: types.optional(types.maybeNull(types.safeReference(UserExtended)), null),
+    score: types.maybeNull(types.number),
 
     parent_prediction: types.maybeNull(types.integer),
     parent_annotation: types.maybeNull(types.integer),
@@ -146,8 +145,6 @@ export const Annotation = types
     editable: types.optional(types.boolean, true),
     readonly: types.optional(types.boolean, false),
 
-    relationMode: types.optional(types.boolean, false),
-
     suggestions: types.map(Area),
 
     regionStore: types.optional(RegionStore, {
@@ -177,8 +174,10 @@ export const Annotation = types
 
     const updateIds = (item) => {
       const children = item.children?.map(updateIds);
+      const imageEntities = item.imageEntities?.map(updateIds);
 
       if (children) item = { ...item, children };
+      if (imageEntities) item = { ...item, imageEntities };
       if (item.id) item = { ...item, id: `${item.name ?? item.id}@${sn.id}` };
       // @todo fallback for tags with name as id:
       // if (item.name) item = { ...item, name: item.name + "@" + sn.id };
@@ -195,11 +194,26 @@ export const Annotation = types
       user = user.id;
     }
 
+    const getCreatedBy = (snapshot) => {
+      if (snapshot.type === "prediction") {
+        const modelVersion = snapshot.model_version?.trim() ?? "";
+        return modelVersion || "Admin";
+      }
+
+      return snapshot.createdBy ?? "Admin";
+    };
+
+    const getCreatedAt = (snapshot) => {
+      return snapshot.draft_created_at ?? snapshot.created_at ?? snapshot.createdDate;
+    };
+
     return {
       ...sn,
       ...(isFF(FF_DEV_3391) ? { root } : {}),
       user,
       editable: sn.editable ?? sn.type === "annotation",
+      createdBy: getCreatedBy(sn),
+      createdDate: getCreatedAt(sn),
       ground_truth: sn.honeypot ?? sn.ground_truth ?? false,
       skipped: sn.skipped || sn.was_cancelled,
       acceptedState: sn.accepted_state ?? sn.acceptedState ?? null,
@@ -310,8 +324,22 @@ export const Annotation = types
       });
     },
 
+    get isNonEditableDraft() {
+      const isKnownUsers = !!self.user && !!self.store.user;
+      // If we do not know what user created draft
+      // and who we are, then, we shouldn't prevent the ability to edit annotation
+      // because we can't predict is it our draft or not.
+      // It most probably could be relevant for standalone `lsf`
+      if (!isKnownUsers) return false;
+
+      // If there is no `pk` than there  is no annotation in DataBase
+      const isDraft = self.pk === null;
+      const isNonEditable = self.user.id !== self.store.user.id;
+      return isDraft && isNonEditable;
+    },
+
     isReadOnly() {
-      return self.readonly || !self.editable;
+      return self.isNonEditableDraft || self.readonly || !self.editable;
     },
   }))
   .volatile(() => ({
@@ -349,6 +377,8 @@ export const Annotation = types
         getEnv(self).events.hasEvent("acceptAnnotation") &&
         // Quick View — we don't have View All in Label Stream
         store.hasInterface("annotations:view-all") &&
+        // skipped annotations can't be reviewed
+        !self.skipped &&
         // annotation was submitted already
         !isNaN(self.pk)
       );
@@ -361,7 +391,7 @@ export const Annotation = types
       if (self.type === "annotation") self.setInitialValues();
     },
 
-    setEdit(val) {
+    setEditable(val) {
       self.editable = val;
     },
 
@@ -489,22 +519,6 @@ export const Annotation = types
       destroy(area);
     },
 
-    startRelationMode(node1) {
-      self._relationObj = node1;
-      self.relationMode = true;
-
-      document.body.style.cursor = Constants.CHOOSE_CURSOR;
-    },
-
-    stopRelationMode() {
-      document.body.style.cursor = Constants.DEFAULT_CURSOR;
-
-      self._relationObj = null;
-      self.relationMode = false;
-
-      self.regionStore.unhighlightAll();
-    },
-
     deleteAllRegions({ deleteReadOnly = false } = {}) {
       let regions = Array.from(self.areas.values());
 
@@ -533,9 +547,9 @@ export const Annotation = types
     addRegion(reg) {
       self.regionStore.unselectAll(true);
 
-      if (self.relationMode) {
-        self.addRelation(reg);
-        self.stopRelationMode();
+      if (self.isLinkingMode) {
+        self.addLinkedRegion(reg);
+        self.stopLinkingMode();
       }
     },
 
@@ -547,10 +561,6 @@ export const Annotation = types
           mainViewTag.unselectAll && mainViewTag.unselectAll();
           mainViewTag.perRegionCleanup && mainViewTag.perRegionCleanup();
         });
-    },
-
-    addRelation(reg) {
-      self.relationStore.addRelation(self._relationObj, reg);
     },
 
     validate() {
@@ -581,7 +591,7 @@ export const Annotation = types
         }
       });
 
-      self.stopRelationMode();
+      self.stopLinkingMode();
       self.unselectAll();
     },
 
@@ -664,13 +674,16 @@ export const Annotation = types
       if (force) self.unselectAll();
 
       self.names.forEach((tag) => tag.needsUpdate && tag.needsUpdate());
-      self.areas.forEach((area) => area.updateAppearenceFromState && area.updateAppearenceFromState());
-      if (isFF(FF_DEV_2432)) {
-        const areas = Array.from(self.areas.values());
-        const filtered = areas.filter((area) => area.isDrawing);
+      self.updateAppearenceFromState();
+      const areas = Array.from(self.areas.values());
+      // It should find just one unfinished region, but just in case we work with array
+      const filtered = areas.filter((area) => area.isDrawing);
 
-        self.regionStore.selection._updateResultsFromRegions(filtered);
-      }
+      // Update UI to reflect the state of an unfinished region in case if it exists
+      if (filtered.length) self.regionStore.selection._updateResultsFromRegions(filtered);
+    },
+    updateAppearenceFromState() {
+      self.areas.forEach((area) => area.updateAppearenceFromState?.());
     },
 
     setInitialValues() {
@@ -896,7 +909,7 @@ export const Annotation = types
           else audioNode = node;
 
           node.hotkey = comb;
-          hotkeys.addKey(comb, node.onHotKey, "Play an audio", `${Hotkey.DEFAULT_SCOPE},${Hotkey.INPUT_SCOPE}`);
+          hotkeys.addKey(comb, node.onHotKey, "Play an audio", Hotkey.ALL_SCOPES);
 
           audiosNum++;
         }
@@ -970,6 +983,11 @@ export const Annotation = types
 
       if (!area) return;
 
+      // This is added mostly for the reason of updating indexes in labels
+      // for the elements (like highlights in text) that won't be dynamically changed
+      // but are dependent on the whole region list values
+      self.updateAppearenceFromState();
+
       if (!area.classification) getEnv(self).events.invoke("entityCreate", area);
       if (!skipAfrerCreate) self.afterCreateResult(area, control);
 
@@ -1029,6 +1047,8 @@ export const Annotation = types
     // And this problems are fixable, so better to fix them on start
     fixBrokenAnnotation(json) {
       return (json ?? []).reduce((res, objRaw) => {
+        if (!objRaw) return res;
+
         const obj = structuredClone(objRaw) ?? {};
 
         if (obj.type === "relation") {
@@ -1044,34 +1064,8 @@ export const Annotation = types
         if (obj.type.endsWith("labels")) {
           const keys = Object.keys(obj.value);
 
-          for (let key of keys) {
+          for (const key of keys) {
             if (key.endsWith("labels")) {
-              const hasControlTag = tagNames.has(obj.from_name) || tagNames.has("labels");
-
-              // remove non-existent labels, it actually breaks dynamic labels
-              // and makes no reason overall — labels from predictions can be out of config
-              if (!isFF(FF_LSDV_4988) && hasControlTag) {
-                const labelsContainer = tagNames.get(obj.from_name) ?? tagNames.get("labels");
-                const value = obj.value[key];
-
-                if (value && value.length && labelsContainer.type.endsWith("labels")) {
-                  const filteredValue = value.filter((labelName) => !!labelsContainer.findLabel(labelName));
-                  const oldKey = key;
-
-                  key = key === labelsContainer.type ? key : labelsContainer.type;
-
-                  if (oldKey !== key) {
-                    obj.type = key;
-                    obj.value[key] = obj.value[oldKey];
-                    delete obj.value[oldKey];
-                  }
-
-                  if (filteredValue.length !== value.length) {
-                    obj.value[key] = filteredValue;
-                  }
-                }
-              }
-
               // detect most relevant label tags if that one from from_name is missing
               // can be useful for predictions in old format with config in new format:
               // Rectangle + Labels -> RectangleLabels
@@ -1432,3 +1426,5 @@ export const Annotation = types
       self.areas.forEach((area) => area.setReady && area.setReady(false));
     },
   }));
+
+export const Annotation = types.compose("Annotation", LinkingModes, _Annotation);

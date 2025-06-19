@@ -204,7 +204,7 @@ class ExportAPI(generics.RetrieveAPIView):
         logger.debug('Prepare export files')
 
         export_file, content_type, filename = DataExport.generate_export_file(
-            project, tasks, export_type, download_resources, request.GET
+            project, tasks, export_type, download_resources, request.GET, hostname=request.build_absolute_uri('/')
         )
 
         r = FileResponse(export_file, as_attachment=True, content_type=content_type, filename=filename)
@@ -356,10 +356,7 @@ class ExportListAPI(generics.ListCreateAPIView):
     def filter_queryset(self, queryset):
         queryset = super().filter_queryset(queryset)
 
-        if flag_set('fflag_fix_back_lsdv_4929_limit_exports_10042023_short', user='auto'):
-            return queryset.order_by('-created_at')[:100]
-        else:
-            return queryset
+        return queryset.order_by('-created_at')[:100]
 
 
 @method_decorator(
@@ -569,7 +566,7 @@ class ExportDownloadAPI(generics.RetrieveAPIView):
             return response
 
 
-def async_convert(converted_format_id, export_type, project, **kwargs):
+def async_convert(converted_format_id, export_type, project, hostname, download_resources=False, **kwargs):
     with transaction.atomic():
         try:
             converted_format = ConvertedFormat.objects.get(id=converted_format_id)
@@ -583,7 +580,7 @@ def async_convert(converted_format_id, export_type, project, **kwargs):
         converted_format.save(update_fields=['status'])
 
     snapshot = converted_format.export
-    converted_file = snapshot.convert_file(export_type)
+    converted_file = snapshot.convert_file(export_type, download_resources=download_resources, hostname=hostname)
     if converted_file is None:
         raise ValidationError('No converted file found, probably there are no annotations in the export snapshot')
     md5 = Export.eval_md5(converted_file)
@@ -602,8 +599,13 @@ def set_convert_background_failure(job, connection, type, value, traceback_obj):
     from data_export.models import ConvertedFormat
 
     convert_id = job.args[0]
-    trace = tb.format_exception(type, value, traceback_obj)
-    ConvertedFormat.objects.filter(id=convert_id).update(status=Export.Status.FAILED, traceback=''.join(trace))
+    try:
+        trace = ''.join(tb.format_exception(type, value, traceback_obj))
+    except Exception as e:
+        if flag_set('fflag_fix_back_leap_1818_set_convert_background_failure_logging_02062025_short'):
+            logger.error(f'Failed to format traceback: {job=} {type=} {value=} {traceback_obj=} {e=}', exc_info=True)
+        trace = 'Exception while processing traceback. See stderr for details'
+    ConvertedFormat.objects.filter(id=convert_id).update(status=Export.Status.FAILED, traceback=trace)
 
 
 @method_decorator(name='get', decorator=swagger_auto_schema(auto_schema=None))
@@ -645,6 +647,7 @@ class ExportConvertAPI(generics.RetrieveAPIView):
         serializer = ExportConvertSerializer(data=request.data, context={'project': snapshot.project})
         serializer.is_valid(raise_exception=True)
         export_type = serializer.validated_data['export_type']
+        download_resources = serializer.validated_data.get('download_resources')
 
         with transaction.atomic():
             converted_format, created = ConvertedFormat.objects.get_or_create(export=snapshot, export_type=export_type)
@@ -657,6 +660,8 @@ class ExportConvertAPI(generics.RetrieveAPIView):
             converted_format.id,
             export_type,
             snapshot.project,
+            request.build_absolute_uri('/'),
+            download_resources=download_resources,
             on_failure=set_convert_background_failure,
         )
         return Response({'export_type': export_type, 'converted_format': converted_format.id})

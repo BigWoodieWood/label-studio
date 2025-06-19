@@ -1,17 +1,15 @@
 import { type FC, useCallback, useContext, useMemo } from "react";
 import {
   IconCursor,
-  IconDetails,
+  IconClockTimeFourOutline,
   IconList,
   IconOutlinerEyeClosed,
   IconOutlinerEyeOpened,
   IconSortDown,
-  IconSortDownNew,
   IconSortUp,
-  IconSortUpNew,
-  IconSpeed,
-  IconTagAlt,
-} from "../../../assets/icons";
+  IconBoundingBox,
+  IconPredictions,
+} from "@humansignal/icons";
 import { Button } from "../../../common/Button/Button";
 import { Dropdown } from "../../../common/Dropdown/Dropdown";
 // eslint-disable-next-line
@@ -20,8 +18,7 @@ import { Menu } from "../../../common/Menu/Menu";
 import { BemWithSpecifiContext } from "../../../utils/bem";
 import { SidePanelsContext } from "../SidePanelsContext";
 import "./ViewControls.scss";
-import { Filter } from "../../Filter/Filter";
-import { FF_DEV_3873, FF_LSDV_3025, FF_LSDV_4992, isFF } from "../../../utils/feature-flags";
+import { FF_DEV_3873, isFF } from "../../../utils/feature-flags";
 import { observer } from "mobx-react";
 
 const { Block, Elem } = BemWithSpecifiContext();
@@ -49,23 +46,35 @@ export const ViewControls: FC<ViewControlsProps> = observer(
       switch (value) {
         case "manual":
           return {
-            label: "Group Manually",
+            label: (
+              <>
+                <IconList /> Group Manually
+              </>
+            ),
             selectedLabel: isFF(FF_DEV_3873) ? "Manual" : "Manual Grouping",
-            icon: <IconList />,
+            icon: <IconList width={16} height={16} />,
             tooltip: "Manually Grouped",
           };
         case "label":
           return {
-            label: "Group by Label",
-            selectedLabel: isFF(FF_DEV_3873) ? (isFF(FF_LSDV_4992) ? "By Label" : "Label") : "Grouped by Label",
-            icon: <IconTagAlt />,
+            label: (
+              <>
+                <IconBoundingBox /> Group by Label
+              </>
+            ),
+            selectedLabel: isFF(FF_DEV_3873) ? "By Label" : "Grouped by Label",
+            icon: <IconBoundingBox width={16} height={16} />,
             tooltip: "Grouped by Label",
           };
         case "type":
           return {
-            label: "Group by Tool",
-            selectedLabel: isFF(FF_DEV_3873) ? (isFF(FF_LSDV_4992) ? "By Tool" : "Tool") : "Grouped by Tool",
-            icon: <IconCursor />,
+            label: (
+              <>
+                <IconCursor /> Group by Tool
+              </>
+            ),
+            selectedLabel: isFF(FF_DEV_3873) ? "By Tool" : "Grouped by Tool",
+            icon: <IconCursor width={16} height={16} />,
             tooltip: "Grouped by Tool",
           };
       }
@@ -75,28 +84,31 @@ export const ViewControls: FC<ViewControlsProps> = observer(
       switch (value) {
         case "date":
           return {
-            label: "Order by Time",
+            label: (
+              <>
+                <IconClockTimeFourOutline /> Order by Time
+              </>
+            ),
             selectedLabel: "By Time",
-            icon: <IconDetails />,
+            icon: <IconClockTimeFourOutline width={16} height={16} />,
           };
         case "score":
           return {
-            label: "Order by Score",
+            label: (
+              <>
+                <IconPredictions /> Order by Score
+              </>
+            ),
             selectedLabel: "By Score",
-            icon: <IconSpeed />,
+            icon: <IconPredictions width={16} height={16} />,
           };
       }
     }, []);
 
-    const renderOrderingDirectionIcon =
-      orderingDirection === "asc" ? (
-        <IconSortUpNew style={{ color: "#898098" }} />
-      ) : (
-        <IconSortDownNew style={{ color: "#898098" }} />
-      );
+    const renderOrderingDirectionIcon = orderingDirection === "asc" ? <IconSortUp /> : <IconSortDown />;
 
     return (
-      <Block name="view-controls" mod={{ collapsed: context.locked, FF_LSDV_4992: isFF(FF_LSDV_4992) }}>
+      <Block name="view-controls" mod={{ collapsed: context.locked }}>
         <Grouping
           value={grouping}
           options={["manual", "type", "label"]}
@@ -116,32 +128,14 @@ export const ViewControls: FC<ViewControlsProps> = observer(
             />
           </Elem>
         )}
-        {isFF(FF_LSDV_3025) && (
-          <Filter
-            onChange={onFilterChange}
-            filterData={regions?.regions}
-            availableFilters={[
-              {
-                label: "Annotation results",
-                path: "labelName",
-                type: "String",
-              },
-              {
-                label: "Confidence score",
-                path: "score",
-                type: "Number",
-              },
-            ]}
-          />
-        )}
-        {isFF(FF_LSDV_4992) ? <ToggleRegionsVisibilityButton regions={regions} /> : null}
+        <ToggleRegionsVisibilityButton regions={regions} />
       </Block>
     );
   },
 );
 
 interface LabelInfo {
-  label: string;
+  label: string | React.ReactNode | JSX.Element;
   selectedLabel: string;
   icon: JSX.Element;
   tooltip?: string;
@@ -202,16 +196,7 @@ const Grouping = <T extends string>({
 
   // mods are already set in the button from type, so use it only in new UI
   const extraStyles = isFF(FF_DEV_3873) ? { mod: { newUI: true } } : undefined;
-  const style = isFF(FF_LSDV_4992)
-    ? {}
-    : {
-        padding: "0",
-        whiteSpace: "nowrap",
-      };
-
-  if (isFF(FF_DEV_3873)) {
-    style.padding = "0 12px 0 2px";
-  }
+  const style = isFF(FF_DEV_3873) ? { padding: "0 12px 0 2px" } : {};
 
   return (
     <Dropdown.Trigger content={dropdownContent} style={{ width: 200 }}>
@@ -228,7 +213,7 @@ const Grouping = <T extends string>({
             <DirectionIndicator direction={direction} name={value} value={value} wrap={false} />
           )
         }
-        tooltip={(isFF(FF_LSDV_4992) && readableValue.tooltip) || undefined}
+        tooltip={readableValue.tooltip || undefined}
         tooltipTheme="dark"
       >
         {readableValue.selectedLabel}
@@ -297,7 +282,13 @@ const ToggleRegionsVisibilityButton = observer<FC<ToggleRegionsVisibilityButton>
       onClick={toggleRegionsVisibility}
       mod={{ hidden: isAllHidden }}
       aria-label={isAllHidden ? "Show all regions" : "Hide all regions"}
-      icon={isAllHidden ? <IconOutlinerEyeClosed /> : <IconOutlinerEyeOpened />}
+      icon={
+        isAllHidden ? (
+          <IconOutlinerEyeClosed width={16} height={16} />
+        ) : (
+          <IconOutlinerEyeOpened width={16} height={16} />
+        )
+      }
       tooltip={isAllHidden ? "Show all regions" : "Hide all regions"}
       tooltipTheme="dark"
     />

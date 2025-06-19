@@ -1,5 +1,4 @@
 const assert = require("assert");
-const { initLabelStudio } = require("./helpers");
 
 const config = `
 <View>
@@ -35,13 +34,16 @@ const data = {
 
 Feature("Visual tags");
 
-Scenario("Check Collapse, Header and Style", async ({ I }) => {
+Scenario("Check Collapse, Header and Style", async ({ I, LabelStudio }) => {
   // @todo usual click should work because of role=button
   // @todo or at least locate('[role=button]'), but both of them are failing
   const clickCollapse = (text) => I.click(locate(".ant-collapse-header").withText(text));
 
+  LabelStudio.setFeatureFlags({
+    fflag_fix_front_dev_3391_interactive_view_all: true,
+  });
   await I.amOnPage("/");
-  I.executeScript(initLabelStudio, { config, data });
+  LabelStudio.init({ config, data });
   I.see("FAQ");
   I.say("Every panel is hidden at the beginning and no duplicates");
   I.dontSee("Main questions");

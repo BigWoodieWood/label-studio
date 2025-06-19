@@ -1,7 +1,9 @@
-import { IconCopy, IconInfo, IconViewAll, LsSettings, LsTrash } from "../../assets/icons";
 import { Button } from "../../common/Button/Button";
-import { Tooltip } from "../../common/Tooltip/Tooltip";
+import { IconCopy, IconInfo, IconViewAll, IconTrash, IconSettings } from "@humansignal/icons";
+import { Tooltip } from "@humansignal/ui";
 import { Elem } from "../../utils/bem";
+import { isSelfServe } from "../../utils/billing";
+import { FF_BULK_ANNOTATION, isFF } from "../../utils/feature-flags";
 import { GroundTruth } from "../CurrentEntity/GroundTruth";
 import { EditingHistory } from "./HistoryActions";
 import { confirm } from "../../common/Modal/Modal";
@@ -13,6 +15,7 @@ export const Actions = ({ store }) => {
   const saved = !entity.userGenerate || entity.sentUserGenerate;
   const isPrediction = entity?.type === "prediction";
   const isViewAll = annotationStore.viewingAll;
+  const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
 
   const onToggleVisibility = useCallback(() => {
     annotationStore.toggleViewingAllAnnotations();
@@ -20,12 +23,12 @@ export const Actions = ({ store }) => {
 
   return (
     <Elem name="section">
-      {store.hasInterface("annotations:view-all") && (
-        <Tooltip title="View all annotations">
+      {store.hasInterface("annotations:view-all") && !isBulkMode && (
+        <Tooltip title="Compare all annotations">
           <Button
             icon={<IconViewAll />}
             type="text"
-            aria-label="View All"
+            aria-label="Compare all annotations"
             onClick={() => onToggleVisibility()}
             primary={isViewAll}
             style={{
@@ -37,14 +40,14 @@ export const Actions = ({ store }) => {
         </Tooltip>
       )}
 
-      {!isViewAll && store.hasInterface("ground-truth") && <GroundTruth entity={entity} />}
+      {!isViewAll && !isBulkMode && store.hasInterface("ground-truth") && <GroundTruth entity={entity} />}
 
       {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} />}
 
-      {!isViewAll && store.hasInterface("annotations:delete") && (
+      {!isViewAll && !isBulkMode && store.hasInterface("annotations:delete") && (
         <Tooltip title="Delete annotation">
           <Button
-            icon={<LsTrash />}
+            icon={<IconTrash />}
             look="danger"
             type="text"
             aria-label="Delete"
@@ -66,7 +69,7 @@ export const Actions = ({ store }) => {
         </Tooltip>
       )}
 
-      {!isViewAll && store.hasInterface("annotations:add-new") && saved && (
+      {!isViewAll && !isBulkMode && store.hasInterface("annotations:add-new") && saved && (
         <Tooltip title={`Create copy of current ${entity.type}`}>
           <Button
             icon={<IconCopy style={{ width: 36, height: 36 }} />}
@@ -95,7 +98,7 @@ export const Actions = ({ store }) => {
       )}
 
       <Button
-        icon={<LsSettings />}
+        icon={<IconSettings />}
         type="text"
         aria-label="Settings"
         onClick={() => store.toggleSettings()}
@@ -106,7 +109,7 @@ export const Actions = ({ store }) => {
         }}
       />
 
-      {store.description && store.hasInterface("instruction") && (
+      {store.description && store.hasInterface("instruction") && !isBulkMode && (
         <Button
           icon={<IconInfo style={{ width: 16, height: 16 }} />}
           primary={store.showingDescription}

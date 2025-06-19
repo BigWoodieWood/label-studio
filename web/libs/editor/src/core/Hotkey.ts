@@ -2,10 +2,10 @@ import keymaster from "keymaster";
 import { inject } from "mobx-react";
 import { observer } from "mobx-react";
 import { createElement, Fragment } from "react";
-import { Tooltip } from "../common/Tooltip/Tooltip";
+import { Tooltip } from "@humansignal/ui";
 import Hint from "../components/Hint/Hint";
 import { Block, Elem } from "../utils/bem";
-import { FF_LSDV_1148, FF_MULTI_OBJECT_HOTKEYS, isFF } from "../utils/feature-flags";
+import { FF_MULTI_OBJECT_HOTKEYS, isFF } from "../utils/feature-flags";
 import { isDefined, isMacOS } from "../utils/utilities";
 import defaultKeymap from "./settings/keymap.json";
 
@@ -170,13 +170,9 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
         const keys = getKeys(key);
 
         for (const key of keys) {
-          if (isFF(FF_LSDV_1148)) {
-            removeKeyHandlerRef(scope, key);
-            keymaster.unbind(key, scope);
-            rebindKeyHandlers(scope, key);
-          } else {
-            keymaster.unbind(key, scope);
-          }
+          removeKeyHandlerRef(scope, key);
+          keymaster.unbind(key, scope);
+          rebindKeyHandlers(scope, key);
           delete _hotkeys_desc[key];
         }
       }
@@ -229,9 +225,7 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
             func(...args);
           };
 
-          if (isFF(FF_LSDV_1148)) {
-            addKeyHandlerRef(scope, keyName, handler);
-          }
+          addKeyHandlerRef(scope, keyName, handler);
           keymaster(keyName, scope, handler);
         });
     },
@@ -264,13 +258,9 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
           .map((s) => s.trim())
           .filter(Boolean)
           .forEach((scope) => {
-            if (isFF(FF_LSDV_1148)) {
-              removeKeyHandlerRef(scope, key);
-              keymaster.unbind(keyName, scope);
-              rebindKeyHandlers(scope, key);
-            } else {
-              keymaster.unbind(keyName, scope);
-            }
+            removeKeyHandlerRef(scope, key);
+            keymaster.unbind(keyName, scope);
+            rebindKeyHandlers(scope, key);
           });
 
         delete _hotkeys_map[keyName];
@@ -285,7 +275,7 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
       const hotkey = Hotkey.keymap[name];
 
       if (isDefined(hotkey)) {
-        const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
         this.addKey(shortcut, func, hotkey.description, scope);
 
@@ -304,7 +294,7 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
       const hotkey = Hotkey.keymap[name];
 
       if (isDefined(hotkey)) {
-        const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
         this.removeKey(shortcut, scope);
 
@@ -326,7 +316,7 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
       const hotkey = Hotkey.keymap[name];
 
       if (isDefined(hotkey)) {
-        const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
         this.overwriteKey(shortcut, func, hotkey.description, scope);
 
@@ -399,6 +389,8 @@ Hotkey.DEFAULT_SCOPE = DEFAULT_SCOPE;
 
 Hotkey.INPUT_SCOPE = INPUT_SCOPE;
 
+Hotkey.ALL_SCOPES = [DEFAULT_SCOPE, INPUT_SCOPE].join(",");
+
 Hotkey.keymap = { ...defaultKeymap } as Keymap;
 
 Hotkey.setKeymap = (newKeymap: Keymap) => {
@@ -434,7 +426,7 @@ Hotkey.Tooltip = inject("store")(
     const enabled = store.settings.enableTooltips && store.settings.enableHotkeys;
 
     if (isDefined(hotkey)) {
-      const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
       const description = props.title ?? hotkey.description;
       const hotkeys: JSX.Element[] = [];
@@ -490,7 +482,7 @@ Hotkey.Hint = inject("store")(
     const enabled = store.settings.enableTooltips && store.settings.enableHotkeys;
 
     if (isDefined(hotkey) && enabled) {
-      const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
       return createElement(Hint, {}, [shortcut]);
     }

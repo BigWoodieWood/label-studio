@@ -158,6 +158,24 @@ const Result = types
     get canBeSubmitted() {
       const control = self.from_name;
 
+      // Find the first node moving up in the tree with the given visibleWhen value
+      function findParentWithVisibleWhen(control, visibleWhen) {
+        let currentControl = control;
+
+        while (currentControl) {
+          if (currentControl.visiblewhen === visibleWhen) return currentControl;
+
+          try {
+            currentControl = getParent(currentControl);
+            if (!currentControl) break;
+          } catch {
+            break;
+          }
+        }
+
+        return null;
+      }
+
       if (control.perregion) {
         const label = control.whenlabelvalue;
 
@@ -201,11 +219,19 @@ const Result = types
         return true;
       };
 
-      if (control.visiblewhen === "choice-selected") {
+      // When perregion is used, we must ignore the visibility of the components and focus only on the selection
+      if (control.perregion && control.visiblewhen === "choice-selected") {
         return isChoiceSelected();
       }
+
       if (control.visiblewhen === "choice-unselected") {
         return !isChoiceSelected();
+      }
+
+      // We need to check if there is any node up in the tree with visibility restrictions so we can determine
+      // if the element is selected considering its own visibility
+      if (!control.perregion && findParentWithVisibleWhen(control, "choice-selected")) {
+        return control.isVisible === false ? false : isChoiceSelected();
       }
 
       return true;
@@ -249,6 +275,16 @@ const Result = types
       const { fillcolor, strokecolor, strokewidth, fillopacity, opacity } = self.from_name;
 
       return { strokecolor, strokewidth, fillcolor, fillopacity, opacity };
+    },
+
+    /**
+     *  This name historically is used for the region elements for getting their bboxes.
+     *  Now we need it for a result also.
+     *  Let's say "Region" here means just an area on the screen.
+     *  So that it's an element through which we can get the bbox for an area where classification takes place.
+     */
+    getRegionElement() {
+      return self.from_name?.getRegionElement?.();
     },
   }))
   .volatile(() => ({
@@ -309,19 +345,10 @@ const Result = types
         }
       }
 
-      const contolMeta = self.from_name.metaValue;
-
-      if (contolMeta) {
-        data.meta = { ...data.meta, ...contolMeta };
-      }
-      const areaMeta = self.area.meta;
-
-      if (areaMeta && Object.keys(areaMeta).length) {
-        data.meta = { ...data.meta, ...areaMeta };
-      }
-
-      if (meta) {
-        data.meta = { ...data.meta, ...meta };
+      if (meta || (self.area.meta && Object.keys(self.area.meta).length)) {
+        // `meta` is used for lead_time which is stored in one result, while area's `meta` is used for meta text,
+        // and this text is duplicated in every connected result, so we should prefer area's `meta` for actual value.
+        data.meta = { ...meta, ...self.area.meta };
       }
 
       if (self.area.parentID) {

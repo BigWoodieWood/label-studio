@@ -1,10 +1,9 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { Button } from "./Button/Button";
-import { Checkbox } from "./Checkbox/Checkbox";
+import { Checkbox, Tooltip } from "@humansignal/ui";
 import { Dropdown } from "./Dropdown/Dropdown";
 import { Menu } from "./Menu/Menu";
-import { Tooltip } from "./Tooltip/Tooltip";
 import { Elem } from "../../utils/bem";
 
 const injector = inject(({ store }) => {
@@ -73,6 +72,7 @@ export const FieldsButton = injector(
     selected,
     tooltip,
     tooltipTheme = "dark",
+    openUpwardForShortViewport = true,
   }) => {
     const content = [];
 
@@ -102,6 +102,7 @@ export const FieldsButton = injector(
           maxHeight: 280,
           overflow: "auto",
         }}
+        openUpwardForShortViewport={openUpwardForShortViewport}
       >
         {tooltip ? (
           <Elem name={"field-button"} style={{ zIndex: 1000 }}>

@@ -1,6 +1,6 @@
 import { forwardRef, memo, type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Block, Elem } from "../../utils/bem";
-import { FF_LSDV_4711, isFF } from "../../utils/feature-flags";
+import { FF_LSDV_4711, FF_VIDEO_FRAME_SEEK_PRECISION, isFF } from "../../utils/feature-flags";
 import { clamp, isDefined } from "../../utils/utilities";
 import "./VideoCanvas.scss";
 import { MAX_ZOOM, MIN_ZOOM } from "./VideoConstants";
@@ -55,6 +55,10 @@ export const clampZoom = (value: number) => clamp(value, MIN_ZOOM, MAX_ZOOM);
 const zoomRatio = (canvasWidth: number, canvasHeight: number, width: number, height: number) =>
   Math.min(1, Math.min(canvasWidth / width, canvasHeight / height));
 
+// Browsers can only handle time to the nearest 2ms, so we need to round to that precision when seeking by frames
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/currentTime
+const BROWSER_TIME_PRECISION = 0.002;
+
 export interface VideoRef {
   currentFrame: number;
   length: number;
@@ -74,6 +78,7 @@ export interface VideoRef {
   play: () => void;
   pause: () => void;
   goToFrame: (frame: number) => void;
+  frameSteppedTime: (time?: number) => number;
   seek: (time: number) => void;
   setContrast: (value: number) => void;
   setBrightness: (value: number) => void;
@@ -167,7 +172,9 @@ export const VideoCanvas = memo(
         if (!contextRef.current) return;
 
         const currentTime = videoRef.current?.currentTime ?? 0;
-        const frameNumber = Math.round(currentTime * framerate);
+        const frameNumber = isFF(FF_VIDEO_FRAME_SEEK_PRECISION)
+          ? Math.ceil(currentTime * framerate)
+          : Math.round(currentTime * framerate);
         const frame = clamp(frameNumber, 1, length || 1);
         const onChange = props.onFrameChange ?? (() => {});
 
@@ -407,16 +414,35 @@ export const VideoCanvas = memo(
       },
       pause() {
         videoRef.current?.pause();
+        if (isFF(FF_VIDEO_FRAME_SEEK_PRECISION)) {
+          this.currentTime = clamp(this.frameSteppedTime(), 0, this.duration);
+        }
       },
       seek(time) {
         this.currentTime = clamp(time, 0, this.duration);
         requestAnimationFrame(() => drawVideo());
       },
+      frameSteppedTime(time?: number): number {
+        if (isFF(FF_VIDEO_FRAME_SEEK_PRECISION)) {
+          return (
+            Math.round((time ?? this.currentTime) / BROWSER_TIME_PRECISION) * BROWSER_TIME_PRECISION +
+            BROWSER_TIME_PRECISION
+          );
+        }
+        return time ?? this.currentTime;
+      },
       goToFrame(frame: number) {
         const frameClamped = clamp(frame, 1, length);
 
-        this.currentTime = frameClamped / framerate;
-        requestAnimationFrame(() => drawVideo());
+        // We need to subtract 1 from the frame number because the frame number is 1-based
+        // and the currentTime is 0-based
+        const frameZeroBased = frameClamped - 1;
+
+        // Calculate exact frame time
+        const exactTime = frameZeroBased / framerate;
+
+        // Round to next closest browser precision frame time
+        this.currentTime = this.frameSteppedTime(exactTime);
       },
     };
 
@@ -459,7 +485,9 @@ export const VideoCanvas = memo(
           const video = videoRef.current;
 
           loadTimeout = setTimeout(() => {
-            const length = Math.ceil(video.duration * framerate);
+            const length = isFF(FF_VIDEO_FRAME_SEEK_PRECISION)
+              ? Math.round(video.duration * framerate)
+              : Math.ceil(video.duration * framerate);
             const [width, height] = [video.videoWidth, video.videoHeight];
 
             const dimensions = {

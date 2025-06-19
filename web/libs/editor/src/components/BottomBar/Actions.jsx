@@ -1,27 +1,29 @@
-import { IconInfoOutline, LsSettingsAlt } from "../../assets/icons";
+import { IconInfoOutline, IconSettings } from "@humansignal/icons";
+import { Tooltip } from "@humansignal/ui";
 import { Button } from "../../common/Button/Button";
 import { Elem } from "../../utils/bem";
+import { isSelfServe } from "../../utils/billing";
+import { FF_BULK_ANNOTATION } from "../../utils/feature-flags";
 import { EditingHistory } from "./HistoryActions";
 import { DynamicPreannotationsToggle } from "../AnnotationTab/DynamicPreannotationsToggle";
 import { AutoAcceptToggle } from "../AnnotationTab/AutoAcceptToggle";
 import { GroundTruth } from "../CurrentEntity/GroundTruth";
-import { Tooltip } from "../../common/Tooltip/Tooltip";
 
 export const Actions = ({ store }) => {
   const annotationStore = store.annotationStore;
   const entity = annotationStore.selected;
   const isPrediction = entity?.type === "prediction";
   const isViewAll = annotationStore.viewingAll === true;
+  const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
 
   return (
     <Elem name="section">
       {!isPrediction && !isViewAll && store.hasInterface("edit-history") && <EditingHistory entity={entity} />}
 
       {store.description && store.hasInterface("instruction") && (
-        <Tooltip placement="topLeft" title="Show instructions">
+        <Tooltip alignment="top-left" title="Show instructions">
           <Button
             icon={<IconInfoOutline style={{ width: 20, height: 20 }} />}
-            primary={store.showingDescription}
             type="text"
             aria-label="Instructions"
             onClick={() => store.toggleDescription()}
@@ -33,9 +35,9 @@ export const Actions = ({ store }) => {
           />
         </Tooltip>
       )}
-      <Tooltip placement="topLeft" title="Settings">
+      <Tooltip alignment="top-left" title="Settings">
         <Button
-          icon={<LsSettingsAlt />}
+          icon={<IconSettings />}
           type="text"
           aria-label="Settings"
           onClick={() => store.toggleSettings()}
@@ -47,7 +49,7 @@ export const Actions = ({ store }) => {
         />
       </Tooltip>
 
-      {store.hasInterface("ground-truth") && <GroundTruth entity={entity} />}
+      {store.hasInterface("ground-truth") && !isBulkMode && <GroundTruth entity={entity} />}
 
       {!isViewAll && (
         <Elem name="section">

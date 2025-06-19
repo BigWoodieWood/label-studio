@@ -27,7 +27,7 @@ const RatingResult: FC<{ mainValue: string[] }> = observer(({ mainValue }) => {
   return <span>{mainValue}</span>;
 });
 
-const ResultItem: FC<{ result: any }> = observer(({ result }) => {
+export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
   const { type, mainValue } = result;
   /**
    * @todo before fix this var was always false, so fix is left commented out
@@ -63,6 +63,16 @@ const ResultItem: FC<{ result: any }> = observer(({ result }) => {
           <Text>Choices: </Text>
           <Elem name="value">
             <ChoicesResult mainValue={mainValue} />
+          </Elem>
+        </Elem>
+      );
+    }
+    if (type === "taxonomy") {
+      return (
+        <Elem name="result">
+          <Text>Taxonomy: </Text>
+          <Elem name="value">
+            <ChoicesResult mainValue={mainValue.map((v: string[]) => v.join("/"))} />
           </Elem>
         </Elem>
       );
@@ -108,7 +118,6 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
 
     const saveMeta = (value: string) => {
       region.setMetaText(value);
-      region.setNormInput(value);
     };
 
     useEffect(() => {
@@ -127,16 +136,16 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
             ref={(el) => (input.current = el)}
             placeholder="Meta"
             className={bem.elem("meta-text").toClassName()}
-            value={region.normInput}
+            value={region.meta.text}
             onChange={(e) => saveMeta(e.target.value)}
-            onBlur={() => {
-              saveMeta(region.normInput);
+            onBlur={(e) => {
+              saveMeta(e.target.value);
               cancelEditMode?.();
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                saveMeta(region.normInput);
+                saveMeta(e.target.value);
                 cancelEditMode?.();
               }
             }}
@@ -148,32 +157,7 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
             </Elem>
           )
         )}
-        {/* <Elem name="section">
-        <Elem name="section-head">
-          Data Display
-        </Elem>
-        <Elem name="section-content">
-          content
-        </Elem>
-      </Elem> */}
       </>
     );
-    // return (
-    //   <>
-    //     {region?.meta?.text && (
-    //       <Elem name="text">
-    //           Meta: <span>{region.meta.text}</span>
-    //           &nbsp;
-    //         <IconTrash
-    //           type="delete"
-    //           style={{ cursor: "pointer" }}
-    //           onClick={() => {
-    //             region.deleteMetaText();
-    //           }}
-    //         />
-    //       </Elem>
-    //     )}
-    //   </>
-    // );
   },
 );

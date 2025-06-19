@@ -1,5 +1,6 @@
 import { observe } from "mobx";
 import { getEnv, getRoot, getType, types } from "mobx-state-tree";
+import { createRef } from "react";
 import { customTypes } from "../../../core/CustomTypes";
 import { guidGenerator } from "../../../core/Helpers.ts";
 import { AnnotationMixin } from "../../../mixins/AnnotationMixin";
@@ -113,6 +114,7 @@ const TagAttrs = types.model({
   splitchannels: types.optional(types.boolean, false),
   decoder: types.optional(types.enumeration(["ffmpeg", "webaudio"]), "webaudio"),
   player: types.optional(types.enumeration(["html5", "webaudio"]), "html5"),
+  spectrogram: types.optional(types.boolean, false),
 });
 
 export const AudioModel = types.compose(
@@ -131,6 +133,9 @@ export const AudioModel = types.compose(
     })
     .volatile(() => ({
       errors: [],
+      stageRef: createRef(),
+      _ws: null,
+      _wfFrame: null,
     }))
     .views((self) => ({
       get hasStates() {
@@ -163,6 +168,12 @@ export const AudioModel = types.compose(
         const state = self.activeState;
 
         return state?.selectedValues()?.[0];
+      },
+      get activeLabelKey() {
+        const labels = self.activeState?.selectedValues();
+
+        // use label to generate a unique key to ensure that adding/deleting can trigger changes
+        return labels ? labels.join(",") : "";
       },
     }))
     ////// Sync actions
@@ -266,7 +277,7 @@ export const AudioModel = types.compose(
         afterCreate() {
           dispose = observe(
             self,
-            "activeLabel",
+            "activeLabelKey",
             () => {
               const selectedRegions = self._ws?.regions?.selected;
 
@@ -402,7 +413,7 @@ export const AudioModel = types.compose(
             states,
           });
 
-          r._ws_region = wsRegion;
+          r.setWSRegion(wsRegion);
 
           self.regions.push(r);
           self.annotation.addRegion(r);
@@ -415,7 +426,7 @@ export const AudioModel = types.compose(
           const find_r = self.annotation.areas.get(wsRegion.id);
 
           if (find_r) {
-            find_r._ws_region = wsRegion;
+            find_r.setWSRegion(wsRegion);
             find_r.updateColor();
             return find_r;
           }
@@ -436,7 +447,7 @@ export const AudioModel = types.compose(
           const r = self.annotation.createResult(wsRegion, labels, control, self);
           const updatedRegion = wsRegion.convertToRegion(labels.labels);
 
-          r._ws_region = updatedRegion;
+          r.setWSRegion(updatedRegion);
           r.updateColor();
           return r;
         },
@@ -459,7 +470,7 @@ export const AudioModel = types.compose(
 
           const r = self._ws.addRegion(options, false);
 
-          region._ws_region = r;
+          region.setWSRegion(r);
         },
 
         updateWsRegion(region) {
@@ -474,7 +485,7 @@ export const AudioModel = types.compose(
 
         clearRegionMappings() {
           self.regs.forEach((r) => {
-            r._ws_region = null;
+            r.setWSRegion(null);
           });
         },
 
@@ -482,11 +493,20 @@ export const AudioModel = types.compose(
           self.clearRegionMappings();
           self._ws = ws;
 
-          self.onReady();
+          self.checkReady();
           self.needsUpdate();
           if (isFF(FF_LSDV_E_278)) {
             self.loadSyncedParagraphs();
           }
+        },
+
+        checkReady() {
+          if (!self._ws || self._ws.destroyed) return;
+          if (self._ws.isDrawing) {
+            requestAnimationFrame(() => self.checkReady());
+            return;
+          }
+          self.onReady();
         },
 
         onSeek(time) {
@@ -533,6 +553,9 @@ export const AudioModel = types.compose(
             self._ws = null;
             console.warn("Already destroyed");
           }
+        },
+        setWFFrame(frame) {
+          self._wfFrame = frame;
         },
       };
     }),

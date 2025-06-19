@@ -1,14 +1,12 @@
-import React, { useCallback } from "react";
-import { LsCross, LsPencil, LsPlus } from "../../assets/icons";
+import { useCallback } from "react";
 import { Button } from "../../components";
-import { Form, Input, Label, Toggle } from "../../components/Form";
-import { modal } from "../../components/Modal/Modal";
+import { IconCross, IconPencil } from "@humansignal/icons";
+import { Toggle } from "@humansignal/ui";
 import { Block, Elem } from "../../utils/bem";
 import "./WebhookPage.scss";
 import { format } from "date-fns";
 import { useAPI } from "../../providers/ApiProvider";
 import { WebhookDeleteModal } from "./WebhookDeleteModal";
-import { useProject } from "../../providers/ProjectProvider";
 
 const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) => {
   const api = useAPI();
@@ -52,7 +50,7 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                   <Elem name="item-date">Created {format(new Date(obj.created_at), "dd MMM yyyy, HH:mm")}</Elem>
                 </Elem>
                 <Elem name="item-control">
-                  <Button onClick={() => onSelectActive(obj.id)} icon={<LsPencil />}>
+                  <Button onClick={() => onSelectActive(obj.id)} icon={<IconPencil />}>
                     Edit
                   </Button>
                   <Button
@@ -65,7 +63,7 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                       })
                     }
                     look="danger"
-                    icon={<LsCross />}
+                    icon={<IconCross />}
                   >
                     Delete
                   </Button>

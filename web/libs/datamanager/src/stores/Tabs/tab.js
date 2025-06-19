@@ -8,6 +8,7 @@ import { TabSelectedItems } from "./tab_selected_items";
 import { History } from "../../utils/history";
 import { CustomJSON, StringOrNumberID, ThresholdType } from "../types";
 import { clamp } from "../../utils/helpers";
+import { FF_ANNOTATION_RESULTS_FILTERING, isFF } from "../../utils/feature-flags";
 
 const THRESHOLD_MIN = 0;
 const THRESHOLD_MIN_DIFF = 0.001;
@@ -34,6 +35,7 @@ export const Tab = types
     columnsWidth: types.map(types.maybeNull(types.number)),
     columnsDisplayType: types.map(types.maybeNull(types.string)),
     gridWidth: 4,
+    gridFitImagesToWidth: false,
 
     enableFilters: false,
     renameMode: false,
@@ -72,7 +74,9 @@ export const Tab = types
     },
 
     get targetColumns() {
-      return self.columns.filter((c) => c.target === self.target);
+      return self.columns.filter((c) => {
+        return c.target === self.target && !c.isAnnotationResultsFilterColumn;
+      });
     },
 
     // get fields formatted as columns structure for react-table
@@ -106,7 +110,10 @@ export const Tab = types
     },
 
     get currentFilters() {
-      return self.filters.filter((f) => f.target === self.target);
+      if (isFF(FF_ANNOTATION_RESULTS_FILTERING)) {
+        return self.filters.filter((f) => f.target === self.target);
+      }
+      return self.filters.filter((f) => f.target === self.target && !f.field.isAnnotationResultsFilterColumn);
     },
 
     get currentOrder() {
@@ -142,7 +149,6 @@ export const Tab = types
         };
 
         filterItem.value = normalizeFilterValue(filterItem.type, filterItem.operator, filterItem.value);
-
         return filterItem;
       });
     },
@@ -158,7 +164,7 @@ export const Tab = types
       return self.selectedCount === self.dataStore.total;
     },
 
-    get filterSnposhot() {
+    get filterSnapshot() {
       return {
         conjunction: self.conjunction,
         items: self.serializedFilters,
@@ -176,7 +182,7 @@ export const Tab = types
 
     get query() {
       return JSON.stringify({
-        filters: self.filterSnposhot,
+        filters: self.filterSnapshot,
         ordering: self.ordering.toJSON(),
         hiddenColumns: self.hiddenColumnsSnapshot,
       });
@@ -186,7 +192,7 @@ export const Tab = types
       if (self.virtual) {
         return {
           title: self.title,
-          filters: self.filterSnposhot,
+          filters: self.filterSnapshot,
           ordering: self.ordering.toJSON(),
         };
       }
@@ -199,11 +205,12 @@ export const Tab = types
         ordering: self.ordering.toJSON(),
         type: self.type,
         target: self.target,
-        filters: self.filterSnposhot,
+        filters: self.filterSnapshot,
         hiddenColumns: getSnapshot(self.hiddenColumns),
         columnsWidth: self.columnsWidth.toPOJO(),
         columnsDisplayType: self.columnsDisplayType.toPOJO(),
         gridWidth: self.gridWidth,
+        gridFitImagesToWidth: self.gridFitImagesToWidth,
         semantic_search: self.semantic_search?.toJSON() ?? [],
         threshold: self.threshold?.toJSON(),
       };
@@ -285,6 +292,11 @@ export const Tab = types
 
     setGridWidth(width) {
       self.gridWidth = width;
+      self.save();
+    },
+
+    setFitImagesToWidth(responsive) {
+      self.gridFitImagesToWidth = responsive;
       self.save();
     },
 

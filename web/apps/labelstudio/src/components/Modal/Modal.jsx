@@ -1,4 +1,4 @@
-import React, { createRef } from "react";
+import { createRef } from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 import { ApiProvider } from "../../providers/ApiProvider";
 import { ConfigProvider } from "../../providers/ConfigProvider";
@@ -8,6 +8,7 @@ import { cn } from "../../utils/bem";
 import { Button } from "../Button/Button";
 import { Space } from "../Space/Space";
 import { Modal } from "./ModalPopup";
+import { ToastProvider, ToastViewport } from "@humansignal/ui";
 
 const standaloneModal = (props) => {
   const modalRef = createRef();
@@ -27,7 +28,12 @@ const standaloneModal = (props) => {
         providers={
           props.simple
             ? []
-            : [<ConfigProvider key="config" />, <ApiProvider key="api" />, <CurrentUserProvider key="current-user" />]
+            : [
+                <ConfigProvider key="config" />,
+                <ToastProvider key="toast" />,
+                <ApiProvider key="api" />,
+                <CurrentUserProvider key="current-user" />,
+              ]
         }
       >
         <Modal
@@ -40,6 +46,7 @@ const standaloneModal = (props) => {
           }}
           animateAppearance={animate}
         />
+        {!props.simple && <ToastViewport />}
       </MultiProvider>,
       rootDiv,
     );

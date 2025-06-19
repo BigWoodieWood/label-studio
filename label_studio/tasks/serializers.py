@@ -6,6 +6,7 @@ import ujson as json
 from core.feature_flags import flag_set
 from core.label_config import replace_task_data_undefined_with_config_field
 from core.utils.common import load_func, retry_database_locked
+from core.utils.db import fast_first
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from drf_yasg import openapi
@@ -17,7 +18,7 @@ from rest_framework.fields import SkipField
 from rest_framework.serializers import ModelSerializer
 from rest_framework.settings import api_settings
 from tasks.exceptions import AnnotationDuplicateError
-from tasks.models import Annotation, AnnotationDraft, Prediction, Task
+from tasks.models import Annotation, AnnotationDraft, Prediction, PredictionMeta, Task
 from tasks.validation import TaskValidator
 from users.models import User
 from users.serializers import UserSerializer
@@ -175,7 +176,10 @@ class BaseTaskSerializer(FlexFieldsModelSerializer):
 
     def validate(self, task):
         instance = self.instance if hasattr(self, 'instance') else None
-        validator = TaskValidator(self.project(), instance)
+        validator = TaskValidator(
+            self.project(task=instance),
+            instance=instance if 'data' not in task else None,
+        )
         return validator.validate(task)
 
     def to_representation(self, instance):
@@ -391,6 +395,7 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
 
         self.post_process_annotations(user, db_annotations, 'imported')
         self.post_process_tasks(self.project.id, [t.id for t in self.db_tasks])
+        self.post_process_custom_callback(self.project.id, user)
 
         if flag_set('fflag_feat_back_lsdv_5307_import_reviews_drafts_29062023_short', user=ff_user):
             with transaction.atomic():
@@ -533,10 +538,13 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
         db_tasks = []
         max_overlap = self.project.maximum_annotations
 
-        # identify max inner id
-        tasks = Task.objects.filter(project=self.project)
-        prev_inner_id = tasks.order_by('-inner_id')[0].inner_id if tasks else 0
+        # Acquire a lock on the project to ensure atomicity when calculating inner_id
+        project = Project.objects.select_for_update().get(id=self.project.id)
+
+        last_task = fast_first(Task.objects.filter(project=project).order_by('-inner_id'))
+        prev_inner_id = last_task.inner_id if last_task else 0
         max_inner_id = (prev_inner_id + 1) if prev_inner_id else 1
+
         for i, task in enumerate(validated_tasks):
             cancelled_annotations = len([ann for ann in task_annotations[i] if ann.get('was_cancelled', False)])
             total_annotations = len(task_annotations[i]) - cancelled_annotations
@@ -585,6 +593,10 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
     @staticmethod
     def add_annotation_fields(body, user, action):
         return body
+
+    @staticmethod
+    def post_process_custom_callback(project_id, user):
+        pass
 
     class Meta:
         model = Task
@@ -720,6 +732,15 @@ class TaskIDOnlySerializer(ModelSerializer):
     class Meta:
         model = Task
         fields = ['id']
+
+
+class PredictionMetaSerializer(ModelSerializer):
+    """Serializer for PredictionMeta model"""
+
+    class Meta:
+        model = PredictionMeta
+        fields = '__all__'
+        read_only_fields = ['prediction', 'failed_prediction']
 
 
 # LSE inherits this serializer

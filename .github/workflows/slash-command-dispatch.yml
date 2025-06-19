@@ -11,6 +11,8 @@ env:
     git
     jira
     docker
+    fm
+    fmt
 
   issue_commands_list: |
     help

@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
-import React, { Fragment } from "react";
-import { FaTrash } from "react-icons/fa";
+import { Fragment } from "react";
+import { IconClose } from "@humansignal/icons";
 import { BemWithSpecifiContext } from "../../../utils/bem";
 import { Button } from "../../Common/Button/Button";
 import { Icon } from "../../Common/Icon/Icon";
@@ -49,6 +49,13 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
             width={80}
             dropdownWidth={120}
             dropdownClassName={dropdownClassName}
+            // Search on filter.title instead of filter.id
+            searchFilter={(option, query) => {
+              const original = option?.original ?? option;
+              const title = original?.field?.title ?? original?.title ?? "";
+              const parentTitle = original?.field?.parent?.title ?? "";
+              return `${title} ${parentTitle}`.toLowerCase().includes(query.toLowerCase());
+            }}
             onChange={(value) => filter.setFilterDelayed(value)}
             optionRender={({ item: { original: filter } }) => (
               <Elem name="selector">
@@ -68,12 +75,14 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
       </GroupWrapper>
       <Elem name="remove">
         <Button
-          type="link"
+          look="danger"
+          size="small"
+          style={{ border: "none" }}
           onClick={(e) => {
             e.stopPropagation();
             filter.delete();
           }}
-          icon={<Icon icon={FaTrash} size={12} />}
+          icon={<Icon icon={IconClose} size={12} />}
         />
       </Elem>
     </Block>

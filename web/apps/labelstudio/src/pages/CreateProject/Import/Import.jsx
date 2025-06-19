@@ -1,10 +1,20 @@
+import { ff } from "@humansignal/core";
+import { SampleDatasetSelect } from "@humansignal/app-common/blocks/SampleDatasetSelect/SampleDatasetSelect";
+import { IconErrorAlt, IconFileUpload, IconInfoOutline, IconTrash, IconUpload, IconCode } from "@humansignal/icons";
+import { Badge } from "@humansignal/shad/components/ui/badge";
+import { cn as scn } from "@humansignal/shad/utils";
+import { Button } from "apps/labelstudio/src/components";
+import { useAtomValue } from "jotai";
+import Input from "libs/datamanager/src/components/Common/Input/Input";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { Modal } from "../../../components/Modal/Modal";
+import { useAPI } from "../../../providers/ApiProvider";
 import { cn } from "../../../utils/bem";
 import { unique } from "../../../utils/helpers";
+import { sampleDatasetAtom } from "../utils/atoms";
 import "./Import.scss";
-import { IconError, IconInfo, IconUpload } from "../../../assets/icons";
-import { useAPI } from "../../../providers/ApiProvider";
+import samples from "./samples.json";
+import { importFiles } from "./utils";
+import { CodeBlock, SimpleCard, Spinner, Tooltip } from "@humansignal/ui";
 
 const importClass = cn("upload_page");
 const dropzoneClass = cn("dropzone");
@@ -17,11 +27,11 @@ function flatten(nested) {
 const supportedExtensions = {
   text: ["txt"],
   audio: ["wav", "mp3", "flac", "m4a", "ogg"],
-  video: ["mp4", "webp", "webm"],
-  image: ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"],
+  video: ["mp4", "webm"],
+  image: ["bmp", "gif", "jpg", "jpeg", "png", "svg", "webp"],
   html: ["html", "htm", "xml"],
-  timeSeries: ["csv", "tsv"],
-  common: ["csv", "tsv", "txt", "json"],
+  pdf: ["pdf"],
+  structuredData: ["csv", "tsv", "json"],
   object3d: ["glb"],
 };
 const allSupportedExtensions = flatten(Object.values(supportedExtensions));
@@ -72,23 +82,6 @@ function getFiles(files) {
   });
 }
 
-const Footer = () => {
-  return (
-    <Modal.Footer>
-      <IconInfo className={importClass.elem("info-icon")} width="20" height="20" />
-      See the&nbsp;documentation to{" "}
-      <a target="_blank" href="https://labelstud.io/guide/predictions.html" rel="noreferrer">
-        import preannotated data
-      </a>{" "}
-      or&nbsp;to{" "}
-      <a target="_blank" href="https://labelstud.io/guide/storage.html" rel="noreferrer">
-        sync data from a&nbsp;database or&nbsp;cloud storage
-      </a>
-      .
-    </Modal.Footer>
-  );
-};
-
 const Upload = ({ children, sendFiles }) => {
   const [hovered, setHovered] = useState(false);
   const onHover = (e) => {
@@ -135,7 +128,7 @@ const ErrorMessage = ({ error }) => {
 
   return (
     <div className={importClass.elem("error")}>
-      <IconError style={{ marginRight: 8 }} />
+      <IconErrorAlt width="24" height="24" />
       {error.id && `[${error.id}] `}
       {error.detail || error.message}
       {extra && ` (${extra})`}
@@ -145,18 +138,22 @@ const ErrorMessage = ({ error }) => {
 
 export const ImportPage = ({
   project,
+  sample,
   show = true,
   onWaiting,
   onFileListUpdate,
+  onSampleDatasetSelect,
   highlightCsvHandling,
   dontCommitToProject = false,
   csvHandling,
   setCsvHandling,
   addColumns,
+  openLabelingConfig,
 }) => {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
   const api = useAPI();
+  const projectConfigured = project?.label_config !== "<View></View>";
+  const sampleConfig = useAtomValue(sampleDatasetAtom);
 
   const processFiles = (state, action) => {
     if (action.sending) {
@@ -178,7 +175,7 @@ export const ImportPage = ({
   };
 
   const [files, dispatch] = useReducer(processFiles, { uploaded: [], uploading: [], ids: [] });
-  const showList = Boolean(files.uploaded?.length || files.uploading?.length);
+  const showList = Boolean(files.uploaded?.length || files.uploading?.length || sample);
 
   const loadFilesList = useCallback(
     async (file_upload_ids) => {
@@ -199,13 +196,9 @@ export const ImportPage = ({
       }
       return files;
     },
-    [project],
+    [project?.id],
   );
 
-  const onStart = () => {
-    setLoading(true);
-    setError(null);
-  };
   const onError = (err) => {
     console.error(err);
     // @todo workaround for error about input size in a wrong html format
@@ -216,7 +209,6 @@ export const ImportPage = ({
       err = { message, extra };
     }
     setError(err);
-    setLoading(false);
     onWaiting?.(false);
   };
   const onFinish = useCallback(
@@ -225,43 +217,33 @@ export const ImportPage = ({
 
       dispatch({ ids: file_upload_ids });
       if (could_be_tasks_list && !csvHandling) setCsvHandling("choose");
-      setLoading(true);
       onWaiting?.(false);
       addColumns(data_columns);
 
-      return loadFilesList(file_upload_ids).then(() => setLoading(false));
+      return loadFilesList(file_upload_ids);
     },
-    [addColumns, loadFilesList, setLoading],
+    [addColumns, loadFilesList],
   );
 
-  const importFiles = useCallback(
+  const importFilesImmediately = useCallback(
     async (files, body) => {
-      dispatch({ sending: files });
-
-      const query = dontCommitToProject ? { commit_to_project: "false" } : {};
-      // @todo use json for dataset uploads by URL
-      const contentType =
-        body instanceof FormData
-          ? "multipart/form-data" // usual multipart for usual files
-          : "application/x-www-form-urlencoded"; // chad urlencoded for URL uploads
-      const res = await api.callApi("importFiles", {
-        params: { pk: project.id, ...query },
-        headers: { "Content-Type": contentType },
+      importFiles({
+        files,
         body,
-        errorFilter: () => true,
+        project,
+        onError,
+        onFinish,
+        onUploadStart: (files) => dispatch({ sending: files }),
+        onUploadFinish: (files) => dispatch({ sent: files }),
+        dontCommitToProject,
       });
-
-      if (res && !res.error) onFinish?.(res);
-      else onError?.(res?.response);
-
-      dispatch({ sent: files });
     },
     [project, onFinish],
   );
 
   const sendFiles = useCallback(
     (files) => {
-      onStart();
+      setError(null);
       onWaiting?.(true);
       files = [...files]; // they can be array-like object
       const fd = new FormData();
@@ -273,9 +255,9 @@ export const ImportPage = ({
         }
         fd.append(f.name, f);
       }
-      return importFiles(files, fd);
+      return importFilesImmediately(files, fd);
     },
-    [importFiles, onStart],
+    [importFilesImmediately],
   );
 
   const onUpload = useCallback(
@@ -289,33 +271,41 @@ export const ImportPage = ({
   const onLoadURL = useCallback(
     (e) => {
       e.preventDefault();
-      onStart();
+      setError(null);
       const url = urlRef.current?.value;
 
       if (!url) {
-        setLoading(false);
         return;
       }
       urlRef.current.value = "";
       onWaiting?.(true);
       const body = new URLSearchParams({ url });
 
-      importFiles([{ name: url }], body);
+      importFilesImmediately([{ name: url }], body);
     },
-    [importFiles],
+    [importFilesImmediately],
+  );
+
+  const openConfig = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openLabelingConfig?.();
+    },
+    [openLabelingConfig],
   );
 
   useEffect(() => {
     if (project?.id !== undefined) {
       loadFilesList().then((files) => {
         if (csvHandling) return;
-        // empirical guess on start if we have some possible tasks list/time series problem
+        // empirical guess on start if we have some possible tasks list/structured data problem
         if (Array.isArray(files) && files.some(({ file }) => /\.[ct]sv$/.test(file))) {
           setCsvHandling("choose");
         }
       });
     }
-  }, [project, loadFilesList]);
+  }, [project?.id, loadFilesList]);
 
   const urlRef = useRef();
 
@@ -333,20 +323,25 @@ export const ImportPage = ({
       {highlightCsvHandling && <div className={importClass.elem("csv-splash")} />}
       <input id="file-input" type="file" name="file" multiple onChange={onUpload} style={{ display: "none" }} />
 
-      <header>
-        <form className={`${importClass.elem("url-form")} inline`} method="POST" onSubmit={onLoadURL}>
-          <input placeholder="Dataset URL" name="url" ref={urlRef} />
-          <button type="submit">Add URL</button>
+      <header className="flex gap-4">
+        <form className={`${importClass.elem("url-form")} inline-flex`} method="POST" onSubmit={onLoadURL}>
+          <Input placeholder="Dataset URL" name="url" ref={urlRef} style={{ height: 40 }} />
+          <Button type="submit" look="primary">
+            Add URL
+          </Button>
         </form>
         <span>or</span>
-        <button
+        <Button
           type="button"
           onClick={() => document.getElementById("file-input").click()}
           className={importClass.elem("upload-button")}
         >
           <IconUpload width="16" height="16" className={importClass.elem("upload-icon")} />
           Upload {files.uploaded.length ? "More " : ""}Files
-        </button>
+        </Button>
+        {ff.isActive(ff.FF_SAMPLE_DATASETS) && (
+          <SampleDatasetSelect samples={samples} sample={sample} onSampleApplied={onSampleDatasetSelect} />
+        )}
         <div
           className={importClass.elem("csv-handling").mod({ highlighted: highlightCsvHandling, hidden: !csvHandling })}
         >
@@ -367,72 +362,183 @@ export const ImportPage = ({
 
       <main>
         <Upload sendFiles={sendFiles} project={project}>
-          {!showList && (
-            <label htmlFor="file-input">
-              <div className={dropzoneClass.elem("content")}>
-                <header>
-                  Drag & drop files here
-                  <br />
-                  or click to browse
-                </header>
-                <IconUpload height="64" className={dropzoneClass.elem("icon")} />
-                <dl>
-                  <dt>Text</dt>
-                  <dd>{supportedExtensions.text.join(", ")}</dd>
-                  <dt>Audio</dt>
-                  <dd>{supportedExtensions.audio.join(", ")}</dd>
-                  <dt>Video</dt>
-                  <dd>mpeg4/H.264 webp, webm* {/* Keep in sync with supportedExtensions.video */}</dd>
-                  <dt>Images</dt>
-                  <dd>{supportedExtensions.image.join(", ")}</dd>
-                  <dt>HTML</dt>
-                  <dd>{supportedExtensions.html.join(", ")}</dd>
-                  <dt>Time Series</dt>
-                  <dd>{supportedExtensions.timeSeries.join(", ")}</dd>
-                  <dt>Object 3D Formats</dt>
-                  <dd>{supportedExtensions.object3d.join(", ")}</dd>
-                  <dt>Common Formats</dt>
-                  <dd>{supportedExtensions.common.join(", ")}</dd>
-                </dl>
-                <b>
-                  * – Support depends on the browser
-                  <br />* – Use{" "}
-                  <a href="https://labelstud.io/guide/storage.html" target="_blank" rel="noreferrer">
-                    Cloud Storages
-                  </a>{" "}
-                  if you want to import a large number of files
-                </b>
-              </div>
-            </label>
-          )}
+          <div className={scn("flex gap-4 w-full min-h-full", { "justify-center": !showList })}>
+            {!showList && (
+              <div className="flex gap-4 justify-center items-start w-full h-full">
+                <label htmlFor="file-input" className="w-full h-full">
+                  <div className={`${dropzoneClass.elem("content")} w-full`}>
+                    <IconFileUpload height="64" className={dropzoneClass.elem("icon")} />
+                    <header>
+                      Drag & drop files here
+                      <br />
+                      or click to browse
+                    </header>
 
-          {showList && (
-            <table>
-              <tbody>
-                {files.uploading.map((file, idx) => (
-                  <tr key={`${idx}-${file.name}`}>
-                    <td>{file.name}</td>
-                    <td>
-                      <span className={importClass.elem("file-status").mod({ uploading: true })} />
-                    </td>
-                  </tr>
-                ))}
-                {files.uploaded.map((file) => (
-                  <tr key={file.file}>
-                    <td>{file.file}</td>
-                    <td>
-                      <span className={importClass.elem("file-status")} />
-                    </td>
-                    <td>{file.size}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                    <dl>
+                      <dt>Images</dt>
+                      <dd>{supportedExtensions.image.join(", ")}</dd>
+                      <dt>Audio</dt>
+                      <dd>{supportedExtensions.audio.join(", ")}</dd>
+                      <dt>
+                        <div className="flex items-center gap-1">
+                          Video
+                          <Tooltip title="Video format support depends on your browser. Click to learn more.">
+                            <a
+                              href="https://labelstud.io/tags/video#Video-format"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center"
+                              aria-label="Learn more about video format support"
+                            >
+                              <IconInfoOutline className="w-4 h-4 text-primary-content hover:text-primary-content-hover" />
+                            </a>
+                          </Tooltip>
+                        </div>
+                      </dt>
+                      <dd>{supportedExtensions.video.join(", ")}</dd>
+                      <dt>HTML / HyperText</dt>
+                      <dd>{supportedExtensions.html.join(", ")}</dd>
+                      <dt>Text</dt>
+                      <dd>{supportedExtensions.text.join(", ")}</dd>
+                      <dt>Structured data</dt>
+                      <dd>{supportedExtensions.structuredData.join(", ")}</dd>
+                      <dt>Object 3D Formats</dt>
+                  <dd>{supportedExtensions.object3d.join(", ")}</dd>
+                  <dt>PDF</dt>
+                      <dd>{supportedExtensions.pdf.join(", ")}</dd>
+                    </dl>
+                    <div className="tips">
+                      <b>Important:</b>
+                      <ul className="mt-2 ml-4 list-disc font-normal">
+                        <li>
+                          We recommend{" "}
+                          <a href="https://labelstud.io/guide/storage.html" target="_blank" rel="noreferrer">
+                            Cloud Storage
+                          </a>{" "}
+                          over direct uploads due to{" "}
+                          <a href="https://labelstud.io/guide/tasks.html#Import-data-from-the-Label-Studio-UI">
+                            upload limitations
+                          </a>
+                          .
+                        </li>
+                        <li>
+                          For PDFs, use{" "}
+                          <a href="https://labelstud.io/templates/multi-page-document-annotation">
+                            multi-image labeling
+                          </a>
+                          . JSONL or Parquet (Enterprise only) files require cloud storage.
+                        </li>
+                        <li>
+                          Check the documentation to{" "}
+                          <a target="_blank" href="https://labelstud.io/guide/predictions.html" rel="noreferrer">
+                            import preannotated data
+                          </a>
+                          .
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            )}
+
+            {showList && (
+              <div className="w-full">
+                <SimpleCard title="Files" className="w-full h-full">
+                  <table>
+                    <tbody>
+                      {sample && (
+                        <tr key={sample.url}>
+                          <td>
+                            <div className="flex items-center gap-2">
+                              {sample.title}
+                              <Badge variant="info" className="h-5 text-xs rounded-sm">
+                                Sample
+                              </Badge>
+                            </div>
+                          </td>
+                          <td>{sample.description}</td>
+                          <td>
+                            <Button
+                              size="icon"
+                              look="destructive"
+                              rawClassName="h-6 w-6 p-0"
+                              onClick={() => onSampleDatasetSelect(undefined)}
+                            >
+                              <IconTrash className="w-3 h-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      )}
+                      {files.uploading.map((file, idx) => (
+                        <tr key={`${idx}-${file.name}`}>
+                          <td>{file.name}</td>
+                          <td colSpan={2}>
+                            <span className={importClass.elem("file-status").mod({ uploading: true })} />
+                          </td>
+                        </tr>
+                      ))}
+                      {files.uploaded.map((file) => (
+                        <tr key={file.file}>
+                          <td>{file.file}</td>
+                          <td>
+                            <span className={importClass.elem("file-status")} />
+                          </td>
+                          <td>{file.size}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </SimpleCard>
+              </div>
+            )}
+
+            {ff.isFF(ff.FF_JSON_PREVIEW) && (
+              <div className="w-full h-full flex flex-col min-h-[400px]">
+                {projectConfigured ? (
+                  <SimpleCard title="Expected input preview" className="w-full h-full">
+                    {sampleConfig.data ? (
+                      <CodeBlock
+                        title="Expected input preview"
+                        code={sampleConfig?.data ?? ""}
+                        className="w-full h-full"
+                      />
+                    ) : sampleConfig.isLoading ? (
+                      <div className="w-full flex justify-center py-12">
+                        <Spinner className="h-6 w-6" />
+                      </div>
+                    ) : sampleConfig.isError ? (
+                      <div className="w-full pt-4 text-lg text-negative-content">Unable to load sample data</div>
+                    ) : null}
+                  </SimpleCard>
+                ) : (
+                  <SimpleCard className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
+                    <div className="flex flex-col items-center gap-tight">
+                      <div className="bg-primary-background rounded-largest p-tight flex items-center justify-center">
+                        <IconCode className="w-6 h-6 text-primary-icon" />
+                      </div>
+                      <div className="flex flex-col items-center gap-tighter">
+                        <div className="text-label-small text-neutral-content font-medium">View JSON input format</div>
+                        <div className="text-body-small text-neutral-content-subtler text-center">
+                          Setup your{" "}
+                          <button
+                            type="button"
+                            onClick={openConfig}
+                            className="border-none bg-none p-0 m-0 text-primary-content underline hover:text-primary-content-hover transition-colors"
+                          >
+                            labeling configuration
+                          </button>{" "}
+                          first to preview the expected JSON data format
+                        </div>
+                      </div>
+                    </div>
+                  </SimpleCard>
+                )}
+              </div>
+            )}
+          </div>
         </Upload>
       </main>
-
-      <Footer />
     </div>
   );
 };

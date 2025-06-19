@@ -25,7 +25,7 @@ from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 from django.utils import dateformat, timezone
 from label_studio_sdk.converter import Converter
-from tasks.models import Annotation, Task
+from tasks.models import Annotation, AnnotationDraft, Task
 
 ONLY = 'only'
 EXCLUDE = 'exclude'
@@ -96,21 +96,29 @@ class ExportMixin:
         })
         """
         queryset = Annotation.objects.all()
-        if not isinstance(annotation_filter_options, dict):
-            return queryset
+        if isinstance(annotation_filter_options, dict):
+            q_list = []
+            if annotation_filter_options.get('usual'):
+                q_list.append(Q(was_cancelled=False, ground_truth=False))
+            if annotation_filter_options.get('ground_truth'):
+                q_list.append(Q(ground_truth=True))
+            if annotation_filter_options.get('skipped'):
+                q_list.append(Q(was_cancelled=True))
+            if q_list:
+                q = reduce(lambda x, y: x | y, q_list)
+                queryset = queryset.filter(q)
 
-        q_list = []
-        if annotation_filter_options.get('usual'):
-            q_list.append(Q(was_cancelled=False, ground_truth=False))
-        if annotation_filter_options.get('ground_truth'):
-            q_list.append(Q(ground_truth=True))
-        if annotation_filter_options.get('skipped'):
-            q_list.append(Q(was_cancelled=True))
-        if not q_list:
-            return queryset
+        # pre-select completed_by user info
+        queryset = queryset.select_related('completed_by')
+        # prefetch reviews in LSE
+        if hasattr(queryset.model, 'reviews'):
+            from reviews.models import AnnotationReview
 
-        q = reduce(lambda x, y: x | y, q_list)
-        return queryset.filter(q)
+            queryset = queryset.prefetch_related(
+                Prefetch('reviews', queryset=AnnotationReview.objects.select_related('created_by'))
+            )
+
+        return queryset
 
     @staticmethod
     def _get_export_serializer_option(serialization_options):
@@ -137,19 +145,22 @@ class ExportMixin:
                 options['context']['interpolate_key_frames'] = serialization_options['interpolate_key_frames']
             if serialization_options.get('include_annotation_history') is False:
                 options['omit'] = ['annotations.history']
+            # download resources
+            if serialization_options.get('download_resources') is True:
+                options['download_resources'] = True
         return options
 
     def get_task_queryset(self, ids, annotation_filter_options):
         annotations_qs = self._get_filtered_annotations_queryset(annotation_filter_options=annotation_filter_options)
+
         return (
             Task.objects.filter(id__in=ids)
+            .select_related('file_upload')  # select_related more efficient for regular foreign-key relationship
             .prefetch_related(
-                Prefetch(
-                    'annotations',
-                    queryset=annotations_qs,
-                )
+                Prefetch('annotations', queryset=annotations_qs),
+                Prefetch('drafts', queryset=AnnotationDraft.objects.select_related('user')),
+                'comment_authors',
             )
-            .prefetch_related('predictions', 'drafts')
         )
 
     def get_export_data(self, task_filter_options=None, annotation_filter_options=None, serialization_options=None):
@@ -269,10 +280,10 @@ class ExportMixin:
             self.status = self.Status.COMPLETED
             self.save(update_fields=['status'])
 
-        except Exception:
+        except Exception as e:
             self.status = self.Status.FAILED
             self.save(update_fields=['status'])
-            logger.exception('Export was failed')
+            logger.exception('Export was failed: %s', e)
         finally:
             self.finished_at = datetime.now()
             self.save(update_fields=['finished_at'])
@@ -303,7 +314,7 @@ class ExportMixin:
                 serialization_options=serialization_options,
             )
 
-    def convert_file(self, to_format):
+    def convert_file(self, to_format, download_resources=False, hostname=None):
         with get_temp_dir() as tmp_dir:
             OUT = 'out'
             out_dir = pathlib.Path(tmp_dir) / OUT
@@ -313,7 +324,10 @@ class ExportMixin:
                 config=self.project.get_parsed_config(),
                 project_dir=None,
                 upload_dir=out_dir,
-                download_resources=False,
+                download_resources=download_resources,
+                # for downloading resource we need access to the API
+                access_token=self.project.organization.created_by.auth_token.key,
+                hostname=hostname,
             )
             input_name = pathlib.Path(self.file.name).name
             input_file_path = pathlib.Path(tmp_dir) / input_name

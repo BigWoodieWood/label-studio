@@ -20,6 +20,8 @@ export class CommentsSdk {
     const body = {
       is_resolved: comment.is_resolved,
       text: comment.text,
+      region_ref: comment.region_ref,
+      classifications: comment.classifications,
     };
 
     if (comment.annotation) {
@@ -57,6 +59,11 @@ export class CommentsSdk {
     }
 
     const res = await this.dm.apiCall("listComments", listParams);
+
+    // Ensure request is went through and res is an array
+    if (!res?.length) {
+      return [];
+    }
 
     const commentUsers = [];
     const comments = res.map((comment) => {

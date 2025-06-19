@@ -128,7 +128,9 @@ interface Object3DViewProps {
 const Object3DView: FC<Object3DViewProps> = observer(({ item }) => {
   return (
     <div className={styles.container}>
-      <Canvas>
+      <Canvas
+        style={{ height: '100%' }}
+      >
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
         <Scene item={item} />

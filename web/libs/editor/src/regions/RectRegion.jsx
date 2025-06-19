@@ -1,5 +1,5 @@
 import { getRoot, isAlive, types } from "mobx-state-tree";
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Rect } from "react-konva";
 import { ImageViewContext } from "../components/ImageView/ImageViewContext";
 import { LabelOnRect } from "../components/ImageView/LabelOnRegion";
@@ -361,6 +361,38 @@ const Model = types
     updateImageSize() {},
 
     /**
+     * Konva.js allows region to be flipped, but it saves the origin, so the result is unusual.
+     * When you resize it along height, it just inverts the height, no other changes.
+     * When you resize it along width, it inverts the height and rotates the region by 180°.
+     * This method fixes the region to have positive height.
+     * Rotation is kept intact except for the two most common cases when it stays 0:
+     * - when the region is flipped horizontally with no rotation, we fix the rotation back to 0.
+     * - when the region is flipped vertically, rotation is still 0, we just flip the height.
+     */
+    flipRegion() {
+      const height = -self.height;
+
+      // the most common case, when the region is flipped horizontally with no rotation,
+      // for this case we are fixing rotation back to 0, that's more intuitive for the user.
+      if (self.rotation === 180) {
+        self.height = height;
+        self.x -= self.width;
+        self.rotation = 0;
+      } else {
+        // we need to invert the height and swap top-left and bottom-left corners, but with respect to rotation.
+        // we'll use tranform from Konva.js to not fight aspect ratio and rotation.
+        // transform is calculated in canvas coords, so we need to convert coords back and forth.
+        const transform = self.shapeRef.getAbsoluteTransform();
+        // bottom-left corner; it's "above" the top-left corner because of inverted height
+        const { x, y } = transform.point({ x: 0, y: -self.parent.internalToCanvasY(height) });
+
+        self.height = height;
+        self.x = self.parent.canvasToInternalX(x);
+        self.y = self.parent.canvasToInternalY(y);
+      }
+    },
+
+    /**
      * @example
      * {
      *   "original_width": 1920,
@@ -497,23 +529,20 @@ const HtxRectangleView = ({ item, setShapeRef }) => {
         name={`${item.id} _transformable`}
         {...eventHandlers}
         onMouseOver={() => {
-          if (store.annotationStore.selected.relationMode) {
+          if (store.annotationStore.selected.isLinkingMode) {
             item.setHighlight(true);
-            stage.container().style.cursor = Constants.RELATION_MODE_CURSOR;
-          } else {
-            stage.container().style.cursor = Constants.POINTER_CURSOR;
           }
+          item.updateCursor(true);
         }}
         onMouseOut={() => {
-          stage.container().style.cursor = Constants.DEFAULT_CURSOR;
-
-          if (store.annotationStore.selected.relationMode) {
+          if (store.annotationStore.selected.isLinkingMode) {
             item.setHighlight(false);
           }
+          item.updateCursor();
         }}
         onClick={(e) => {
           if (item.parent.getSkipInteractions()) return;
-          if (store.annotationStore.selected.relationMode) {
+          if (store.annotationStore.selected.isLinkingMode) {
             stage.container().style.cursor = Constants.DEFAULT_CURSOR;
           }
 

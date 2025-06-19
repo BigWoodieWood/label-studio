@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Checkbox, Modal, Table, Tabs } from "antd";
+import { Modal, Table, Tabs } from "antd";
 import { observer } from "mobx-react";
 
 import { Hotkey } from "../../core/Hotkey";
@@ -10,8 +10,8 @@ import { triggerResizeEvent } from "../../utils/utilities";
 
 import EditorSettings from "../../core/settings/editorsettings";
 import * as TagSettings from "./TagSettings";
-import { LsClose } from "../../assets/icons";
-import Toggle from "../../common/Toggle/Toggle";
+import { IconClose } from "@humansignal/icons";
+import { Checkbox, Toggle } from "@humansignal/ui";
 import { FF_DEV_3873, isFF } from "../../utils/feature-flags";
 
 const HotkeysDescription = () => {
@@ -96,7 +96,7 @@ const GeneralSettings = observer(({ store }) => {
                       <SettingsTag key={tag}>{tag}</SettingsTag>
                     ))}
                   </Elem>
-                  <Block name="description">{EditorSettings[obj].newUI.description}</Block>
+                  <Elem name="description">{EditorSettings[obj].newUI.description}</Elem>
                 </Block>
                 <Toggle
                   key={index}
@@ -200,7 +200,7 @@ const DEFAULT_MODAL_SETTINGS = isFF(FF_DEV_3873)
   ? {
       name: "settings-modal",
       title: "Labeling Interface Settings",
-      closeIcon: <LsClose />,
+      closeIcon: <IconClose />,
     }
   : {
       name: "settings-modal-old",
@@ -226,7 +226,7 @@ export default observer(({ store }) => {
   return (
     <Block
       tag={Modal}
-      visible={store.showingSettings}
+      open={store.showingSettings}
       onCancel={store.toggleSettings}
       footer=""
       {...DEFAULT_MODAL_SETTINGS}

@@ -179,7 +179,12 @@ def get_not_solved_tasks_qs(
 
         # otherwise, filtering out completed tasks is sufficient
         else:
-            not_solved_tasks = not_solved_tasks.filter(is_labeled=False)
+            # ignore tasks that are already labeled for onboarding mode
+            if not (
+                flag_set('fflag_feat_all_leap_1825_annotator_evaluation_short', user='auto')
+                and project.show_ground_truth_first
+            ):
+                not_solved_tasks = not_solved_tasks.filter(is_labeled=False)
 
     if not flag_set('fflag_fix_back_lsdv_4523_show_overlap_first_order_27022023_short'):
         # show tasks with overlap > 1 first (unless tasks are already prioritized on agreement)
@@ -265,9 +270,6 @@ def skipped_queue(next_task, prepared_tasks, project, user, queue_info):
 def postponed_queue(next_task, prepared_tasks, project, user, queue_info):
     if not next_task:
         q = Q(task__project=project, task__isnull=False, was_postponed=True, task__is_labeled=False)
-        if flag_set('fflag_fix_back_lsdv_1044_check_annotations_24012023_short', user):
-            q &= ~Q(task__annotations__completed_by=user)
-
         postponed_tasks = user.drafts.filter(q).order_by('updated_at').values_list('task__pk', flat=True)
         if postponed_tasks.exists():
             preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(postponed_tasks)])
@@ -401,7 +403,7 @@ def get_next_task(
                         'project_id': project.id,
                         'title': project.title,
                     }
-                    logger.error(
+                    logger.info(
                         f'DEBUG INFO: get_next_task is_labeled/overlap: '
                         f'LOCALS ==> {local} :: PROJECT ==> {project_data} :: '
                         f'NEXT_TASK ==> {task}'

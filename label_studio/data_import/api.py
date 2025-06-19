@@ -1,11 +1,9 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
-import base64
 import json
 import logging
 import mimetypes
 import time
-from typing import Union
 from urllib.parse import unquote, urlparse
 
 import drf_yasg.openapi as openapi
@@ -14,12 +12,11 @@ from core.feature_flags import flag_set
 from core.permissions import ViewClassPermission, all_permissions
 from core.redis import start_job_async_or_sync
 from core.utils.common import retry_database_locked, timeit
-from core.utils.exceptions import LabelStudioValidationErrorSentryIgnored
 from core.utils.params import bool_from_request, list_of_strings_from_request
 from csp.decorators import csp
 from django.conf import settings
 from django.db import transaction
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from projects.models import Project, ProjectImport, ProjectReimport
@@ -189,7 +186,7 @@ task_create_response_scheme = {
 
             ```bash
             curl -H 'Authorization: Token abc123' \\
-            -X POST '{host}/api/projects/1/import' -F ‘file=@path/to/my_file.csv’
+            -X POST '{host}/api/projects/1/import' -F 'file=@path/to/my_file.csv'
             ```
 
             ### 3\. **POST with URL**
@@ -384,10 +381,7 @@ class ImportAPI(generics.CreateAPIView):
         # check project permissions
         project = generics.get_object_or_404(Project.objects.for_user(self.request.user), pk=self.kwargs['pk'])
 
-        if (
-            flag_set('fflag_feat_all_lsdv_4915_async_task_import_13042023_short', request.user)
-            and settings.VERSION_EDITION != 'Community'
-        ):
+        if settings.VERSION_EDITION != 'Community':
             return self.async_import(request, project, preannotated_from_fields, commit_to_project, return_task_ids)
         else:
             return self.sync_import(request, project, preannotated_from_fields, commit_to_project, return_task_ids)
@@ -413,7 +407,7 @@ class ImportPredictionsAPI(generics.CreateAPIView):
         predictions = []
         for item in self.request.data:
             if item.get('task') not in tasks_ids:
-                raise LabelStudioValidationErrorSentryIgnored(
+                raise ValidationError(
                     f'{item} contains invalid "task" field: corresponding task ID couldn\'t be retrieved '
                     f'from project {project} tasks'
                 )
@@ -679,6 +673,8 @@ class FileUploadAPI(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UploadedFileResponse(generics.RetrieveAPIView):
+    """Serve uploaded files from local drive"""
+
     permission_classes = (IsAuthenticated,)
 
     @override_report_only_csp
@@ -712,7 +708,34 @@ class UploadedFileResponse(generics.RetrieveAPIView):
 
 
 class DownloadStorageData(APIView):
-    """Check auth for nginx auth_request"""
+    """
+    Secure file download API for persistent storage (S3, GCS, Azure, etc.)
+
+    This view provides authenticated access to uploaded files and user avatars stored in
+    cloud storage or local filesystems. It supports two operational modes for optimal
+    performance and flexibility (simplicity).
+
+    ## Operation Modes:
+
+    ### 1. NGINX Mode (Default - USE_NGINX_FOR_UPLOADS=True)
+    - **High Performance**: Uses X-Accel-Redirect headers for efficient file serving
+    - **How it works**:
+      1. Validates user permissions and file access
+      2. Returns HttpResponse with X-Accel-Redirect header pointing to storage URL
+      3. NGINX intercepts and serves the file directly from storage
+    - **Benefits**: Reduces Django server load, better performance for large files
+
+    ### 2. Direct Mode (USE_NGINX_FOR_UPLOADS=False)
+    - **Direct Serving**: Django serves files using RangedFileResponse
+    - **How it works**:
+      1. Validates user permissions and file access
+      2. Opens file from storage and streams it with range request support
+      3. Supports partial content requests (HTTP 206)
+    - **Benefits**: Works without NGINX, supports range requests for media files
+
+    ## Content-Disposition Logic:
+    - **Inline**: PDFs, audio, video files - because media files are directly displayed in the browser
+    """
 
     swagger_schema = None
     http_method_names = ['get']
@@ -720,121 +743,44 @@ class DownloadStorageData(APIView):
 
     def get(self, request, *args, **kwargs):
         """Get export files list"""
-        request = self.request
         filepath = request.GET.get('filepath')
         if filepath is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         filepath = unquote(request.GET['filepath'])
 
-        url = None
+        file_obj = None
         if filepath.startswith(settings.UPLOAD_DIR):
             logger.debug(f'Fetch uploaded file by user {request.user} => {filepath}')
             file_upload = FileUpload.objects.filter(file=filepath).last()
 
             if file_upload is not None and file_upload.has_permission(request.user):
-                url = file_upload.file.storage.url(file_upload.file.name, storage_url=True)
+                file_obj = file_upload.file
         elif filepath.startswith(settings.AVATAR_PATH):
             user = User.objects.filter(avatar=filepath).first()
             if user is not None and request.user.active_organization.has_user(user):
-                url = user.avatar.storage.url(user.avatar.name, storage_url=True)
+                file_obj = user.avatar
 
-        if url is None:
+        if file_obj is None:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        protocol = urlparse(url).scheme
+        # NGINX handling is the default for better performance
+        if settings.USE_NGINX_FOR_UPLOADS:
+            url = file_obj.storage.url(file_obj.name, storage_url=True)
 
-        # Let NGINX handle it
-        response = HttpResponse()
-        # The below header tells NGINX to catch it and serve, see docker-config/nginx-app.conf
-        redirect = '/file_download/' + protocol + '/' + url.replace(protocol + '://', '')
+            protocol = urlparse(url).scheme
+            response = HttpResponse()
+            # The below header tells NGINX to catch it and serve, see deploy/default.conf
+            redirect = '/file_download/' + protocol + '/' + url.replace(protocol + '://', '')
+            response['X-Accel-Redirect'] = redirect
+            response['Content-Disposition'] = f'inline; filename="{filepath}"'
+            return response
 
-        response['X-Accel-Redirect'] = redirect
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filepath)
-        return response
-
-
-class PresignAPIMixin:
-    def handle_presign(self, request: HttpRequest, fileuri: str, instance: Union[Task, Project]) -> Response:
-        model_name = type(instance).__name__
-
-        if not instance.has_permission(request.user):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        # Attempt to base64 decode the fileuri
-        try:
-            fileuri = base64.urlsafe_b64decode(fileuri.encode()).decode()
-        # For backwards compatibility, try unquote if this fails
-        except Exception as exc:
-            logger.debug(
-                f'Failed to decode base64 {fileuri} for {model_name} {instance.id}: {exc} falling back to unquote'
-            )
-            fileuri = unquote(fileuri)
-
-        try:
-            resolved = instance.resolve_storage_uri(fileuri)
-        except Exception as exc:
-            logger.error(f'Failed to resolve storage uri {fileuri} for {model_name} {instance.id}: {exc}')
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if resolved is None or resolved.get('url') is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        url = resolved['url']
-        max_age = 0
-        if resolved.get('presign_ttl'):
-            max_age = resolved.get('presign_ttl') * 60
-
-        # Proxy to presigned url
-        response = HttpResponseRedirect(redirect_to=url, status=status.HTTP_303_SEE_OTHER)
-        response.headers['Cache-Control'] = f'no-store, max-age={max_age}'
-
-        return response
-
-
-class TaskPresignStorageData(PresignAPIMixin, APIView):
-    """A file proxy to presign storage urls at the task level."""
-
-    swagger_schema = None
-    http_method_names = ['get']
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, *args, **kwargs):
-        """Get the presigned url for a given fileuri"""
-        request = self.request
-        task_id = kwargs.get('task_id')
-        fileuri = request.GET.get('fileuri')
-
-        if fileuri is None or task_id is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            task = Task.objects.get(pk=task_id)
-        except Task.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        return self.handle_presign(request, fileuri, task)
-
-
-class ProjectPresignStorageData(PresignAPIMixin, APIView):
-    """A file proxy to presign storage urls at the project level."""
-
-    swagger_schema = None
-    http_method_names = ['get']
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, *args, **kwargs):
-        """Get the presigned url for a given fileuri"""
-        request = self.request
-        project_id = kwargs.get('project_id')
-        fileuri = request.GET.get('fileuri')
-
-        if fileuri is None or project_id is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            project = Project.objects.get(pk=project_id)
-        except Project.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        return self.handle_presign(request, fileuri, project)
+        # No NGINX: standard way for direct file serving
+        else:
+            content_type, _ = mimetypes.guess_type(filepath)
+            content_type = content_type or 'application/octet-stream'
+            response = RangedFileResponse(request, file_obj.open(mode='rb'), content_type=content_type)
+            response['Content-Disposition'] = f'inline; filename="{filepath}"'
+            response['filename'] = filepath
+            return response

@@ -1,3 +1,4 @@
+import { fixLSParams } from "@humansignal/frontend-test/helpers/utils/fixLSParams";
 import { expect } from "chai";
 
 type LSParams = Record<string, any>;
@@ -22,6 +23,7 @@ class LSParamsBuilder {
       "annotations:add-new",
       "annotations:delete",
       "annotations:view-all",
+      "annotations:copy-link",
       "predictions:tabs",
       "predictions:menu",
       "auto-annotation",
@@ -34,14 +36,20 @@ class LSParamsBuilder {
       predictions: [],
     },
   };
+  private _localStorageItems: Record<string, any> = {};
   private ls: typeof LabelStudio = null;
 
   constructor(ls: typeof LabelStudio) {
     this.ls = ls;
   }
 
-  init() {
-    this.ls.init(this.params);
+  init(beforeLoadCallback?: (win: Cypress.AUTWindow) => void) {
+    this.ls.init(this.params, (win) => {
+      Object.entries(this._localStorageItems).forEach(([key, value]) => {
+        win.localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+      });
+      beforeLoadCallback?.(win);
+    });
   }
 
   private get _task() {
@@ -62,6 +70,15 @@ class LSParamsBuilder {
     return task.annotations;
   }
 
+  private get _predictions() {
+    const task = this._task;
+
+    if (!task.predictions) {
+      task.predictions = [];
+    }
+    return task.predictions;
+  }
+
   config(config) {
     this.params.config = config;
     return this;
@@ -80,6 +97,10 @@ class LSParamsBuilder {
   }
   withAnnotation(annotation) {
     this._annotations.push(annotation);
+    return this;
+  }
+  withPrediction(prediction) {
+    this._predictions.push(prediction);
     return this;
   }
   withResult(result) {
@@ -124,13 +145,21 @@ class LSParamsBuilder {
     this.params[paramName] = paramValue;
     return this;
   }
+  localStorageItems(items) {
+    this._localStorageItems = items;
+    return this;
+  }
+  withLocalStorageItem(key, value) {
+    this._localStorageItems[key] = value;
+    return this;
+  }
 }
 
 export const LabelStudio = {
   /**
    * Initializes LabelStudio instance with given configuration
    */
-  init(params: LSParams) {
+  init(params: LSParams, beforeLoadCallback?: (win: Cypress.AUTWindow) => void) {
     cy.log("Initialize LSF");
     const windowLoadCallback = (win: Cypress.AUTWindow) => {
       win.DEFAULT_LSF_INIT = false;
@@ -152,6 +181,7 @@ export const LabelStudio = {
           "annotations:add-new",
           "annotations:delete",
           "annotations:view-all",
+          "annotations:copy-link",
           "predictions:tabs",
           "predictions:menu",
           "auto-annotation",
@@ -159,6 +189,7 @@ export const LabelStudio = {
         ],
         ...params,
       };
+      beforeLoadCallback?.(win);
 
       Cypress.off("window:before:load", windowLoadCallback);
     };
@@ -167,7 +198,7 @@ export const LabelStudio = {
 
     cy.visit("/").then((win) => {
       cy.log(`Default feature flags set ${JSON.stringify(win.APP_SETTINGS.feature_flags, null, "  ")}`);
-      const labelStudio = new win.LabelStudio("label-studio", win.LSF_CONFIG);
+      const labelStudio = new win.LabelStudio("label-studio", fixLSParams(win.LSF_CONFIG, win));
 
       if (win.LSF_CONFIG.eventListeners) {
         for (const [event, listener] of Object.entries(win.LSF_CONFIG.eventListeners)) {

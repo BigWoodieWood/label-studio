@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import { Fragment } from "react";
 import { observer } from "mobx-react";
 import { types } from "mobx-state-tree";
 
@@ -6,7 +6,7 @@ import BaseTool from "./Base";
 import ToolMixin from "../mixins/Tool";
 import { Tool } from "../components/Toolbar/Tool";
 import { FlyoutMenu } from "../components/Toolbar/FlyoutMenu";
-import { IconExpand, IconHandTool, IconZoomIn, IconZoomOut } from "../assets/icons";
+import { IconExpandTool, IconHandTool, IconZoomIn, IconZoomOut } from "@humansignal/icons";
 
 const ToolView = observer(({ item }) => {
   return (
@@ -33,7 +33,7 @@ const ToolView = observer(({ item }) => {
         }}
       />
       <FlyoutMenu
-        icon={<IconExpand />}
+        icon={<IconExpandTool />}
         items={[
           {
             label: "Zoom to fit",

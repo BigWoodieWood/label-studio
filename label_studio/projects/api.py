@@ -22,6 +22,7 @@ from django.utils.decorators import method_decorator
 from django_filters import CharFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
+from label_studio_sdk.label_interface.interface import LabelInterface
 from ml.serializers import MLBackendSerializer
 from projects.functions.next_task import get_next_task
 from projects.functions.stream_history import get_label_stream_history
@@ -29,6 +30,7 @@ from projects.functions.utils import recalculate_created_annotations_and_labels_
 from projects.models import Project, ProjectImport, ProjectManager, ProjectReimport, ProjectSummary
 from projects.serializers import (
     GetFieldsSerializer,
+    ProjectCountsSerializer,
     ProjectImportSerializer,
     ProjectLabelConfigSerializer,
     ProjectModelVersionExtendedSerializer,
@@ -279,6 +281,36 @@ class ProjectListAPI(generics.ListCreateAPIView):
     @api_webhook(WebhookAction.PROJECT_CREATED)
     def post(self, request, *args, **kwargs):
         return super(ProjectListAPI, self).post(request, *args, **kwargs)
+
+
+@method_decorator(
+    name='get',
+    decorator=swagger_auto_schema(
+        tags=['Projects'],
+        x_fern_sdk_group_name='projects',
+        x_fern_sdk_method_name='counts',
+        x_fern_audiences=['public'],
+        x_fern_pagination={
+            'offset': '$request.page',
+            'results': '$response.results',
+        },
+        operation_summary="List project's counts",
+        operation_description='Returns a list of projects with their counts. For example, task_number which is the total task number in project',
+    ),
+)
+class ProjectCountsListAPI(generics.ListAPIView):
+    serializer_class = ProjectCountsSerializer
+    filterset_class = ProjectFilterSet
+    permission_required = ViewClassPermission(
+        GET=all_permissions.projects_view,
+    )
+    pagination_class = ProjectListPagination
+
+    def get_queryset(self):
+        serializer = GetFieldsSerializer(data=self.request.query_params)
+        serializer.is_valid(raise_exception=True)
+        fields = serializer.validated_data.get('include')
+        return Project.objects.with_counts(fields=fields).filter(organization=self.request.user.active_organization)
 
 
 @method_decorator(
@@ -589,7 +621,7 @@ class ProjectSummaryResetAPI(GetParentObjectMixin, generics.CreateAPIView):
 
     @swagger_auto_schema(auto_schema=None)
     def post(self, *args, **kwargs):
-        project = self.get_parent_object()
+        project = self.parent_object
         summary = project.summary
         start_job_async_or_sync(
             recalculate_created_annotations_and_labels_from_scratch,
@@ -732,6 +764,7 @@ class ProjectTaskListAPI(GetParentObjectMixin, generics.ListCreateAPIView, gener
         project = generics.get_object_or_404(Project.objects.for_user(self.request.user), pk=self.kwargs['pk'])
         task_ids = list(Task.objects.filter(project=project).values('id'))
         Task.delete_tasks_without_signals(Task.objects.filter(project=project))
+        logger.info(f'calling reset project_id={project.id} ProjectTaskListAPI.delete()')
         project.summary.reset()
         emit_webhooks_for_instance(request.user.active_organization, None, WebhookAction.TASKS_DELETED, task_ids)
         return Response(status=204)
@@ -745,11 +778,11 @@ class ProjectTaskListAPI(GetParentObjectMixin, generics.ListCreateAPIView, gener
 
     def get_serializer_context(self):
         context = super(ProjectTaskListAPI, self).get_serializer_context()
-        context['project'] = self.get_parent_object()
+        context['project'] = self.parent_object
         return context
 
     def perform_create(self, serializer):
-        project = self.get_parent_object()
+        project = self.parent_object
         instance = serializer.save(project=project)
         emit_webhooks_for_instance(
             self.request.user.active_organization, project, WebhookAction.TASKS_CREATED, [instance]
@@ -757,28 +790,34 @@ class ProjectTaskListAPI(GetParentObjectMixin, generics.ListCreateAPIView, gener
         return instance
 
 
+def read_templates_and_groups():
+    annotation_templates_dir = find_dir('annotation_templates')
+    configs = []
+    for config_file in pathlib.Path(annotation_templates_dir).glob('**/*.yml'):
+        config = read_yaml(config_file)
+        if settings.VERSION_EDITION == 'Community':
+            if settings.VERSION_EDITION.lower() != config.get('type', 'community'):
+                continue
+        if config.get('image', '').startswith('/static') and settings.HOSTNAME:
+            # if hostname set manually, create full image urls
+            config['image'] = settings.HOSTNAME + config['image']
+        configs.append(config)
+    template_groups_file = find_file(os.path.join('annotation_templates', 'groups.txt'))
+    with open(template_groups_file, encoding='utf-8') as f:
+        groups = f.read().splitlines()
+    logger.debug(f'{len(configs)} templates found.')
+    return {'templates': configs, 'groups': groups}
+
+
 class TemplateListAPI(generics.ListAPIView):
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     permission_required = all_permissions.projects_view
     swagger_schema = None
+    # load this once in memory for performance
+    templates_and_groups = read_templates_and_groups()
 
     def list(self, request, *args, **kwargs):
-        annotation_templates_dir = find_dir('annotation_templates')
-        configs = []
-        for config_file in pathlib.Path(annotation_templates_dir).glob('**/*.yml'):
-            config = read_yaml(config_file)
-            if settings.VERSION_EDITION == 'Community':
-                if settings.VERSION_EDITION.lower() != config.get('type', 'community'):
-                    continue
-            if config.get('image', '').startswith('/static') and settings.HOSTNAME:
-                # if hostname set manually, create full image urls
-                config['image'] = settings.HOSTNAME + config['image']
-            configs.append(config)
-        template_groups_file = find_file(os.path.join('annotation_templates', 'groups.txt'))
-        with open(template_groups_file, encoding='utf-8') as f:
-            groups = f.read().splitlines()
-        logger.debug(f'{len(configs)} templates found.')
-        return Response({'templates': configs, 'groups': groups})
+        return Response(self.templates_and_groups)
 
 
 class ProjectSampleTask(generics.RetrieveAPIView):
@@ -790,11 +829,31 @@ class ProjectSampleTask(generics.RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         label_config = self.request.data.get('label_config')
+        include_annotation_and_prediction = self.request.data.get('include_annotation_and_prediction', False)
+
         if not label_config:
             raise RestValidationError('Label config is not set or is empty')
 
         project = self.get_object()
-        return Response({'sample_task': project.get_sample_task(label_config)}, status=200)
+
+        if include_annotation_and_prediction:
+            try:
+                label_interface = LabelInterface(label_config)
+                complete_task = label_interface.generate_complete_sample_task(raise_on_failure=True)
+                # set the annotation's user id to the current user instead of -1
+                user_id = request.user.id
+                for annotation in complete_task['annotations']:
+                    annotation['completed_by'] = user_id
+                return Response({'sample_task': complete_task}, status=200)
+            except Exception as e:
+                logger.error(
+                    f'Error generating enhanced sample task, falling back to original method: {str(e)}. Label config: {label_config}'
+                )
+                # Fallback to project.get_sample_task if LabelInterface.generate_complete_sample_task failed
+                return Response({'sample_task': project.get_sample_task(label_config)}, status=200)
+        else:
+            # Use the simple sample task generation method
+            return Response({'sample_task': project.get_sample_task(label_config)}, status=200)
 
 
 class ProjectModelVersions(generics.RetrieveAPIView):

@@ -1,7 +1,8 @@
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
-import { LsCross } from "../../../assets/icons";
-import { Button, Userpic } from "../../../components";
+import { IconCross } from "@humansignal/icons";
+import { Userpic } from "@humansignal/ui";
+import { Button } from "../../../components";
 import { Block, Elem } from "../../../utils/bem";
 import "./SelectedUser.scss";
 
@@ -32,7 +33,7 @@ export const SelectedUser = ({ user, onClose }) => {
   return (
     <Block name="user-info">
       <Elem name="close" tag={Button} type="link" onClick={onClose}>
-        <LsCross />
+        <IconCross />
       </Elem>
 
       <Elem name="header">

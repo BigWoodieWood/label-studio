@@ -1,10 +1,10 @@
-import React, { useCallback, useContext } from "react";
+import { EnterpriseBadge, Select } from "@humansignal/ui";
+import { useCallback, useContext } from "react";
 import { Button } from "../../components";
-import { Form, Input, Label, Select, TextArea } from "../../components/Form";
+import { Form, Input, TextArea } from "../../components/Form";
 import { RadioGroup } from "../../components/Form/Elements/RadioGroup/RadioGroup";
 import { ProjectContext } from "../../providers/ProjectProvider";
-import { Block, cn, Elem } from "../../utils/bem";
-import { EnterpriseBadge } from "../../components/Badges/Enterprise";
+import { Block, Elem } from "../../utils/bem";
 import "./settings.scss";
 import { HeidiTips } from "../../components/HeidiTips/HeidiTips";
 import { FF_LSDV_E_297, isFF } from "../../utils/feature-flags";
@@ -21,7 +21,7 @@ export const GeneralSettings = () => {
   const colors = ["#FDFDFC", "#FF4C25", "#FF750F", "#ECB800", "#9AC422", "#34988D", "#617ADA", "#CC6FBE"];
 
   const samplings = [
-    { value: "Sequential", label: "Sequential", description: "Tasks are ordered by Data manager ordering" },
+    { value: "Sequential", label: "Sequential", description: "Tasks are ordered by Task ID" },
     { value: "Uniform", label: "Random", description: "Tasks are chosen with uniform random" },
   ];
 
@@ -39,7 +39,7 @@ export const GeneralSettings = () => {
                 <Block name="workspace-placeholder">
                   <Elem name="badge-wrapper">
                     <Elem name="title">Workspace</Elem>
-                    <EnterpriseBadge />
+                    <EnterpriseBadge className="ml-2" />
                   </Elem>
                   <Select placeholder="Select an option" disabled options={[]} />
                   <Caption>
@@ -83,7 +83,7 @@ export const GeneralSettings = () => {
                     value=""
                     label={
                       <>
-                        Uncertainty sampling <EnterpriseBadge />
+                        Uncertainty sampling <EnterpriseBadge className="ml-2" />
                       </>
                     }
                     disabled

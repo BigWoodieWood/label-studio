@@ -1,3 +1,4 @@
+import { ff } from "@humansignal/core";
 import { inject } from "mobx-react";
 import { destroy, getRoot, getType, types } from "mobx-state-tree";
 
@@ -16,9 +17,8 @@ import ToolsManager from "../../../tools/Manager";
 import { parseValue } from "../../../utils/data";
 import {
   FF_DEV_3377,
-  FF_DEV_3666,
+  FF_DEV_3391,
   FF_DEV_3793,
-  FF_DEV_4081,
   FF_LSDV_4583,
   FF_LSDV_4583_6,
   FF_LSDV_4711,
@@ -70,7 +70,7 @@ const IMAGE_PRELOAD_COUNT = 3;
  * @meta_description Customize Label Studio with the Image tag to annotate images for computer vision machine learning and data science projects.
  * @param {string} name                       - Name of the element
  * @param {string} value                      - Data field containing a path or URL to the image
- * @param {string} [valueList]                - References a variable that holds a list of image URLs
+ * @param {string} [valueList]                - References a variable that holds a list of image URLs. For an example, see the [Multi-Page Document Annotation](/templates/multi-page-document-annotation) template.
  * @param {boolean} [smoothing]               - Enable smoothing, by default it uses user settings
  * @param {string=} [width=100%]              - Image width
  * @param {string=} [maxWidth=750px]          - Maximum image width
@@ -292,9 +292,6 @@ const Model = types
 
       if (isFF(FF_LSDV_4711) && (!value || value === "none")) return "anonymous";
 
-      if (!isFF(FF_DEV_4081)) {
-        return null;
-      }
       if (!value || value === "none") {
         return null;
       }
@@ -572,7 +569,9 @@ const Model = types
       };
     },
   }))
-
+  .volatile((self) => ({
+    manager: null,
+  }))
   // actions for the tools
   .actions((self) => {
     const manager = ToolsManager.getInstance({ name: self.name });
@@ -582,18 +581,19 @@ const Model = types
       if (!self.store.task) return;
 
       const parsedValue = self.multiImage ? self.parsedValueList : self.parsedValue;
+      const idPostfix = self.annotation ? `@${self.annotation.id}` : "";
 
       if (Array.isArray(parsedValue)) {
         parsedValue.forEach((src, index) => {
           self.imageEntities.push({
-            id: `${self.name}#${index}`,
+            id: `${self.name}#${index}${idPostfix}`,
             src,
             index,
           });
         });
       } else {
         self.imageEntities.push({
-          id: `${self.name}#0`,
+          id: `${self.name}#0${idPostfix}`,
           src: parsedValue,
           index: 0,
         });
@@ -603,15 +603,18 @@ const Model = types
     }
 
     function afterAttach() {
-      if (self.selectioncontrol) manager.addTool("MoveTool", Tools.Selection.create({}, env));
+      if (ff.isActive(FF_DEV_3391) && !self.annotation) {
+        return;
+      }
+      if (self.selectioncontrol) manager.addTool("MoveTool", Tools.Selection.create({}, env), "MoveTool");
 
-      if (self.zoomcontrol) manager.addTool("ZoomPanTool", Tools.Zoom.create({}, env));
+      if (self.zoomcontrol) manager.addTool("ZoomPanTool", Tools.Zoom.create({}, env), "ZoomPanTool");
 
-      if (self.brightnesscontrol) manager.addTool("BrightnessTool", Tools.Brightness.create({}, env));
+      if (self.brightnesscontrol) manager.addTool("BrightnessTool", Tools.Brightness.create({}, env), "BrightnessTool");
 
-      if (self.contrastcontrol) manager.addTool("ContrastTool", Tools.Contrast.create({}, env));
+      if (self.contrastcontrol) manager.addTool("ContrastTool", Tools.Contrast.create({}, env), "ContrastTool");
 
-      if (self.rotatecontrol) manager.addTool("RotateTool", Tools.Rotate.create({}, env));
+      if (self.rotatecontrol) manager.addTool("RotateTool", Tools.Rotate.create({}, env), "RotateTool");
 
       createImageEntities();
     }
@@ -643,9 +646,9 @@ const Model = types
           if (isFF(FF_ZOOM_OPTIM)) {
             if (skipInteractions) return true;
 
-            const relationMode = self.annotation.relationMode;
+            const isLinkingMode = self.annotation.isLinkingMode;
 
-            if (relationMode) return false;
+            if (isLinkingMode) return false;
 
             const manager = self.getToolsManager();
             const tool = manager.findSelectedTool();
@@ -1110,15 +1113,8 @@ const Model = types
     },
 
     checkLabels() {
-      let labelStates;
-
-      if (isFF(FF_DEV_3666)) {
-        // there should be at least one available label or none of them should be selected
-        labelStates = self.activeStates() || [];
-      } else {
-        // there is should be at least one state selected for *labels object
-        labelStates = (self.states() || []).filter((s) => s.type.includes("labels"));
-      }
+      // there should be at least one available label or none of them should be selected
+      const labelStates = self.activeStates() || [];
       const selectedStates = self.getAvailableStates();
 
       return selectedStates.length !== 0 || labelStates.length === 0;

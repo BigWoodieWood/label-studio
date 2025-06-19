@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import calendar
 import contextlib
 import copy
+import importlib
 import logging
 import os
 import random
@@ -13,16 +14,14 @@ import time
 import traceback as tb
 import uuid
 from collections import defaultdict
-from datetime import datetime
+from copy import deepcopy
 from functools import wraps
 from typing import Any, Callable, Generator, Iterable, Mapping, Optional
 
 import drf_yasg.openapi as openapi
-import pkg_resources
 import pytz
 import requests
 import ujson as json
-from boxing import boxing
 from colorama import Fore
 from core.utils.params import get_env
 from django.conf import settings
@@ -42,6 +41,7 @@ from django.db.models.signals import (
     pre_save,
 )
 from django.db.utils import OperationalError
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.module_loading import import_string
 from django_filters.rest_framework import DjangoFilterBackend
@@ -49,9 +49,10 @@ from drf_yasg.inspectors import CoreAPICompatInspector, NotHandled
 from label_studio_sdk._extensions.label_studio_tools.core.utils.exceptions import (
     LabelStudioXMLSyntaxErrorSentryIgnored,
 )
-from pkg_resources import parse_version
+from packaging.version import parse as parse_version
+from pyboxen import boxen
 from rest_framework import status
-from rest_framework.exceptions import ErrorDetail
+from rest_framework.exceptions import APIException, ErrorDetail
 from rest_framework.views import Response, exception_handler
 
 import label_studio
@@ -88,7 +89,17 @@ def custom_exception_handler(exc, context):
     :return: response with error desc
     """
     exception_id = uuid.uuid4()
-    logger.error('{} {}'.format(exception_id, exc), exc_info=True)
+
+    sentry_skip = False
+    if isinstance(exc, APIException) and exc.status_code < 500:
+        # Skipping Sentry for non-500 unhandled exceptions
+        sentry_skip = True
+
+    logger.error(
+        '{} {}'.format(exception_id, exc),
+        exc_info=True,
+        extra={'sentry_skip': sentry_skip, 'exception_id': exception_id},
+    )
 
     exc = _override_exceptions(exc)
 
@@ -100,6 +111,10 @@ def custom_exception_handler(exc, context):
         'detail': 'Unknown error',  # default value
         'exc_info': None,
     }
+
+    if hasattr(exc, 'display_context'):
+        response_data['display_context'] = deepcopy(exc.display_context)
+
     # try rest framework handler
     response = exception_handler(exc, context)
     if response is not None:
@@ -129,7 +144,9 @@ def custom_exception_handler(exc, context):
         if not settings.DEBUG_MODAL_EXCEPTIONS:
             exc_tb = None
         response_data['exc_info'] = exc_tb
+        # Thrown by sdk when label config is invalid
         if isinstance(exc, LabelStudioXMLSyntaxErrorSentryIgnored):
+            response_data['status_code'] = status.HTTP_400_BAD_REQUEST
             response = Response(status=status.HTTP_400_BAD_REQUEST, data=response_data)
         else:
             response = Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, data=response_data)
@@ -261,7 +278,7 @@ def datetime_to_timestamp(dt):
 
 
 def timestamp_now():
-    return datetime_to_timestamp(datetime.utcnow())
+    return datetime_to_timestamp(timezone.now())
 
 
 def find_first_one_to_one_related_field_by_prefix(instance, prefix):
@@ -350,11 +367,7 @@ def retry_database_locked():
 
 
 def get_app_version():
-    version = pkg_resources.get_distribution('label-studio').version
-    if isinstance(version, str):
-        return version
-    elif isinstance(version, dict):
-        return version.get('version') or version.get('latest_version')
+    return importlib.metadata.version('label-studio')
 
 
 def get_latest_version():
@@ -397,13 +410,13 @@ def check_for_the_latest_version(print_message):
     outdated = latest_version and current_version_is_outdated(latest_version)
 
     def update_package_message():
-        update_command = Fore.CYAN + 'pip install -U ' + label_studio.package_name + Fore.RESET
-        return boxing(
+        update_command = 'pip install -U ' + label_studio.package_name
+        return boxen(
             'Update available {curr_version} → {latest_version}\nRun {command}'.format(
                 curr_version=label_studio.__version__, latest_version=latest_version, command=update_command
             ),
             style='double',
-        )
+        ).replace(update_command, Fore.CYAN + update_command + Fore.RESET)
 
     if outdated and print_message:
         print(update_package_message())
@@ -496,6 +509,9 @@ def collect_versions(force=False):
                 sentry_sdk.set_tag('version-' + package, result[package]['version'])
             if 'commit' in result[package]:
                 sentry_sdk.set_tag('commit-' + package, result[package]['commit'])
+
+    # edition type
+    result['edition'] = settings.VERSION_EDITION
 
     settings.VERSIONS = result
     return result
@@ -612,6 +628,24 @@ def batch(iterable, n=1):
     l = len(iterable)  # noqa: E741
     for ndx in range(0, l, n):
         yield iterable[ndx : min(ndx + n, l)]
+
+
+def batched_iterator(iterable, n):
+    """
+    TODO: replace with itertools.batched when we drop support for Python < 3.12
+    """
+
+    iterator = iter(iterable)
+    while True:
+        batch = []
+        for _ in range(n):
+            try:
+                batch.append(next(iterator))
+            except StopIteration:
+                if batch:
+                    yield batch
+                return
+        yield batch
 
 
 def round_floats(o):
@@ -734,3 +768,19 @@ def empty(*args, **kwargs):
 def get_ttl_hash(seconds: int = 60) -> int:
     """Return the same value within `seconds` time period"""
     return round(time.time() / seconds)
+
+
+def is_community():
+    """Determine if the current Label Studio instance is the community edition (aka LSO).
+
+    Returns
+    -------
+    bool
+        True if running open-source Label Studio, False otherwise.
+    """
+    try:
+        import label_studio_enterprise  # noqa: F401
+
+        return False
+    except ImportError:
+        return True

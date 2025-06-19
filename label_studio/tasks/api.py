@@ -3,7 +3,6 @@
 import logging
 
 import drf_yasg.openapi as openapi
-from core.feature_flags import flag_set
 from core.mixins import GetParentObjectMixin
 from core.permissions import ViewClassPermission, all_permissions
 from core.utils.common import DjangoFilterDescriptionInspector
@@ -539,7 +538,7 @@ class AnnotationsListAPI(GetParentObjectMixin, generics.ListCreateAPIView):
             pass
 
     def perform_create(self, ser):
-        task = self.get_parent_object()
+        task = self.parent_object
         # annotator has write access only to annotations and it can't be checked it after serializer.save()
         user = self.request.user
 
@@ -573,9 +572,7 @@ class AnnotationsListAPI(GetParentObjectMixin, generics.ListCreateAPIView):
             if draft.task_id != task.id or not draft.has_permission(user) or draft.user_id != user.id:
                 raise PermissionDenied(f'You have no permission to draft id:{draft_id}')
 
-        if draft is not None and flag_set(
-            'fflag_feat_back_lsdv_5035_use_created_at_from_draft_for_annotation_256052023_short', user='auto'
-        ):
+        if draft is not None:
             # if the annotation will be created from draft - get created_at from draft to keep continuity of history
             extra_args['draft_created_at'] = draft.created_at
 
@@ -778,13 +775,7 @@ class PredictionAPI(viewsets.ModelViewSet):
     filterset_fields = ['task', 'task__project', 'project']
 
     def get_queryset(self):
-        if flag_set(
-            'fflag_perf_back_lsdv_4695_update_prediction_query_to_use_direct_project_relation',
-            user='auto',
-        ):
-            return Prediction.objects.filter(project__organization=self.request.user.active_organization)
-        else:
-            return Prediction.objects.filter(task__project__organization=self.request.user.active_organization)
+        return Prediction.objects.filter(project__organization=self.request.user.active_organization)
 
 
 @method_decorator(name='get', decorator=swagger_auto_schema(auto_schema=None))

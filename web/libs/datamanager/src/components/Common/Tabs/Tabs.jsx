@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { FaEllipsisV } from "react-icons/fa";
-import { BemWithSpecifiContext } from "../../../utils/bem";
+import { IconEllipsisVertical } from "@humansignal/icons";
+import { cn } from "../../../utils/bem";
 import { Button } from "../Button/Button";
 import { Dropdown } from "../Dropdown/DropdownComponent";
 import { Icon } from "../Icon/Icon";
@@ -9,9 +9,8 @@ import Input from "../Input/Input";
 import "./Tabs.scss";
 import { TabsMenu } from "./TabsMenu";
 
-const { Block, Elem } = BemWithSpecifiContext();
-
 const TabsContext = createContext();
+export const tabsCN = cn("tabs-dm");
 
 export const Tabs = ({
   children,
@@ -45,22 +44,28 @@ export const Tabs = ({
 
   return (
     <TabsContext.Provider value={contextValue}>
-      <Block name="tabs-dm">
-        <Elem name="list">
+      <div className={tabsCN.toString()}>
+        <span className={tabsCN.elem("list").toString()}>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="droppable" direction="horizontal">
               {(provided) => (
-                <Elem ref={provided.innerRef} name="droppable" {...provided.droppableProps}>
+                <div
+                  className={tabsCN.elem("droppable").toString()}
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                >
                   {children}
                   {provided.placeholder}
-                </Elem>
+                </div>
               )}
             </Droppable>
           </DragDropContext>
-          {allowedActions.add !== false && <Elem tag={Button} name="add" type="text" onClick={onAdd} icon={addIcon} />}
-        </Elem>
-        <Elem name="extra">{tabBarExtraContent}</Elem>
-      </Block>
+          {allowedActions.add !== false && (
+            <Button className={tabsCN.elem("add").toString()} type="text" onClick={onAdd} icon={addIcon} data-leave />
+          )}
+        </span>
+        <span className={tabsCN.elem("extra").toString()}>{tabBarExtraContent}</span>
+      </div>
     </TabsContext.Provider>
   );
 };
@@ -121,19 +126,21 @@ export const TabsItem = ({
   );
 
   return (
-    <Elem
-      name="item"
-      mod={{ active, hover, virtual }}
+    <div
+      className={tabsCN.elem("item").mod({ active, hover, virtual }).toString()}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <Elem
-        name="item-left"
+      <div
+        className={tabsCN
+          .elem("item-left")
+          .mod({
+            edit: renameMode,
+          })
+          .toString()}
         onClick={() => switchTab?.(tab)}
-        mod={{
-          edit: renameMode,
-        }}
         title={currentTitle}
+        data-leave
       >
         {renameMode ? (
           <Input
@@ -158,11 +165,12 @@ export const TabsItem = ({
             {currentTitle}
           </span>
         )}
-      </Elem>
-      <Elem name="item-right">
+      </div>
+      <div className={tabsCN.elem("item-right").toString()}>
         {showMenu && (
           <Dropdown.Trigger
             align="bottom-left"
+            openUpwardForShortViewport={false}
             content={
               <TabsMenu
                 editable={tabIsEditable}
@@ -184,17 +192,17 @@ export const TabsItem = ({
               />
             }
           >
-            <Elem name="item-right-button">
+            <div className={tabsCN.elem("item-right-button").toString()}>
               <Button
                 type="link"
                 size="small"
                 style={{ padding: "6px", margin: "auto", color: "#999" }}
-                icon={<Icon icon={FaEllipsisV} />}
+                icon={<Icon icon={IconEllipsisVertical} />}
               />
-            </Elem>
+            </div>
           </Dropdown.Trigger>
         )}
-      </Elem>
-    </Elem>
+      </div>
+    </div>
   );
 };

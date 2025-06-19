@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LsPlus } from "../../../assets/icons";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "../../../components";
 import { Description } from "../../../components/Description/Description";
 import { Input } from "../../../components/Form";
@@ -9,22 +8,39 @@ import { Space } from "../../../components/Space/Space";
 import { useAPI } from "../../../providers/ApiProvider";
 import { useConfig } from "../../../providers/ConfigProvider";
 import { Block, Elem } from "../../../utils/bem";
-import { FF_LSDV_E_297, isFF } from "../../../utils/feature-flags";
-import { copyText } from "../../../utils/helpers";
+import { FF_AUTH_TOKENS, FF_LSDV_E_297, isFF } from "../../../utils/feature-flags";
 import "./PeopleInvitation.scss";
 import { PeopleList } from "./PeopleList";
 import "./PeoplePage.scss";
 import { SelectedUser } from "./SelectedUser";
+import { TokenSettingsModal } from "@humansignal/app-common/blocks/TokenSettingsModal";
+import { IconPlus } from "@humansignal/icons";
+import { useToast } from "@humansignal/ui";
+import { InviteLink } from "./InviteLink";
+import { debounce } from "@humansignal/core/lib/utils/debounce";
 
 const InvitationModal = ({ link }) => {
   return (
     <Block name="invite">
-      <Input value={link} style={{ width: "100%" }} readOnly />
+      <Input
+        value={link}
+        style={{ width: "100%" }}
+        readOnly
+        onCopy={debounce(() => __lsa("organization.add_people.manual_copy_link"), 1000)}
+        onSelect={debounce(() => __lsa("organization.add_people.select_link"), 1000)}
+      />
 
       <Description style={{ marginTop: 16 }}>
         Invite people to join your Label Studio instance. People that you invite have full access to all of your
         projects.{" "}
-        <a href="https://labelstud.io/guide/signup.html" target="_blank" rel="noreferrer">
+        <a
+          href="https://labelstud.io/guide/signup.html"
+          target="_blank"
+          rel="noreferrer"
+          onClick={() =>
+            __lsa("docs.organization.add_people.learn_more", { href: "https://labelstud.io/guide/signup.html" })
+          }
+        >
           Learn more
         </a>
         .
@@ -36,8 +52,11 @@ const InvitationModal = ({ link }) => {
 export const PeoplePage = () => {
   const api = useAPI();
   const inviteModal = useRef();
+  const apiSettingsModal = useRef();
   const config = useConfig();
+  const toast = useToast();
   const [selectedUser, setSelectedUser] = useState(null);
+  const [invitationOpen, setInvitationOpen] = useState(false);
 
   const [link, setLink] = useState();
 
@@ -50,72 +69,30 @@ export const PeoplePage = () => {
     [setSelectedUser],
   );
 
-  const setInviteLink = useCallback(
-    (link) => {
-      const hostname = config.hostname || location.origin;
-
-      setLink(`${hostname}${link}`);
-    },
-    [config, setLink],
-  );
-
-  const updateLink = useCallback(() => {
-    api.callApi("resetInviteLink").then(({ invite_url }) => {
-      setInviteLink(invite_url);
-    });
-  }, [setInviteLink]);
-
-  const inviteModalProps = useCallback(
-    (link) => ({
-      title: "Invite people",
-      style: { width: 640, height: 472 },
-      body: () => <InvitationModal link={link} />,
-      footer: () => {
-        const [copied, setCopied] = useState(false);
-
-        const copyLink = useCallback(() => {
-          setCopied(true);
-          copyText(link);
-          setTimeout(() => setCopied(false), 1500);
-        }, []);
-
-        return (
-          <Space spread>
-            <Space>
-              <Button style={{ width: 170 }} onClick={() => updateLink()}>
-                Reset Link
-              </Button>
-            </Space>
-            <Space>
-              <Button primary style={{ width: 170 }} onClick={copyLink}>
-                {copied ? "Copied!" : "Copy link"}
-              </Button>
-            </Space>
-          </Space>
-        );
-      },
-      bareFooter: true,
+  const apiTokensSettingsModalProps = useMemo(
+    () => ({
+      title: "API Token Settings",
+      style: { width: 480 },
+      body: () => (
+        <TokenSettingsModal
+          onSaved={() => {
+            toast.show({ message: "API Token settings saved" });
+            apiSettingsModal.current?.close();
+          }}
+        />
+      ),
     }),
     [],
   );
 
-  const showInvitationModal = useCallback(() => {
-    inviteModal.current = modal(inviteModalProps(link));
-  }, [inviteModalProps, link]);
+  const showApiTokenSettingsModal = useCallback(() => {
+    apiSettingsModal.current = modal(apiTokensSettingsModalProps);
+    __lsa("organization.token_settings");
+  }, [apiTokensSettingsModalProps]);
 
   const defaultSelected = useMemo(() => {
     return localStorage.getItem("selectedUser");
   }, []);
-
-  useEffect(() => {
-    api.callApi("inviteLink").then(({ invite_url }) => {
-      setInviteLink(invite_url);
-    });
-  }, []);
-
-  useEffect(() => {
-    inviteModal.current?.update(inviteModalProps(link));
-  }, [link]);
 
   return (
     <Block name="people">
@@ -124,7 +101,8 @@ export const PeoplePage = () => {
           <Space />
 
           <Space>
-            <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
+            {isFF(FF_AUTH_TOKENS) && <Button onClick={showApiTokenSettingsModal}>API Tokens Settings</Button>}
+            <Button icon={<IconPlus />} primary onClick={() => setInvitationOpen(true)}>
               Add People
             </Button>
           </Space>
@@ -143,6 +121,13 @@ export const PeoplePage = () => {
           isFF(FF_LSDV_E_297) && <HeidiTips collection="organizationPage" />
         )}
       </Elem>
+      <InviteLink
+        opened={invitationOpen}
+        onClosed={() => {
+          console.log("hidden");
+          setInvitationOpen(false);
+        }}
+      />
     </Block>
   );
 };

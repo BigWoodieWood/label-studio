@@ -14,10 +14,12 @@ from organizations.models import Organization, OrganizationMember
 from organizations.serializers import (
     OrganizationIdSerializer,
     OrganizationInviteSerializer,
-    OrganizationMemberUserSerializer,
+    OrganizationMemberListParamsSerializer,
+    OrganizationMemberListSerializer,
+    OrganizationMemberSerializer,
     OrganizationSerializer,
-    OrganizationsParamsSerializer,
 )
+from projects.models import Project
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import get_object_or_404
@@ -25,7 +27,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.views import APIView
+from tasks.models import Annotation
 from users.models import User
 
 from label_studio.core.permissions import ViewClassPermission, all_permissions
@@ -73,7 +77,7 @@ class OrganizationListAPI(generics.ListCreateAPIView):
         return super(OrganizationListAPI, self).post(request, *args, **kwargs)
 
 
-class OrganizationMemberPagination(PageNumberPagination):
+class OrganizationMemberListPagination(PageNumberPagination):
     page_size = 20
     page_size_query_param = 'page_size'
 
@@ -109,19 +113,68 @@ class OrganizationMemberListAPI(generics.ListAPIView):
         PATCH=all_permissions.organizations_change,
         DELETE=all_permissions.organizations_change,
     )
-    serializer_class = OrganizationMemberUserSerializer
-    pagination_class = OrganizationMemberPagination
+    serializer_class = OrganizationMemberListSerializer
+    pagination_class = OrganizationMemberListPagination
+
+    def _get_created_projects_map(self):
+        members = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        user_ids = [member.user_id for member in members]
+        projects = (
+            Project.objects.filter(created_by_id__in=user_ids, organization=self.request.user.active_organization)
+            .values('created_by_id', 'id', 'title')
+            .distinct()
+        )
+        projects_map = {}
+        for project in projects:
+            projects_map.setdefault(project['created_by_id'], []).append(
+                {
+                    'id': project['id'],
+                    'title': project['title'],
+                }
+            )
+        return projects_map
+
+    def _get_contributed_to_projects_map(self):
+        members = self.paginate_queryset(self.filter_queryset(self.get_queryset()))
+        user_ids = [member.user_id for member in members]
+        org_project_ids = Project.objects.filter(organization=self.request.user.active_organization).values_list(
+            'id', flat=True
+        )
+        annotations = (
+            Annotation.objects.filter(completed_by__in=list(user_ids), project__in=list(org_project_ids))
+            .values('completed_by', 'project_id')
+            .distinct()
+        )
+        project_ids = [annotation['project_id'] for annotation in annotations]
+        projects_map = Project.objects.in_bulk(id_list=project_ids, field_name='id')
+
+        contributed_to_projects_map = {}
+        for annotation in annotations:
+            project = projects_map[annotation['project_id']]
+            contributed_to_projects_map.setdefault(annotation['completed_by'], []).append(
+                {
+                    'id': project.id,
+                    'title': project.title,
+                }
+            )
+        return contributed_to_projects_map
 
     def get_serializer_context(self):
+        context = super().get_serializer_context()
+        contributed_to_projects = bool_from_request(self.request.GET, 'contributed_to_projects', False)
         return {
-            'contributed_to_projects': bool_from_request(self.request.GET, 'contributed_to_projects', False),
-            'request': self.request,
+            'contributed_to_projects': contributed_to_projects,
+            'created_projects_map': self._get_created_projects_map() if contributed_to_projects else None,
+            'contributed_to_projects_map': self._get_contributed_to_projects_map()
+            if contributed_to_projects
+            else None,
+            **context,
         }
 
     def get_queryset(self):
         org = generics.get_object_or_404(self.request.user.organizations, pk=self.kwargs[self.lookup_field])
         if flag_set('fix_backend_dev_3134_exclude_deactivated_users', self.request.user):
-            serializer = OrganizationsParamsSerializer(data=self.request.GET)
+            serializer = OrganizationMemberListParamsSerializer(data=self.request.GET)
             serializer.is_valid(raise_exception=True)
             active = serializer.validated_data.get('active')
 
@@ -135,6 +188,25 @@ class OrganizationMemberListAPI(generics.ListAPIView):
             return org.members.order_by('user__username')
 
 
+@method_decorator(
+    name='get',
+    decorator=swagger_auto_schema(
+        tags=['Organizations'],
+        x_fern_sdk_group_name=['organizations', 'members'],
+        x_fern_sdk_method_name='get',
+        operation_summary='Get organization member details',
+        operation_description='Get organization member details by user ID.',
+        manual_parameters=[
+            openapi.Parameter(
+                name='user_pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying the user to get organization details for.',
+            ),
+        ],
+        responses={200: OrganizationMemberSerializer()},
+    ),
+)
 @method_decorator(
     name='delete',
     decorator=swagger_auto_schema(
@@ -160,16 +232,39 @@ class OrganizationMemberListAPI(generics.ListAPIView):
 )
 class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView):
     permission_required = ViewClassPermission(
+        GET=all_permissions.organizations_view,
         DELETE=all_permissions.organizations_change,
     )
     parent_queryset = Organization.objects.all()
     parser_classes = (JSONParser, FormParser, MultiPartParser)
-    permission_classes = (IsAuthenticated, HasObjectPermission)
-    serializer_class = OrganizationMemberUserSerializer  # Assuming this is the right serializer
-    http_method_names = ['delete']
+    serializer_class = OrganizationMemberSerializer
+    http_method_names = ['delete', 'get']
+
+    @property
+    def permission_classes(self):
+        if self.request.method == 'DELETE':
+            return [IsAuthenticated, HasObjectPermission]
+        return api_settings.DEFAULT_PERMISSION_CLASSES
+
+    def get_queryset(self):
+        return OrganizationMember.objects.filter(organization=self.parent_object)
+
+    def get_serializer_context(self):
+        return {
+            **super().get_serializer_context(),
+            'organization': self.parent_object,
+        }
+
+    def get(self, request, pk, user_pk):
+        queryset = self.get_queryset()
+        user = get_object_or_404(User, pk=user_pk)
+        member = get_object_or_404(queryset, user=user)
+        self.check_object_permissions(request, member)
+        serializer = self.get_serializer(member)
+        return Response(serializer.data)
 
     def delete(self, request, pk=None, user_pk=None):
-        org = self.get_parent_object()
+        org = self.parent_object
         if org != request.user.active_organization:
             raise PermissionDenied('You can delete members only for your current active organization')
 

@@ -1,10 +1,11 @@
-import React, { createElement } from "react";
+import { createElement } from "react";
 import { cn } from "../../../../utils/bem";
 import "./Label.scss";
-
-const Label = ({ text, children, required, placement, description, size, large, style, simple, flat }) => {
+import { clsx } from "clsx";
+/** @deprecated - needs to be replaced with @humansignal/ui Label - visualizes differently currently */
+const Label = ({ text, children, required, placement, description, size, large, style, simple, flat, className }) => {
   const rootClass = cn("label-ls");
-  const classList = [rootClass];
+  const classList = [rootClass.toClassName()];
   const tagName = simple ? "div" : "label";
   const mods = {
     size,
@@ -15,12 +16,12 @@ const Label = ({ text, children, required, placement, description, size, large, 
     empty: !children,
   };
 
-  classList.push(rootClass.mod(mods));
+  classList.push(rootClass.mod(mods).toClassName());
 
   return createElement(
     tagName,
     {
-      className: classList.join(" "),
+      className: clsx(classList, className),
       "data-required": required,
       style: style,
     },

@@ -1,4 +1,4 @@
-import React, { Component, createRef, forwardRef, Fragment, memo, useEffect, useRef, useState } from "react";
+import { Component, createRef, forwardRef, Fragment, memo, useEffect, useRef, useState } from "react";
 import { Group, Layer, Line, Rect, Stage } from "react-konva";
 import { observer } from "mobx-react";
 import { getEnv, getRoot, isAlive } from "mobx-state-tree";
@@ -21,11 +21,9 @@ import { debounce } from "../../utils/debounce";
 import Constants from "../../core/Constants";
 import { fixRectToFit } from "../../utils/image";
 import {
-  FF_DBLCLICK_DELAY,
   FF_DEV_1442,
   FF_DEV_3077,
   FF_DEV_3793,
-  FF_DEV_4081,
   FF_LSDV_4583_6,
   FF_LSDV_4711,
   FF_LSDV_4930,
@@ -65,12 +63,7 @@ const splitRegions = (regions) => {
 };
 
 const Region = memo(({ region, showSelected = false }) => {
-  if (isFF(FF_DBLCLICK_DELAY)) {
-    return useObserver(() => Tree.renderItem(region, region.annotation, true));
-  }
-  return useObserver(() =>
-    region.inSelection !== showSelected ? null : Tree.renderItem(region, region.annotation, false),
-  );
+  return useObserver(() => Tree.renderItem(region, region.annotation, true));
 });
 
 const RegionsLayer = memo(({ regions, name, useLayers, showSelected = false }) => {
@@ -227,7 +220,7 @@ const TransformerBack = observer(({ item }) => {
             item.annotation.unselectAreas();
           }}
           onMouseOver={(ev) => {
-            if (!item.annotation.relationMode) {
+            if (!item.annotation.isLinkingMode) {
               ev.target.getStage().container().style.cursor = Constants.POINTER_CURSOR;
             }
           }}
@@ -364,11 +357,7 @@ const Selection = observer(({ item, ...triggeredOnResize }) => {
 
   return (
     <>
-      {isFF(FF_DBLCLICK_DELAY) ? (
-        <Layer name="selection-regions-layer" />
-      ) : (
-        <SelectedRegions item={item} selectedRegions={item.selectedRegions} {...triggeredOnResize} />
-      )}
+      <Layer name="selection-regions-layer" />
       <SelectionLayer item={item} selectionArea={selectionArea} />
     </>
   );
@@ -451,7 +440,7 @@ const Crosshair = memo(
  * of the image to support Magic Wand tool
  */
 const CanvasOverlay = observer(({ item }) => {
-  return isFF(FF_DEV_4081) ? (
+  return (
     <canvas
       className={styles.overlay}
       ref={(ref) => {
@@ -459,7 +448,7 @@ const CanvasOverlay = observer(({ item }) => {
       }}
       style={item.imageTransform}
     />
-  ) : null;
+  );
 });
 
 export default observer(
@@ -580,7 +569,7 @@ export default observer(
             // segmentation is specific for Brushes
             // but click interaction on the region covers the case of the same MoveTool interaction here,
             // so it should ignore move tool interaction to prevent conflicts
-            if ((!isFF(FF_DBLCLICK_DELAY) || !isMoveTool) && "segmentation" === el?.attrs?.name) {
+            if (!isMoveTool && "segmentation" === el?.attrs?.name) {
               return true;
             }
           }
@@ -926,11 +915,15 @@ export default observer(
       const [toolsReady, stageLoading] = isFF(FF_LSDV_4583_6) ? [true, false] : [item.hasTools, item.stageWidth <= 1];
 
       const imageIsLoaded = item.imageIsLoaded || !isFF(FF_LSDV_4583_6);
+      const isViewingAll = store.annotationStore.viewingAll;
 
       return (
         <ObjectTag item={item} className={wrapperClasses.join(" ")}>
           {paginationEnabled ? (
-            <div className={styles.pagination}>
+            <div
+              className={styles.pagination}
+              title={isViewingAll ? "Pagination is not supported in View All Annotations" : undefined}
+            >
               <Pagination
                 size="small"
                 outline={false}
@@ -944,6 +937,7 @@ export default observer(
                 totalPages={item.parsedValueList.length}
                 onChange={(n) => item.setCurrentImage(n - 1)}
                 pageSizeSelectable={false}
+                disabled={isViewingAll}
               />
             </div>
           ) : null}

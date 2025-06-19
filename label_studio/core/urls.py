@@ -27,8 +27,6 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-handler500 = 'core.views.custom_500'
-
 versions = collect_versions()
 open_api_info = openapi.Info(
     title='Label Studio API',
@@ -64,7 +62,13 @@ urlpatterns = [
     ),
     re_path(r'^dm/(?P<path>.*)$', serve, kwargs={'document_root': settings.DM_ROOT, 'show_indexes': True}),
     re_path(
-        r'^react-app/(?P<path>.*)$', serve, kwargs={'document_root': settings.REACT_APP_ROOT, 'show_indexes': True}
+        r'^react-app/(?P<path>.*)$',
+        serve,
+        kwargs={
+            'document_root': settings.REACT_APP_ROOT,
+            'show_indexes': True,
+            'manifest_asset_prefix': 'react-app',
+        },
     ),
     re_path(
         r'^static/fonts/roboto/roboto.css$',
@@ -103,7 +107,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('django-rq/', include('django_rq.urls')),
     path('feature-flags/', views.feature_flags, name='feature_flags'),
+    path('heidi-tips/', views.heidi_tips, name='heidi_tips'),
+    path('__lsa/', views.collect_metrics, name='collect_metrics'),
     re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    re_path(r'^', include('jwt_auth.urls')),
+    re_path(r'^', include('session_policy.urls')),
 ]
 
 if settings.DEBUG:
