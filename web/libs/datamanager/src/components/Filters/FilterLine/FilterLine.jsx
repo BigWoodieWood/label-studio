@@ -31,14 +31,7 @@ const GroupWrapper = ({ children, wrap = false }) => {
 };
 
 export const FilterLine = observer(({ filter, availableFilters, index, view, sidebar, dropdownClassName }) => {
-  // Determine this filter's position in the master filters array; child filters store
-  // a reference to their parent via this absolute index, not the index within the
-  // (potentially filtered) list rendered in the sidebar. Using the absolute index
-  // guarantees that child filters are rendered inline with their correct parent
-  // even when the sidebar list omits them.
-  const parentIdx = filter.view.filters.indexOf(filter);
-
-  const childFilters = filter.view.filters.filter((f) => f.parent_index === parentIdx);
+  const childFilters = filter.view.filters.filter((f) => f.parent === filter.id);
 
   return (
     <Block name="filter-line" tag={Fragment}>

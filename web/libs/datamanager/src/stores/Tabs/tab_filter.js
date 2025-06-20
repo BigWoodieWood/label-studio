@@ -25,10 +25,11 @@ export const TabFilter = types
     operator: types.maybeNull(Operators),
     value: types.maybeNull(FilterValueType),
 
-    /**
-     * Index within the filters list of the parent filter (root filter). For child filters only.
-     */
-    parent_index: types.maybeNull(types.number),
+    // DB ID of the Filter
+    id: types.maybeNull(types.int),
+
+    // DB ID of the parent Filter, if any
+    parent: types.maybeNull(types.int),
   })
   .views((self) => ({
     get field() {

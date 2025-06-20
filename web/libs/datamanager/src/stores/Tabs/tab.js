@@ -113,7 +113,7 @@ export const Tab = types
       return self.filters.filter((f) => {
         const targetMatches = f.target === self.target;
         const annotationResultsOK = isFF(FF_ANNOTATION_RESULTS_FILTERING) || !f.field.isAnnotationResultsFilterColumn;
-        const isRoot = f.parent_index == null;
+        const isRoot = f.parent == null;
 
         return targetMatches && annotationResultsOK && isRoot;
       });
@@ -138,7 +138,7 @@ export const Tab = types
 
     get filtersApplied() {
       // count only parent filters
-      return self.validFilters.filter((f) => f.parent_index == null).length;
+      return self.validFilters.filter((f) => f.parent == null).length;
     },
 
     get validFilters() {
@@ -389,16 +389,14 @@ export const Tab = types
      * Used internally to materialize join filters.
      */
     createChildFilterForType(filterType, parentFilter) {
-      const parentIdx = self.filters.indexOf(parentFilter);
-
       const filter = TabFilter.create({
         filter: filterType,
-        parent_index: parentIdx,
+        parent: parentFilter.id,
       });
 
       self.filters.push(filter);
 
-      console.debug("[DM] child filter instantiated", { parentFilterIndex: parentIdx, child: filter });
+      console.debug("[DM] child filter instantiated", { parentFilter: parentFilter.id, child: filter });
 
       return filter;
     },
@@ -425,10 +423,7 @@ export const Tab = types
 
     deleteFilter(filter) {
       // Recursively delete child filters first
-      const parentIdx = self.filters.indexOf(filter);
-      const childFilters = self.filters.filter(
-        (f) => (f.parent && f.parent === filter.id) || f.parent_index === parentIdx,
-      );
+      const childFilters = self.filters.filter((f) => f.parent === filter.id);
 
       childFilters.forEach((child) => {
         self.deleteFilter(child);
@@ -502,9 +497,7 @@ export const Tab = types
       self.targetColumns
         .filter((c) => joinFilters.includes(c.alias))
         .forEach((col) => {
-          const exists = self.filters.find(
-            (f) => f.parent_index === self.filters.indexOf(rootFilter) && f.filter.field.id === col.id,
-          );
+          const exists = self.filters.find((f) => f.parent === rootFilter.id && f.filter.field.id === col.id);
 
           console.debug("[DM] join-filter check", { col: col.id, exists });
 
@@ -524,7 +517,7 @@ export const Tab = types
 
     /** Remove any child filters previously created */
     clearJoinFilters(rootFilter) {
-      const childFilters = self.filters.filter((f) => f.parent_index === self.filters.indexOf(rootFilter));
+      const childFilters = self.filters.filter((f) => f.parent === rootFilter.id);
 
       childFilters.forEach((child) => {
         console.debug("[DM] join-filter removed", { child });

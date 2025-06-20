@@ -270,7 +270,7 @@ def apply_filters(queryset, filters, project, request):
 
     for _filter in filters.items:
         # combine child filters with their parent in the same filter expression
-        parent_id = _filter.parent_id if _filter.parent_id is not None else _filter.id
+        parent_id = _filter.parent if _filter.parent is not None else _filter.id
         filter_expressions = parent_id_to_filter_expressions[parent_id]
 
         # we can also have annotations filters
