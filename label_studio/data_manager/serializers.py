@@ -21,7 +21,31 @@ from users.models import User
 from label_studio.core.utils.common import round_floats
 
 
+class RecursiveField(serializers.Serializer):
+    def to_representation(self, value):
+        parent = self.parent.parent  # the owning serializer instance
+        serializer = parent.__class__(value, context=self.context)
+        return serializer.data
+
+    def to_internal_value(self, data):
+        """Allow RecursiveField to be writable.
+
+        We instantiate the *parent* serializer class (which in this case is
+        ``FilterSerializer``) to validate the nested payload. The validated
+        data produced by that serializer is returned so that the enclosing
+        serializer (``FilterSerializer``) can include it in its own
+        ``validated_data`` structure.
+        """
+
+        parent_cls = self.parent.parent.__class__  # FilterSerializer
+        serializer = parent_cls(data=data, context=self.context)
+        serializer.is_valid(raise_exception=True)
+        return serializer.validated_data
+
+
 class FilterSerializer(serializers.ModelSerializer):
+    child_filters = RecursiveField(many=True, required=False)
+
     class Meta:
         model = Filter
         fields = '__all__'
@@ -115,12 +139,10 @@ class ViewSerializer(serializers.ModelSerializer):
             data['filter_group'] = {'conjunction': conjunction, 'filters': []}
             if 'items' in filters:
                 # Support two input formats:
-                # 1) "flat" list where potential children reference their parent via ``parent_index`` (legacy)
-                # 2) "nested" list where each root item may contain ``child_filters`` (new preferred format).
+                # 1) "flat" list where potential children reference their parent via ``parent``
+                # 2) "nested" list where each root item may contain ``child_filters``
 
-                root_counter = 0  # keeps track of the current root filter index
-
-                def _append_filter(src_filter, parent_idx=None):
+                def _convert_filter(src_filter):
                     """Convert a single filter JSON object into internal representation."""
 
                     filter_payload = {
@@ -131,24 +153,17 @@ class ViewSerializer(serializers.ModelSerializer):
                     }
 
                     # Explicit parent reference by DB id (rare in create requests)
-                    if src_filter.get('parent') is not None:
-                        filter_payload['parent'] = src_filter.get('parent')
+                    if (parent := src_filter.get('parent')) is not None:
+                        filter_payload['parent'] = parent
 
-                    data['filter_group']['filters'].append(filter_payload)
+                    if child_filters := src_filter.get('child_filters'):
+                        filter_payload['child_filters'] = [_convert_filter(child) for child in child_filters]
+
+                    return filter_payload
 
                 # Iterate over top-level items (roots)
                 for f in filters['items']:
-                    # Root filter itself
-                    _append_filter(f)
-
-                    # Process potential nested children
-                    child_filters = f.get('child_filters', []) or []
-                    for child in child_filters:
-                        _append_filter(child, parent_idx=root_counter)
-
-                    # Increment root index AFTER children have been processed so that
-                    # subsequent roots receive the proper index.
-                    root_counter += 1
+                    data['filter_group']['filters'].append(_convert_filter(f))
 
         ordering = _data.pop('ordering', {})
         data['ordering'] = ordering
@@ -177,12 +192,10 @@ class ViewSerializer(serializers.ModelSerializer):
                 }
 
                 # Relationship hints
-                if f.parent_id:
-                    item['parent_id'] = f.parent_id
-                else:
-                    child_ids = list(f.children.all().values_list('id', flat=True))
-                    if child_ids:
-                        item['child_ids'] = child_ids
+                if f.parent:
+                    item['parent'] = f.parent.id
+                if children := list(f.children.all().values_list('id', flat=True)):
+                    item['children'] = children
 
                 filters['items'].append(item)
             result['data']['filters'] = filters
@@ -206,33 +219,31 @@ class ViewSerializer(serializers.ModelSerializer):
           shown in the top-level ordering bar.
         """
 
-        # Pass 1 — create root filters (no parent) and build index→object map
-        index_to_filter = {}
-        next_index = 0
-        for filter_data in filters_data:
-            is_root = filter_data.get('parent') in (None, '')
+        def _create_recursive(data, parent=None, index=None):
 
-            if not is_root:
-                continue
+            # Extract nested children early (if any) and remove them from payload
+            children = data.pop('child_filters', [])
 
-            # Enumerate root filters for stable ordering
-            filter_data['index'] = next_index
-            next_index += 1
+            # Handle explicit parent reference present in the JSON payload only
+            # for root elements. For nested structures we rely on the actual
+            # ``parent`` FK object instead of its primary key.
+            if parent is not None:
+                data.pop('parent', None)
 
-            root_obj = Filter.objects.create(**filter_data)
-            filter_group.filters.add(root_obj)
-            index_to_filter[root_obj.index] = root_obj
+            # Assign display order for root filters
+            if parent is None:
+                data['index'] = index
 
-        # Pass 2 — create child filters, resolving parent via `parent` PK or `parent_index`
-        for filter_data in filters_data:
-            has_parent_pk = filter_data.get('parent') not in (None, '')
+            # Persist the filter
+            obj = Filter.objects.create(parent=parent, **data)
+            filter_group.filters.add(obj)
 
-            if not has_parent_pk:
-                # Already processed as a root filter
-                continue
+            # Recurse into children (if any)
+            for child in children:
+                _create_recursive(child, parent=obj)
 
-            child_obj = Filter.objects.create(**filter_data)
-            filter_group.filters.add(child_obj)
+        for index, data in enumerate(filters_data):
+            _create_recursive(data, index=index)
 
     def create(self, validated_data):
         with transaction.atomic():
