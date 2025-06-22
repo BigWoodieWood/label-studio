@@ -314,16 +314,8 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
 class UserHotkeysAPI(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def perform_create(self, serializer):
         """Update the current user's hotkeys"""
-        serializer = HotkeysSerializer(data=request.data)
-        
-        if serializer.is_valid():
-            # Update the user's profile
-            user = request.user
-            user.custom_hotkeys = serializer.validated_data['custom_hotkeys']
-            user.save()
-            
-            return Response({'custom_hotkeys': user.custom_hotkeys})
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        user = self.request.user
+        user.custom_hotkeys = serializer.validated_data['custom_hotkeys']
+        user.save()
