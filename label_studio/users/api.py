@@ -311,7 +311,7 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
         responses={200: HotkeysSerializer},
     ),
 )
-class UserHotkeysAPI(APIView):
+class UserHotkeysAPI(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
