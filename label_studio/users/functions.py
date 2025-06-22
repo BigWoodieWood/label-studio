@@ -96,4 +96,3 @@ def proceed_registration(request, user_form, organization_form, next_page):
 def login(request, *args, **kwargs):
     request.session['last_login'] = time()
     return auth.login(request, *args, **kwargs)
-
