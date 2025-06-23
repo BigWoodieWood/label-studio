@@ -313,7 +313,8 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
 )
 class UserHotkeysAPI(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
-
+    serializer_class = HotkeysSerializer
+    
     def perform_create(self, serializer):
         """Update the current user's hotkeys"""
         user = self.request.user

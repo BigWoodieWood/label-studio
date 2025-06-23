@@ -47,7 +47,7 @@ class UserHotkeysAPITestCase(TestCase):
             data=json.dumps(self.valid_payload),
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['custom_hotkeys'], self.valid_payload['custom_hotkeys'])
         
         # Verify user data was updated in database
@@ -94,7 +94,7 @@ class UserHotkeysAPITestCase(TestCase):
             data=json.dumps(partial_update),
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
         # Should completely replace the user's hotkeys, not merge them
         user = User.objects.get(id=self.user.id)
@@ -112,7 +112,7 @@ class UserHotkeysAPITestCase(TestCase):
             data=json.dumps(empty_payload),
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
         # User should now have empty hotkeys
         user = User.objects.get(id=self.user.id)

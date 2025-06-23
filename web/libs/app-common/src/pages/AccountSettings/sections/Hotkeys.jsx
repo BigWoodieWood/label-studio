@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { ToastType, useToast } from "@humansignal/ui";
 
 // Shadcn UI components
@@ -68,7 +68,7 @@ export const HotkeysManager = () => {
   };
 
   // Save hotkeys to API function
-  const saveHotkeysToAPI = async () => {
+  const saveHotkeysToAPI = useCallback(async () => {
     // Get all modified hotkeys, not just from one section
     const modifiedHotkeys = getModifiedHotkeys(hotkeys);
     
@@ -123,7 +123,7 @@ export const HotkeysManager = () => {
         error: error.message
       };
     }
-  };
+  });
 
   function updateHotkeysWithCustomSettings(defaultHotkeys, customHotkeys) {
     return defaultHotkeys.map(hotkey => {
@@ -164,36 +164,6 @@ export const HotkeysManager = () => {
     loadHotkeys();
   }, []);
 
-  // Handle enabling/disabling all hotkeys
-  const handleToggleAllHotkeys = async () => {
-    const newState = !globalEnabled;
-    
-    try {
-      setIsLoading(true);
-      
-      // Update local state first
-      const updatedHotkeys = hotkeys.map(hotkey => ({ ...hotkey, active: newState }));
-      setHotkeys(updatedHotkeys);
-      setGlobalEnabled(newState);
-      
-      // Mark all sections as having changes
-      const newDirtyState = {};
-      HOTKEY_SECTIONS.forEach(section => {
-        newDirtyState[section.id] = true;
-      });
-      setDirtyState(newDirtyState);
-      
-      toast.show({ 
-        message: `All hotkeys ${newState ? 'enabled' : 'disabled'}`, 
-        type: ToastType.success 
-      });
-    } catch (error) {
-      toast.show({ message: "Error updating hotkeys", type: ToastType.error });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Handle toggling a single hotkey
   const handleToggleHotkey = (hotkeyId) => {
     // Update the hotkey
@@ -218,23 +188,6 @@ export const HotkeysManager = () => {
     // Update global enabled state
     const allEnabled = updatedHotkeys.every(hotkey => hotkey.active);
     setGlobalEnabled(allEnabled);
-  };
-
-  // Handle platform translation toggle
-  const handleTogglePlatformTranslation = async () => {
-    const newState = !autoTranslatePlatforms;
-    setAutoTranslatePlatforms(newState);
-    
-    // Mark as having changes
-    setDirtyState({
-      ...dirtyState,
-      settings: true
-    });
-    
-    toast.show({ 
-      message: `Platform translation ${newState ? 'enabled' : 'disabled'}`, 
-      type: ToastType.success 
-    });
   };
 
   // Handle resetting all hotkeys to defaults
