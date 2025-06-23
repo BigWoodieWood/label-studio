@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import { Fragment } from "react";
 import { IconClose } from "@humansignal/icons";
+import { Badge } from "@humansignal/ui";
 import { BemWithSpecifiContext } from "../../../utils/bem";
 import { Button } from "../../Common/Button/Button";
 import { Icon } from "../../Common/Icon/Icon";
@@ -77,10 +78,11 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
 
         {/* Render child filters (join filters) inline */}
         {childFilter && (
-          <Elem name="column" mix="value">
-            <Tag size="small" className="filters-data-tag" color="#1d91e4" style={{ marginRight: 4 }}>
+          <Elem name="column" mix="value child-filter">
+            <span style={{ fontSize: 12, paddingRight: 5 }}>and</span>
+            <Badge variant="outline" size="sm" style={{ fontWeight: "normal" }}>
               {childFilter.field.title}
-            </Tag>
+            </Badge>
             <FilterOperation
               filter={childFilter}
               value={childFilter.currentValue}
