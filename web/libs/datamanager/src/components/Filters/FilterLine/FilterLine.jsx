@@ -31,7 +31,7 @@ const GroupWrapper = ({ children, wrap = false }) => {
 };
 
 export const FilterLine = observer(({ filter, availableFilters, index, view, sidebar, dropdownClassName }) => {
-  const childFilters = filter.view.filters.filter((f) => f.parent === filter.id);
+  const childFilter = filter.child_filter;
 
   return (
     <Block name="filter-line" tag={Fragment}>
@@ -76,22 +76,19 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
         <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} />
 
         {/* Render child filters (join filters) inline */}
-        {childFilters.map((child, idx) => {
-          console.debug("[DM] render child filter", { parent: filter, child });
-          return (
-            <Elem name="column" key={`child-${idx}`} mix="value">
-              <Tag size="small" className="filters-data-tag" color="#1d91e4" style={{ marginRight: 4 }}>
-                {child.field.title}
-              </Tag>
-              <FilterOperation
-                filter={child}
-                value={child.currentValue}
-                operator={child.operator}
-                field={child.field}
-              />
-            </Elem>
-          );
-        })}
+        {childFilter && (
+          <Elem name="column" mix="value">
+            <Tag size="small" className="filters-data-tag" color="#1d91e4" style={{ marginRight: 4 }}>
+              {childFilter.field.title}
+            </Tag>
+            <FilterOperation
+              filter={childFilter}
+              value={childFilter.currentValue}
+              operator={childFilter.operator}
+              field={childFilter.field}
+            />
+          </Elem>
+        )}
       </GroupWrapper>
       <Elem name="remove">
         <Button

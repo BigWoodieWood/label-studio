@@ -113,9 +113,8 @@ export const Tab = types
       return self.filters.filter((f) => {
         const targetMatches = f.target === self.target;
         const annotationResultsOK = isFF(FF_ANNOTATION_RESULTS_FILTERING) || !f.field.isAnnotationResultsFilterColumn;
-        const isRoot = f.parent == null;
 
-        return targetMatches && annotationResultsOK && isRoot;
+        return targetMatches && annotationResultsOK;
       });
     },
 
@@ -138,7 +137,7 @@ export const Tab = types
 
     get filtersApplied() {
       // count only parent filters
-      return self.validFilters.filter((f) => f.parent == null).length;
+      return self.validFilters.length;
     },
 
     get validFilters() {
@@ -371,6 +370,8 @@ export const Tab = types
     },
 
     createFilter() {
+      if (self.availableFilters.length === 0) return;
+
       const filterType = self.availableFilters[0];
       const filter = TabFilter.create({
         filter: filterType,
@@ -391,12 +392,12 @@ export const Tab = types
     createChildFilterForType(filterType, parentFilter) {
       const filter = TabFilter.create({
         filter: filterType,
-        parent: parentFilter.id,
       });
 
-      self.filters.push(filter);
+      // Don't add to main filters array - child is owned by parent
+      parentFilter.child_filter = filter;
 
-      console.debug("[DM] child filter instantiated", { parentFilter: parentFilter.id, child: filter });
+      console.debug("[DM] child filter instantiated", { parentFilter: parentFilter, child: filter });
 
       return filter;
     },
@@ -422,12 +423,10 @@ export const Tab = types
     }),
 
     deleteFilter(filter) {
-      // Recursively delete child filters first
-      const childFilters = self.filters.filter((f) => f.parent === filter.id);
-
-      childFilters.forEach((child) => {
-        self.deleteFilter(child);
-      });
+      // Recursively delete child filter first
+      if (filter.child_filter) {
+        self.deleteFilter(filter.child_filter);
+      }
 
       const index = self.filters.findIndex((f) => f === filter);
       if (index > -1) {
@@ -488,41 +487,38 @@ export const Tab = types
      * Create child filters for a given root filter according to its column's `join_filters` metadata.
      */
     applyJoinFilters(rootFilter) {
-      const column = rootFilter.filter.field;
-      const joinFilters = column?.join_filters ?? [];
+      if (!rootFilter || !rootFilter.filter || !rootFilter.filter.field) return;
 
-      if (!Array.isArray(joinFilters) || joinFilters.length === 0) return;
+      const column = rootFilter.field;
+      const joinFilters = column?.join_filters;
+      console.debug("[DM] applyJoinFilters", { rootFilter, joinFilters });
 
+      if (!joinFilters || !Array.isArray(joinFilters) || joinFilters.length === 0) return;
+
+      // Only create one child filter for the first join filter column
       // NOTE: using targetColumns instead of columns means that annotation results columns cannot be used in join_filters, but seems fine for now
-      self.targetColumns
-        .filter((c) => joinFilters.includes(c.alias))
-        .forEach((col) => {
-          const exists = self.filters.find((f) => f.parent === rootFilter.id && f.filter.field.id === col.id);
+      const firstJoinColumn = self.targetColumns.find((c) => joinFilters.includes(c.alias));
 
-          console.debug("[DM] join-filter check", { col: col.id, exists });
+      if (firstJoinColumn && !rootFilter.child_filter) {
+        const filterType = self.availableFilters.find((ft) => ft.field.id === firstJoinColumn.id);
 
-          if (!exists) {
-            const filterType = self.availableFilters.find((ft) => ft.field.id === col.id);
+        if (filterType) {
+          const childFilter = self.createChildFilterForType(filterType, rootFilter);
+          // TODO ensure the child's correct default operator is set, regardless of the parent's operator
+          childFilter.setOperator(rootFilter.operator);
 
-            if (filterType) {
-              const childFilter = self.createChildFilterForType(filterType, rootFilter);
-
-              childFilter.setOperator(rootFilter.operator);
-
-              console.debug("[DM] join-filter created", { parent: rootFilter.id, child: childFilter });
-            }
-          }
-        });
+          console.debug("[DM] join-filter created", { parent: rootFilter, child: childFilter });
+        }
+      }
     },
 
     /** Remove any child filters previously created */
     clearJoinFilters(rootFilter) {
-      const childFilters = self.filters.filter((f) => f.parent === rootFilter.id);
-
-      childFilters.forEach((child) => {
-        console.debug("[DM] join-filter removed", { child });
-        self.deleteFilter(child);
-      });
+      if (rootFilter.child_filter) {
+        console.debug("[DM] join-filter removed", { child: rootFilter.child_filter });
+        self.deleteFilter(rootFilter.child_filter);
+        rootFilter.child_filter = null;
+      }
     },
   }))
   .preProcessSnapshot((snapshot) => {

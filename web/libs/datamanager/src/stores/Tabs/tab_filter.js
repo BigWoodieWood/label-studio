@@ -25,11 +25,7 @@ export const TabFilter = types
     operator: types.maybeNull(Operators),
     value: types.maybeNull(FilterValueType),
 
-    // DB ID of the Filter
-    id: types.maybeNull(types.int),
-
-    // DB ID of the parent Filter, if any
-    parent: types.maybeNull(types.int),
+    child_filter: types.maybeNull(types.late(() => TabFilter)),
   })
   .views((self) => ({
     get field() {
@@ -42,7 +38,23 @@ export const TabFilter = types
 
     /** @returns {import("./tab").View} */
     get view() {
-      return getParent(getParent(self));
+      // For child filters, we need to traverse up to find the tab
+      let current = self;
+      let parent = null;
+
+      try {
+        while (current) {
+          parent = getParent(current);
+          if (parent && parent.filters && Array.isArray(parent.filters)) {
+            return parent;
+          }
+          current = parent;
+        }
+      } catch {
+        return getParent(getParent(self));
+      }
+
+      return null;
     },
 
     get component() {
@@ -116,12 +128,12 @@ export const TabFilter = types
       self.view.clearJoinFilters(self);
 
       const previousFilterType = self.filter.currentType;
-      const previousFilter = self.filter.id;
+      const previousFilter = self.filter;
 
       self.filter = value;
 
       const typeChanged = previousFilterType !== self.filter.currentType;
-      const filterChanged = previousFilter !== self.filter.id;
+      const filterChanged = previousFilter !== self.filter;
 
       if (typeChanged || filterChanged) {
         // Spawn child filters (join_filters)
@@ -212,5 +224,6 @@ export const TabFilter = types
     }, 300),
   }))
   .preProcessSnapshot((sn) => {
+    if (!sn) return sn;
     return { ...sn, value: sn.value ?? null };
   });
