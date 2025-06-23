@@ -23,8 +23,8 @@ from label_studio.core.utils.common import round_floats
 
 class RecursiveField(serializers.Serializer):
     def to_representation(self, value):
-        parent = self.parent.parent  # the owning serializer instance
-        serializer = parent.__class__(value, context=self.context)
+        parent = self.parent  # the owning FilterSerializer instance
+        serializer = parent.__class__(instance=value, context=self.context)
         return serializer.data
 
     def to_internal_value(self, data):
@@ -37,14 +37,14 @@ class RecursiveField(serializers.Serializer):
         ``validated_data`` structure.
         """
 
-        parent_cls = self.parent.parent.__class__  # FilterSerializer
+        parent_cls = self.parent.__class__  # FilterSerializer
         serializer = parent_cls(data=data, context=self.context)
         serializer.is_valid(raise_exception=True)
         return serializer.validated_data
 
 
 class FilterSerializer(serializers.ModelSerializer):
-    child_filters = RecursiveField(many=True, required=False)
+    child_filter = RecursiveField(required=False)
 
     class Meta:
         model = Filter
@@ -97,6 +97,37 @@ class FilterSerializer(serializers.ModelSerializer):
 class FilterGroupSerializer(serializers.ModelSerializer):
     filters = FilterSerializer(many=True)
 
+    def to_representation(self, instance):
+        def _build_filter_tree(filter_obj):
+            """Build hierarchical filter representation."""
+            item = {
+                'id': filter_obj.id,
+                'filter': filter_obj.column,
+                'operator': filter_obj.operator,
+                'type': filter_obj.type,
+                'value': filter_obj.value,
+            }
+
+            # Add child filter if exists (only one level of nesting)
+            child_filters = filter_obj.children.all()
+            if child_filters.exists():
+                child = child_filters.first()  # Only support one child
+                child_item = {
+                    'id': child.id,
+                    'filter': child.column,
+                    'operator': child.operator,
+                    'type': child.type,
+                    'value': child.value,
+                }
+                item['child_filter'] = child_item
+
+            return item
+
+        # Only process root filters (ordered by index)
+        roots = instance.filters.filter(parent__isnull=True).order_by('index')
+
+        return {'conjunction': instance.conjunction, 'items': [_build_filter_tree(f) for f in roots]}
+
     class Meta:
         model = FilterGroup
         fields = '__all__'
@@ -138,9 +169,7 @@ class ViewSerializer(serializers.ModelSerializer):
         if 'filter_group' not in data and conjunction:
             data['filter_group'] = {'conjunction': conjunction, 'filters': []}
             if 'items' in filters:
-                # Support two input formats:
-                # 1) "flat" list where potential children reference their parent via ``parent``
-                # 2) "nested" list where each root item may contain ``child_filters``
+                # Support "nested" list where each root item may contain ``child_filters``
 
                 def _convert_filter(src_filter):
                     """Convert a single filter JSON object into internal representation."""
@@ -152,12 +181,8 @@ class ViewSerializer(serializers.ModelSerializer):
                         'value': src_filter.get('value', {}),
                     }
 
-                    # Explicit parent reference by DB id (rare in create requests)
-                    if (parent := src_filter.get('parent')) is not None:
-                        filter_payload['parent'] = parent
-
-                    if child_filters := src_filter.get('child_filters'):
-                        filter_payload['child_filters'] = [_convert_filter(child) for child in child_filters]
+                    if child_filter := src_filter.get('child_filter'):
+                        filter_payload['child_filter'] = _convert_filter(child_filter)
 
                     return filter_payload
 
@@ -172,32 +197,10 @@ class ViewSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
+
+        # Handle filter_group serialization
         filters = result.pop('filter_group', {})
         if filters:
-            filters['items'] = []
-            filters.pop('filters', [])
-            filters.pop('id', None)
-
-            # Root filters first (ordered by index), followed by child filters (any order)
-            roots = instance.filter_group.filters.filter(parent__isnull=True).order_by('index')
-            children = instance.filter_group.filters.filter(parent__isnull=False)
-
-            for f in list(roots) + list(children):
-                item = {
-                    'id': f.id,
-                    'filter': f.column,
-                    'operator': f.operator,
-                    'type': f.type,
-                    'value': f.value,
-                }
-
-                # Relationship hints
-                if f.parent:
-                    item['parent'] = f.parent.id
-                if children := list(f.children.all().values_list('id', flat=True)):
-                    item['children'] = children
-
-                filters['items'].append(item)
             result['data']['filters'] = filters
 
         selected_items = result.pop('selected_items', {})
@@ -222,7 +225,7 @@ class ViewSerializer(serializers.ModelSerializer):
         def _create_recursive(data, parent=None, index=None):
 
             # Extract nested children early (if any) and remove them from payload
-            children = data.pop('child_filters', [])
+            child_filter = data.pop('child_filter', None)
 
             # Handle explicit parent reference present in the JSON payload only
             # for root elements. For nested structures we rely on the actual
@@ -238,9 +241,8 @@ class ViewSerializer(serializers.ModelSerializer):
             obj = Filter.objects.create(parent=parent, **data)
             filter_group.filters.add(obj)
 
-            # Recurse into children (if any)
-            for child in children:
-                _create_recursive(child, parent=obj)
+            if child_filter:
+                _create_recursive(child_filter, parent=obj)
 
         for index, data in enumerate(filters_data):
             _create_recursive(data, index=index)
@@ -268,6 +270,8 @@ class ViewSerializer(serializers.ModelSerializer):
                 filter_group = instance.filter_group
                 if filter_group is None:
                     filter_group = FilterGroup.objects.create(**filter_group_data)
+                    instance.filter_group = filter_group
+                    instance.save()
 
                 conjunction = filter_group_data.get('conjunction')
                 if conjunction and filter_group.conjunction != conjunction:
