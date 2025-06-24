@@ -136,7 +136,6 @@ export const Tab = types
     },
 
     get filtersApplied() {
-      // count only parent filters
       return self.validFilters.length;
     },
 
@@ -370,11 +369,10 @@ export const Tab = types
     },
 
     createFilter() {
-      if (self.availableFilters.length === 0) return;
-
       const filterType = self.availableFilters[0];
       const filter = TabFilter.create({
         filter: filterType,
+        view: self.id,
       });
 
       self.filters.push(filter);
@@ -392,6 +390,7 @@ export const Tab = types
     createChildFilterForType(filterType, parentFilter) {
       const filter = TabFilter.create({
         filter: filterType,
+        view: self.id,
       });
 
       // Don't add to main filters array - child is owned by parent
