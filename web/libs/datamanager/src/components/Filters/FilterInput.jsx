@@ -11,13 +11,16 @@ export const FilterInput = ({ value, type, onChange, placeholder, schema, style 
 
   return (
     <Input
-      rawClassName="h-full"
+      rawClassName="h-full font-size-12 h-8 min-h-8"
+      style={{
+        ...style,
+      }}
       type={type}
       value={value ?? ""}
       ref={inputRef}
       placeholder={placeholder}
       onChange={onChangeHandler}
-      style={style}
+      size="small"
       {...(schema ?? {})}
     />
   );

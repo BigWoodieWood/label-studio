@@ -1,7 +1,5 @@
 import { observer } from "mobx-react";
-import { Fragment } from "react";
 import { IconClose } from "@humansignal/icons";
-import { Badge } from "@humansignal/ui";
 import { BemWithSpecifiContext } from "../../../utils/bem";
 import { Button } from "../../Common/Button/Button";
 import { Icon } from "../../Common/Icon/Icon";
@@ -34,9 +32,11 @@ const GroupWrapper = ({ children, wrap = false }) => {
 export const FilterLine = observer(({ filter, availableFilters, index, view, sidebar, dropdownClassName }) => {
   const childFilter = filter.child_filter;
 
-  return (
-    <Block name="filter-line" tag={Fragment}>
-      <GroupWrapper wrap={sidebar}>
+  if (sidebar) {
+    // Sidebar layout uses grid structure like main layout
+    return (
+      <Block name="filterLine" mod={{ hasChild: !!childFilter }}>
+        {/* Main filter row */}
         <Elem name="column" mix="conjunction">
           {index === 0 ? (
             <span style={{ fontSize: 12, paddingRight: 5 }}>Where</span>
@@ -44,15 +44,13 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
             <Conjunction index={index} view={view} />
           )}
         </Elem>
+
         <Elem name="column" mix="field">
           <FilterDropdown
             placeholder="Column"
             defaultValue={filter.filter.id}
             items={availableFilters}
-            width={80}
-            dropdownWidth={120}
             dropdownClassName={dropdownClassName}
-            // Search on filter.title instead of filter.id
             searchFilter={(option, query) => {
               const original = option?.original ?? option;
               const title = original?.field?.title ?? original?.title ?? "";
@@ -72,38 +70,173 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
             )}
           />
         </Elem>
-      </GroupWrapper>
-      <GroupWrapper wrap={sidebar}>
+
         <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} />
 
-        {/* Render child filters (join filters) inline */}
+        {/* Column 5: Remove button - only show if no child filter, otherwise empty space */}
+        {!childFilter ? (
+          <Elem name="remove">
+            <Button
+              look="danger"
+              size="small"
+              style={{ border: "none" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                filter.delete();
+              }}
+              icon={<Icon icon={IconClose} size={12} />}
+            />
+          </Elem>
+        ) : (
+          <Elem name="remove" />
+        )}
+
+        {/* Child filter row */}
         {childFilter && (
-          <Elem name="column" mix="value child-filter">
-            <span style={{ fontSize: 12, paddingRight: 5 }}>and</span>
-            <Badge variant="outline" size="sm" style={{ fontWeight: "normal" }}>
-              {childFilter.field.title}
-            </Badge>
+          <>
+            {/* Column 1: Conjunction */}
+            <Elem name="column" mix="conjunction">
+              <span style={{ fontSize: 12, paddingRight: 5 }}>and</span>
+            </Elem>
+
+            {/* Column 2: Field */}
+            <Elem name="column" mix="field child-field">
+              <FilterDropdown
+                placeholder={childFilter.field.title}
+                value={childFilter.field.title}
+                items={[{ value: childFilter.field.title, label: childFilter.field.title }]}
+                disabled={true}
+                onChange={() => {}} // No-op since it's disabled
+                style={{ minWidth: "80px" }}
+              />
+            </Elem>
+
+            {/* Column 3 & 4: Operation and Value */}
             <FilterOperation
               filter={childFilter}
               value={childFilter.currentValue}
               operator={childFilter.operator}
               field={childFilter.field}
             />
-          </Elem>
+
+            {/* Column 5: Remove */}
+            <Elem name="remove">
+              <Button
+                look="danger"
+                size="small"
+                style={{ border: "none" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  filter.delete(); // Remove the main filter (which includes child)
+                }}
+                icon={<Icon icon={IconClose} size={12} />}
+              />
+            </Elem>
+          </>
         )}
-      </GroupWrapper>
-      <Elem name="remove">
-        <Button
-          look="danger"
-          size="small"
-          style={{ border: "none" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            filter.delete();
+      </Block>
+    );
+  }
+
+  // Main layout uses parent grid structure - render children as direct grid items
+  return (
+    <Block name="filterLine" mod={{ hasChild: !!childFilter }}>
+      <Elem name="column" mix="conjunction">
+        {index === 0 ? (
+          <span style={{ fontSize: 12, paddingRight: 5 }}>Where</span>
+        ) : (
+          <Conjunction index={index} view={view} />
+        )}
+      </Elem>
+
+      <Elem name="column" mix="field">
+        <FilterDropdown
+          placeholder="Column"
+          defaultValue={filter.filter.id}
+          items={availableFilters}
+          width={80}
+          dropdownWidth={120}
+          dropdownClassName={dropdownClassName}
+          searchFilter={(option, query) => {
+            const original = option?.original ?? option;
+            const title = original?.field?.title ?? original?.title ?? "";
+            const parentTitle = original?.field?.parent?.title ?? "";
+            return `${title} ${parentTitle}`.toLowerCase().includes(query.toLowerCase());
           }}
-          icon={<Icon icon={IconClose} size={12} />}
+          onChange={(value) => filter.setFilterDelayed(value)}
+          optionRender={({ item: { original: filter } }) => (
+            <Elem name="selector">
+              {filter.field.title}
+              {filter.field.parent && (
+                <Tag size="small" className="filters-data-tag" color="#1d91e4" style={{ marginLeft: 7 }}>
+                  {filter.field.parent.title}
+                </Tag>
+              )}
+            </Elem>
+          )}
         />
       </Elem>
+
+      <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} />
+
+      {/* Only show remove button if there's no child filter, or show it on the last column of the main filter */}
+      {!childFilter && (
+        <Elem name="remove">
+          <Button
+            look="danger"
+            size="small"
+            style={{ border: "none" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              filter.delete();
+            }}
+            icon={<Icon icon={IconClose} size={12} />}
+          />
+        </Elem>
+      )}
+
+      {/* Render child filters as additional grid items on new row */}
+      {childFilter && (
+        <>
+          {/* Empty column to maintain grid alignment for main filter row */}
+          <Elem name="remove" />
+
+          <Elem name="column" mix="conjunction">
+            <span style={{ fontSize: 12, paddingRight: 5 }}>and</span>
+          </Elem>
+
+          <Elem name="column" mix="field child-field">
+            <FilterDropdown
+              placeholder={childFilter.field.title}
+              value={childFilter.field.title}
+              items={[{ value: childFilter.field.title, label: childFilter.field.title }]}
+              disabled={true}
+              onChange={() => {}} // No-op since it's disabled
+            />
+          </Elem>
+
+          <FilterOperation
+            filter={childFilter}
+            value={childFilter.currentValue}
+            operator={childFilter.operator}
+            field={childFilter.field}
+          />
+
+          {/* Show remove button on child filter row - removes the entire filter group */}
+          <Elem name="remove">
+            <Button
+              look="danger"
+              size="small"
+              style={{ border: "none" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                filter.delete(); // Remove the main filter (which includes child)
+              }}
+              icon={<Icon icon={IconClose} size={12} />}
+            />
+          </Elem>
+        </>
+      )}
     </Block>
   );
 });
