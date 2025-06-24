@@ -7,11 +7,6 @@
   grid-template-columns: 65px minmax(120px, max-content) minmax(100px, max-content) 1fr 24px;
   grid-gap: var(--spacing-tightest);
   align-items: start;
-  
-  // Add visual grouping spacing for all filter sets
-  &:not(:last-child) {
-    margin-bottom: var(--spacing-tight);
-  }
 
   &__remove {
     height: 100%;
