@@ -224,5 +224,6 @@ export const TabFilter = types
     }, 300),
   }))
   .preProcessSnapshot((sn) => {
+    if (!sn) return sn;
     return { ...sn, value: sn.value ?? null };
   });

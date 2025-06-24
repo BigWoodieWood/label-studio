@@ -101,7 +101,6 @@ class FilterGroupSerializer(serializers.ModelSerializer):
         def _build_filter_tree(filter_obj):
             """Build hierarchical filter representation."""
             item = {
-                'id': filter_obj.id,
                 'filter': filter_obj.column,
                 'operator': filter_obj.operator,
                 'type': filter_obj.type,
@@ -113,7 +112,6 @@ class FilterGroupSerializer(serializers.ModelSerializer):
             if child_filters:
                 child = child_filters[0]   # Only support one child
                 child_item = {
-                    'id': child.id,
                     'filter': child.column,
                     'operator': child.operator,
                     'type': child.type,
