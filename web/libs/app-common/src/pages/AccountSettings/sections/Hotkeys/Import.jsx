@@ -111,7 +111,7 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px] bg-neutral-surface">
         <DialogHeader>
           <DialogTitle>Import Hotkeys</DialogTitle>
           <DialogDescription>

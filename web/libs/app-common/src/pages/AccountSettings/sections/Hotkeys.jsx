@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ToastType, useToast } from "@humansignal/ui";
 
 // Shadcn UI components
@@ -15,6 +15,7 @@ import { useAPI } from "apps/labelstudio/src/providers/ApiProvider";
 import { HotkeySection } from "./Hotkeys/Section";
 import { ImportDialog } from "./Hotkeys/Import";
 import { DEFAULT_HOTKEYS, HOTKEY_SECTIONS } from "./Hotkeys/defaults";
+import styles from "../AccountSettings.module.scss";
 
 window.DEFAULT_HOTKEYS = DEFAULT_HOTKEYS;
 
@@ -417,60 +418,53 @@ export const HotkeysManager = () => {
   };
 
   return (
-    <div id="hotkeys-manager" style={{ maxWidth: "660px" }}>
-      <div className="space-y-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Keyboard Hotkeys
-            </h2>
-            <p className="text-muted-foreground">
-              Customize your keyboard shortcuts to speed up your workflow. Click on any hotkey below to assign a new key combination that works best for you.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Dropdown.Trigger
-              align="right"
-              content={
-                <Menu>
-                  <Menu.Item label="Export Hotkeys" onClick={handleExportHotkeys} />
-                  <Menu.Item label="Import Hotkeys" onClick={() => setImportDialogOpen(true)} />
-                  <Menu.Divider />
-                  <Menu.Item label="Reset to Defaults" onClick={handleResetToDefaults} />                
-                </Menu>
-              }
-            >
-              <Button variant="secondary">Actions</Button>
-            </Dropdown.Trigger>
-          </div>
+    <div id="hotkeys-manager">
+      <div className={styles.sectionContent}>
+        <div className={styles.flexRow} style={{ justifyContent: 'flex-end', marginBottom: 'var(--spacing-wide)' }}>
+          <Dropdown.Trigger
+            align="right"
+            content={
+              <Menu>
+                <Menu.Item label="Export Hotkeys" onClick={handleExportHotkeys} />
+                <Menu.Item label="Import Hotkeys" onClick={() => setImportDialogOpen(true)} />
+                <Menu.Divider />
+                <Menu.Item label="Reset to Defaults" onClick={handleResetToDefaults} />                
+              </Menu>
+            }
+          >
+            <Button variant="secondary">Actions</Button>
+          </Dropdown.Trigger>
         </div>
         
         {isLoading && hotkeys.length === 0 ? (
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-wide)' }}>
             {/* Platform settings skeleton */}
             <Card>
-              <CardHeader className="pb-2">
-                <Skeleton className="h-6 w-[250px]" />
-                <Skeleton className="h-4 w-[300px]" />
+              <CardHeader style={{ paddingBottom: 'var(--spacing-tight)' }}>
+                <Skeleton style={{ height: '1.5rem', width: '250px' }} />
+                <Skeleton style={{ height: '1rem', width: '300px' }} />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-5 w-[180px] mb-2" />
-                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton style={{ height: '1.25rem', width: '180px', marginBottom: 'var(--spacing-tight)' }} />
+                <Skeleton style={{ height: '1rem', width: '250px' }} />
               </CardContent>
             </Card>
             
             {/* Hotkey sections skeleton */}
             {HOTKEY_SECTIONS.map(section => (
               <Card key={section.id}>
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-6 w-[250px]" />
-                  <Skeleton className="h-4 w-[300px]" />
+                <CardHeader style={{ paddingBottom: 'var(--spacing-tight)' }}>
+                  <Skeleton style={{ height: '1.5rem', width: '250px' }} />
+                  <Skeleton style={{ height: '1rem', width: '300px' }} />
                 </CardHeader>
                 <CardContent>
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="py-3 border-b border-border last:border-0">
-                      <Skeleton className="h-5 w-[180px] mb-2" />
-                      <Skeleton className="h-4 w-[250px]" />
+                    <div key={i} style={{ 
+                      padding: 'var(--spacing-wide) 0', 
+                      borderBottom: i < 3 ? '1px solid var(--border-color)' : 'none' 
+                    }}>
+                      <Skeleton style={{ height: '1.25rem', width: '180px', marginBottom: 'var(--spacing-tight)' }} />
+                      <Skeleton style={{ height: '1rem', width: '250px' }} />
                     </div>
                   ))}
                 </CardContent>
@@ -478,7 +472,7 @@ export const HotkeysManager = () => {
             ))}
           </div>
         ) : (
-          <div className="space-y-6">            
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-wide)' }}>            
             {/* Hotkey Sections */}
             {HOTKEY_SECTIONS.map(section => (
               <HotkeySection
@@ -502,12 +496,12 @@ export const HotkeysManager = () => {
       <ImportDialog 
         open={importDialogOpen} 
         onOpenChange={setImportDialogOpen}
-        onImport={handleImportHotkeys} 
+        onImport={handleImportHotkeys}
       />
 
       {/* Duplicate Confirmation Dialog */}
       <Dialog open={duplicateConfirmDialog.open} onOpenChange={handleCancelDuplicate}>
-        <DialogContent>
+        <DialogContent className="bg-neutral-surface">
           <DialogHeader>
             <DialogTitle>Duplicate Hotkey Detected</DialogTitle>
             <DialogDescription>
@@ -515,17 +509,30 @@ export const HotkeysManager = () => {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="py-4 max-h-60 overflow-y-auto">
-            <div className="space-y-3">
+          <div style={{ 
+            padding: 'var(--spacing-wide) 0', 
+            maxHeight: '15rem', 
+            overflowY: 'auto' 
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-wide)' }}>
               {duplicateConfirmDialog.conflictingHotkeys.map((conflictHotkey) => (
-                <div key={conflictHotkey.id} className="flex items-center justify-between p-3 bg-muted rounded-md">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{conflictHotkey.label}</div>
-                    <div className="text-sm text-muted-foreground">
+                <div key={conflictHotkey.id} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  padding: 'var(--spacing-wide)', 
+                  backgroundColor: 'var(--bg-neutral-surface)', 
+                  borderRadius: 'var(--border-radius)' 
+                }}>
+                  <div style={{ flex: '1', minWidth: '0' }}>
+                    <div style={{ fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {conflictHotkey.label}
+                    </div>
+                    <div style={{ fontSize: 'var(--font-size-small)', color: 'var(--text-muted)' }}>
                       {getSectionTitle(conflictHotkey.section)}
                     </div>
                   </div>
-                  <Badge variant="secondary" className="ml-2 shrink-0">
+                  <Badge variant="secondary" style={{ marginLeft: 'var(--spacing-tight)', flexShrink: '0' }}>
                     {conflictHotkey.key}
                   </Badge>
                 </div>
@@ -533,7 +540,13 @@ export const HotkeysManager = () => {
             </div>
           </div>
 
-          <DialogDescription className="text-amber-600 bg-amber-50 p-3 rounded-md border border-amber-200">
+          <DialogDescription style={{ 
+            color: 'var(--color-warning-text)', 
+            backgroundColor: 'var(--color-warning-background)', 
+            padding: 'var(--spacing-wide)', 
+            borderRadius: 'var(--border-radius)', 
+            border: '1px solid var(--color-warning-border)' 
+          }}>
             ⚠️ Having duplicate hotkeys may cause conflicts and unexpected behavior. Are you sure you want to proceed?
           </DialogDescription>
           
