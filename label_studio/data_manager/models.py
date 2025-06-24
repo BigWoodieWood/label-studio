@@ -50,22 +50,14 @@ class ProjectViewMixin(models.Model):
 
 class View(ViewBaseModel, ProjectViewMixin):
     def get_prepare_tasks_params(self, add_selected_items=False):
+        # Import here to avoid circular imports
+        from data_manager.serializers import FilterGroupSerializer
+
         # convert filters to PrepareParams structure
         filters = None
         if self.filter_group:
-            items = []
-            for f in self.filter_group.filters.all():
-                items.append(
-                    dict(
-                        id=f.id,
-                        filter=f.column,
-                        operator=f.operator,
-                        type=f.type,
-                        value=f.value,
-                        parent_id=f.parent.id if f.parent else None,
-                    )
-                )
-            filters = dict(conjunction=self.filter_group.conjunction, items=items)
+            serializer = FilterGroupSerializer()
+            filters = serializer.to_representation(self.filter_group)
 
         ordering = self.ordering
         if not ordering:

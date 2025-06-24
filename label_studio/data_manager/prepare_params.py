@@ -13,9 +13,7 @@ class FilterIn(BaseModel):
 
 
 class Filter(BaseModel):
-    id: Optional[int] = None  # Database ID of this filter
-    parent: Optional[int] = None  # Parent filter DB ID (only for child filters)
-    children: Optional[List[int]] = None  # Child filter DB IDs
+    child_filter: Optional['Filter'] = None
 
     filter: str
     operator: str

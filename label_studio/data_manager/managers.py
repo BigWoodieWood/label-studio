@@ -464,7 +464,7 @@ def apply_filters(queryset, filters, project, request):
                 cast_value(_filter)
                 filter_expressions.append(Q(**{field_name: _filter.value}))
 
-            filter_line_expressions.append(filter_expressions)
+        filter_line_expressions.append(filter_expressions)
 
     """WARNING: Stringifying filter_expressions will evaluate the (sub)queryset.
         Do not use a log in the following manner:
