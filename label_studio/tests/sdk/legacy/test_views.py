@@ -23,6 +23,9 @@ def test_create_view(django_live_url, business_client):
 
     view = project.create_view(title='Test View', filters=filters)
 
+    for filter in view['data']['filters']['items']:
+        filter.pop('id')
+
     assert view['data']['filters'] == {
         'conjunction': 'and',
         'items': [
