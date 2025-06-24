@@ -387,6 +387,13 @@ export const Tab = types
      * Used internally to materialize join filters.
      */
     createChildFilterForType(filterType, parentFilter) {
+      // // HACK: Create a copy of filterType to avoid modifying the protected reference
+      // const filterTypeCopy = { ...filterType };
+      // if (filterType.field.title === "Annotators") {
+      //   filterTypeCopy.field = { ...filterType.field, id: "annotators__completed_by" };
+      // }
+      // filterType = filterTypeCopy;
+
       const filter = TabFilter.create({
         filter: filterType,
       });
@@ -501,8 +508,6 @@ export const Tab = types
 
         if (filterType) {
           const childFilter = self.createChildFilterForType(filterType, rootFilter);
-          // TODO ensure the child's correct default operator is set, regardless of the parent's operator
-          childFilter.setOperator(rootFilter.operator);
 
           console.debug("[DM] join-filter created", { parent: rootFilter, child: childFilter });
         }
