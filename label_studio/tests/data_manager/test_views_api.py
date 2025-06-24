@@ -149,10 +149,7 @@ def test_views_api_filters(business_client, project_id):
     )
 
     assert response.status_code == 200, response.content
-    response_data = response.json()['data']
-    for item in response_data['filters']['items']:
-        item.pop('id')
-    assert response_data == payload['data']
+    assert response.json()['data'] == payload['data']
 
     updated_payload = dict(
         project=project_id,
@@ -190,10 +187,7 @@ def test_views_api_filters(business_client, project_id):
     )
 
     assert response.status_code == 200, response.content
-    response_data = response.json()['data']
-    for item in response_data['filters']['items']:
-        item.pop('id')
-    assert response_data == updated_payload['data']
+    assert response.json()['data'] == updated_payload['data']
 
 
 def test_views_api_nested_filters(business_client, project_id):
