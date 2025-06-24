@@ -268,11 +268,7 @@ def apply_filters(queryset, filters, project, request):
     # combine child filters with their parent in the same filter expression
     filter_line_expressions: list[list[Q]] = []
     for parent_filter in filters.items:
-        filter_line = []
-        filter_line.append(parent_filter)
-        if parent_filter.child_filter is not None:
-            filter_line.append(parent_filter.child_filter)
-
+        filter_line = [parent_filter, parent_filter.child_filter] if parent_filter.child_filter else [parent_filter]
         filter_expressions: list[Q] = []
 
         for _filter in filter_line:
@@ -466,6 +462,8 @@ def apply_filters(queryset, filters, project, request):
 
         filter_line_expressions.append(filter_expressions)
 
+    resolved_filter_lines = [reduce(lambda x, y: x & y, fle) for fle in filter_line_expressions]
+
     """WARNING: Stringifying filter_expressions will evaluate the (sub)queryset.
         Do not use a log in the following manner:
         logger.debug(f'Apply filter: {filter_expressions}')
@@ -474,14 +472,12 @@ def apply_filters(queryset, filters, project, request):
     """
     if filters.conjunction == ConjunctionEnum.OR:
         result_filter = Q()
-        for filter_expressions in filter_line_expressions:
-            filter_expression = reduce(lambda x, y: x & y, filter_expressions)
-            result_filter.add(filter_expression, Q.OR)
+        for resolved_filter in resolved_filter_lines:
+            result_filter.add(resolved_filter, Q.OR)
         queryset = queryset.filter(result_filter)
     else:
-        for filter_expressions in filter_line_expressions:
-            filter_expression = reduce(lambda x, y: x & y, filter_expressions)
-            queryset = queryset.filter(filter_expression)
+        for resolved_filter in resolved_filter_lines:
+            queryset = queryset.filter(resolved_filter)
     return queryset
 
 

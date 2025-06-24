@@ -21,14 +21,14 @@ from users.models import User
 from label_studio.core.utils.common import round_floats
 
 
-class RecursiveField(serializers.Serializer):
+class ChildFilterSerializer(serializers.Serializer):
     def to_representation(self, value):
         parent = self.parent  # the owning FilterSerializer instance
         serializer = parent.__class__(instance=value, context=self.context)
         return serializer.data
 
     def to_internal_value(self, data):
-        """Allow RecursiveField to be writable.
+        """Allow ChildFilterSerializer to be writable.
 
         We instantiate the *parent* serializer class (which in this case is
         ``FilterSerializer``) to validate the nested payload. The validated
@@ -44,7 +44,7 @@ class RecursiveField(serializers.Serializer):
 
 
 class FilterSerializer(serializers.ModelSerializer):
-    child_filter = RecursiveField(required=False)
+    child_filter = ChildFilterSerializer(required=False)
 
     class Meta:
         model = Filter
@@ -110,8 +110,8 @@ class FilterGroupSerializer(serializers.ModelSerializer):
 
             # Add child filter if exists (only one level of nesting)
             child_filters = filter_obj.children.all()
-            if child_filters.exists():
-                child = child_filters.first()  # Only support one child
+            if child_filters:
+                child = child_filters[0]   # Only support one child
                 child_item = {
                     'id': child.id,
                     'filter': child.column,
@@ -124,7 +124,7 @@ class FilterGroupSerializer(serializers.ModelSerializer):
             return item
 
         # Only process root filters (ordered by index)
-        roots = instance.filters.filter(parent__isnull=True).order_by('index')
+        roots = instance.filters.filter(parent__isnull=True).prefetch_related('children').order_by('index')
 
         return {'conjunction': instance.conjunction, 'items': [_build_filter_tree(f) for f in roots]}
 
