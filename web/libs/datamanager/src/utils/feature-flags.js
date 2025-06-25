@@ -74,6 +74,10 @@ function getFeatureFlags() {
 }
 
 export function isFF(id) {
+  if (id === FF_DEV_3873) {
+    return true;
+  }
+
   const featureFlags = getFeatureFlags();
   // TODO: remove the override + if statement once LSE and LSO start building react the same way and fflag_fix_front_lsdv_4620_memory_leaks_100723_short is removed
   const override = {
