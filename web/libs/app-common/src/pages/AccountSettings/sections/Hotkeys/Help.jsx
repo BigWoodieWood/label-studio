@@ -112,13 +112,14 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold">Available Keyboard Shortcuts</h2>
-            <button
+            <Button
+              type="text"
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none"
               aria-label="Close modal"
             >
               ×
-            </button>
+            </Button>
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Keyboard shortcuts for this page.&nbsp;

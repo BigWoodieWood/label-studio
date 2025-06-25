@@ -99,16 +99,17 @@ export const HotkeyItem = ({ hotkey, onEdit, isEditing, onSave, onCancel, onTogg
         <div className="font-medium">{hotkey.label}</div>
         <div className="flex gap-3">
           {/* Key recording input area */}
-          <div
+          <Button
             ref={keyRecordingRef}
+            variant="neutral"
             className={clsx(
               "flex-1 flex items-center justify-center min-h-[40px] px-4 py-2 border rounded-md cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-              keyRecordingMode ? "bg-primary/10 border-primary" : "border-input bg-background",
+              keyRecordingMode ? "border-primary" : "border-input bg-background",
               error ? "border-destructive" : "",
             )}
             onClick={startRecordingKeys}
             onKeyDown={handleKeyPress}
-            tabIndex="0"
+            aria-label="Click to record keyboard shortcut"
           >
             {keyRecordingMode ? (
               <span className="text-primary font-medium animate-pulse">Press keys now...</span>
@@ -117,7 +118,7 @@ export const HotkeyItem = ({ hotkey, onEdit, isEditing, onSave, onCancel, onTogg
             ) : (
               <span className="text-muted-foreground">Click to set shortcut</span>
             )}
-          </div>
+          </Button>
 
           {/* Action buttons */}
           <div className="flex flex-col gap-2">

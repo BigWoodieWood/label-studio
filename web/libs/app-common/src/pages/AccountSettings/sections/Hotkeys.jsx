@@ -405,7 +405,7 @@ export const HotkeysManager = () => {
 
       toast.show({ message: "Hotkeys imported successfully", type: ToastType.success });
     } catch (error) {
-      toast.show({ message: "Error importing hotkeys: " + error.message, type: ToastType.error });
+      toast.show({ message: `Error importing hotkeys: ${error.message}`, type: ToastType.error });
     } finally {
       setIsLoading(false);
     }
