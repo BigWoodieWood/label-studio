@@ -26,7 +26,7 @@ export const Tool = ({
   label,
   shortcut,
   onClick,
-}) => {  
+}) => {
   let currentShortcut = shortcut;
   const dynamic = tool?.dynamic ?? false;
   const { expanded, alignment } = useContext(ToolbarContext);
@@ -36,7 +36,7 @@ export const Tool = ({
     const sc = hotkeys.lookupKey(shortcut);
 
     if (!isDefined(sc)) return null;
-    
+
     const combos = sc.split(",").map((s) => s.trim());
 
     return (
@@ -71,17 +71,14 @@ export const Tool = ({
     currentShortcut = shortcut;
 
     if (shortcut && !hotkeys.hasKeyByName(shortcut)) {
-      hotkeys.addNamed(
-        shortcut,
-        () => {
-          if (!tool?.disabled && !tool?.annotation?.isDrawing) {
-            if (tool?.unselectRegionOnToolChange) {
-              tool.annotation.unselectAreas();
-            }
-            onClick?.();
+      hotkeys.addNamed(shortcut, () => {
+        if (!tool?.disabled && !tool?.annotation?.isDrawing) {
+          if (tool?.unselectRegionOnToolChange) {
+            tool.annotation.unselectAreas();
           }
+          onClick?.();
         }
-      );
+      });
     }
 
     return () => {

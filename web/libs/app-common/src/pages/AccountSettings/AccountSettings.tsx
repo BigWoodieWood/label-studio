@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@humansignal/ui/lib/card-new/card";
 import { useMemo, isValidElement } from "react";
 import { Redirect, Route, Switch, useHistory, useParams, useRouteMatch } from "react-router-dom";
@@ -20,14 +19,14 @@ const AccountSettingsSection = () => {
   const contentClassName = clsx(styles.accountSettings__content, {
     [styles.accountSettingsPadding]: window.APP_SETTINGS.billing !== undefined,
   });
-  
+
   const resolvedSections = useMemo(() => {
     return settings.data ? accountSettingsSections(settings.data) : [];
   }, [settings.data]);
 
-  const currentSection = useMemo(() => 
-    resolvedSections.find(section => section.id === sectionId),
-    [resolvedSections, sectionId]
+  const currentSection = useMemo(
+    () => resolvedSections.find((section) => section.id === sectionId),
+    [resolvedSections, sectionId],
   );
 
   if (!currentSection && resolvedSections.length > 0) {
@@ -36,25 +35,27 @@ const AccountSettingsSection = () => {
 
   return currentSection ? (
     currentSection.raw ? (
-	<currentSection.component />
+      <currentSection.component />
     ) : (
-	<div className={contentClassName}>
-	<Card key={currentSection.id}>
-        <CardHeader>
-        <CardTitle>{currentSection.title}</CardTitle>
-        {currentSection.description && (
-            <CardDescription>
-            {isValidElement(currentSection.description) 
-             ? currentSection.description 
-             : <currentSection.description />}
-          </CardDescription>
-        )}
-      </CardHeader>
-        <CardContent>
-        <currentSection.component />
-        </CardContent>
-	</Card>
-	</div>
+      <div className={contentClassName}>
+        <Card key={currentSection.id}>
+          <CardHeader>
+            <CardTitle>{currentSection.title}</CardTitle>
+            {currentSection.description && (
+              <CardDescription>
+                {isValidElement(currentSection.description) ? (
+                  currentSection.description
+                ) : (
+                  <currentSection.description />
+                )}
+              </CardDescription>
+            )}
+          </CardHeader>
+          <CardContent>
+            <currentSection.component />
+          </CardContent>
+        </Card>
+      </div>
     )
   ) : null;
 };
@@ -64,7 +65,7 @@ const AccountSettingsPage = () => {
   const history = useHistory();
   const match = useRouteMatch();
   const { sectionId } = useParams();
-  
+
   const resolvedSections = useMemo(() => {
     return settings.data ? accountSettingsSections(settings.data) : [];
   }, [settings.data]);
@@ -87,9 +88,7 @@ const AccountSettingsPage = () => {
         <Switch>
           <Route path={`${match.path}/:sectionId`} component={AccountSettingsSection} />
           <Route exact path={match.path}>
-            {resolvedSections.length > 0 && (
-              <Redirect to={`${match.path}/${resolvedSections[0].id}`} />
-            )}
+            {resolvedSections.length > 0 && <Redirect to={`${match.path}/${resolvedSections[0].id}`} />}
           </Route>
         </Switch>
       </SidebarMenu>
@@ -109,7 +108,7 @@ AccountSettingsPage.routes = () => [
   {
     path: `${AccountSettingsPage.path}/:sectionId?`,
     component: AccountSettingsPage,
-  }
+  },
 ];
 
 export { AccountSettingsPage };

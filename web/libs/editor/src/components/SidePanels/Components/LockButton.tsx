@@ -26,7 +26,14 @@ export const LockButton: FC<{
     };
 
     return (
-	<RegionControlButton disabled={isRegionReadonly} onClick={onClick} displayedHotkey={displayedHotkey} hotkey={hotkey} look={look} style={styles}>
+      <RegionControlButton
+        disabled={isRegionReadonly}
+        onClick={onClick}
+        displayedHotkey={displayedHotkey}
+        hotkey={hotkey}
+        look={look}
+        style={styles}
+      >
         {isLocked ? <IconLockLocked /> : <IconLockUnlocked />}
       </RegionControlButton>
     );

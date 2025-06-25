@@ -26,7 +26,8 @@ export const accountSettingsSections = (settings: AuthTokenSettings): SectionTyp
       title: "Hotkeys",
       id: "hotkeys",
       component: HotkeysManager,
-      description: () => "Customize your keyboard shortcuts to speed up your workflow. Click on any hotkey below to assign a new key combination that works best for you.",
+      description: () =>
+        "Customize your keyboard shortcuts to speed up your workflow. Click on any hotkey below to assign a new key combination that works best for you.",
     },
     {
       title: "Email Preferences",

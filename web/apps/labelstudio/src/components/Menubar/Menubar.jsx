@@ -21,6 +21,7 @@ import { useCurrentUser } from "../../providers/CurrentUser";
 import { cn } from "../../utils/bem";
 import { absoluteURL, isDefined } from "../../utils/helpers";
 import { Breadcrumbs } from "../Breadcrumbs/Breadcrumbs";
+import { Button } from "../Button/Button";
 import { Dropdown } from "../Dropdown/Dropdown";
 import { Hamburger } from "../Hamburger/Hamburger";
 import { Menu } from "../Menu/Menu";
@@ -150,15 +151,31 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
           </div>
 
           <div className={menubarClass.elem("spacer").toString()} />
-          
+
           {ff.isActive(ff.FF_THEME_TOGGLE) && <ThemeToggle />}
 
           <div className={menubarClass.elem("hotkeys")}>
             <div className={menubarClass.elem("hotkeys-button")}>
-              <a href="#" onClick={() => { openHotkeyHelp(["annotation", "data_manager", "regions", "tools", "audio", "video", "timeseries", "image_gallery"]) }}><IconHotkeys /></a>
+              <Button
+                type="text"
+                onClick={() => {
+                  openHotkeyHelp([
+                    "annotation",
+                    "data_manager",
+                    "regions",
+                    "tools",
+                    "audio",
+                    "video",
+                    "timeseries",
+                    "image_gallery",
+                  ]);
+                }}
+              >
+                <IconHotkeys />
+              </Button>
             </div>
           </div>
-          
+
           <Dropdown.Trigger
             ref={useMenuRef}
             align="right"
@@ -168,7 +185,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
                   icon={<IconSettings />}
                   label="Account &amp; Settings"
                   href={pages.AccountSettingsPage.path}
-                />                
+                />
                 {/* <Menu.Item label="Dark Mode"/> */}
                 <Menu.Item icon={<IconDoor />} label="Log Out" href={absoluteURL("/logout")} data-external />
                 {showNewsletterDot && (

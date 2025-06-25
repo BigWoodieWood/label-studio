@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@humansignal/ui";
 import { Label } from "@humansignal/ui";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@humansignal/shad/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@humansignal/shad/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@humansignal/shad/components/ui/alert";
 
 /**
  * ImportDialog - A dialog component for importing hotkey configurations
- * 
+ *
  * This component allows users to import hotkey configurations by pasting JSON data.
  * It validates the imported data structure and provides error feedback.
- * 
+ *
  * @param {ImportDialogProps} props - The component props
  * @returns {React.ReactElement} The ImportDialog component
  */
@@ -25,11 +32,11 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
    * @throws {Error} If the hotkey is missing required fields
    */
   const validateHotkey = (hotkey) => {
-    const requiredFields = ['id', 'section', 'element', 'label', 'key'];
-    const missingFields = requiredFields.filter(field => !hotkey[field]);
-    
+    const requiredFields = ["id", "section", "element", "label", "key"];
+    const missingFields = requiredFields.filter((field) => !hotkey[field]);
+
     if (missingFields.length > 0) {
-      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
     }
   };
 
@@ -41,7 +48,7 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
     try {
       // Clear any previous errors
       setError("");
-      
+
       // Validate input exists
       if (!importText.trim()) {
         throw new Error("Please enter JSON data to import");
@@ -49,7 +56,7 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
 
       // Parse the JSON
       const hotkeys = JSON.parse(importText);
-      
+
       // Validate it's an array
       if (!Array.isArray(hotkeys)) {
         throw new Error("Invalid format: expected an array of hotkeys");
@@ -59,7 +66,7 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
       if (hotkeys.length === 0) {
         throw new Error("No hotkeys found in the imported data");
       }
-      
+
       // Validate each hotkey object
       hotkeys.forEach((hotkey, index) => {
         try {
@@ -68,13 +75,12 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
           throw new Error(`Hotkey at index ${index}: ${validationError.message}`);
         }
       });
-      
+
       // If validation passes, proceed with import
       onImport(hotkeys);
-      
+
       // Reset the dialog state
       resetDialogState();
-      
     } catch (err) {
       // Set error message for display
       setError(err.message);
@@ -115,11 +121,11 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
         <DialogHeader>
           <DialogTitle>Import Hotkeys</DialogTitle>
           <DialogDescription>
-            Paste your exported hotkeys JSON below. This will replace your current hotkeys.
-            Make sure the JSON contains an array of hotkey objects with the required fields.
+            Paste your exported hotkeys JSON below. This will replace your current hotkeys. Make sure the JSON contains
+            an array of hotkey objects with the required fields.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-4 py-4">
           <Label htmlFor="import-json">Hotkeys JSON</Label>
           <textarea
@@ -130,7 +136,7 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
             onChange={handleTextareaChange}
             aria-describedby={error ? "import-error" : undefined}
           />
-          
+
           {error && (
             <Alert variant="destructive" id="import-error">
               <AlertTitle>Import Error</AlertTitle>
@@ -138,15 +144,12 @@ export const ImportDialog = ({ open, onOpenChange, onImport }) => {
             </Alert>
           )}
         </div>
-        
+
         <DialogFooter>
           <Button variant="ghost" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleImport} 
-            disabled={!importText.trim()}
-          >
+          <Button onClick={handleImport} disabled={!importText.trim()}>
             Import Hotkeys
           </Button>
         </DialogFooter>

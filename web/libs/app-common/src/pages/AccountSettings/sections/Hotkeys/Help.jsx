@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom";
 import clsx from "clsx";
 import { Button } from "@humansignal/ui";
@@ -31,15 +30,15 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
    * Renders a single hotkey section with its shortcuts
    */
   const renderSection = (sectionId) => {
-    const section = HOTKEY_SECTIONS.find(s => s.id === sectionId);
+    const section = HOTKEY_SECTIONS.find((s) => s.id === sectionId);
     if (!section) return null;
 
-    const sectionHotkeys = DEFAULT_HOTKEYS.filter(h => h.section === sectionId);
+    const sectionHotkeys = DEFAULT_HOTKEYS.filter((h) => h.section === sectionId);
     if (sectionHotkeys.length === 0) return null;
 
     // Group hotkeys by subgroup for better organization
     const groupedHotkeys = sectionHotkeys.reduce((groups, hotkey) => {
-      const subgroup = hotkey.subgroup || 'default';
+      const subgroup = hotkey.subgroup || "default";
       if (!groups[subgroup]) {
         groups[subgroup] = [];
       }
@@ -49,8 +48,8 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
 
     // Sort subgroups with 'default' always first
     const subgroups = Object.keys(groupedHotkeys).sort((a, b) => {
-      if (a === 'default') return -1;
-      if (b === 'default') return 1;
+      if (a === "default") return -1;
+      if (b === "default") return 1;
       return a.localeCompare(b);
     });
 
@@ -59,24 +58,21 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
         {/* Section Header */}
         <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <h3 className="font-medium">{section.title}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {section.description}
-          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{section.description}</p>
         </div>
 
         {/* Section Content */}
         <div className="p-4">
           <div className="space-y-2">
             {subgroups.map((subgroup) => (
-              <div 
-                key={subgroup} 
+              <div
+                key={subgroup}
                 className={clsx(
-                  subgroup !== 'default' && 
-                  "mt-4 pt-2 border rounded-md border-gray-200 dark:border-gray-700 p-3"
+                  subgroup !== "default" && "mt-4 pt-2 border rounded-md border-gray-200 dark:border-gray-700 p-3",
                 )}
               >
                 {/* Subgroup Header */}
-                {subgroup !== 'default' && (
+                {subgroup !== "default" && (
                   <div className="mb-3">
                     <div className="text-sm font-medium mb-1 capitalize">
                       {HOTKEY_SECTIONS[subgroup]?.title || subgroup}
@@ -88,19 +84,14 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
                     )}
                   </div>
                 )}
-                
+
                 {/* Hotkey Items */}
-                {groupedHotkeys[subgroup].map(hotkey => (
-                  <div
-                    key={`${section.id}-${hotkey.element}`}
-                    className="flex items-center justify-between py-2"
-                  >
+                {groupedHotkeys[subgroup].map((hotkey) => (
+                  <div key={`${section.id}-${hotkey.element}`} className="flex items-center justify-between py-2">
                     <div>
                       <div className="font-medium">{hotkey.label}</div>
                       {hotkey.description && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {hotkey.description}
-                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{hotkey.description}</div>
                       )}
                     </div>
                     <KeyboardKey>{hotkey.key}</KeyboardKey>
@@ -115,10 +106,7 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
   };
 
   return (
-    <div 
-      onClick={handleBackdropClick} 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50"
-    >
+    <div onClick={handleBackdropClick} className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-3xl max-h-[80vh] overflow-hidden w-full mx-4">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -134,11 +122,11 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Keyboard shortcuts for this page.&nbsp;
-            <a 
-              href="/user/account/hotkeys" 
-              onClick={(e) => { 
-                e.preventDefault(); 
-                handleCustomizeClick(); 
+            <a
+              href="/user/account/hotkeys"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCustomizeClick();
               }}
               className="text-blue-600 hover:underline"
             >
@@ -146,20 +134,16 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
             </a>
           </p>
         </div>
-        
+
         {/* Modal Content */}
         <div className="px-6 py-4 overflow-y-auto max-h-[60vh]">
-          <div className="space-y-4">
-            {sectionsToShow.map(renderSection)}
-          </div>
+          <div className="space-y-4">{sectionsToShow.map(renderSection)}</div>
         </div>
 
         {/* Modal Footer */}
         <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-end">
-            <Button onClick={handleCustomizeClick}>
-              Customize Hotkeys
-            </Button>
+            <Button onClick={handleCustomizeClick}>Customize Hotkeys</Button>
           </div>
         </div>
       </div>
@@ -174,11 +158,10 @@ const HotkeyHelpModal = ({ sectionsToShow, onClose }) => {
  */
 const determineSectionsToShow = (sectionOrUrl) => {
   let sectionsToShow = [];
-  
+
   if (sectionOrUrl) {
     // Check if input is a URL
-    if (typeof sectionOrUrl === 'string' &&
-        (sectionOrUrl.startsWith('http') || sectionOrUrl.startsWith('/'))) {
+    if (typeof sectionOrUrl === "string" && (sectionOrUrl.startsWith("http") || sectionOrUrl.startsWith("/"))) {
       // Apply URL-to-section mapping
       for (const mapping of URL_TO_SECTION_MAPPING) {
         if (mapping.regex.test(sectionOrUrl)) {
@@ -212,7 +195,7 @@ const determineSectionsToShow = (sectionOrUrl) => {
 
   // Show all sections if none were identified
   if (sectionsToShow.length === 0) {
-    sectionsToShow = HOTKEY_SECTIONS.map(section => section.id);
+    sectionsToShow = HOTKEY_SECTIONS.map((section) => section.id);
   }
 
   return sectionsToShow;
@@ -221,23 +204,23 @@ const determineSectionsToShow = (sectionOrUrl) => {
 /**
  * Creates and displays a modal with keyboard shortcuts
  * Automatically determines which shortcuts to show based on current page or provided sections
- * 
+ *
  * @param {string|string[]} [sectionOrUrl] - Optional URL or section name(s) to determine which shortcuts to display
  *                                         - If URL: uses regex mapping to find relevant sections
  *                                         - If string: shows that specific section
- *                                         - If array: shows multiple specific sections  
+ *                                         - If array: shows multiple specific sections
  *                                         - If undefined: auto-detects from current URL
- * 
+ *
  * @example
  * // Show shortcuts for current page
  * openHotkeyHelp();
- * 
+ *
  * // Show shortcuts for specific section
  * openHotkeyHelp('annotation');
- * 
+ *
  * // Show shortcuts for multiple sections
  * openHotkeyHelp(['annotation', 'regions']);
- * 
+ *
  * // Show shortcuts based on URL
  * openHotkeyHelp('/projects/123/data/?task=456');
  */
@@ -245,13 +228,13 @@ export const openHotkeyHelp = (sectionOrUrl) => {
   const sectionsToShow = determineSectionsToShow(sectionOrUrl);
 
   // Create modal container with high z-index
-  const modalRoot = document.createElement('div');
-  modalRoot.style.position = 'fixed';
-  modalRoot.style.top = '0';
-  modalRoot.style.left = '0';
-  modalRoot.style.width = '100%';
-  modalRoot.style.height = '100%';
-  modalRoot.style.zIndex = '9999';
+  const modalRoot = document.createElement("div");
+  modalRoot.style.position = "fixed";
+  modalRoot.style.top = "0";
+  modalRoot.style.left = "0";
+  modalRoot.style.width = "100%";
+  modalRoot.style.height = "100%";
+  modalRoot.style.zIndex = "9999";
   document.body.appendChild(modalRoot);
 
   /**
@@ -276,15 +259,9 @@ export const openHotkeyHelp = (sectionOrUrl) => {
   document.addEventListener("keydown", handleEscKey);
 
   // Render modal component
-  ReactDOM.render(
-    <HotkeyHelpModal 
-      sectionsToShow={sectionsToShow} 
-      onClose={closeModal} 
-    />, 
-    modalRoot
-  );
+  ReactDOM.render(<HotkeyHelpModal sectionsToShow={sectionsToShow} onClose={closeModal} />, modalRoot);
 
   return {
-    close: closeModal
+    close: closeModal,
   };
 };

@@ -16,7 +16,7 @@ const shortcutView = (shortcut) => {
   if (!isDefined(sc)) return null;
 
   const combos = sc.split(",").map((s) => s.trim());
-  
+
   return (
     <Elem name="shortcut">
       {combos.map((combo, index) => {
@@ -56,14 +56,11 @@ export const FlyoutMenu = ({ items, icon }) => {
         const currentShortcut = menuItem.shortcut;
 
         if (currentShortcut && !hotkeys.hasKeyByName(currentShortcut)) {
-          hotkeys.addNamed(
-            currentShortcut,
-            () => {
-              console.log("clicked");
-              menuItem?.onClick?.();
-              setClicked(false);
-            }
-          );
+          hotkeys.addNamed(currentShortcut, () => {
+            console.log("clicked");
+            menuItem?.onClick?.();
+            setClicked(false);
+          });
         }
       });
     };

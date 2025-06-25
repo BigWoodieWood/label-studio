@@ -1,16 +1,14 @@
-
 import { useEffect, useState, useRef } from "react";
 import clsx from "clsx";
 
 // UI components
 import { Button } from "@humansignal/ui";
-import { Switch } from "@humansignal/shad/components/ui/switch";
 import { Toggle as UiToggle } from "@humansignal/ui";
 import { KeyboardKey } from "./Key";
 
 /**
  * HotkeyItem component for displaying and editing keyboard shortcuts
- * 
+ *
  * @param {Object} hotkey - The hotkey configuration object
  * @param {string} hotkey.id - Unique identifier for the hotkey
  * @param {string} hotkey.label - Display name for the hotkey
@@ -28,7 +26,7 @@ export const HotkeyItem = ({ hotkey, onEdit, isEditing, onSave, onCancel, onTogg
   const [keyRecordingMode, setKeyRecordingMode] = useState(false);
   const [error, setError] = useState("");
   const keyRecordingRef = useRef(null);
-  
+
   /**
    * Auto-start key recording when entering edit mode
    * Focuses the input and begins listening for key presses immediately
@@ -46,35 +44,35 @@ export const HotkeyItem = ({ hotkey, onEdit, isEditing, onSave, onCancel, onTogg
       }, 50);
     }
   }, [isEditing]);
-  
+
   /**
    * Handles key press events and builds key combination strings
    * Captures modifier keys (ctrl, shift, alt, meta) and main key
    */
   const handleKeyPress = (e) => {
     if (!keyRecordingMode) return;
-    
+
     e.preventDefault();
-    
+
     const { key, ctrlKey, shiftKey, altKey, metaKey } = e.nativeEvent;
-    
+
     // Skip if only modifier keys are pressed
-    if (['Control', 'Shift', 'Alt', 'Meta'].includes(key)) return;
-    
+    if (["Control", "Shift", "Alt", "Meta"].includes(key)) return;
+
     // Build key combination array
-    let keyCombo = [];
-    if (ctrlKey) keyCombo.push('ctrl');
-    if (shiftKey) keyCombo.push('shift');
-    if (altKey) keyCombo.push('alt');
-    if (metaKey) keyCombo.push('meta');
-    
+    const keyCombo = [];
+    if (ctrlKey) keyCombo.push("ctrl");
+    if (shiftKey) keyCombo.push("shift");
+    if (altKey) keyCombo.push("alt");
+    if (metaKey) keyCombo.push("meta");
+
     keyCombo.push(key.toLowerCase());
-    
-    setEditedKey(keyCombo.join('+'));
+
+    setEditedKey(keyCombo.join("+"));
     setError("");
     setKeyRecordingMode(false);
   };
-  
+
   /**
    * Manually restart key recording (for when user wants to re-record)
    */
@@ -86,7 +84,7 @@ export const HotkeyItem = ({ hotkey, onEdit, isEditing, onSave, onCancel, onTogg
       keyRecordingRef.current.focus();
     }
   };
-  
+
   /**
    * Save the edited key combination
    */
@@ -101,12 +99,12 @@ export const HotkeyItem = ({ hotkey, onEdit, isEditing, onSave, onCancel, onTogg
         <div className="font-medium">{hotkey.label}</div>
         <div className="flex gap-3">
           {/* Key recording input area */}
-          <div 
+          <div
             ref={keyRecordingRef}
             className={clsx(
               "flex-1 flex items-center justify-center min-h-[40px] px-4 py-2 border rounded-md cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
               keyRecordingMode ? "bg-primary/10 border-primary" : "border-input bg-background",
-              error ? "border-destructive" : ""
+              error ? "border-destructive" : "",
             )}
             onClick={startRecordingKeys}
             onKeyDown={handleKeyPress}
@@ -120,59 +118,44 @@ export const HotkeyItem = ({ hotkey, onEdit, isEditing, onSave, onCancel, onTogg
               <span className="text-muted-foreground">Click to set shortcut</span>
             )}
           </div>
-          
+
           {/* Action buttons */}
           <div className="flex flex-col gap-2">
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={handleSave} 
-              disabled={!editedKey || !!error}
-            >
+            <Button variant="default" size="sm" onClick={handleSave} disabled={!editedKey || !!error}>
               Apply
             </Button>
-            <Button 
-              variant="neutral" 
-              size="sm" 
-              onClick={() => onCancel(hotkey.id)}
-            >
+            <Button variant="neutral" size="sm" onClick={() => onCancel(hotkey.id)}>
               Cancel
             </Button>
           </div>
         </div>
-        {error && (
-          <div className="text-sm text-destructive mt-1">{error}</div>
-        )}
+        {error && <div className="text-sm text-destructive mt-1">{error}</div>}
       </div>
     );
   }
-  
+
   // Render normal view: toggle switch, label/description, hotkey display
   return (
-    <div className={clsx(
-      "flex items-center py-3 border-b border-border/10 last:border-0",
-      !hotkey.active && "opacity-60"
-    )}>
+    <div
+      className={clsx("flex items-center py-3 border-b border-border/10 last:border-0", !hotkey.active && "opacity-60")}
+    >
       {/* Toggle switch */}
       <div className="flex-none mr-4">
-        <UiToggle 
+        <UiToggle
           checked={hotkey.active}
           onChange={() => onToggle(hotkey.id)}
-          aria-label={`${hotkey.active ? 'Disable' : 'Enable'} ${hotkey.label}`}
+          aria-label={`${hotkey.active ? "Disable" : "Enable"} ${hotkey.label}`}
         />
       </div>
-      
+
       {/* Label and description */}
       <div className="flex-1 mr-4">
         <div className="font-medium">{hotkey.label}</div>
         <div className="text-sm text-muted-foreground">{hotkey.description}</div>
       </div>
-      
+
       {/* Current hotkey display (clickable to edit) */}
-      <div 
-        className="flex items-center gap-2 cursor-pointer hover:opacity-80" 
-        onClick={() => onEdit(hotkey.id)}
-      >
+      <div className="flex items-center gap-2 cursor-pointer hover:opacity-80" onClick={() => onEdit(hotkey.id)}>
         <KeyboardKey>{hotkey.key}</KeyboardKey>
       </div>
     </div>

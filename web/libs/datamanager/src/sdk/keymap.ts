@@ -18,5 +18,5 @@ export const keymap = {
   "dm.toggle-bulk-sidebar-minimization": {
     title: "Toggle bulk sidebar minimization",
     shortcut: "shift+.",
-  }
+  },
 };

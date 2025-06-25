@@ -494,7 +494,7 @@ const _Annotation = types
         region.setLocked(!region.locked);
       });
     },
-    
+
     hideSelectedRegions() {
       self.selectedRegions.forEach((region) => {
         region.toggleHidden();

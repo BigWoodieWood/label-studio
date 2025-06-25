@@ -14,11 +14,9 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
 from users.functions import check_avatar
 from users.models import User
-from users.serializers import UserSerializer, UserSerializerUpdate, HotkeysSerializer
-
+from users.serializers import HotkeysSerializer, UserSerializer, UserSerializerUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -314,7 +312,7 @@ class UserWhoAmIAPI(generics.RetrieveAPIView):
 class UserHotkeysAPI(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = HotkeysSerializer
-    
+
     def perform_create(self, serializer):
         """Update the current user's hotkeys"""
         user = self.request.user

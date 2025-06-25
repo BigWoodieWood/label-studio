@@ -443,7 +443,7 @@ export default types
         const c = self.annotationStore.selected;
 
         if (c && !c.isLinkingMode) {
-	  c.lockSelectedRegions();
+          c.lockSelectedRegions();
         }
       });
 

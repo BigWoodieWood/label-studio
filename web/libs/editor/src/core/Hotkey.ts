@@ -199,7 +199,7 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
     /**
      * Add key
      */
-      addKey(key: string, func: keymaster.KeyHandler, desc?: string, scope: string = DEFAULT_SCOPE) {
+    addKey(key: string, func: keymaster.KeyHandler, desc?: string, scope: string = DEFAULT_SCOPE) {
       if (!isDefined(key)) return;
 
       if (_hotkeys_map[key]) {
@@ -224,9 +224,9 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
 
             func(...args);
           };
-	    
+
           addKeyHandlerRef(scope, keyName, handler);
-            keymaster(keyName, scope, handler);
+          keymaster(keyName, scope, handler);
         });
     },
 
@@ -271,33 +271,32 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
     /**
      * Add hotkey from keymap
      */
-      addNamed(name: string, func: keymaster.KeyHandler, scope?: string) {
-	  const hotkey = Hotkey.keymap[name];
-	  
-	  if (isDefined(hotkey)) {
-	      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
-	      
-              this.addKey(shortcut, func, hotkey.description, scope);
+    addNamed(name: string, func: keymaster.KeyHandler, scope?: string) {
+      const hotkey = Hotkey.keymap[name];
 
-              if (hotkey.modifier) {
-		  this.addKey(`${hotkey.modifier}+${shortcut}`, func, hotkey.modifierDescription, scope);
-              }
+      if (isDefined(hotkey)) {
+        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
-	      // if (name == "tool:move")
-	      // 	debugger;
-	  } else {
-              throw new Error(`Unknown named hotkey ${hotkey}`);
-	  }
-      },
+        this.addKey(shortcut, func, hotkey.description, scope);
 
+        if (hotkey.modifier) {
+          this.addKey(`${hotkey.modifier}+${shortcut}`, func, hotkey.modifierDescription, scope);
+        }
 
-      lookupKey(name: string) {
-	  const hotkey = Hotkey.keymap[name];
-	  if (isDefined(hotkey)) {
-	      return isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
-	  }
-      },
-      
+        // if (name == "tool:move")
+        // 	debugger;
+      } else {
+        throw new Error(`Unknown named hotkey ${hotkey}`);
+      }
+    },
+
+    lookupKey(name: string) {
+      const hotkey = Hotkey.keymap[name];
+      if (isDefined(hotkey)) {
+        return isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
+      }
+    },
+
     /**
      * Removed named hotkey
      */
@@ -347,23 +346,23 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
       return isDefined(_hotkeys_map[keyName]);
     },
 
-      hasKeyByName(name: string) {
-	  if (! isDefined(name)) return;
+    hasKeyByName(name: string) {
+      if (!isDefined(name)) return;
 
-	  const hotkey = Hotkey.keymap[name];
-	  const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
-	  
-	  return this.hasKey(shortcut);
-      },
-      
-    hasName(name: string) {
-	if (! isDefined(name)) return;
+      const hotkey = Hotkey.keymap[name];
+      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
-	const keyName = name.toLowerCase();
-
-	return isDefined(keyName in Hotkey.keymap);
+      return this.hasKey(shortcut);
     },
-      
+
+    hasName(name: string) {
+      if (!isDefined(name)) return;
+
+      const keyName = name.toLowerCase();
+
+      return isDefined(keyName in Hotkey.keymap);
+    },
+
     getKeys() {
       return Object.keys(_hotkeys_map);
     },
