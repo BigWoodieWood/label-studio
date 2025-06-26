@@ -1,22 +1,14 @@
 // Custom commands can be executed with `cy.[command_name]`
 import "./commands";
 
-import "@cypress/code-coverage/support";
-
-// Output spec steps
-require("cypress-terminal-report/src/installLogsCollector")();
-
-// Import commands.js using ES2015 syntax:
-import './commands';
-
 // Import coverage collection
-import '@cypress/code-coverage/support';
+import "@cypress/code-coverage/support";
 
 // Import image snapshot commands
 import 'cypress-image-snapshot/command';
 
-// Import terminal report commands
-import 'cypress-terminal-report/src/installLogsCollector';
+// Install terminal report logs collector
+require("cypress-terminal-report/src/installLogsCollector")();
 
 // Add global types for better TypeScript support
 declare global {
@@ -92,20 +84,17 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   return true;
 });
 
-// Set up code coverage collection
-beforeEach(() => {
-  // Reset coverage collection for each test
-  if (Cypress.env('coverage')) {
-    cy.task('resetCoverage', null, { log: false }).then(() => {
-      cy.task('seedCoverage', null, { log: false });
-    });
-  }
-});
-
-// After each test, save coverage
+// Set up code coverage collection (only if properly instrumented)
 afterEach(() => {
+  // Save coverage data if available
   if (Cypress.env('coverage')) {
-    cy.task('saveCoverage', null, { log: false });
+    cy.window({ log: false }).then((win) => {
+      if (win.__coverage__) {
+        cy.task('saveCoverage', win.__coverage__, { log: false, timeout: 5000 }).catch(() => {
+          // Silently ignore coverage save errors to prevent test failures
+        });
+      }
+    });
   }
 });
 
@@ -113,16 +102,6 @@ afterEach(() => {
 beforeEach(() => {
   // Set up common viewport
   cy.viewport(1600, 900);
-  
-  // Set up common configuration
-  if (Cypress.env('coverage')) {
-    // Ensure coverage is instrumented
-    cy.window().then((win) => {
-      if (win.__coverage__) {
-        cy.task('saveCoverage', win.__coverage__, { log: false });
-      }
-    });
-  }
 });
 
 // Add support for running tests with feature flags

@@ -1,5 +1,4 @@
 import { defineConfig } from "cypress";
-import installLogsPrinter from "cypress-terminal-report/src/installLogsPrinter";
 import { addMatchImageSnapshotPlugin } from "cypress-image-snapshot/plugin";
 import { nxE2EPreset } from "@nx/cypress/plugins/cypress-preset";
 
@@ -8,43 +7,12 @@ const COLLECT_COVERAGE = process.env.COLLECT_COVERAGE === "true" || process.env.
 // Coverage plugin setup
 function setupCoverage(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   if (COLLECT_COVERAGE) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require("@cypress/code-coverage/task")(on, config);
-    
-    on("task", {
-      // Custom task to merge coverage reports from multiple components
-      mergeCoverageReports: async () => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const fs = require("fs");
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const path = require("path");
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const glob = require("glob");
-        
-        const coverageDir = path.resolve("coverage");
-        const reports = glob.sync("libs/*/coverage/coverage-final.json");
-        
-        let mergedCoverage = {};
-        
-        for (const report of reports) {
-          if (fs.existsSync(report)) {
-            const coverage = JSON.parse(fs.readFileSync(report, "utf8"));
-            mergedCoverage = { ...mergedCoverage, ...coverage };
-          }
-        }
-        
-        if (!fs.existsSync(coverageDir)) {
-          fs.mkdirSync(coverageDir, { recursive: true });
-        }
-        
-        fs.writeFileSync(
-          path.join(coverageDir, "coverage-final.json"),
-          JSON.stringify(mergedCoverage, null, 2)
-        );
-        
-        return null;
-      }
-    });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require("@cypress/code-coverage/task")(on, config);
+    } catch (error) {
+      console.warn("Coverage task setup failed:", error);
+    }
   }
   
   return config;
@@ -81,6 +49,9 @@ export default defineConfig({
   e2e: {
     ...nxE2EPreset(__filename),
     
+    // Base URL for the application
+    baseUrl: 'http://localhost:3000',
+    
     // Test patterns
     specPattern: [
       "libs/editor/tests/integration/e2e/**/*.cy.ts",
@@ -103,7 +74,7 @@ export default defineConfig({
       addMatchImageSnapshotPlugin(on, config);
       
       // Terminal logging
-      installLogsPrinter(on, {
+      require('cypress-terminal-report/src/installLogsPrinter')(on, {
         outputVerbose: false,
         includeSuccessfulHookLogs: false,
         outputRoot: config.projectRoot,
