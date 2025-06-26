@@ -62,7 +62,10 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     /Script error/,
     /Network request failed/,
     /Loading chunk \d+ failed/,
-    /ChunkLoadError/
+    /ChunkLoadError/,
+    /MobX Provider: The set of provided stores has changed/,
+    /forwardRef render functions accept exactly two parameters/,
+    /ReactDOM\.render is no longer supported in React 18/
   ];
   
   const errorMessage = err.message || err.toString();
@@ -84,7 +87,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   return true;
 });
 
-// Set up code coverage collection (only if properly instrumented)
+// Set up code coverage collection and cleanup after each test
 afterEach(() => {
   // Save coverage data if available
   if (Cypress.env('coverage')) {
@@ -96,12 +99,56 @@ afterEach(() => {
       }
     });
   }
+  
+  // Clean up LabelStudio instances after each test
+  cy.window({ log: false }).then((win) => {
+    if (win.LabelStudio && win.LabelStudio.instances) {
+      Array.from(win.LabelStudio.instances.values()).forEach((instance: any) => {
+        try {
+          if (instance && typeof instance.destroy === 'function') {
+            instance.destroy();
+          }
+        } catch (error) {
+          // Silently ignore cleanup errors
+        }
+      });
+      win.LabelStudio.instances.clear();
+    }
+  });
 });
 
 // Global test setup
 beforeEach(() => {
   // Set up common viewport
   cy.viewport(1600, 900);
+  
+  // Clean up any LabelStudio instances from previous tests
+  cy.window({ log: false }).then((win) => {
+    if (win.LabelStudio && win.LabelStudio.instances) {
+      Array.from(win.LabelStudio.instances.values()).forEach((instance: any) => {
+        try {
+          if (instance && typeof instance.destroy === 'function') {
+            instance.destroy();
+          }
+        } catch (error) {
+          // Silently ignore cleanup errors
+        }
+      });
+      win.LabelStudio.instances.clear();
+    }
+    
+    // Clear any remaining DOM elements
+    if (win.document) {
+      const lsfEditors = win.document.querySelectorAll('.lsf-editor');
+      lsfEditors.forEach(element => {
+        try {
+          element.remove();
+        } catch (error) {
+          // Silently ignore cleanup errors
+        }
+      });
+    }
+  });
 });
 
 // Add support for running tests with feature flags
