@@ -37,7 +37,29 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      - name: Run tests
+      - name: Run unit tests
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        env:
+          CI: true
         run: |
-          yarn test:unit
+          yarn test:unit:coverage
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-coverage
+          path: |
+            web/coverage/
+            web/libs/*/coverage/
+          retention-days: 30
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: |
+            web/test-results/
+            web/junit.xml
+          retention-days: 7

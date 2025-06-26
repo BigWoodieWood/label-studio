@@ -37,10 +37,6 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      - name: Install e2e dependencies
-        working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}/libs/editor/tests/e2e
-        run: yarn install
-
       - name: Run LSO server
         id: run-lso-server
         run: |
@@ -66,18 +62,33 @@ jobs:
             sleep 2s
           done
 
-      - name: Run tests
+      - name: Run e2e tests
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         env:
-          HEADLESS: true
+          COLLECT_COVERAGE: true
+          CI: true
         run: |
-          yarn lsf:e2e:ci
+          yarn test:e2e:coverage
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: e2e output
-          path: "web/libs/editor/tests/e2e/output"
+          name: e2e-coverage
+          path: |
+            web/coverage/
+            web/libs/*/coverage/
+          retention-days: 30
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-artifacts
+          path: |
+            web/dist/cypress/
+            web/cypress-logs.*
+          retention-days: 7
 
       - name: Kill LSO server
         if: always()
