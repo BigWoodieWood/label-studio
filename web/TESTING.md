@@ -25,6 +25,11 @@ The testing framework has been reorganized to provide:
 
 ## Quick Start
 
+⚠️ **Important**: Run all commands from the `web/` directory:
+```bash
+cd web/
+```
+
 ### Running All Tests
 ```bash
 # Run all tests (unit + e2e)
@@ -68,8 +73,11 @@ yarn test:e2e:open
 # Run e2e tests in headed mode (see browser)
 yarn test:e2e:headed
 
-# Run e2e tests in parallel (faster for CI)
+# Run e2e tests in parallel (built-in Cypress parallelization)
 yarn test:e2e:parallel
+
+# Run e2e tests with worker processes (using cypress-parallel)
+yarn test:e2e:parallel-workers
 ```
 
 #### Component-Specific Tests
@@ -238,7 +246,7 @@ describe("Drawing", () => {
 | Old Command | New Command |
 |-------------|-------------|
 | `yarn lsf:e2e` | `yarn test:e2e --spec "libs/editor/**"` |
-| `yarn lsf:e2e:parallel` | `yarn test:e2e:parallel` |
+| `yarn lsf:e2e:parallel` | `yarn test:e2e:parallel-workers` |
 | `yarn lsf:integration` | `yarn test:integration` |
 | `yarn test:e2e` (old) | `yarn test:all` |
 
@@ -246,6 +254,9 @@ describe("Drawing", () => {
 
 ### Local Development
 ```bash
+# Make sure you're in the web directory
+cd web/
+
 # Open Cypress test runner
 yarn test:e2e:open
 
@@ -289,6 +300,15 @@ yarn test:e2e:headed
 
 ### Common Issues
 
+#### "Could not find a Cypress configuration file"
+This error occurs when running commands from the wrong directory.
+
+**Solution**: Always run test commands from the `web/` directory:
+```bash
+cd web/
+yarn test:all
+```
+
 #### Coverage Not Generated
 - Ensure `COLLECT_COVERAGE=true` is set
 - Check that source files are properly instrumented
@@ -316,3 +336,4 @@ When adding new tests:
 2. Add appropriate documentation
 3. Ensure tests pass in both local and CI environments
 4. Update this documentation if adding new patterns or tools
+5. Always run commands from the `web/` directory
