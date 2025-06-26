@@ -40,4 +40,18 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         run: |
-          yarn test:unit
+          yarn test:unit:ci
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3.1.1
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload coverage to Artifacts
+        uses: actions/upload-artifact@v4
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        with:
+          name: unit-tests-coverage
+          path: ${{ env.FRONTEND_MONOREPO_DIR }}/coverage/
