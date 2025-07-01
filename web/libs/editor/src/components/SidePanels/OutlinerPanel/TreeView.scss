@@ -185,29 +185,23 @@
     top: 0;
     right: 0;
     height: 32px;
-    display: none;
-    position: absolute;
+    display: flex;
+    position: initial;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     grid-template-columns: repeat(5, 32px);
 
-    &_newUI {
-      display: flex;
-      position: initial;
-      justify-content: space-between;
+    .outliner-item__control_type_predict {
+      width: 14px;
+    }
 
-      .outliner-item__control_type_predict {
-        width: 14px;
-      }
+    .outliner-item__control_type_score {
+      font-size: 12px;
+    }
 
-      .outliner-item__control_type_score {
-        font-size: 12px;
-      }
-
-      .outliner-item__control_type_predict:empty,
-      .outliner-item__control_type_score:empty {
-        display: none;
-      }
+    .outliner-item__control_type_predict:empty,
+    .outliner-item__control_type_score:empty {
+      display: none;
     }
 
     &_withControls {

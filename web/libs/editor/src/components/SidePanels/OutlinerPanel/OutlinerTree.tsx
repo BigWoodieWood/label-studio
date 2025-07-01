@@ -504,7 +504,7 @@ const RegionControls: FC<RegionControlsProps> = injector(
     }, []);
 
     return (
-      <Elem name="controls" mod={{ withControls: hasControls, newUI: true }}>
+      <Elem name="controls" mod={{ withControls: hasControls }}>
         <Tooltip title={"Confidence Score"}>
           <Elem name="control-wrapper">
             <Elem name="control" mod={{ type: "predict" }}>
