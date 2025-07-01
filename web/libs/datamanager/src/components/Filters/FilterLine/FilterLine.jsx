@@ -68,7 +68,13 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
           />
         </Elem>
 
-        <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} disabled={filter.field.disabled} />
+        <FilterOperation
+          filter={filter}
+          value={filter.currentValue}
+          operator={filter.operator}
+          field={filter.field}
+          disabled={filter.field.disabled}
+        />
 
         {/* Column 5: Remove button - only show if no child filter, otherwise empty space */}
         {!childFilter ? (
@@ -171,13 +177,18 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
                 </Tag>
               )}
             </Elem>
-          disabled={filter.field.disabled}
-          icon={<Icon icon={IconClose} size={12} />}
           )}
+          disabled={filter.field.disabled}
         />
       </Elem>
 
-      <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} disabled={filter.field.disabled} />
+      <FilterOperation
+        filter={filter}
+        value={filter.currentValue}
+        operator={filter.operator}
+        field={filter.field}
+        disabled={filter.field.disabled}
+      />
 
       {/* Only show remove button if there's no child filter, or show it on the last column of the main filter */}
       {!childFilter && (
