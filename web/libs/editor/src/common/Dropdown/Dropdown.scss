@@ -10,6 +10,7 @@
   box-sizing: border-box;
   background-color: var(--color-neutral-background);
   box-shadow: 0 5px 20px rgb(var(--color-neutral-shadow-raw) / calc(20% * var(--shadow-intensity)));
+  border-radius: var(--corner-radius-smaller, 4px);
   will-change: transform, opacity;
 
   &_align {

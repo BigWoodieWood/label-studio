@@ -217,10 +217,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
         name="dropdown"
         data-testid={props.dataTestId}
         mix={[props.className, visibilityClasses]}
-        style={{
-          ...compositeStyles,
-          borderRadius: 4,
-        }}
+        style={compositeStyles}
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
         {content}
