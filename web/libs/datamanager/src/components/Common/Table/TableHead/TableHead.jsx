@@ -222,7 +222,6 @@ export const TableHead = observer(
           ref={ref}
           style={{
             ...style,
-            height: 42,
           }}
           onDragOver={useCallback(
             (e) => {
