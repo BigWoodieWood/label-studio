@@ -25,10 +25,6 @@ const Conjunction = observer(({ index, view }) => {
   );
 });
 
-const GroupWrapper = ({ children, wrap = false }) => {
-  return wrap ? <Elem name="group">{children}</Elem> : children;
-};
-
 export const FilterLine = observer(({ filter, availableFilters, index, view, sidebar, dropdownClassName }) => {
   const childFilter = filter.child_filter;
 
@@ -68,10 +64,11 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
                 )}
               </Elem>
             )}
+            disabled={filter.field.disabled}
           />
         </Elem>
 
-        <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} />
+        <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} disabled={filter.field.disabled} />
 
         {/* Column 5: Remove button - only show if no child filter, otherwise empty space */}
         {!childFilter ? (
@@ -117,6 +114,7 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
               value={childFilter.currentValue}
               operator={childFilter.operator}
               field={childFilter.field}
+              disabled={filter.field.disabled}
             />
 
             {/* Column 5: Remove */}
@@ -173,11 +171,13 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
                 </Tag>
               )}
             </Elem>
+          disabled={filter.field.disabled}
+          icon={<Icon icon={IconClose} size={12} />}
           )}
         />
       </Elem>
 
-      <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} />
+      <FilterOperation filter={filter} value={filter.currentValue} operator={filter.operator} field={filter.field} disabled={filter.field.disabled} />
 
       {/* Only show remove button if there's no child filter, or show it on the last column of the main filter */}
       {!childFilter && (
@@ -220,6 +220,7 @@ export const FilterLine = observer(({ filter, availableFilters, index, view, sid
             value={childFilter.currentValue}
             operator={childFilter.operator}
             field={childFilter.field}
+            disabled={filter.field.disabled}
           />
 
           {/* Show remove button on child filter row - removes the entire filter group */}

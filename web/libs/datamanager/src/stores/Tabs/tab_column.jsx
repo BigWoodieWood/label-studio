@@ -77,13 +77,14 @@ export const TabColumn = types
     help: types.maybeNull(types.string),
     // List of column aliases whose filters should be joined automatically when a filter is created for this column
     join_filters: types.maybeNull(types.array(types.string)),
+    disabled: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get hidden() {
       if (self.children) {
         return all(self.children, (c) => c.hidden);
       }
-      return self.parentView?.hiddenColumns.hasColumn(self) ?? (self.parent.hidden || false);
+      return self.disabled || (self.parentView?.hiddenColumns.hasColumn(self) ?? (self.parent.hidden || false));
     },
 
     get parentView() {
