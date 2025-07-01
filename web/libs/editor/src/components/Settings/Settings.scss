@@ -16,24 +16,18 @@
 }
 
 .settings {
-  &__field + &__field {
-    margin-top: 10px;
-    color: var(--color-neutral-content);
-  }
-}
-
-.settings_newUI {
-  .settings__field {
+  &__field {
     display: flex;
     align-items: flex-start;
     cursor: pointer;
   }
 
-  .settings__field + .settings__field {
+  &__field + &__field {
     margin-top: 16px;
+    color: var(--color-neutral-content);
   }
 
-  .settings__label {
+  &__label {
     flex: 1;
 
     &__title {

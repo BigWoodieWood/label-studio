@@ -61,8 +61,6 @@ const HotkeysDescription = () => {
   );
 };
 
-const newUI = { newUI: true };
-
 const editorSettingsKeys = Object.keys(EditorSettings).filter((key) => {
   const flag = EditorSettings[key].flag;
   return flag ? ff.isActive(flag) : true;
@@ -83,18 +81,18 @@ const SettingsTag = ({ children }) => {
 
 const GeneralSettings = observer(({ store }) => {
   return (
-    <Block name="settings" mod={newUI}>
+    <Block name="settings">
       {editorSettingsKeys.map((obj, index) => {
         return (
           <Elem name="field" tag="label" key={index}>
             <Block name="settings__label">
               <Elem name="title">
-                {EditorSettings[obj].newUI.title}
-                {EditorSettings[obj].newUI.tags?.split(",").map((tag) => (
+                {EditorSettings[obj].title}
+                {EditorSettings[obj].tags?.split(",").map((tag) => (
                   <SettingsTag key={tag}>{tag}</SettingsTag>
                 ))}
               </Elem>
-              <Elem name="description">{EditorSettings[obj].newUI.description}</Elem>
+              <Elem name="description">{EditorSettings[obj].description}</Elem>
             </Block>
             <Toggle
               key={index}
