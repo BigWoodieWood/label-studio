@@ -32,11 +32,8 @@
   &__history-controls {
     display: flex;
     grid-area: buttons;
-
-    &_newui {
-      gap: 8px;
-      margin-left: 8px;
-    }
+    gap: 8px;
+    margin-left: 8px;
   }
 
   &__prevnext {
@@ -44,10 +41,8 @@
     height: 32px;
     place-self: center center;
 
-    &_newui {
-      &:hover {
-        background: var(--color-primary-emphasis-subtle);
-      }
+    &:hover {
+      background: var(--color-primary-emphasis-subtle);
     }
 
     &::before {

@@ -78,11 +78,11 @@ export const CurrentTask = observer(({ store }) => {
             ))}
         </Elem>
         {historyEnabled && (
-          <Elem name="history-controls" mod={{ newui: true }}>
+          <Elem name="history-controls">
             <Elem
               tag={Button}
               name="prevnext"
-              mod={{ prev: true, disabled: !store.canGoPrevTask, newui: true }}
+              mod={{ prev: true, disabled: !store.canGoPrevTask }}
               type="link"
               disabled={!historyEnabled || !store.canGoPrevTask}
               onClick={store.prevTask}
@@ -96,7 +96,6 @@ export const CurrentTask = observer(({ store }) => {
                 next: true,
                 disabled: !store.canGoNextTask && !canPostpone,
                 postpone: !store.canGoNextTask && canPostpone,
-                newui: true,
               }}
               type="link"
               disabled={!store.canGoNextTask && !canPostpone}
