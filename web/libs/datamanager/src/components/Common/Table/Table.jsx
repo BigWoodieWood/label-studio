@@ -4,7 +4,7 @@ import { useSDK } from "../../../providers/SDKProvider";
 import { isDefined } from "../../../utils/utils";
 import { Icon } from "../Icon/Icon";
 import { modal } from "../Modal/Modal";
-import { IconCode, IconGearNewUI, IconCopyOutline } from "@humansignal/icons";
+import { IconCode, IconGear, IconCopyOutline } from "@humansignal/icons";
 import { AutoSizerTable, Tooltip, Button } from "@humansignal/ui";
 import { useCopyText } from "@humansignal/core/lib/hooks/useCopyText";
 import "./Table.scss";
@@ -292,7 +292,7 @@ export const Table = observer(
             <FieldsButton
               className={columnsSelectorCN.elem("button-new").toString()}
               wrapper={FieldsButton.Checkbox}
-              icon={<IconGearNewUI />}
+              icon={<IconGear />}
               style={{ padding: "0" }}
               tooltip={"Customize Columns"}
             />
