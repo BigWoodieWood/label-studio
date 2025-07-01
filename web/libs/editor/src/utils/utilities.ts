@@ -250,13 +250,6 @@ export function isMacOS() {
   return navigator.platform.indexOf("Mac") > -1;
 }
 
-export const triggerResizeEvent = () => {
-  const event = new Event("resize");
-
-  event.initEvent("resize", false, false);
-  window.dispatchEvent(event);
-};
-
 export const humanDateDiff = (date: string | number): string => {
   const fnsDate = formatDistanceToNow(new Date(date), { addSuffix: true });
 
