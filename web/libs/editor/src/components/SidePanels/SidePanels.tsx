@@ -472,7 +472,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
         style={{
           ...padding,
         }}
-        mod={{ collapsed: sidepanelsCollapsed }}
+        mod={{ collapsed: sidepanelsCollapsed, newLabelingUI: true }}
       >
         {initialized && (
           <>

@@ -5,7 +5,21 @@
   overflow: hidden;
   position: relative;
 
-  --panel-border-color: var(--color-neutral-border);
+  &_newLabelingUI {
+    .sidepanels {
+      --panel-border-color: var(--color-neutral-border);
+
+      &__wrapper {
+        &_align_left {
+          border-right: 1px solid var(--panel-border-color);
+        }
+
+        &_align_right {
+          border-left: 1px solid var(--panel-border-color);
+        }
+      }
+    }
+  }
 
   &__content {
     height: 100%;
@@ -70,7 +84,6 @@
     &_align {
       &_left {
         left: 0;
-        border-right: 1px solid var(--panel-border-color);
 
         --snap-rotation: -90deg;
       }
@@ -78,7 +91,6 @@
       &_right {
         top: 0;
         right: 0;
-        border-left: 1px solid var(--panel-border-color);
 
         --snap-rotation: 90deg;
       }
