@@ -1,11 +1,9 @@
 .topbar {
-  height: var(--topbar-height);
+  height: 42px;
   width: 100%;
   z-index: 101;
   flex: none;
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
+  display: block;
   background-color: var(--color-neutral-background);
   border-bottom: 1px solid var(--color-neutral-border);
   user-select: none;
@@ -19,8 +17,10 @@
   }
 
   &__group {
+    height: 42px;
+    flex: 1;
     display: flex;
-    align-items: stretch;
+    align-items: center;
   }
 
   &__section {
@@ -38,18 +38,5 @@
     }
   }
 
-  &_newLabelingUI {
-    display: block;
-    background-color: var(--color-neutral-background);
-    height: 42px;
-    border-bottom: 1px solid var(--color-neutral-border);
 
-    & .topbar {
-      &__group {
-        height: 42px;
-        flex: 1;
-        align-items: center;
-      }
-    }
-  }
 }

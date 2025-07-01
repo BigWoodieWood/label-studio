@@ -23,7 +23,7 @@ export const TopBar = observer(({ store }) => {
   if (isBulkMode) return null;
 
   return store ? (
-    <Block name="topbar" mod={{ newLabelingUI: true }}>
+    <Block name="topbar">
       <Elem name="group">
         <CurrentTask store={store} />
         {store.hasInterface("annotations:view-all") && (

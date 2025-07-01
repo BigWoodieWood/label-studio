@@ -9,11 +9,9 @@
   z-index: 10;
   background-color: var(--color-neutral-background);
   pointer-events: all;
-
-  &_newLabelingUI {
-    --header-background-new: var(--color-neutral-surface-inset);
-    --icon-color: var(--color-neutral-icon);
-  }
+  
+  --header-background-new: var(--color-neutral-surface-inset);
+  --icon-color: var(--color-neutral-icon);
 
   .panel {
     &__header {
