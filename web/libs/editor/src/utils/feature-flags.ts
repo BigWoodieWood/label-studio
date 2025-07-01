@@ -55,7 +55,6 @@ export const FF_DEV_3391 = "fflag_fix_front_dev_3391_interactive_view_all";
  * Fixing "Auto Detect" tool undo functionality and bugs with skipNextUndoState.
  * @link https://app.launchdarkly.com/default/production/features/fflag_fix_front_dev_1284_auto_detect_undo_281022_short
  */
-export const FF_DEV_3873 = "fflag_feat_front_dev_3873_labeling_ui_improvements_short";
 
 // Use only relative coords internally to improve performance and reduce bugs
 export const FF_DEV_3793 = "fflag_fix_front_dev_3793_relative_coords_short";

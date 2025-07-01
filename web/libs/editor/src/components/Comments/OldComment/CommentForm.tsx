@@ -5,7 +5,6 @@ import { IconSend } from "@humansignal/icons";
 import "./CommentForm.scss";
 import { TextArea } from "../../../common/TextArea/TextArea";
 import { observer } from "mobx-react";
-import { FF_DEV_3873, isFF } from "../../../utils/feature-flags";
 
 export type CommentFormProps = {
   commentStore: any;
@@ -51,17 +50,11 @@ export const CommentForm: FC<CommentFormProps> = observer(
     );
 
     useEffect(() => {
-      if (!isFF(FF_DEV_3873)) {
-        commentStore.setAddedCommentThisSession(false);
-        clearTooltipMessage();
-      }
       return () => clearTooltipMessage();
     }, []);
 
     useEffect(() => {
-      if (isFF(FF_DEV_3873)) {
-        commentStore.tooltipMessage && actionRef.current?.el?.current?.focus({ preventScroll: true });
-      }
+      commentStore.tooltipMessage && actionRef.current?.el?.current?.focus({ preventScroll: true });
     }, [commentStore.tooltipMessage]);
 
     useEffect(() => {

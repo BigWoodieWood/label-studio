@@ -3,7 +3,6 @@ import { Button } from "../../common/Button/Button";
 import { IconStar, IconStarOutline } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
 import { BemWithSpecifiContext } from "../../utils/bem";
-import { FF_DEV_3873, isFF } from "../../utils/feature-flags";
 import "./GroundTruth.scss";
 
 const { Block, Elem } = BemWithSpecifiContext();
@@ -29,8 +28,8 @@ export const GroundTruth = observer(({ entity, disabled = false, size = "md" }) 
           >
             <Elem
               name="indicator"
-              tag={isFF(FF_DEV_3873) && !entity.ground_truth ? IconStarOutline : IconStar}
-              mod={{ active: entity.ground_truth, dark: isFF(FF_DEV_3873) }}
+              tag={!entity.ground_truth ? IconStarOutline : IconStar}
+              mod={{ active: entity.ground_truth, dark: true }}
             />
           </Elem>
         </Tooltip>

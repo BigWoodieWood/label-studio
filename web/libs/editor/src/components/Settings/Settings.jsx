@@ -6,13 +6,11 @@ import { Hotkey } from "../../core/Hotkey";
 
 import "./Settings.scss";
 import { Block, Elem } from "../../utils/bem";
-import { triggerResizeEvent } from "../../utils/utilities";
 
 import EditorSettings from "../../core/settings/editorsettings";
 import * as TagSettings from "./TagSettings";
 import { IconClose } from "@humansignal/icons";
-import { Checkbox, Toggle } from "@humansignal/ui";
-import { FF_DEV_3873, isFF } from "../../utils/feature-flags";
+import { Toggle } from "@humansignal/ui";
 import { ff } from "@humansignal/core";
 
 const HotkeysDescription = () => {
@@ -63,23 +61,21 @@ const HotkeysDescription = () => {
   );
 };
 
-const newUI = isFF(FF_DEV_3873) ? { newUI: true } : {};
+const newUI = { newUI: true };
 
 const editorSettingsKeys = Object.keys(EditorSettings).filter((key) => {
   const flag = EditorSettings[key].flag;
   return flag ? ff.isActive(flag) : true;
 });
 
-if (isFF(FF_DEV_3873)) {
-  const enableTooltipsIndex = editorSettingsKeys.findIndex((key) => key === "enableTooltips");
-  const enableLabelTooltipsIndex = editorSettingsKeys.findIndex((key) => key === "enableLabelTooltips");
+const enableTooltipsIndex = editorSettingsKeys.findIndex((key) => key === "enableTooltips");
+const enableLabelTooltipsIndex = editorSettingsKeys.findIndex((key) => key === "enableLabelTooltips");
 
-  // swap these in the array
-  const tmp = editorSettingsKeys[enableTooltipsIndex];
+// swap these in the array
+const tmp = editorSettingsKeys[enableTooltipsIndex];
 
-  editorSettingsKeys[enableTooltipsIndex] = editorSettingsKeys[enableLabelTooltipsIndex];
-  editorSettingsKeys[enableLabelTooltipsIndex] = tmp;
-}
+editorSettingsKeys[enableTooltipsIndex] = editorSettingsKeys[enableLabelTooltipsIndex];
+editorSettingsKeys[enableLabelTooltipsIndex] = tmp;
 
 const SettingsTag = ({ children }) => {
   return <Block name="settings-tag">{children}</Block>;
@@ -91,100 +87,24 @@ const GeneralSettings = observer(({ store }) => {
       {editorSettingsKeys.map((obj, index) => {
         return (
           <Elem name="field" tag="label" key={index}>
-            {isFF(FF_DEV_3873) ? (
-              <>
-                <Block name="settings__label">
-                  <Elem name="title">
-                    {EditorSettings[obj].newUI.title}
-                    {EditorSettings[obj].newUI.tags?.split(",").map((tag) => (
-                      <SettingsTag key={tag}>{tag}</SettingsTag>
-                    ))}
-                  </Elem>
-                  <Elem name="description">{EditorSettings[obj].newUI.description}</Elem>
-                </Block>
-                <Toggle
-                  key={index}
-                  checked={store.settings[obj]}
-                  onChange={store.settings[EditorSettings[obj].onChangeEvent]}
-                  description={EditorSettings[obj].description}
-                />
-              </>
-            ) : (
-              <>
-                <Checkbox
-                  key={index}
-                  checked={store.settings[obj]}
-                  onChange={store.settings[EditorSettings[obj].onChangeEvent]}
-                >
-                  {EditorSettings[obj].description}
-                </Checkbox>
-                <br />
-              </>
-            )}
+            <Block name="settings__label">
+              <Elem name="title">
+                {EditorSettings[obj].newUI.title}
+                {EditorSettings[obj].newUI.tags?.split(",").map((tag) => (
+                  <SettingsTag key={tag}>{tag}</SettingsTag>
+                ))}
+              </Elem>
+              <Elem name="description">{EditorSettings[obj].newUI.description}</Elem>
+            </Block>
+            <Toggle
+              key={index}
+              checked={store.settings[obj]}
+              onChange={store.settings[EditorSettings[obj].onChangeEvent]}
+              description={EditorSettings[obj].description}
+            />
           </Elem>
         );
       })}
-    </Block>
-  );
-});
-
-const LayoutSettings = observer(({ store }) => {
-  return (
-    <Block name="settings" mod={newUI}>
-      <Elem name="field">
-        <Checkbox
-          checked={store.settings.bottomSidePanel}
-          onChange={() => {
-            store.settings.toggleBottomSP();
-            setTimeout(triggerResizeEvent);
-          }}
-        >
-          Move sidepanel to the bottom
-        </Checkbox>
-      </Elem>
-
-      <Elem name="field">
-        <Checkbox checked={store.settings.displayLabelsByDefault} onChange={store.settings.toggleSidepanelModel}>
-          Display Labels by default in Results panel
-        </Checkbox>
-      </Elem>
-
-      <Elem name="field">
-        <Checkbox
-          value="Show Annotations panel"
-          defaultChecked={store.settings.showAnnotationsPanel}
-          onChange={() => {
-            store.settings.toggleAnnotationsPanel();
-          }}
-        >
-          Show Annotations panel
-        </Checkbox>
-      </Elem>
-
-      <Elem name="field">
-        <Checkbox
-          value="Show Predictions panel"
-          defaultChecked={store.settings.showPredictionsPanel}
-          onChange={() => {
-            store.settings.togglePredictionsPanel();
-          }}
-        >
-          Show Predictions panel
-        </Checkbox>
-      </Elem>
-
-      {/* Saved for future use */}
-      {/* <Elem name="field">
-        <Checkbox
-          value="Show image in fullsize"
-          defaultChecked={store.settings.imageFullSize}
-          onChange={() => {
-            store.settings.toggleImageFS();
-          }}
-        >
-          Show image in fullsize
-        </Checkbox>
-      </Elem> */}
     </Block>
   );
 });
@@ -194,23 +114,13 @@ const Settings = {
   Hotkeys: { name: "Hotkeys", component: HotkeysDescription },
 };
 
-if (!isFF(FF_DEV_3873)) {
-  Settings.Layout = { name: "Layout", component: LayoutSettings };
-}
-
 const DEFAULT_ACTIVE = Object.keys(Settings)[0];
 
-const DEFAULT_MODAL_SETTINGS = isFF(FF_DEV_3873)
-  ? {
-      name: "settings-modal",
-      title: "Labeling Interface Settings",
-      closeIcon: <IconClose />,
-    }
-  : {
-      name: "settings-modal-old",
-      title: "Settings",
-      bodyStyle: { paddingTop: "0" },
-    };
+const DEFAULT_MODAL_SETTINGS = {
+  name: "settings-modal",
+  title: "Labeling Interface Settings",
+  closeIcon: <IconClose />,
+};
 
 export default observer(({ store }) => {
   const availableSettings = useMemo(() => {

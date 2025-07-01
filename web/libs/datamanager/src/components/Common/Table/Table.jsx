@@ -4,7 +4,7 @@ import { useSDK } from "../../../providers/SDKProvider";
 import { isDefined } from "../../../utils/utils";
 import { Icon } from "../Icon/Icon";
 import { modal } from "../Modal/Modal";
-import { IconCode, IconGear, IconGearNewUI, IconCopyOutline } from "@humansignal/icons";
+import { IconCode, IconGearNewUI, IconCopyOutline } from "@humansignal/icons";
 import { AutoSizerTable, Tooltip, Button } from "@humansignal/ui";
 import { useCopyText } from "@humansignal/core/lib/hooks/useCopyText";
 import "./Table.scss";
@@ -15,7 +15,7 @@ import { TableRow } from "./TableRow/TableRow";
 import { prepareColumns } from "./utils";
 import { cn } from "../../../utils/bem";
 import { FieldsButton } from "../FieldsButton";
-import { FF_DEV_3873, FF_LOPS_E_3, isFF } from "../../../utils/feature-flags";
+import { FF_LOPS_E_3, isFF } from "../../../utils/feature-flags";
 
 const Decorator = (decoration) => {
   return {
@@ -289,28 +289,13 @@ export const Table = observer(
               right,
             }}
           >
-            {isFF(FF_DEV_3873) ? (
-              <FieldsButton
-                className={columnsSelectorCN.elem("button-new").toString()}
-                wrapper={FieldsButton.Checkbox}
-                icon={<IconGearNewUI />}
-                style={{ padding: "0" }}
-                tooltip={"Customize Columns"}
-              />
-            ) : (
-              <FieldsButton
-                wrapper={FieldsButton.Checkbox}
-                icon={<IconGear />}
-                style={{
-                  padding: 0,
-                  zIndex: 1000,
-                  borderRadius: 0,
-                  height: "45px",
-                  width: "45px",
-                  margin: "-1px",
-                }}
-              />
-            )}
+            <FieldsButton
+              className={columnsSelectorCN.elem("button-new").toString()}
+              wrapper={FieldsButton.Checkbox}
+              icon={<IconGearNewUI />}
+              style={{ padding: "0" }}
+              tooltip={"Customize Columns"}
+            />
           </div>
         )}
         <div ref={tableWrapper} className={tableCN.mod({ fit: props.fitToContent }).toString()}>

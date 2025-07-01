@@ -18,7 +18,7 @@ import { Menu } from "../../../common/Menu/Menu";
 import { BemWithSpecifiContext } from "../../../utils/bem";
 import { SidePanelsContext } from "../SidePanelsContext";
 import "./ViewControls.scss";
-import { FF_DEV_3873, isFF } from "../../../utils/feature-flags";
+
 import { observer } from "mobx-react";
 
 const { Block, Elem } = BemWithSpecifiContext();
@@ -51,7 +51,7 @@ export const ViewControls: FC<ViewControlsProps> = observer(
                 <IconList /> Group Manually
               </>
             ),
-            selectedLabel: isFF(FF_DEV_3873) ? "Manual" : "Manual Grouping",
+            selectedLabel: "Manual",
             icon: <IconList width={16} height={16} />,
             tooltip: "Manually Grouped",
           };
@@ -62,7 +62,7 @@ export const ViewControls: FC<ViewControlsProps> = observer(
                 <IconBoundingBox /> Group by Label
               </>
             ),
-            selectedLabel: isFF(FF_DEV_3873) ? "By Label" : "Grouped by Label",
+            selectedLabel: "By Label",
             icon: <IconBoundingBox width={16} height={16} />,
             tooltip: "Grouped by Label",
           };
@@ -73,7 +73,7 @@ export const ViewControls: FC<ViewControlsProps> = observer(
                 <IconCursor /> Group by Tool
               </>
             ),
-            selectedLabel: isFF(FF_DEV_3873) ? "By Tool" : "Grouped by Tool",
+            selectedLabel: "By Tool",
             icon: <IconCursor width={16} height={16} />,
             tooltip: "Grouped by Tool",
           };
@@ -175,7 +175,7 @@ const Grouping = <T extends string>({
         style={{
           width: 200,
           minWidth: 200,
-          borderRadius: isFF(FF_DEV_3873) && 4,
+          borderRadius: 4,
         }}
         selectedKeys={[value]}
         allowClickSelected={allowClickSelected}
@@ -195,8 +195,8 @@ const Grouping = <T extends string>({
   }, [value, optionsList, readableValue, direction, onChange]);
 
   // mods are already set in the button from type, so use it only in new UI
-  const extraStyles = isFF(FF_DEV_3873) ? { mod: { newUI: true } } : undefined;
-  const style = isFF(FF_DEV_3873) ? { padding: "0 12px 0 2px" } : {};
+  const extraStyles = { mod: { newUI: true } };
+  const style = { padding: "0 12px 0 2px" };
 
   return (
     <Dropdown.Trigger content={dropdownContent} style={{ width: 200 }}>
@@ -206,13 +206,7 @@ const Grouping = <T extends string>({
         {...extraStyles}
         icon={readableValue.icon}
         style={style}
-        extra={
-          isFF(FF_DEV_3873) ? (
-            extraIcon
-          ) : (
-            <DirectionIndicator direction={direction} name={value} value={value} wrap={false} />
-          )
-        }
+        extra={extraIcon}
         tooltip={readableValue.tooltip || undefined}
         tooltipTheme="dark"
       >
@@ -251,10 +245,8 @@ interface DirectionIndicator {
 const DirectionIndicator: FC<DirectionIndicator> = ({ direction, value, name, wrap = true }) => {
   const content = direction === "asc" ? <IconSortUp /> : <IconSortDown />;
 
-  if (!direction || value !== name || isFF(FF_DEV_3873)) return null;
-  if (!wrap) return content;
-
-  return <span>{content}</span>;
+  // Modern UI doesn't show direction indicators
+  return null;
 };
 
 interface ToggleRegionsVisibilityButton {

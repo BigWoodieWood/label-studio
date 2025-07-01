@@ -17,7 +17,6 @@ import { alignElements, type Align } from "@humansignal/core/lib/utils/dom";
 import { aroundTransition } from "@humansignal/core/lib/utils/transition";
 import "./Dropdown.scss";
 import { DropdownContext } from "./DropdownContext";
-import { FF_DEV_3873, isFF } from "../../utils/feature-flags";
 
 let lastIndex = 1;
 
@@ -220,7 +219,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
         mix={[props.className, visibilityClasses]}
         style={{
           ...compositeStyles,
-          borderRadius: isFF(FF_DEV_3873) && 4,
+          borderRadius: 4,
         }}
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >

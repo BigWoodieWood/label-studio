@@ -20,7 +20,6 @@ import type { PanelProps } from "./PanelBase";
 import "./SidePanels.scss";
 import { SidePanelsContext } from "./SidePanelsContext";
 import { useRegionsCopyPaste } from "../../hooks/useRegionsCopyPaste";
-import { FF_DEV_3873, isFF } from "../../utils/feature-flags";
 
 const maxWindowWidth = 980;
 
@@ -28,6 +27,7 @@ interface SidePanelsProps {
   panelsHidden: boolean;
   store: any;
   currentEntity: any;
+  children: React.ReactNode;
 }
 
 interface PanelBBox {
@@ -165,10 +165,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
 
   const spaceFree = useCallback(
     (alignment: "left" | "right") => {
-      return (
-        isFF(FF_DEV_3873) ||
-        Object.values(panelData).find((p) => p.alignment === alignment && !p.detached) === undefined
-      );
+      return true || Object.values(panelData).find((p) => p.alignment === alignment && !p.detached) === undefined;
     },
     [panelData],
   );
@@ -280,24 +277,10 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
       const maxHeight = viewportSize.current.height - top;
 
       requestAnimationFrame(() => {
-        if (isFF(FF_DEV_3873)) {
-          const panelsOnSameAlignment = findPanelsOnSameSide(panelData[name]?.alignment);
+        const panelsOnSameAlignment = findPanelsOnSameSide(panelData[name]?.alignment);
 
-          panelsOnSameAlignment.forEach((panelName) => {
-            updatePanel(panelName as PanelType, {
-              top,
-              left,
-              relativeTop: (top / viewportSize.current.height) * 100,
-              relativeLeft: (left / viewportSize.current.width) * 100,
-              storedLeft: undefined,
-              storedTop: undefined,
-              maxHeight,
-              width: clamp(w, DEFAULT_PANEL_WIDTH, panelMaxWidth),
-              height: clamp(h, DEFAULT_PANEL_HEIGHT, maxHeight),
-            });
-          });
-        } else {
-          updatePanel(name, {
+        panelsOnSameAlignment.forEach((panelName) => {
+          updatePanel(panelName as PanelType, {
             top,
             left,
             relativeTop: (top / viewportSize.current.height) * 100,
@@ -308,7 +291,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
             width: clamp(w, DEFAULT_PANEL_WIDTH, panelMaxWidth),
             height: clamp(h, DEFAULT_PANEL_HEIGHT, maxHeight),
           });
-        }
+        });
       });
     },
     [updatePanel, panelMaxWidth, panelData],
@@ -324,18 +307,16 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
         detached: false,
       };
 
-      if (isFF(FF_DEV_3873)) {
-        const firstPanelOnNewSideName = findPanelsOnSameSide(localSnap.current).filter(
-          (panelName) => panelName !== name,
-        )?.[0];
+      const firstPanelOnNewSideName = findPanelsOnSameSide(localSnap.current).filter(
+        (panelName) => panelName !== name,
+      )?.[0];
 
-        if (firstPanelOnNewSideName) {
-          bboxData.width = clamp(
-            panelData[firstPanelOnNewSideName as PanelType]?.width,
-            DEFAULT_PANEL_WIDTH,
-            panelMaxWidth,
-          );
-        }
+      if (firstPanelOnNewSideName) {
+        bboxData.width = clamp(
+          panelData[firstPanelOnNewSideName as PanelType]?.width,
+          DEFAULT_PANEL_WIDTH,
+          panelMaxWidth,
+        );
       }
       updatePanel(name, bboxData);
       setSnap(undefined);
@@ -366,7 +347,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
   }, [eventHandlers, rootRef, regions, regions.selectio, currentEntity]);
 
   const padding = useMemo(() => {
-    if (panelsHidden && isFF(FF_DEV_3873)) return {};
+    if (panelsHidden) return {};
 
     const result = {
       paddingLeft: 0,
@@ -378,7 +359,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
     }
 
     return Object.values(panelData).reduce<CSSProperties>((res, data) => {
-      const visible = isFF(FF_DEV_3873) || (!panelsHidden && !data.detached && data.visible);
+      const visible = true || (!panelsHidden && !data.detached && data.visible);
       const padding = visible ? data.width : PANEL_HEADER_HEIGHT;
       const paddingProperty = data.alignment === "left" ? "paddingLeft" : "paddingRight";
 
@@ -491,7 +472,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
         style={{
           ...padding,
         }}
-        mod={{ collapsed: sidepanelsCollapsed, newLabelingUI: isFF(FF_DEV_3873) }}
+        mod={{ collapsed: sidepanelsCollapsed, newLabelingUI: true }}
       >
         {initialized && (
           <>

@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
 import { Button } from "../../common/Button/Button";
 import { Block, Elem } from "../../utils/bem";
-import { FF_DEV_3873, FF_DEV_4174, FF_LEAP_1173, FF_TASK_COUNT_FIX, isFF } from "../../utils/feature-flags";
+import { FF_DEV_4174, FF_LEAP_1173, FF_TASK_COUNT_FIX, isFF } from "../../utils/feature-flags";
 import { guidGenerator } from "../../utils/unique";
 import { isDefined } from "../../utils/utilities";
 import "./CurrentTask.scss";
@@ -59,11 +59,11 @@ export const CurrentTask = observer(({ store }) => {
         name="current-task"
         mod={{ "with-history": historyEnabled }}
         style={{
-          padding: isFF(FF_DEV_3873) && 0,
-          width: isFF(FF_DEV_3873) && "auto",
+          padding: 0,
+          width: "auto",
         }}
       >
-        <Elem name="task-id" style={{ fontSize: isFF(FF_DEV_3873) ? 12 : 14 }}>
+        <Elem name="task-id" style={{ fontSize: 12 }}>
           {store.task.id ?? guidGenerator()}
           {historyEnabled &&
             showCounter &&
@@ -78,15 +78,15 @@ export const CurrentTask = observer(({ store }) => {
             ))}
         </Elem>
         {historyEnabled && (
-          <Elem name="history-controls" mod={{ newui: isFF(FF_DEV_3873) }}>
+          <Elem name="history-controls" mod={{ newui: true }}>
             <Elem
               tag={Button}
               name="prevnext"
-              mod={{ prev: true, disabled: !store.canGoPrevTask, newui: isFF(FF_DEV_3873) }}
+              mod={{ prev: true, disabled: !store.canGoPrevTask, newui: true }}
               type="link"
               disabled={!historyEnabled || !store.canGoPrevTask}
               onClick={store.prevTask}
-              style={{ background: !isFF(FF_DEV_3873) && "none", backgroundColor: isFF(FF_DEV_3873) && "none" }}
+              style={{ backgroundColor: "none" }}
             />
             <Elem
               tag={Button}
@@ -96,12 +96,12 @@ export const CurrentTask = observer(({ store }) => {
                 next: true,
                 disabled: !store.canGoNextTask && !canPostpone,
                 postpone: !store.canGoNextTask && canPostpone,
-                newui: isFF(FF_DEV_3873),
+                newui: true,
               }}
               type="link"
               disabled={!store.canGoNextTask && !canPostpone}
               onClick={store.canGoNextTask ? store.nextTask : store.postponeTask}
-              style={{ background: !isFF(FF_DEV_3873) && "none", backgroundColor: isFF(FF_DEV_3873) && "none" }}
+              style={{ backgroundColor: "none" }}
             />
           </Elem>
         )}
