@@ -1,4 +1,3 @@
-
 export const ToolBar = {
   _controlsSelector: ".lsf-controls",
 

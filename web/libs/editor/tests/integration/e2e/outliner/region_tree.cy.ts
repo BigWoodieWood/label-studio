@@ -1,7 +1,6 @@
 import { LabelStudio, Sidebar } from "@humansignal/frontend-test/helpers/LSF";
 
 describe("Outliner - Regions tree", () => {
-
   it("shouldn't show all of the regions at the regions list due to virtualization", () => {
     const text = "a".repeat(30);
     const result = text.split("").map((val, idx) => {
