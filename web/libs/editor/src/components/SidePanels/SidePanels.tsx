@@ -165,7 +165,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
 
   const spaceFree = useCallback(
     (alignment: "left" | "right") => {
-      return true || Object.values(panelData).find((p) => p.alignment === alignment && !p.detached) === undefined;
+      return Object.values(panelData).find((p) => p.alignment === alignment && !p.detached) === undefined;
     },
     [panelData],
   );
