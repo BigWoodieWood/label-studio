@@ -359,7 +359,7 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
     }
 
     return Object.values(panelData).reduce<CSSProperties>((res, data) => {
-      const visible = true || (!panelsHidden && !data.detached && data.visible);
+      const visible = true;
       const padding = visible ? data.width : PANEL_HEADER_HEIGHT;
       const paddingProperty = data.alignment === "left" ? "paddingLeft" : "paddingRight";
 
