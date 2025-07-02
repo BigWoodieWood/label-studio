@@ -84,8 +84,7 @@ describe("Outliner - Hide all regions", () => {
       expect(annID).to.equal("10");
 
       // Move to the annotation tab specified by param
-      cy.get('[class="lsf-annotations-list__toggle"]').click();
-      cy.get('[class="lsf-annotations-list__entity-id"]').contains("10").click();
+      cy.get('[class="lsf-annotation-button__entity-id"]').contains("10").click();
 
       annotations[1].regionStore.setRegionVisible(window.LSF_CONFIG.region);
     });
@@ -98,7 +97,7 @@ describe("Outliner - Hide all regions", () => {
     Sidebar.assertRegionHidden(2, "Label 3", true);
   });
 
-  it("should not hide regions in the non-targeted annotaion tab", () => {
+  it("should not hide regions in the non-targeted annotation tab", () => {
     LabelStudio.params()
       .config(simpleRegionsConfig)
       .data(simpleRegionsData)
@@ -113,7 +112,7 @@ describe("Outliner - Hide all regions", () => {
     });
 
     // Validate the annotation tab
-    cy.get('[class="lsf-annotations-list__entity-id"]').should("contain.text", "20");
+    cy.get('[class="lsf-annotation-button__entity-id"]').contains("20").click();
 
     Sidebar.hasRegions(3);
     Sidebar.hasHiddenRegion(0);
