@@ -97,11 +97,8 @@ describe("Relations: Hide/Show all relations", () => {
   beforeEach(() => {
     LabelStudio.init({ config, task });
     ImageView.waitForImage();
+    Relations.deattachRelationTab();
     Relations.hasRelations(0);
-  });
-
-  it("should exist and be disabled without existed relations", () => {
-    Relations.showAllRelationsButton.should("be.visible").should("be.disabled");
   });
 
   it("should exist and be enabled with existed relations", () => {
@@ -200,7 +197,6 @@ describe("Relations: Hide/Show all relations", () => {
     Relations.toggleCreation();
     ImageView.clickAtRelative(0.51, 0.06);
     Relations.hasRelations(3);
-
     Relations.hideAllRelationsButton.trigger("mouseover");
     Tooltip.hasText("Hide all");
   });

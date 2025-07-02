@@ -41,9 +41,7 @@ export const Relations = {
     return this.overlay.find("g");
   },
   hasRelations(count: number) {
-    cy.get(".lsf-details__section-head")
-      .filter((index, element) => Cypress.$(element).next(".lsf-relation-controls").length > 0)
-      .should("have.text", `Relations (${count})`);
+    cy.get(".lsf-relations__item").should("have.length", count);
   },
   hasRelation(from: string, to: string) {
     cy.get(".lsf-relations").contains(from).closest(".lsf-relations").contains(to);
@@ -65,5 +63,35 @@ export const Relations = {
       .find(".lsf-relations__actions")
       .find('button[aria-label="Hide Relation"]')
       .click({ force: true });
+  },
+  deattachRelationTab() {
+    const selector = "#regions-relations_0_droppable";
+    cy.get(selector).then(($el) => {
+      const rect = $el[0].getBoundingClientRect();
+      const startX = rect.left + rect.width / 2;
+      const startY = rect.top + rect.height / 2;
+      const endY = startY - 40;
+
+      cy.get(selector).trigger("mousedown", {
+        clientX: startX,
+        clientY: startY,
+        which: 1,
+        force: true,
+      });
+
+      cy.get(selector).trigger("mousemove", {
+        clientX: startX,
+        clientY: endY,
+        force: true,
+      });
+
+      cy.wait(100);
+
+      cy.get(selector).trigger("mouseup", {
+        clientX: startX,
+        clientY: endY,
+        force: true,
+      });
+    });
   },
 };

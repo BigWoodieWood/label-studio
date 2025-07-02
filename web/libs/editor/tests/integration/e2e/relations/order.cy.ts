@@ -97,6 +97,7 @@ describe("Relations: Sort Order all relations", () => {
   beforeEach(() => {
     LabelStudio.init({ config, task });
     ImageView.waitForImage();
+    Relations.deattachRelationTab();
     Relations.hasRelations(0);
   });
 

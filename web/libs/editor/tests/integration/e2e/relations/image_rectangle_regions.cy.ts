@@ -94,16 +94,14 @@ const task = {
 };
 
 describe("Relations: Image Rectangle Regions", () => {
-  it("Check hotkeys work with the relations action button visible", () => {
-    LabelStudio.init({
-      config,
-      task,
-    });
-
+  beforeEach(() => {
+    LabelStudio.init({ config, task });
     ImageView.waitForImage();
-
+    Relations.deattachRelationTab();
     Relations.hasRelations(0);
+  });
 
+  it("Check hotkeys work with the relations action button visible", () => {
     // Select the first region
     Sidebar.toggleRegionSelection(0);
 
@@ -142,15 +140,6 @@ describe("Relations: Image Rectangle Regions", () => {
   });
 
   it("Check hotkeys work without the relations action button visible", () => {
-    LabelStudio.init({
-      config,
-      task,
-    });
-
-    ImageView.waitForImage();
-
-    Relations.hasRelations(0);
-
     // With the relations action button not visible
     Sidebar.collapseDetailsRightPanel();
 
