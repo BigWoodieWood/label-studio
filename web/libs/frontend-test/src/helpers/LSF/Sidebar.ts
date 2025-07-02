@@ -85,4 +85,42 @@ export const Sidebar = {
     const expectation = shouldBeHidden ? "have.class" : "not.have.class";
     this.findRegionByIndex(idx).should("contain.text", id).parent().should(expectation, "lsf-tree__node_hidden");
   },
+  dettachTab(panel: string) {
+    let selector: string;
+    if (panel === "relations") {
+      selector = "#regions-relations_0_droppable";
+    } else if (panel === "history") {
+      selector = "#info-history_1_droppable";
+    } else {
+      throw new Error(`Invalid panel: ${panel}`);
+    }
+
+    cy.get(selector).then(($el) => {
+      const rect = $el[0].getBoundingClientRect();
+      const startX = rect.left + rect.width / 2;
+      const startY = rect.top + rect.height / 2;
+      const endY = startY - 40;
+
+      cy.get(selector).trigger("mousedown", {
+        clientX: startX,
+        clientY: startY,
+        which: 1,
+        force: true,
+      });
+
+      cy.get(selector).trigger("mousemove", {
+        clientX: startX,
+        clientY: endY,
+        force: true,
+      });
+
+      cy.wait(100);
+
+      cy.get(selector).trigger("mouseup", {
+        clientX: startX,
+        clientY: endY,
+        force: true,
+      });
+    });
+  },
 };

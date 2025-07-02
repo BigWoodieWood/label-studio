@@ -97,7 +97,7 @@ describe("Relations: Hide/Show all relations", () => {
   beforeEach(() => {
     LabelStudio.init({ config, task });
     ImageView.waitForImage();
-    Relations.deattachRelationTab();
+    Sidebar.dettachTab("relations");
     Relations.hasRelations(0);
   });
 

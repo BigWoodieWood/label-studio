@@ -97,7 +97,7 @@ describe("Relations: Image Rectangle Regions", () => {
   beforeEach(() => {
     LabelStudio.init({ config, task });
     ImageView.waitForImage();
-    Relations.deattachRelationTab();
+    Sidebar.dettachTab("relations");
     Relations.hasRelations(0);
   });
 
