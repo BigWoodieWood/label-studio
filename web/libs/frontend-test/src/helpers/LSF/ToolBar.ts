@@ -2,7 +2,7 @@ export const ToolBar = {
   _controlsSelector: ".lsf-controls",
 
   get sectionOne() {
-    return cy.get(".lsf-topbar").find(".lsf-topbar__group").eq(0);
+    return cy.get(".lsf-bottombar").find(".lsf-bottombar__group").eq(0);
   },
 
   get sectionTwo() {
