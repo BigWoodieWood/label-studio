@@ -220,7 +220,7 @@ export const perRegionMIGTaxonomyConfig = `<View>
 </View>`;
 
 export const perItemMIGTaxonomyConfig = `<View>
-  <Image name="image" valueList="$images"/>
+  <Image name="image" valueList="$images" maxWidth="50%"/>
   <Taxonomy name="taxonomy" toName="image" perItem="true">
     <Choice value="Choice 1" />
     <Choice value="Choice 2" />
@@ -248,7 +248,7 @@ export const requiredPerRegionMIGTaxonomyConfig = `<View>
 </View>`;
 
 export const requiredPerItemMIGTaxonomyConfig = `<View>
-  <Image name="image" valueList="$images"/>
+  <Image name="image" valueList="$images" maxWidth="50%"/>
   <Taxonomy name="taxonomy" toName="image" perItem="true" required="true">
     <Choice value="Choice 1" />
     <Choice value="Choice 2" />
