@@ -30,51 +30,6 @@ const OutlinerFFClasses: string[] = [];
 
 OutlinerFFClasses.push("ff_hide_all_regions");
 
-const OutlinerPanelComponent: FC<OutlinerPanelProps> = ({ regions, ...props }) => {
-  const [group, setGroup] = useState<GroupingOptions>(regions.group);
-  const onOrderingChange = useCallback(
-    (value: OrderingOptions) => {
-      regions.setSort(value);
-    },
-    [regions],
-  );
-
-  const onGroupingChange = useCallback(
-    (value: GroupingOptions) => {
-      regions.setGrouping(value);
-      setGroup(value);
-    },
-    [regions],
-  );
-
-  const onFilterChange = useCallback(
-    (value: Region[] | null) => {
-      regions.setFilteredRegions(value);
-    },
-    [regions],
-  );
-
-  useEffect(() => {
-    setGroup(regions.group);
-  }, []);
-
-  regions.setGrouping(group);
-
-  return (
-    <PanelBase {...props} name="outliner" mix={OutlinerFFClasses} title="Outliner">
-      <ViewControls
-        ordering={regions.sort}
-        regions={regions}
-        orderingDirection={regions.sortOrder}
-        onOrderingChange={onOrderingChange}
-        onGroupingChange={onGroupingChange}
-        onFilterChange={onFilterChange}
-      />
-      <OutlinerTreeComponent regions={regions} />
-    </PanelBase>
-  );
-};
-
 const OutlinerStandAlone: FC<OutlinerPanelProps> = ({ regions }) => {
   const onOrderingChange = useCallback(
     (value: OrderingOptions) => {
@@ -171,5 +126,3 @@ const OutlinerTreeComponent: FC<OutlinerTreeComponentProps> = observer(({ region
 });
 
 export const OutlinerComponent = observer(OutlinerStandAlone);
-
-export const OutlinerPanel = observer(OutlinerPanelComponent);

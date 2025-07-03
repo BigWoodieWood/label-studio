@@ -148,7 +148,7 @@ Data(shapesTable).Scenario(
     };
     const getCenter = (bbox) => [bbox.x + bbox.width / 2, bbox.y + bbox.height / 2];
     let isTransformerExist;
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     LabelStudio.init(getParamsWithLabels(shapeName));
     AtDetailsPanel.collapsePanel();
@@ -216,7 +216,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMoveToolTransfor
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -268,7 +268,7 @@ Data(shapesTable.filter(({ shapeName }) => shapeName === "Rectangle")).Scenario(
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -337,7 +337,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMoveToolTransfor
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, Regions, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     LabelStudio.setFeatureFlags({
       fflag_fix_front_dev_3377_image_regions_shift_on_resize_280922_short: true,
@@ -396,7 +396,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionRo
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -460,7 +460,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionRo
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -517,7 +517,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionRo
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -676,7 +676,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionRo
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -768,7 +768,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionRo
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -877,7 +877,7 @@ Data(
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -970,7 +970,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionTr
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -1091,7 +1091,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionRo
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -1230,7 +1230,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMultiSelectionRo
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));
@@ -1424,7 +1424,7 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasRotator)).Scenar
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { shapeName } = current;
     const Shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(getParamsWithShape(shapeName, Shape.params));

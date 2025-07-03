@@ -5,7 +5,7 @@ const { I } = inject();
  * like region labels, editable fields, meta info, etc.
  */
 module.exports = {
-  _rootSelector: ".lsf-details",
+  _rootSelector: ".lsf-info",
   _labelSelector: ".lsf-detailed-region .lsf-labels-list span",
   _textSelector: ".lsf-region-meta__content_type_text",
   _editMetaSelector: '[aria-label="Edit region\'s meta"]',
@@ -15,7 +15,7 @@ module.exports = {
   _resultBlockSelector: ".lsf-detailed-region__result",
   _resultTitleSelector: ".ant-typography",
   _resultValueSelector: ".lsf-region-meta__value",
-  _sectionHeadSelector: ".lsf-details__section-head",
+  _sectionHeadSelector: ".lsf-info__section-head",
   locateDetailPanel() {
     return locate(this._rootSelector);
   },

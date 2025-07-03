@@ -1,9 +1,3 @@
-/**
- * This panel is used with FF_1170 + FF_3873 in new interface,
- * but it's also used in old interface with FF_3873, but without FF_1170.
- * Only this component should get interface updates, other versions should be removed.
- */
-
 import { observer } from "mobx-react";
 import type React from "react";
 import { useCallback, useState } from "react";

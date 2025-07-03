@@ -124,7 +124,7 @@ DataStore.Scenario(
       config,
       data: { image: IMAGE },
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(params);

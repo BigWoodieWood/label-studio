@@ -4,21 +4,14 @@ Different thoughts and investingations related to LSF init.
 
 ## App render
 
-We have 3 UI versions: old (awful), medium (outliner v1), modern (draggable panels)
-
-Flag:
-
-- `fflag_feat_front_dev_3873_labeling_ui_improvements_short` — modern **FF_3873**
+We have draggable panels
 
 Components:
 
-- modern (FF_1170 + FF_3873): `SideTabsPanels` + `SidePanels/TabPanels` + `OutlinerTree` + `BottomBar`
-- medium (FF_1170): `SidePanels` + `OutlinerTree`
-- old: `SidebarTabs` + `AnnotationTab` + `Entities/RegionTree` and surprisingly `BottomBar` if FF_3873 enabled without FF_1170
+- modern `SideTabsPanels` + `SidePanels/TabPanels` + `OutlinerTree` + `BottomBar`
 
 They all have `TopBar` with 2 different layouts:
 - modern (FF_3873): annotations tab by `AnnotationsCarousel` + custom actions
-- medium and old: annotations dropdown by `TopBar/Annotations` + `TopBar/Actions`
 
 ## configureStore, environments and init
 
@@ -83,8 +76,6 @@ called from 3 places:
 ## Huge mess with "side panels"
 
 We have three versions of interface:
-1. with DEV-1170 FF off we have old interface with `components/SidebarTabs`
-2. with DEV-1170 FF on and DEV-3873 off we have intermediate interface with `components/SidePanels/SidePanels.tsx`
 3. with both FFs on we have new desired interface with `components/SidePanels/TabPanels/SideTabsPanels.tsx`
 
 They both are only disabled in couple places.

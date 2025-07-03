@@ -118,7 +118,7 @@ Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtIma
     config: getConfigWithShapes(Object.keys(createShape), 'strokewidth="5"'),
     data: { image: IMAGE },
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
   I.amOnPage("/");
   LabelStudio.init(params);

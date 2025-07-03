@@ -12,10 +12,11 @@ import { Block, Elem } from "../../utils/bem";
 import { IconArrowLeft, IconArrowRight, IconOutlinerCollapse, IconOutlinerExpand } from "@humansignal/icons";
 
 import "./PanelBase.scss";
-import type { PanelType } from "./SidePanels";
 import { useDrag } from "../../hooks/useDrag";
 import { clamp, isDefined } from "../../utils/utilities";
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH, PANEL_HEADER_HEIGHT_PADDED } from "./constants";
+
+type PanelType = "outliner" | "info" | "relations" | "history" | "comments" | "regions";
 
 export type PanelBaseExclusiveProps = "name" | "title";
 

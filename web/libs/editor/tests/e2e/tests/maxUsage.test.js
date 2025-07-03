@@ -123,7 +123,7 @@ Data(maxUsageImageToolsDataTable).Scenario(
     const { maxUsage, shapeName } = current;
     const shape = shapes[shapeName];
     const annotations = [];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     for (let k = 0; k < maxUsage; k++) {
       annotations.push({
@@ -171,7 +171,7 @@ Data(maxUsageImageToolsDataTable).Scenario(
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { maxUsage, shapeName } = current;
     const shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init({

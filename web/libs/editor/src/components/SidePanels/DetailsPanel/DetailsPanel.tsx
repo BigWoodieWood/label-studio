@@ -15,35 +15,6 @@ import { EmptyState } from "../Components/EmptyState";
 import { IconCursor, IconRelationLink } from "@humansignal/icons";
 import { getDocsUrl } from "../../../utils/docs";
 
-interface DetailsPanelProps extends PanelProps {
-  regions: any;
-  selection: any;
-}
-
-const DetailsPanelComponent: FC<DetailsPanelProps> = ({ currentEntity, regions, ...props }) => {
-  const selectedRegions = regions.selection;
-
-  return (
-    <PanelBase {...props} currentEntity={currentEntity} name="details" title="Details">
-      <Content selection={selectedRegions} currentEntity={currentEntity} />
-    </PanelBase>
-  );
-};
-
-const DetailsComponent: FC<DetailsPanelProps> = ({ currentEntity, regions }) => {
-  const selectedRegions = regions.selection;
-
-  return (
-    <Block name="details-tab">
-      <Content selection={selectedRegions} currentEntity={currentEntity} />
-    </Block>
-  );
-};
-
-const Content: FC<any> = observer(function Content({ selection, currentEntity }: any): JSX.Element {
-  return <>{selection.size ? <RegionsPanel regions={selection} /> : <GeneralPanel currentEntity={currentEntity} />}</>;
-});
-
 const CommentsTab: FC<any> = inject("store")(
   observer(function CommentsTab({ store }: any): JSX.Element {
     return (
@@ -218,5 +189,3 @@ export const Comments = CommentsTab;
 export const History = HistoryTab;
 export const Relations = RelationsTab;
 export const Info = InfoTab;
-export const Details = observer(DetailsComponent);
-export const DetailsPanel = observer(DetailsPanelComponent);

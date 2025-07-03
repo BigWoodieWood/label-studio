@@ -311,7 +311,7 @@ Scenario("No errors during brush export in MIG", async ({ I, LabelStudio, AtImag
     [40, 20],
     [20, 20],
   ];
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
   I.amOnPage("/");
   LabelStudio.init(params);

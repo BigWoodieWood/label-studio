@@ -7,18 +7,18 @@ const { I } = inject();
  */
 class Panel {
   container = ".lsf-sidepanels";
-  root = ".lsf-panel";
-  detached = ".lsf-panel_detached";
-  aligmentLeft = ".lsf-panel_alignment_left";
-  aligmentRight = ".lsf-panel_alignment_right";
-  header = ".lsf-panel__header";
-  body = ".lsf-panel__body";
-  title = ".lsf-panel__title";
+  root = ".lsf-tabs-panel";
+  detached = ".lsf-tabs-panel_detached";
+  aligmentLeft = ".lsf-tabs-panel_alignment_left";
+  aligmentRight = ".lsf-tabs-panel_alignment_right";
+  header = ".lsf-tabs-panel__header";
+  body = ".lsf-tabs-panel__body";
+  title = ".lsf-tabs-panel__title";
 
   leftZone = ".lsf-sidepanels__wrapper_align_left";
   rightZone = ".lsf-sidepanels__wrapper_align_right";
 
-  collapsingToggle = ".lsf-panel__toggle";
+  collapsingToggle = ".lsf-tabs-panel__toggle";
   collapseButton = `${this.collapsingToggle}[data-tooltip*="Collapse"]`;
   expandButton = `${this.collapsingToggle}[data-tooltip*="Expand"]`;
 
@@ -32,7 +32,7 @@ class Panel {
   resizeRight = '[data-resize="right"]';
 
   constructor(selector) {
-    this.root = selector ? `${this.root}${selector}` : this.root;
+    this.root = selector ? `${this.root} ${selector}` : this.root;
   }
   locatePanel(stateSelector = "") {
     return locate(this.root + stateSelector);
@@ -137,7 +137,11 @@ class Panel {
 module.exports = new Panel();
 module.exports.PANEL = {
   OUTLINER: ".lsf-outliner",
-  DETAILS: ".lsf-details",
+  INFO: ".lsf-info",
+  RELATIONS: ".lsf-relations",
+  HISTORY: ".lsf-history",
+  COMMENTS: ".lsf-comments",
+  REGIONS: ".lsf-regions",
 };
 module.exports.usePanel = (panel) => {
   return new Panel(panel);

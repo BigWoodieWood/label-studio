@@ -116,7 +116,7 @@ Data(shapesTable).Scenario(
       config,
       data: { image: IMAGE },
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     LabelStudio.init(params);
@@ -158,7 +158,7 @@ Data(shapesTable).Scenario("Rotate zoomed", async ({ I, LabelStudio, AtImageView
     config: getConfigWithShape(current.shape, current.props),
     data: { image: IMAGE },
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
   I.amOnPage("/");
   LabelStudio.init(params);
@@ -208,7 +208,7 @@ Data(windowSizesTable).Scenario(
       config,
       data: { image: IMAGE },
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.amOnPage("/");
     I.resizeWindow(current.width, current.height);
@@ -324,7 +324,7 @@ Data(layoutVariations).Scenario(
         },
       ],
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
 
     I.say(`Two columns [config: ${twoColumnsConfigs.indexOf(config)}] [${direction}]`);
 
