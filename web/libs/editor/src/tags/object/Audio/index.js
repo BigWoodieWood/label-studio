@@ -1,6 +1,6 @@
 import Registry from "../../../core/Registry";
 import { AudioModel } from "./model";
-import { AudioView as HtxAudio } from "./view";
+import { Audio as HtxAudio } from "./view";
 import { AudioRegionModel } from "../../../regions/AudioRegion";
 
 Registry.addTag("audio", AudioModel, HtxAudio);

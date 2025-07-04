@@ -1,5 +1,5 @@
 import { types } from "mobx-state-tree";
-import { AudioModel } from "../../tags/object/AudioNext";
+import { AudioModel } from "../../tags/object/Audio/model";
 import Utils from "../../utils";
 import Constants from "../../core/Constants";
 import { clamp } from "../../utils/utilities";
