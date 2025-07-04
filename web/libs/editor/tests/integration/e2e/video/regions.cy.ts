@@ -64,7 +64,7 @@ describe("Video segmentation", suiteConfig, () => {
       VideoView.clickAtFrame(4);
 
       // Ensure drawing operations are complete before comparison
-      cy.wait(1000);
+      cy.wait(1500);
 
       VideoView.canvasShouldChange("canvas", 0);
     });
