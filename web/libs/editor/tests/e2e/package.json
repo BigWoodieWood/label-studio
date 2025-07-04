@@ -24,7 +24,7 @@
   "devDependencies": {
     "@codeceptjs/configure": "^0.7.0",
     "@codeceptjs/examples": "^1.2.1",
-    "@codeceptjs/ui": "^1.2.5",
+    "@codeceptjs/ui": "1.2.1",
     "@types/mkdirp": "^1.0.1",
     "@types/node": "^16.11.6",
     "@types/puppeteer": "^5.4.3",
