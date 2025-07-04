@@ -11,6 +11,10 @@ addMatchImageSnapshotCommand({
 
 const Screenshots = new Map<string, string>();
 
+beforeEach(() => {
+  Screenshots.clear();
+});
+
 const getName = (suffix: string) => {
   const spec = Cypress.spec.name;
 
