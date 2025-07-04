@@ -47,10 +47,8 @@ describe("Video segmentation", suiteConfig, () => {
 
     VideoView.canvasShouldChange("segmentation-canvas", 0);
   });
-});
 
-describe("Video Segmentation: Rectangle", suiteConfig, () => {
-  it("Should be invisible out of the lifespan", () => {
+  it("Should be invisible out of the lifespan (rectangle)", () => {
     LabelStudio.params().config(simpleVideoConfig).data(simpleVideoData).withResult(simpleVideoResult).init();
     LabelStudio.waitForObjectsReady();
     // Wait for video and regions to be fully loaded
@@ -69,10 +67,8 @@ describe("Video Segmentation: Rectangle", suiteConfig, () => {
 
     VideoView.canvasShouldChange("rectangle-canvas", 0);
   });
-});
 
-describe("Video Segmentation: Transformer", suiteConfig, () => {
-  it("Should be invisible out of the lifespan", () => {
+  it("Should be invisible out of the lifespan (transformer)", () => {
     LabelStudio.params().config(simpleVideoConfig).data(simpleVideoData).withResult(simpleVideoResult).init();
     LabelStudio.waitForObjectsReady();
     // Wait for frame change to be fully processed
