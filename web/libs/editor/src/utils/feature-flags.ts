@@ -58,12 +58,6 @@ export const FF_DEV_3793 = "fflag_fix_front_dev_3793_relative_coords_short";
 export const FF_DEV_4174 = "fflag_fix_back_dev_4174_overlap_issue_experiments_10012023_short";
 
 /**
- * Contextual scrolling of Paragraph segments with Audio V0
- * @link https://app.launchdarkly.com/default/production/features/fflag_feat_front_lsdv_e_278_contextual_scrolling_short/targeting
- */
-export const FF_LSDV_E_278 = "fflag_feat_front_lsdv_e_278_contextual_scrolling_short";
-
-/**
  * Annotations with LLM assistance
  * @link https://app.launchdarkly.com/default/production/features/fflag_feat_all_lsdv_e_294_llm_annotations_180723_long
  */

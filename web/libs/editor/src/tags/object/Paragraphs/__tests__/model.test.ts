@@ -1,11 +1,7 @@
 import { types } from "mobx-state-tree";
-import { mockFF } from "../../../../../__mocks__/global";
-import { FF_LSDV_E_278 } from "../../../../utils/feature-flags";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { ParagraphsModel } from "../model";
-
-const ff = mockFF();
 
 jest.mock("../../../../regions/ParagraphsRegion", () => ({}));
 
@@ -42,11 +38,6 @@ const phrases = [
     duration: 1.5,
   },
 ];
-
-ff.setup();
-ff.set({
-  [FF_LSDV_E_278]: true,
-});
 
 describe("Paragraphs phrases", () => {
   // creating models can be a long one, so all tests will share one model
@@ -100,5 +91,4 @@ describe("Paragraphs phrases", () => {
       phrases[3].author,
     ]);
   });
-  ff.reset();
 });

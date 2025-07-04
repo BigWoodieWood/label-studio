@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 
 import ObjectTag from "../../../components/Tags/Object";
-import { FF_DEV_2669, FF_DEV_2918, FF_LSDV_4711, FF_LSDV_E_278, isFF } from "../../../utils/feature-flags";
+import { FF_DEV_2669, FF_DEV_2918, FF_LSDV_4711, isFF } from "../../../utils/feature-flags";
 import { findNodeAt, matchesSelector, splitBoundaries } from "../../../utils/html";
 import { isSelectionContainsSpan } from "../../../utils/selection-tools";
 import styles from "./Paragraphs.module.scss";
@@ -423,7 +423,6 @@ class HtxParagraphsView extends Component {
     });
 
     if (
-      isFF(FF_LSDV_E_278) &&
       this.props.item.contextscroll &&
       item.playingId >= 0 &&
       this.lastPlayingId !== item.playingId &&
@@ -511,8 +510,7 @@ class HtxParagraphsView extends Component {
   }
 
   componentDidMount() {
-    if (isFF(FF_LSDV_E_278) && this.props.item.contextscroll)
-      this._resizeObserver.observe(document.querySelector(this.mainContentSelector));
+    if (this.props.item.contextscroll) this._resizeObserver.observe(document.querySelector(this.mainContentSelector));
     this._handleUpdate();
   }
 
@@ -572,9 +570,9 @@ class HtxParagraphsView extends Component {
   render() {
     const { item } = this.props;
     const withAudio = !!item.audio;
-    const contextScroll = isFF(FF_LSDV_E_278) && this.props.item.contextscroll;
+    const contextScroll = this.props.item.contextscroll;
 
-    if (!item.playing && isFF(FF_LSDV_E_278)) this._disposeTimeout(); // dispose scroll timeout when the audio is not playing
+    if (!item.playing) this._disposeTimeout(); // dispose scroll timeout when the audio is not playing
 
     // current way to not render when we wait for data
     if (isFF(FF_DEV_2669) && !item._value) return null;
@@ -594,7 +592,7 @@ class HtxParagraphsView extends Component {
             onCanPlay={item.handleCanPlay}
           />
         )}
-        {isFF(FF_LSDV_E_278) ? this.renderWrapperHeader() : isFF(FF_DEV_2669) && <AuthorFilter item={item} />}
+        {this.renderWrapperHeader()}
         <div
           ref={this.myRef}
           data-testid="phrases-wrapper"
@@ -606,7 +604,7 @@ class HtxParagraphsView extends Component {
             setIsInViewport={this.setIsInViewPort.bind(this)}
             item={item}
             playingId={item.playingId}
-            {...(isFF(FF_LSDV_E_278) ? { activeRef: this.activeRef } : {})}
+            activeRef={this.activeRef}
           />
         </div>
       </ObjectTag>

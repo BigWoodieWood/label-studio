@@ -3,10 +3,6 @@ import { render, screen } from "@testing-library/react";
 // @ts-ignore
 import { Phrases } from "../Phrases";
 import { getRoot } from "mobx-state-tree";
-import { mockFF } from "../../../../../__mocks__/global";
-import { FF_LSDV_E_278 } from "../../../../utils/feature-flags";
-
-const ff = mockFF();
 
 const intersectionObserverMock = () => ({
   observe: () => null,
@@ -21,16 +17,6 @@ jest.mock("mobx-state-tree", () => ({
 }));
 
 describe("Phrases Component", () => {
-  beforeAll(() => {
-    ff.setup();
-    ff.set({
-      [FF_LSDV_E_278]: true,
-    });
-  });
-  afterAll(() => {
-    ff.reset();
-  });
-
   it("renders phrases", () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -54,9 +40,10 @@ describe("Phrases Component", () => {
     };
 
     const playingId = 0;
-    const contextScroll = false;
+    const activeRef = { current: null };
+    const setIsInViewport = jest.fn();
 
-    render(<Phrases item={item} playingId={playingId} contextScroll={contextScroll} />);
+    render(<Phrases item={item} playingId={playingId} activeRef={activeRef} setIsInViewport={setIsInViewport} />);
 
     const phraseElements = screen.getAllByTestId(/^phrase:/);
     const phraseTextContext = phraseElements.map((element) => element.textContent);
