@@ -11,11 +11,6 @@ addMatchImageSnapshotCommand({
 
 const Screenshots = new Map<string, string>();
 
-// Clear Screenshots Map before each test to prevent conflicts between tests
-beforeEach(() => {
-  Screenshots.clear();
-});
-
 const getName = (suffix: string) => {
   const spec = Cypress.spec.name;
 
