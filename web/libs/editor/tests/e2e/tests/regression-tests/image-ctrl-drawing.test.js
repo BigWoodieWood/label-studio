@@ -161,6 +161,7 @@ Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtIma
     await AtImageView.lookForStage();
     I.pressKey(outerRegion.hotKey);
     AtImageView[outerRegion.action](...outerRegion.params);
+    await I.wait(1);
     AtOutliner.seeRegions(1);
     I.pressKey(["u"]);
     I.pressKey(innerRegion.hotKey);
@@ -169,6 +170,7 @@ Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtIma
     I.pressKeyUp("CommandOrControl");
     const result = await LabelStudio.serialize();
 
+    await I.wait(1);
     AtOutliner.seeRegions(2);
     for (let i = 0; i < 2; i++) {
       if (regionPair[i].result) {

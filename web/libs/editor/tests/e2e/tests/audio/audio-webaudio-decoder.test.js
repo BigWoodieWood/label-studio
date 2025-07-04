@@ -142,6 +142,7 @@ Scenario(
       I.pressKey("u");
     }
 
+    await I.wait(1);
     AtOutliner.seeRegions(10);
 
     I.pressKey("u");
@@ -169,6 +170,7 @@ Scenario("Can select a region below a hidden region", async ({ I, LabelStudio, A
   AtAudioView.dragAudioElement(50, 80);
   I.pressKey("u");
 
+  await I.wait(1);
   AtOutliner.seeRegions(1);
 
   // create a new region above the first one
@@ -176,6 +178,7 @@ Scenario("Can select a region below a hidden region", async ({ I, LabelStudio, A
   AtAudioView.dragAudioElement(49, 81);
   I.pressKey("u");
 
+  await I.wait(1);
   AtOutliner.seeRegions(2);
 
   // click on the top-most region visible to select it

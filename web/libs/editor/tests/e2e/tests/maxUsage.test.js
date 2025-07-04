@@ -123,7 +123,6 @@ Data(maxUsageImageToolsDataTable).Scenario(
     const { maxUsage, shapeName } = current;
     const shape = shapes[shapeName];
     const annotations = [];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
     for (let k = 0; k < maxUsage; k++) {
       annotations.push({
@@ -153,7 +152,6 @@ Data(maxUsageImageToolsDataTable).Scenario(
         },
       ],
     });
-    AtDetailsPanel.collapsePanel();
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
     AtOutliner.seeRegions(maxUsage);
@@ -171,7 +169,6 @@ Data(maxUsageImageToolsDataTable).Scenario(
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
     const { maxUsage, shapeName } = current;
     const shape = shapes[shapeName];
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
     I.amOnPage("/");
     LabelStudio.init({
@@ -180,7 +177,6 @@ Data(maxUsageImageToolsDataTable).Scenario(
         image: IMAGE,
       },
     });
-    AtDetailsPanel.collapsePanel();
 
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();

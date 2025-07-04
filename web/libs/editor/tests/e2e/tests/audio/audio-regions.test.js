@@ -133,6 +133,7 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
           I.pressKey("u");
         }
 
+        await I.wait(1);
         AtOutliner.seeRegions(10);
 
         for (let i = 0; i < 10; i++) {
@@ -167,6 +168,7 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
       AtAudioView.dragAudioElement(50, 80);
       I.pressKey("u");
 
+      await I.wait(1);
       AtOutliner.seeRegions(1);
 
       // create a new region above the first one
@@ -174,6 +176,7 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
       AtAudioView.dragAudioElement(49, 81);
       I.pressKey("u");
 
+      await I.wait(1);
       AtOutliner.seeRegions(2);
 
       // click on the top-most region visible to select it

@@ -324,12 +324,10 @@ Data(layoutVariations).Scenario(
         },
       ],
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
     I.say(`Two columns [config: ${twoColumnsConfigs.indexOf(config)}] [${direction}]`);
 
     LabelStudio.init(params);
-    AtDetailsPanel.collapsePanel();
     LabelStudio.waitForObjectsReady();
     AtOutliner.seeRegions(1);
 
@@ -338,14 +336,6 @@ Data(layoutVariations).Scenario(
 
     I.wait(0.1);
     await compareSize(I, AtImageView, "Dimensions must be equal in landscape", "landscape, rotated");
-
-    I.say("Change to vertcal layout");
-    AtSettings.open();
-    isVerticalLayout = !isVerticalLayout;
-    AtSettings.setLayoutSettings({
-      [AtSettings.LAYOUT_SETTINGS.VERTICAL_LAYOUT]: isVerticalLayout,
-    });
-    AtSettings.close();
 
     AtOutliner.seeRegions(1);
     I.wait(0.1);

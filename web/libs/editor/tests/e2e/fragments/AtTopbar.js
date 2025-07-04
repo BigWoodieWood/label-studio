@@ -40,6 +40,13 @@ module.exports = {
   clickAria(label) {
     I.click(`[aria-label="${label}"]`, this._topbarLocator);
   },
+  clickDeleteAnnotation() {
+    I.click(`.lsf-annotation-button__trigger`);
+    I.wait(1);
+    I.click(locate("div").withText("Delete Annotation"));
+    I.wait(1);
+    I.click(locate(".lsf-button").withText("Delete"));
+  },
   click(locator) {
     I.click(this.locate(locator));
   },

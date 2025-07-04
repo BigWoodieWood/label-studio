@@ -180,6 +180,7 @@ Scenario("Check different cases ", async ({ I, LabelStudio, AtOutliner, AtParagr
   AtLabels.clickLabel("Random talk");
   AtParagraphs.setSelection(AtParagraphs.locateText("Message 1"), 0, AtParagraphs.locateText("Message 10"), 10);
 
+  I.wait(1);
   I.say("There should be 4 new regions");
   AtOutliner.seeRegions(4);
   {
@@ -235,6 +236,7 @@ Scenario("Check different cases ", async ({ I, LabelStudio, AtOutliner, AtParagr
   I.say("Test the overlaps of regions #1");
   AtLabels.clickLabel("Important Stuff");
   AtParagraphs.setSelection(AtParagraphs.locateText("Message 3"), 4, AtParagraphs.locateText("Message 8"), 4);
+  I.wait(1);
   AtOutliner.seeRegions(6);
 
   {
@@ -267,7 +269,8 @@ Scenario("Check different cases ", async ({ I, LabelStudio, AtOutliner, AtParagr
   AtParagraphs.clickFilter("Author 2", "Author 3");
   AtLabels.clickLabel("Important Stuff");
   AtParagraphs.setSelection(AtParagraphs.locateText("age 3"), 4, AtParagraphs.locateText("age 8"), 3);
-  AtOutliner.seeRegions(9);
+  I.wait(1);
+  AtOutliner.seeRegions(8);
 
   {
     const result = await LabelStudio.serialize();

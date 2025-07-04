@@ -19,8 +19,8 @@ class Panel {
   rightZone = ".lsf-sidepanels__wrapper_align_right";
 
   collapsingToggle = ".lsf-tabs-panel__toggle";
-  collapseButton = `${this.collapsingToggle}[data-tooltip*="Collapse"]`;
-  expandButton = `${this.collapsingToggle}[data-tooltip*="Expand"]`;
+  collapseButton = `${this.collapsingToggle}[data-tooltip="Collapse Group"]`;
+  expandButton = `${this.collapsingToggle}[data-tooltip="Expand Group"]`;
 
   resizeTopLeft = '[data-resize="top-left"]';
   resizeTopRight = '[data-resize="top-right"]';
@@ -35,7 +35,7 @@ class Panel {
     this.root = selector ? `${this.root} ${selector}` : this.root;
   }
   locatePanel(stateSelector = "") {
-    return locate(this.root + stateSelector);
+    return locate(this.root).inside(stateSelector || this.container);
   }
   locate(locator) {
     return locator ? locate(locator).inside(this.locatePanel()) : this.locatePanel();
@@ -59,24 +59,24 @@ class Panel {
     I.dontSeeElement(this.locate(this.body));
   }
   collapsePanel() {
-    I.click(this.locate(this.collapsingToggle));
+    I.click(locate(this.collapsingToggle));
     // Allow some tags to rerender and get new sizes before we can continue testing things
     I.wait(1);
   }
   expandPanel() {
-    I.click(this.locate(this.header));
+    I.click(locate(this.expandButton));
   }
   seeExpandButton() {
-    I.seeElement(this.locate(this.expandButton));
+    I.seeElement(locate(this.expandButton));
   }
   dontSeeExpandButton() {
-    I.dontSeeElement(this.locate(this.expandButton));
+    I.dontSeeElement(locate(this.expandButton));
   }
   seeСollapseButton() {
-    I.seeElement(this.locate(this.collapseButton));
+    I.seeElement(locate(this.collapseButton));
   }
   dontSeeСollapseButton() {
-    I.dontSeeElement(this.locate(this.collapseButton));
+    I.dontSeeElement(locate(this.collapseButton));
   }
   async grabHeaderBbox(elementSize) {
     return I.grabElementBoundingRect(this.locate(this.header), elementSize);

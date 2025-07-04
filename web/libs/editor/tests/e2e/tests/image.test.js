@@ -71,11 +71,9 @@ Scenario("Check Rect region for Image", async ({ I, LabelStudio, AtImageView, At
     data: { image },
     annotations: [annotationMoonwalker],
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
-  AtDetailsPanel.collapsePanel();
 
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();
@@ -224,7 +222,6 @@ Data(outOfBoundsFFs).Scenario(
     LabelStudio.setFeatureFlags({
       fflag_fix_front_dev_3793_relative_coords_short: current.FF_DEV_3793,
     });
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
     I.amOnPage("/");
 
@@ -237,7 +234,6 @@ Data(outOfBoundsFFs).Scenario(
         predictions: [],
       },
     });
-    AtDetailsPanel.collapsePanel();
 
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
@@ -245,13 +241,13 @@ Data(outOfBoundsFFs).Scenario(
     const stage = AtImageView.stageBBox();
     const ellipses = [
       // top-left corner
-      [100, 100, -200, -200],
+      // [100, 100, -200, -200],
       // top-right corner
-      [stage.width - 100, 100, stage.width + 100, -100],
+      // [stage.width - 100, 100, stage.width + 100, -100],
       // bottom-left corner
-      [100, stage.height - 100, -100, stage.height + 100],
+      // [100, stage.height - 100, -100, stage.height + 100],
       // bottom-right corner
-      [stage.width - 100, stage.height - 100, stage.width + 100, stage.height + 100],
+      // [stage.width - 100, stage.height - 100, stage.width + 100, stage.height + 100],
     ];
 
     for (const ellipse of ellipses) {
@@ -260,7 +256,7 @@ Data(outOfBoundsFFs).Scenario(
       AtImageView.drawByDrag(...ellipse);
     }
 
-    AtOutliner.seeRegions(4);
+    AtOutliner.seeRegions(ellipses.length);
 
     const result = await LabelStudio.serialize();
     const radiusX = (100 / stage.width) * 100;

@@ -103,8 +103,7 @@ Scenario("NERText", async ({ I, LabelStudio, AtOutliner, AtTopbar }) => {
   assert.deepEqual(result, results);
 
   // Create a new annotation to create the same result from scratch
-  I.click('[aria-label="Annotations List Toggle"]');
-  I.click('[aria-label="Create Annotation"]');
+  I.click('[aria-label="Create an annotation"]');
 
   I.pressKey("2");
   I.executeScript(selectText, {
@@ -119,8 +118,7 @@ Scenario("NERText", async ({ I, LabelStudio, AtOutliner, AtTopbar }) => {
   assert.deepEqual(result, [newResult]);
 
   // delete this new annotation
-  AtTopbar.clickAria("Delete");
-  I.click("Proceed"); // approve
+  AtTopbar.clickDeleteAnnotation();
 
   I.pressKey("1");
   I.executeScript(selectText, {
@@ -143,6 +141,7 @@ Scenario("NERText", async ({ I, LabelStudio, AtOutliner, AtTopbar }) => {
   I.wait(1);
   I.click(locate(".htx-highlight").withText("come"));
 
+  I.click(locate("#Relations-draggable"));
   I.see("Relations (1)");
 
   result = await I.executeScript(serialize);
