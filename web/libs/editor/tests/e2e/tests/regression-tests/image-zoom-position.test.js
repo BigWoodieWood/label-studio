@@ -26,7 +26,7 @@ relativeCoordsFF.add([false]);
 Data(relativeCoordsFF).Scenario(
   "Zoomed image should keep center image in center of canvas on resizes",
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtDetails, AtPanels, current }) => {
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
     const AtOutlinerPanel = AtPanels.usePanel(AtPanels.PANEL.OUTLINER);
     const FF3793 = current;
 
@@ -215,7 +215,7 @@ Data(relativeCoordsFF).Scenario(
 Scenario(
   "Keeping the zoom center for different image sizes and scaling algorithms",
   async ({ I, LabelStudio, AtImageView, AtPanels }) => {
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
     const AtOutlinerPanel = AtPanels.usePanel(AtPanels.PANEL.OUTLINER);
     const strokecolor = "rgb(0,111,222)";
 

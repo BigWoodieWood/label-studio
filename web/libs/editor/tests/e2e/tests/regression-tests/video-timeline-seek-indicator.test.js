@@ -3,7 +3,7 @@ const assert = require("assert");
 Feature("Video timeline seek indicator").tag("@regress");
 
 Scenario("Seek view should be in sync with indicator position", async ({ I, LabelStudio, AtVideoView, AtPanels }) => {
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
   I.amOnPage("/");
   LabelStudio.init({

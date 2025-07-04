@@ -139,9 +139,9 @@ module.exports.PANEL = {
   OUTLINER: ".lsf-outliner",
   INFO: ".lsf-info",
   RELATIONS: ".lsf-relations",
-  HISTORY: ".lsf-history",
+  HISTORY: "#History-draggable",
   COMMENTS: ".lsf-comments",
-  REGIONS: ".lsf-regions",
+  REGIONS: "#Regions-draggable",
 };
 module.exports.usePanel = (panel) => {
   return new Panel(panel);

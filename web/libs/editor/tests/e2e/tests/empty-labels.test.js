@@ -168,7 +168,8 @@ const MULTIPLE_TYPE = "multiple";
 });
 
 Scenario("Consistency of empty labels", async ({ I, LabelStudio, AtOutliner, AtImageView, AtLabels, AtPanels }) => {
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
+  AtDetailsPanel.expandPanel();
   const { config, data } = require("../examples/image-bboxes");
   const params = { annotations: [{ id: "test", result: [] }], data };
   const configTree = Utils.parseXml(config);

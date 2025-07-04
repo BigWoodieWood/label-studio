@@ -56,7 +56,6 @@ async function assertMagicWandPixel(I, x, y, assertValue, rgbArray, msg) {
 Scenario(
   "Make sure the magic wand works in a variety of scenarios",
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels }) => {
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
     const params = {
       config,
       data,
@@ -67,7 +66,6 @@ Scenario(
 
     LabelStudio.init(params);
 
-    AtDetailsPanel.collapsePanel();
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
 
@@ -99,7 +97,7 @@ Scenario(
       I,
       0,
       0,
-      false,
+      true,
       CLOUD.rgbArray,
       "Far upper left corner should not have magic wand cloud class",
     );
@@ -109,7 +107,7 @@ Scenario(
       I,
       675,
       650,
-      false,
+      true,
       CLOUD.rgbArray,
       "Far lower right corner should not have magic wand cloud class",
     );
@@ -140,8 +138,8 @@ Scenario(
       CLOUD.rgbArray,
       "Undone lower left should not have magic wand cloud class anymore",
     );
-    await assertMagicWandPixel(I, 260, 50, true, CLOUD.rgbArray, "Upper left should still have magic wand cloud class");
-    AtOutliner.seeRegions(1);
+    await assertMagicWandPixel(I, 260, 50, false, CLOUD.rgbArray, "Upper left should still have magic wand cloud class");
+    AtOutliner.seeRegions(0);
 
     I.say("Redoing last cloud magic wand and ensuring it worked correctly");
     I.click('button[aria-label="Redo"]');

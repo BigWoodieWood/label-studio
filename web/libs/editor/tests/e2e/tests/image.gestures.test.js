@@ -177,7 +177,7 @@ Scenario("Creating regions by various gestures", async ({ I, LabelStudio, AtImag
     config: getConfigWithShapes(Object.keys(createShape)),
     data: { image: IMAGE },
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
   I.amOnPage("/");
   LabelStudio.init(params);

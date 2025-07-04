@@ -124,11 +124,8 @@ DataStore.Scenario(
       config,
       data: { image: IMAGE },
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
-
     I.amOnPage("/");
     LabelStudio.init(params);
-    AtDetailsPanel.collapsePanel();
     LabelStudio.waitForObjectsReady();
     AtOutliner.seeRegions(0);
     const canvasSize = await AtImageView.getCanvasSize();

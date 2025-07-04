@@ -71,7 +71,7 @@ Scenario("Check Rect region for Image", async ({ I, LabelStudio, AtImageView, At
     data: { image },
     annotations: [annotationMoonwalker],
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
@@ -158,7 +158,7 @@ Data(outOfBoundsFFs).Scenario(
     LabelStudio.setFeatureFlags({
       fflag_fix_front_dev_3793_relative_coords_short: current.FF_DEV_3793,
     });
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
     I.amOnPage("/");
 
@@ -224,7 +224,7 @@ Data(outOfBoundsFFs).Scenario(
     LabelStudio.setFeatureFlags({
       fflag_fix_front_dev_3793_relative_coords_short: current.FF_DEV_3793,
     });
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
     I.amOnPage("/");
 

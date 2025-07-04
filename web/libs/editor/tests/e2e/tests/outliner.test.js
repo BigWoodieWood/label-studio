@@ -241,7 +241,7 @@ Scenario("Panels manipulations", async ({ I, LabelStudio, AtPanels }) => {
   });
 
   const AtOutlinerPanel = AtPanels.usePanel(AtPanels.PANEL.OUTLINER);
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.INFO);
+  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
   I.say("See panels at default positions");
   AtOutlinerPanel.seePanelAttachedLeft();

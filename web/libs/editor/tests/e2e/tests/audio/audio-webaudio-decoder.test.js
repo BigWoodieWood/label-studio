@@ -132,6 +132,7 @@ Scenario(
       I.pressKey("u");
     }
 
+    await I.wait(1);
     AtOutliner.seeRegions(10);
 
     for (let i = 0; i < 10; i++) {
