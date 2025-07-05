@@ -11,10 +11,6 @@ addMatchImageSnapshotCommand({
 
 const Screenshots = new Map<string, string>();
 
-beforeEach(() => {
-  Screenshots.clear();
-});
-
 const getName = (suffix: string) => {
   const spec = Cypress.spec.name;
 
@@ -128,8 +124,6 @@ Cypress.Commands.add(
 
     cy.wait(100);
 
-    let compared = false;
-
     cy.task("compareScreenshots", options, { log: false }).then((result) => {
       if (!result) {
         const error = new Error(
@@ -139,13 +133,10 @@ Cypress.Commands.add(
         log.error(error);
         throw error;
       }
-      compared = true;
       Screenshots.delete(screenshotName);
     });
 
-    while (!compared) {
-      cy.wait(30);
-    }
+    cy.wait(1000);
 
     log.end();
     return obj;
