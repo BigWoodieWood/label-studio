@@ -50,6 +50,8 @@ Cypress.Commands.add(
       cy.get(hiddenSelector).invoke("css", "visibility", "hidden");
     }
 
+    cy.wait(100);
+
     obj.screenshot(
       `${screenshotName}-orig`,
       Object.assign({ log: false }, screenshotOptions, {
@@ -59,9 +61,13 @@ Cypress.Commands.add(
         },
       }),
     );
+
     for (const hiddenSelector of withHidden) {
       cy.get(hiddenSelector).invoke("css", "visibility", "");
     }
+
+    cy.wait(100);
+
     log.end();
     return obj;
   },
@@ -104,6 +110,8 @@ Cypress.Commands.add(
       cy.get(hiddenSelector).invoke("css", "visibility", "hidden");
     }
 
+    cy.wait(100);
+
     obj.screenshot(
       `${screenshotName}-comp`,
       Object.assign({ log: false }, screenshotOptions, {
@@ -118,6 +126,10 @@ Cypress.Commands.add(
       cy.get(hiddenSelector).invoke("css", "visibility", "");
     }
 
+    cy.wait(100);
+
+    let compared = false;
+
     cy.task("compareScreenshots", options, { log: false }).then((result) => {
       if (!result) {
         const error = new Error(
@@ -127,8 +139,13 @@ Cypress.Commands.add(
         log.error(error);
         throw error;
       }
+      compared = true;
       Screenshots.delete(screenshotName);
     });
+
+    while (!compared) {
+      cy.wait(30);
+    }
 
     log.end();
     return obj;
