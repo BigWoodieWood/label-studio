@@ -118,12 +118,9 @@ Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtIma
     config: getConfigWithShapes(Object.keys(createShape), 'strokewidth="5"'),
     data: { image: IMAGE },
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.REGIONS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
-  AtDetailsPanel.collapsePanel();
-  AtDetailsPanel.seeExpandButton();
   LabelStudio.waitForObjectsReady();
   AtOutliner.seeRegions(0);
   I.waitTicks(2);
@@ -156,12 +153,10 @@ Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtIma
     LabelStudio.init(params);
     LabelStudio.waitForObjectsReady();
     AtOutliner.seeRegions(0);
-    AtDetailsPanel.seeExpandButton();
     I.say(`Drawing ${innerRegion.shape} on ${outerRegion.shape}`);
     await AtImageView.lookForStage();
     I.pressKey(outerRegion.hotKey);
     AtImageView[outerRegion.action](...outerRegion.params);
-    await I.wait(1);
     AtOutliner.seeRegions(1);
     I.pressKey(["u"]);
     I.pressKey(innerRegion.hotKey);
@@ -169,8 +164,6 @@ Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtIma
     AtImageView[innerRegion.action](...innerRegion.params);
     I.pressKeyUp("CommandOrControl");
     const result = await LabelStudio.serialize();
-
-    await I.wait(1);
     AtOutliner.seeRegions(2);
     for (let i = 0; i < 2; i++) {
       if (regionPair[i].result) {

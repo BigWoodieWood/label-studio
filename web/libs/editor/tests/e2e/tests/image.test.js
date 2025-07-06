@@ -239,6 +239,7 @@ Data(outOfBoundsFFs).Scenario(
     await AtImageView.lookForStage();
 
     const stage = AtImageView.stageBBox();
+    // TODO: fix this test - the expected (which are likely related to the stage size) values are not correct are not lining up with the actual values
     const ellipses = [
       // top-left corner
       // [100, 100, -200, -200],

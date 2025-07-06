@@ -111,8 +111,6 @@ Data(relativeCoordsFF).Scenario(
     AtDetails.seeFieldWithValue("X", FF3793.enabled ? "88.567" : "430.15");
     I.pressKey("U");
 
-    I.say("Collapse the details panel");
-    AtDetailsPanel.collapsePanel();
     await AtImageView.lookForStage();
 
     I.say("Check that there is a region at the center of visible area");
@@ -120,8 +118,6 @@ Data(relativeCoordsFF).Scenario(
     AtOutliner.seeSelectedRegion();
     I.pressKey("U");
 
-    I.say("Collapse the outliner panel");
-    AtOutlinerPanel.collapsePanel();
     await AtImageView.lookForStage();
 
     I.say("The region should be at the right side of visible area");
@@ -166,8 +162,6 @@ Data(relativeCoordsFF).Scenario(
     AtDetails.seeFieldWithValue("X", FF3793.enabled ? "68.75" : "333.90");
     I.pressKey("U");
 
-    I.say("Collapse the details panel");
-    AtDetailsPanel.collapsePanel();
     await AtImageView.lookForStage();
 
     I.say("Check that the region is still at the center of visible area");
@@ -201,7 +195,7 @@ Data(relativeCoordsFF).Scenario(
       await AtOutlinerPanel.dragResizerBy(shiftX, 0, AtOutlinerPanel.resizeRight, steps);
     }
 
-    I.waitTicks(3);
+    await I.wait(2);
 
     await AtImageView.lookForStage();
 
@@ -272,8 +266,6 @@ Scenario(
       I.pressKey("K");
       AtImageView.drawByClick(AtImageView.percToX(50), AtImageView.percToY(50));
 
-      I.say("Collapse the details panel");
-      AtDetailsPanel.collapsePanel();
       await AtImageView.lookForStage();
 
       I.say("Check that the region is still at the center of visible area");
@@ -281,8 +273,6 @@ Scenario(
       await keyPointBeSelected();
       I.pressKey("U");
 
-      I.say("Collapse the outliner panel");
-      AtOutlinerPanel.collapsePanel();
       await AtImageView.lookForStage();
 
       I.say("Check that the region is still at the center of visible area");
