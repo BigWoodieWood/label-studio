@@ -138,10 +138,6 @@ Scenario(
 );
 
 Scenario("Can select a region below a hidden region", async ({ I, LabelStudio, AtAudioView, AtOutliner }) => {
-  LabelStudio.setFeatureFlags({
-    ff_front_dev_2715_audio_3_280722_short: true,
-    ...flags,
-  });
   I.amOnPage("/");
 
   LabelStudio.init(paramsSpeech);
