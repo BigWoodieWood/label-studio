@@ -17,7 +17,7 @@ import { useScatterFilteredIds } from "./hooks/useScatterFilteredIds";
 import { TOOLTIP_STYLE } from "./utils/scatter-tokens";
 import { IconCloseCircleOutline, IconRefresh } from "@humansignal/icons";
 import { useScatterBaseData } from "./hooks/useScatterBaseData";
-import { Button } from "../../Common/Button/Button";
+import { Button } from "@humansignal/ui";
 import {
   useScatterLayers,
   useHoverLayer,
@@ -415,7 +415,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(({ data = [], view, on
           onSettingsChange={handleSettingsChange}
           availableFields={availableFields}
         />
-        <Button icon={<IconRefresh />} onClick={reload} waiting={baseLoading} size="compact"></Button>
+        <Button leading={<IconRefresh />} onClick={reload} waiting={baseLoading} size="small"></Button>
       </Block>
 
       <DeckGL

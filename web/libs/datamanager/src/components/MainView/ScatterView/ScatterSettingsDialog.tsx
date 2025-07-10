@@ -1,6 +1,6 @@
 import type React from "react";
 import { type FC, useState, useCallback, useRef } from "react";
-import { Button } from "../../Common/Button/Button";
+import { Button } from "@humansignal/ui";
 import { Modal } from "../../Common/Modal/Modal";
 import { Block, Elem } from "../../../utils/bem";
 import { Space } from "../../Common/Space/Space";
@@ -65,10 +65,10 @@ export const ScatterSettingsDialog: FC<ScatterSettingsDialogProps> = ({
       closeOnClickOutside
       footer={
         <Space align="end">
-          <Button onClick={onClose} size="compact">
+          <Button onClick={onClose} size="small">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} look="primary" size="compact">
+          <Button onClick={handleSubmit} variant="primary" size="small">
             Save
           </Button>
         </Space>

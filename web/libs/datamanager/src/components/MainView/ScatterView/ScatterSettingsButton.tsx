@@ -2,8 +2,8 @@ import { type FC, useState, useCallback } from "react";
 import { IconSettings } from "@humansignal/icons";
 import { ScatterSettingsDialog } from "./ScatterSettingsDialog";
 import { Block } from "../../../utils/bem";
-import { Button } from "../../Common/Button/Button";
-import { Icon } from "../../Common/Icon/Icon";
+import { Button } from "@humansignal/ui";
+
 
 interface ScatterSettings {
   classField: string;
@@ -44,8 +44,8 @@ export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
   return (
     <Block name="scatter-settings">
       <Button
-        type="text"
-        icon={<Icon icon={IconSettings} />}
+        type="button"
+        leading={<IconSettings />}
         onClick={handleOpenDialog}
         aria-label="Scatter view settings"
       />
