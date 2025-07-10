@@ -8,6 +8,7 @@ import { SyncableMixin } from "../../../mixins/Syncable";
 import { parseValue } from "../../../utils/data";
 import { FF_VIDEO_FRAME_SEEK_PRECISION, isFF } from "../../../utils/feature-flags";
 import ObjectBase from "../Base";
+import { isDefined } from "../../../utils/utilities";
 
 /**
  * Video tag plays a simple video file. Use for video annotation tasks such as classification and transcription.
@@ -16,12 +17,15 @@ import ObjectBase from "../Base";
  *
  * ### Video format
  *
- * Label Studio relies on your web browser to play videos, so it's essential that your videos use a format and codecs that are universally supported. To ensure maximum compatibility, we recommend using an MP4 container with video encoded using the H.264 (AVC) codec and audio encoded with AAC. This combination is widely supported across all modern browsers and minimizes issues like incorrect total duration detection or problems with playback. In addition, it's important to convert your videos to a constant frame rate (CFR), ideally around 30 fps, to avoid discrepancies in frame counts and issues with duplicated or missing frames.
+ * Label Studio relies on your web browser to play videos and evaluate the total frame number. So, it's essential that your videos use a format and codecs that are universally supported. To ensure maximum compatibility, we recommend using an MP4 container with video encoded using the H.264 (AVC) codec and audio encoded with AAC. This combination is widely supported across all modern browsers and minimizes issues like incorrect total duration detection or problems with playback. In addition, it's important to convert your videos to a constant frame rate (CFR), ideally around 30 fps, to avoid discrepancies in frame counts and issues with duplicated or missing frames. All audio and video streams from your file must have the same durations; otherwise, you will have extra total frames.
  *
- * Converting your videos to this recommended format will help ensure that they play smoothly in Label Studio and that the frame rate and duration are correctly recognized for accurate annotations. To convert any video to this format, you can use FFmpeg. For example, the following command converts an input video to MP4 with H.264 video, AAC audio, and a constant frame rate of 30 fps:
+ * Converting your videos to this recommended format will help ensure that they play smoothly in Label Studio and that the frame rate and duration are correctly recognized for accurate annotations. To convert any video to this format, you can use FFmpeg. For example, the following commands convert an input video to MP4 with H.264 video, AAC audio, and a constant frame rate of 30 fps:
  *
  * ```bash
- * ffmpeg -i input_video.mp4 -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p -r 30 -c:a aac -b:a 128k output_video.mp4
+ * # Extract the exact video stream duration in seconds
+ * DUR=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of default=nokey=1:noprint_wrappers=1 input.mp4)
+ * # Re-encode media file to recommended format
+ * ffmpeg -i input_video.mp4 -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p -r 30 -c:a aac -b:a 128k -to $DUR output_video.mp4
  * ```
  *
  * In this command:
@@ -31,6 +35,7 @@ import ObjectBase from "../Base";
  * - `-pix_fmt yuv420p` ensures the pixel format is compatible with most browsers.
  * - `-r 30` forces a constant frame rate of 30 fps. You can also omit the -r option, ffmpeg will save your current frame rate. This is fine if you are 100% certain that your video has a constant frame rate.
  * - `-c:a aac -b:a 128k` encodes the audio in AAC at 128 kbps.
+ * - `-to` stops writing output as soon as the container clock hits your video’s end timestamp, so any extra audio tail is automatically dropped.
  * - `output_video.mp4` is the converted video file ready for use in Label Studio.
  *
  * Using this FFmpeg command to re-encode your videos will help eliminate playback issues and ensure that Label Studio detects the total video duration  accurately, providing a smooth annotation experience.
@@ -135,7 +140,7 @@ const Model = types
       // normalize framerate — should be string with number of frames per second
       const framerate = Number(parseValue(self.framerate, self.store.task?.dataObj));
 
-      if (!framerate || isNaN(framerate)) self.framerate = "24";
+      if (!framerate || Number.isNaN(framerate)) self.framerate = "24";
       else if (framerate < 1) self.framerate = String(1 / framerate);
       else self.framerate = String(framerate);
     },
@@ -173,9 +178,9 @@ const Model = types
     ////// Incoming
 
     registerSyncHandlers() {
-      ["play", "pause", "seek"].forEach((event) => {
+      for (const event of ["play", "pause", "seek"]) {
         self.syncHandlers.set(event, self.handleSync);
-      });
+      }
       self.syncHandlers.set("speed", self.handleSyncSpeed);
     },
 
@@ -197,8 +202,10 @@ const Model = types
       video.currentTime = data.time;
     },
 
-    handleSyncSpeed({ speed }) {
-      self.speed = speed;
+    handleSyncSpeed(data) {
+      if (isDefined(data.speed)) {
+        self.speed = data.speed;
+      }
     },
 
     handleSeek() {
@@ -253,9 +260,9 @@ const Model = types
         const area = self.annotation.createResult({ sequence }, {}, control, self);
 
         // add labels
-        self.activeStates().forEach((tag) => {
+        for (const tag of self.activeStates()) {
           area.setValue(tag);
-        });
+        }
 
         return area;
       },
@@ -297,6 +304,9 @@ const Model = types
        * @returns {Object} created region
        */
       startDrawing({ frame, region: id }) {
+        // don't create or edit regions in read-only mode
+        if (self.annotation.isReadOnly()) return null;
+
         if (id) {
           const region = self.annotation.regions.find((r) => r.cleanId === id);
           const range = region?.ranges?.[0];

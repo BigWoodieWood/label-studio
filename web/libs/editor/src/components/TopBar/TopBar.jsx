@@ -1,8 +1,8 @@
 import { observer } from "mobx-react";
 
-import { Button } from "../../common/Button/Button";
 import { IconViewAll, IconPlus } from "@humansignal/icons";
-import { Tooltip } from "@humansignal/ui";
+import { Button } from "@humansignal/ui";
+import { ff } from "@humansignal/core";
 import { Block, Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import { FF_BULK_ANNOTATION, FF_DEV_3873, isFF } from "../../utils/feature-flags";
@@ -31,47 +31,39 @@ export const TopBar = observer(({ store }) => {
         <Elem name="group">
           <CurrentTask store={store} />
           {store.hasInterface("annotations:view-all") && (
-            <Tooltip title="Compare all annotations">
-              <Button
-                className={"topbar__button"}
-                icon={<IconViewAll width={20} height={20} />}
-                type={isViewAll ? undefined : "text"}
-                aria-label="Compare all annotations"
-                onClick={annotationStore.toggleViewingAllAnnotations}
-                primary={isViewAll}
-                size="medium"
-                style={{
-                  height: 28,
-                  width: 28,
-                  padding: 0,
-                  marginRight: "var(--spacing-tight, 8px)",
-                }}
-              />
-            </Tooltip>
+            <Button
+              className={"topbar__button"}
+              type={isViewAll ? undefined : "string"}
+              aria-label="Compare all annotations"
+              onClick={annotationStore.toggleViewingAllAnnotations}
+              variant={isViewAll ? "primary" : "neutral"}
+              look={isViewAll ? "filled" : "string"}
+              tooltip="Compare all annotations"
+              size="small"
+            >
+              <IconViewAll />
+            </Button>
           )}
           {store.hasInterface("annotations:add-new") && (
-            <Tooltip title="Create a new annotation" style={{ "--offset-x": "11px" }}>
-              <Button
-                icon={<IconPlus />}
-                className={"topbar__button"}
-                type={isViewAll ? undefined : "text"}
-                aria-label="Create an annotation"
-                onClick={(event) => {
-                  event.preventDefault();
-                  const created = store.annotationStore.createAnnotation();
+            <Button
+              className={"topbar__button"}
+              type={isViewAll ? undefined : "text"}
+              aria-label="Create an annotation"
+              variant="neutral"
+              size="small"
+              look="string"
+              tooltip="Create a new annotation"
+              onClick={(event) => {
+                event.preventDefault();
+                const created = store.annotationStore.createAnnotation();
 
-                  store.annotationStore.selectAnnotation(created.id);
-                }}
-                style={{
-                  height: 28,
-                  width: 28,
-                  padding: 0,
-                  marginRight: "var(--spacing-tight, 8px)",
-                }}
-              />
-            </Tooltip>
+                store.annotationStore.selectAnnotation(created.id);
+              }}
+            >
+              <IconPlus />
+            </Button>
           )}
-          {!isViewAll && (
+          {(!isViewAll || ff.isActive(ff.FF_SUMMARY)) && (
             <AnnotationsCarousel
               store={store}
               annotationStore={store.annotationStore}

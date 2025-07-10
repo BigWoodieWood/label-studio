@@ -39,6 +39,12 @@ const SettingsModel = types
 
     bottomSidePanel: types.optional(types.boolean, false),
 
+    forceBottomPanel: types.optional(types.boolean, false),
+
+    collapsibleBottomPanel: types.optional(types.boolean, false),
+
+    defaultCollapsedBottomPanel: types.optional(types.boolean, false),
+
     sidePanelMode: types.optional(
       types.enumeration([SIDEPANEL_MODE_REGIONS, SIDEPANEL_MODE_LABELS]),
       SIDEPANEL_MODE_REGIONS,
@@ -64,6 +70,10 @@ const SettingsModel = types
     videoHopSize: types.optional(types.number, 10),
 
     isDestroying: types.optional(types.boolean, false),
+
+    videoDrawOutside: types.optional(types.boolean, false),
+
+    invertedZoom: types.optional(types.boolean, false),
   })
   .views((self) => ({
     get annotation() {
@@ -71,6 +81,9 @@ const SettingsModel = types
     },
     get displayLabelsByDefault() {
       return self.sidePanelMode === SIDEPANEL_MODE_LABELS;
+    },
+    get effectiveBottomSidePanel() {
+      return self.forceBottomPanel ? true : self.bottomSidePanel;
     },
   }))
   .actions((self) => ({
@@ -192,6 +205,7 @@ const SettingsModel = types
     },
 
     toggleBottomSP() {
+      if (self.forceBottomPanel) return;
       self.bottomSidePanel = !self.bottomSidePanel;
     },
 
@@ -219,12 +233,24 @@ const SettingsModel = types
       self.enableSmoothing = value;
     },
 
+    toggleInvertedZoom() {
+      self.invertedZoom = !self.invertedZoom;
+    },
+
+    setInvertedZoom(value) {
+      self.invertedZoom = value;
+    },
+
     setVideoHopSize(value) {
       self.videoHopSize = value;
     },
 
     setProperty(name, value) {
       self[name] = value;
+    },
+
+    toggleProperty(name) {
+      self[name] = !self[name];
     },
   }));
 

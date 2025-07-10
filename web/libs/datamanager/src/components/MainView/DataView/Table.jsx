@@ -15,7 +15,7 @@ import { IconQuestionOutline } from "@humansignal/icons";
 import { GridView } from "../GridView/GridView";
 import { ScatterView } from "../ScatterView/ScatterView";
 import "./Table.scss";
-import { Button } from "../../Common/Button/Button";
+import { Button } from "@humansignal/ui";
 import { useState } from "react";
 import { useEffect } from "react";
 
@@ -169,6 +169,8 @@ export const DataView = injector(
               </Elem>
               <Elem name="text">Press the button below to see any synced records</Elem>
               <Button
+                size="small"
+                look="outlined"
                 onClick={async () => {
                   await store.fetchProject({ force: true, interaction: "refresh" });
                   await store.currentView?.reload();
@@ -194,7 +196,7 @@ export const DataView = injector(
               </Elem>
               {!hasData && !!store.interfaces.get("import") && (
                 <Elem name="navigation">
-                  <ImportButton look="primary" href="./import">
+                  <ImportButton variant="primary" look="filled" href="./import">
                     Go to import
                   </ImportButton>
                 </Elem>

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useCopyText } from "@humansignal/core/lib/hooks/useCopyText";
 import styles from "./PersonalJWTToken.module.scss";
+import { Button } from "@humansignal/ui";
 
 /**
  * FIXME: This is legacy imports. We're not supposed to use such statements
@@ -14,7 +15,6 @@ import styles from "./PersonalJWTToken.module.scss";
  */
 import { API } from "apps/labelstudio/src/providers/ApiProvider";
 import { modal, confirm } from "apps/labelstudio/src/components/Modal/Modal";
-import { Button } from "apps/labelstudio/src/components/Button/Button";
 import { Input, Label } from "apps/labelstudio/src/components/Form/Elements";
 import { Tooltip } from "@humansignal/ui";
 
@@ -100,6 +100,7 @@ export function PersonalJWTToken() {
   const tokens = useAtomValue(tokensListAtom);
   const revokeToken = useAtomValue(revokeTokenAtom);
   const createToken = useAtomValue(refreshTokenAtom);
+  const queryClient = useAtomValue(queryClientAtom);
 
   const tokensListClassName = clsx({
     [styles.tokensList]: tokens.data && tokens.data.length,
@@ -113,7 +114,7 @@ export function PersonalJWTToken() {
           window?.APP_SETTINGS?.app_name || "Label Studio"
         }`,
         okText: "Revoke",
-        buttonLook: "danger",
+        buttonLook: "negative",
         onOk: async () => {
           await revokeToken.mutateAsync({ token });
         },
@@ -135,7 +136,10 @@ export function PersonalJWTToken() {
       style: { width: 680 },
       body: CreateTokenForm,
       closeOnClickOutside: false,
-      onHidden: () => setDialogOpened(false),
+      onHidden: () => {
+        setDialogOpened(false);
+        queryClient.invalidateQueries({ queryKey: ACCESS_TOKENS_QUERY_KEY });
+      },
     });
   }
 
@@ -159,7 +163,7 @@ export function PersonalJWTToken() {
                       </div>
                       <div className={styles.tokenString}>{token.token}</div>
                     </div>
-                    <Button look="destructive" onClick={() => revoke(token.token)}>
+                    <Button variant="negative" look="outlined" onClick={() => revoke(token.token)}>
                       Revoke
                     </Button>
                   </div>
@@ -173,7 +177,12 @@ export function PersonalJWTToken() {
       </div>
       <Tooltip title="You can only have one active token" disabled={!disallowAddingTokens}>
         <div style={{ width: "max-content" }}>
-          <Button disabled={disallowAddingTokens || dialogOpened} onClick={openDialog}>
+          <Button
+            disabled={disallowAddingTokens || dialogOpened}
+            variant="neutral"
+            look="outlined"
+            onClick={openDialog}
+          >
             Create New Token
           </Button>
         </div>
@@ -202,7 +211,7 @@ function CreateTokenForm() {
           readOnly
           value={data}
         />
-        <Button onClick={copy} disabled={copied}>
+        <Button onClick={copy} disabled={copied} variant="neutral" look="outlined">
           {copied ? "Copied!" : "Copy"}
         </Button>
       </div>

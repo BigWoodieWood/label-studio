@@ -1,5 +1,6 @@
 import { useCallback, useContext } from "react";
-import { Button, Columns } from "../../../components";
+import { Columns } from "../../../components";
+import { Button } from "@humansignal/ui";
 import { confirm, modal } from "../../../components/Modal/Modal";
 import { Spinner } from "../../../components/Spinner/Spinner";
 import { ApiContext } from "../../../providers/ApiProvider";
@@ -54,9 +55,15 @@ export const StorageSet = ({ title, target, rootClass, buttonLabel }) => {
         ),
         footer: (
           <>
-            Save completed annotations to Amazon S3, Google Cloud, Microsoft Azure, or Redis.
-            <br />
-            <a href="https://labelstud.io/guide/storage.html">See more in the documentation</a>.
+            <a
+              href="https://labelstud.io/guide/storage.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Learn more (Open in new tab)"
+            >
+              Learn more
+            </a>{" "}
+            about importing data and saving annotations to Cloud Storage.
           </>
         ),
       });
@@ -96,7 +103,7 @@ export const StorageSet = ({ title, target, rootClass, buttonLabel }) => {
   return (
     <Columns.Column title={title}>
       <div className={rootClass.elem("controls")}>
-        <Button onClick={() => showStorageFormModal()} disabled={loading}>
+        <Button onClick={() => showStorageFormModal()} disabled={loading} look="outlined" aria-label="Add storage">
           {buttonLabel}
         </Button>
       </div>

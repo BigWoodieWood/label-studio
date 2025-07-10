@@ -1,10 +1,21 @@
 import { format } from "date-fns/esm";
-import { Button } from "../../../components";
+import { Button, CodeBlock, IconFileCopy, Space, Tooltip } from "@humansignal/ui";
 import { DescriptionList } from "../../../components/DescriptionList/DescriptionList";
-import { Tooltip } from "@humansignal/ui";
 import { modal } from "../../../components/Modal/Modal";
 import { Oneof } from "../../../components/Oneof/Oneof";
 import { getLastTraceback } from "../../../utils/helpers";
+import { useCopyText } from "@humansignal/core/lib/hooks/useCopyText";
+
+// Component to handle copy functionality within the modal
+const CopyButton = ({ msg }) => {
+  const [copyText, copied] = useCopyText(msg);
+
+  return (
+    <Button variant="neutral" icon={<IconFileCopy />} onClick={copyText} disabled={copied} className="w-[7rem]">
+      {copied ? "Copied!" : "Copy"}
+    </Button>
+  );
+};
 
 export const StorageSummary = ({ target, storage, className, storageTypes = [] }) => {
   const storageStatus = storage.status.replace(/_/g, " ").replace(/(^\w)/, (match) => match.toUpperCase());
@@ -21,9 +32,10 @@ export const StorageSummary = ({ target, storage, className, storageTypes = [] }
 
   // help text for tasks and annotations
   const tasks_added_help = `${last_sync_count} new tasks added during the last sync.`;
-  const tasks_total_help = `${tasks_existed} tasks that have been found and already synced will not be added to the project again.\n${
-    tasks_existed + last_sync_count
-  } tasks have been added in total for this storage.`;
+  const tasks_total_help = [
+    `${tasks_existed} tasks that have been found and already synced will not be added to the project again.`,
+    `${tasks_existed + last_sync_count} tasks have been added in total for this storage.`,
+  ].join("\n");
   const annotations_help = `${last_sync_count} annotations successfully saved during the last sync.`;
   const total_annotations_help =
     typeof storage.meta?.total_annotations !== "undefined"
@@ -37,39 +49,33 @@ export const StorageSummary = ({ target, storage, className, storageTypes = [] }
       `${getLastTraceback(storage.traceback)}\n\n` +
       `meta = ${JSON.stringify(storage.meta)}\n`;
 
-    modal({
-      title: "Storage error logs",
-      body: (
-        <>
-          <pre style={{ background: "#eee", borderRadius: 5, padding: 10 }}>{msg}</pre>
-          <Button
-            size="compact"
-            onClick={() => {
-              navigator.clipboard.writeText(msg);
-            }}
-          >
-            Copy
-          </Button>
-          {target === "export" ? (
-            <a
-              style={{ float: "right" }}
-              target="_blank"
-              href="https://labelstud.io/guide/storage.html#Target-storage-permissions"
-              rel="noreferrer"
-            >
-              Check Target Storage documentation
-            </a>
-          ) : (
-            <a
-              style={{ float: "right" }}
-              target="_blank"
-              href="https://labelstud.io/guide/storage.html#Source-storage-permissions"
-              rel="noreferrer"
-            >
-              Check Source Storage documentation
-            </a>
+    const currentModal = modal({
+      title: "Storage Sync Error Log",
+      body: <CodeBlock code={msg} variant="negative" className="max-h-[50vh] overflow-y-auto" />,
+      footer: (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          {!window.APP_SETTINGS?.whitelabel_is_active && (
+            <div>
+              <>
+                <a
+                  href="https://labelstud.io/guide/storage.html#Troubleshooting"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label="Learn more about cloud storage troubleshooting"
+                >
+                  See docs
+                </a>{" "}
+                for troubleshooting tips on cloud storage connections.
+              </>
+            </div>
           )}
-        </>
+          <Space>
+            <CopyButton msg={msg} />
+            <Button variant="primary" className="w-[7rem]" onClick={() => currentModal.close()}>
+              Close
+            </Button>
+          </Space>
+        </div>
       ),
       style: { width: "700px" },
       optimize: false,
@@ -103,8 +109,11 @@ export const StorageSummary = ({ target, storage, className, storageTypes = [] }
           ].join("\n")}
         >
           {storageStatus === "Failed" ? (
-            <span style={{ cursor: "pointer", borderBottom: "1px dashed gray" }} onClick={handleButtonClick}>
-              Failed
+            <span
+              className="cursor-pointer border-b border-dashed border-negative-border-subtle text-negative-content"
+              onClick={handleButtonClick}
+            >
+              Failed (View Logs)
             </span>
           ) : (
             storageStatus

@@ -9,19 +9,16 @@ export const FF_DEV_1442 = "ff_front_dev_1442_unselect_shape_on_click_outside_08
 // User labels for Taxonomy
 export const FF_DEV_1536 = "ff_front_dev_1536_taxonomy_user_labels_150222_long";
 
-// New Audio 2.0 UI
-export const FF_DEV_1713 = "ff_front_DEV_1713_audio_ui_150222_short";
-
 export const FF_DEV_2669 = "ff_front_dev_2669_paragraph_author_filter_210622_short";
 
 // Change the rotate tool from bbox
 export const FF_DEV_2671 = "ff_front_dev_2671_anchor_rotate_bbox_010722_short";
 
 /**
- * Audio v3 - new Audio UI Library
- * @link https://app.launchdarkly.com/default/production/features/ff_front_dev_2715_audio_3_280722_short
+ * Enable audio spectrograms
+ * @link https://app.launchdarkly.com/default/production/features/fflag_feat_optic_2123_audio_spectrograms
  */
-export const FF_DEV_2715 = "ff_front_dev_2715_audio_3_280722_short";
+export const FF_AUDIO_SPECTROGRAMS = "fflag_feat_optic_2123_audio_spectrograms";
 
 export const FF_DEV_2755 = "fflag_feat_dev_2755_regions_list_grouped_by_labels_with_ordered_collapse_short";
 
@@ -185,6 +182,14 @@ export const FF_PER_FIELD_COMMENTS = "fflag_feat_all_leap_1430_per_field_comment
 export const FF_IMAGE_MEMORY_USAGE = "fflag_feat_front_optic_1479_improve_image_tag_memory_usage_short";
 
 export const FF_VIDEO_FRAME_SEEK_PRECISION = "fflag_fix_front_optic_1608_improve_video_frame_seek_precision_short";
+
+/**
+ * Allows the time series component to participate in synchronized playback with other media components (like audio and video)
+ * when the feature flag is enabled, while maintaining independent operation when the flag is disabled.
+ *
+ * @link https://app.launchdarkly.com/projects/default/flags/fflag_feat_optic_2125_timeseries_sync
+ */
+export const FF_TIMESERIES_SYNC = "fflag_feat_optic_2125_timeseries_sync";
 
 Object.assign(window, {
   APP_SETTINGS: {

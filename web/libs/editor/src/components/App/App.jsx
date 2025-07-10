@@ -24,7 +24,7 @@ import "../../tags/visual";
  * Utils and common components
  */
 import { Space } from "../../common/Space/Space";
-import { Button } from "../../common/Button/Button";
+import { Button } from "@humansignal/ui";
 import { Block, Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import {
@@ -47,7 +47,6 @@ import { ToastProvider, ToastViewport } from "@humansignal/ui/lib/toast/toast";
 import { Annotation } from "./Annotation";
 import { BottomBar } from "../BottomBar/BottomBar";
 import Debug from "../Debug";
-import Grid from "./Grid";
 import { InstructionsModal } from "../InstructionsModal/InstructionsModal";
 import { RelationsOverlay } from "../InteractiveOverlays/RelationsOverlay";
 import Segment from "../Segment/Segment";
@@ -55,6 +54,7 @@ import Settings from "../Settings/Settings";
 import { SidePanels } from "../SidePanels/SidePanels";
 import { SideTabsPanels } from "../SidePanels/TabPanels/SideTabsPanels";
 import { TopBar } from "../TopBar/TopBar";
+import { ViewAll } from "./ViewAll";
 
 /**
  * Styles
@@ -104,7 +104,12 @@ class App extends Component {
         <Result status="success" title={getEnv(this.props.store).messages.NO_NEXT_TASK} />
         <Block name="sub__result">All tasks in the queue have been completed</Block>
         {store.taskHistory.length > 0 && (
-          <Button onClick={(e) => store.prevTask(e, true)} look="outlined" style={{ margin: "16px 0" }}>
+          <Button
+            onClick={(e) => store.prevTask(e, true)}
+            variant="neutral"
+            className="mx-0 my-4"
+            aria-label="Previous task"
+          >
             Go to Previous Task
           </Button>
         )}
@@ -186,7 +191,7 @@ class App extends Component {
       sortAnnotations(entities);
     }
 
-    return <Grid store={as} annotations={entities} root={as.root} />;
+    return <ViewAll store={as} annotations={entities} root={as.root} />;
   }
 
   renderRelations(selectedStore) {
@@ -274,12 +279,12 @@ class App extends Component {
               name="wrapper"
               mod={{
                 viewAll: viewingAll,
-                bsp: settings.bottomSidePanel,
+                bsp: settings.effectiveBottomSidePanel,
                 showingBottomBar: newUIEnabled,
               }}
             >
               {newUIEnabled ? (
-                isBulkMode ? (
+                isBulkMode || !store.hasInterface("side-column") ? (
                   <>
                     {mainContent}
                     {store.hasInterface("topbar") && <BottomBar store={store} />}
@@ -296,7 +301,7 @@ class App extends Component {
                     {store.hasInterface("topbar") && <BottomBar store={store} />}
                   </SideTabsPanels>
                 )
-              ) : isBulkMode ? (
+              ) : isBulkMode || !store.hasInterface("side-column") ? (
                 mainContent
               ) : (
                 <SidePanels
