@@ -2445,7 +2445,7 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@deck.gl/core@^9.0.0":
+"@deck.gl/core@^9.1.13":
   version "9.1.13"
   resolved "https://registry.yarnpkg.com/@deck.gl/core/-/core-9.1.13.tgz#41e696d1ebadf7cc537e48b1a4f1b10568231633"
   integrity sha512-c15DpwUEvDjmt3+/azSjcfhVQ5L5HiIj6LJob1KAwQOnB5zgVdKWukN/21ELQ7ekppEkfT0x4byRv5k4QVocqQ==
@@ -2468,7 +2468,7 @@
     gl-matrix "^3.0.0"
     mjolnir.js "^3.0.0"
 
-"@deck.gl/layers@^9.0.0":
+"@deck.gl/layers@^9.1.13":
   version "9.1.13"
   resolved "https://registry.yarnpkg.com/@deck.gl/layers/-/layers-9.1.13.tgz#44a48b5deeb6be711223d3a37750777a01ee6f20"
   integrity sha512-2eD2uARmObtCXrc1Q051fqy+LS2w6a700qPerqtqz+J/bOWTHSEZxAdIoHawDU7g+fi4/1lti0m8bdp2X/kZLA==
@@ -2482,10 +2482,17 @@
     "@math.gl/web-mercator" "^4.1.0"
     earcut "^2.2.4"
 
-"@deck.gl/react@^9.0.0":
+"@deck.gl/react@^9.1.13":
   version "9.1.13"
   resolved "https://registry.yarnpkg.com/@deck.gl/react/-/react-9.1.13.tgz#b0f9101a5aabdc1944d7d034170de20cf00c0cc4"
   integrity sha512-9tu5roGzvy4plLvUVUxDpEy3KHDxpAEBRdM/qC06Ijognfl/A9bECdQt4cqqGflkvg6VzQaw2Cy7eIRvzhXJbA==
+
+"@deck.gl/widgets@^9.1.13":
+  version "9.1.13"
+  resolved "https://registry.yarnpkg.com/@deck.gl/widgets/-/widgets-9.1.13.tgz#8ea5f89d1e8bd5a5c30ad68dd8716ae4dc5b1c80"
+  integrity sha512-6nriLKNzXovWrm4Lj9MAdYf2W9/bSwJ1Rlq4jc8WvrOr1wtIJ7j6NdHlfGUs2Vv1PLt72M0jSqMwHQQevLvsqQ==
+  dependencies:
+    preact "^10.17.0"
 
 "@discoveryjs/json-ext@^0.5.0":
   version "0.5.7"
@@ -15297,6 +15304,11 @@ postcss@^8.4.23, postcss@^8.4.38:
     nanoid "^3.3.11"
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
+
+preact@^10.17.0:
+  version "10.26.9"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-10.26.9.tgz#b3898d1b65140640799062ad73b89846c293b6a7"
+  integrity sha512-SSjF9vcnF27mJK1XyFMNJzFd5u3pQiATFqoaDy03XuN00u4ziveVVEGt5RKJrDR8MHE/wJo9Nnad56RLzS2RMA==
 
 pretty-bytes@^5.6.0:
   version "5.6.0"

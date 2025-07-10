@@ -45,7 +45,7 @@ export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
     <Block name="scatter-settings">
       <Button
         type="button"
-        leading={<IconSettings />}
+        leading={<IconSettings className="text-gray-600 dark:text-gray-300" />}
         onClick={handleOpenDialog}
         aria-label="Scatter view settings"
       />
