@@ -386,7 +386,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(({ data = [], view, on
     return (
       <Block name="scatter-view" elem="no-data" mod={{ empty: true }}>
         <Block className="scatter-view__message">
-          <IconCloseCircleOutline className="scatter-view__message-icon text-gray-500 dark:text-gray-400" />
+          <IconCloseCircleOutline className="scatter-view__message-icon" />
           <h3>{data.length === 0 ? "No tasks found" : "No point coordinates available"}</h3>
           <p>
             {data.length === 0
@@ -415,7 +415,7 @@ export const ScatterView: FC<ScatterViewProps> = observer(({ data = [], view, on
           onSettingsChange={handleSettingsChange}
           availableFields={availableFields}
         />
-        <Button leading={<IconRefresh className="text-gray-600 dark:text-gray-300" />} onClick={reload} waiting={baseLoading} size="small"></Button>
+        <Button leading={<IconRefresh />} onClick={reload} waiting={baseLoading} size="small" />
       </Block>
 
       <DeckGL

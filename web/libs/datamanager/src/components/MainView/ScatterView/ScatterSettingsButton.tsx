@@ -4,7 +4,6 @@ import { ScatterSettingsDialog } from "./ScatterSettingsDialog";
 import { Block } from "../../../utils/bem";
 import { Button } from "@humansignal/ui";
 
-
 interface ScatterSettings {
   classField: string;
 }
@@ -43,12 +42,7 @@ export const ScatterSettingsButton: FC<ScatterSettingsButtonProps> = ({
 
   return (
     <Block name="scatter-settings">
-      <Button
-        type="button"
-        leading={<IconSettings className="text-gray-600 dark:text-gray-300" />}
-        onClick={handleOpenDialog}
-        aria-label="Scatter view settings"
-      />
+      <Button type="button" leading={<IconSettings />} onClick={handleOpenDialog} aria-label="Scatter view settings" />
 
       {showDialog && (
         <ScatterSettingsDialog
