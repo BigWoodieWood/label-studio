@@ -138,7 +138,14 @@ Scenario(
       CLOUD.rgbArray,
       "Undone lower left should not have magic wand cloud class anymore",
     );
-    await assertMagicWandPixel(I, 260, 50, false, CLOUD.rgbArray, "Upper left should still have magic wand cloud class");
+    await assertMagicWandPixel(
+      I,
+      260,
+      50,
+      false,
+      CLOUD.rgbArray,
+      "Upper left should still have magic wand cloud class",
+    );
     AtOutliner.seeRegions(0);
 
     I.say("Redoing last cloud magic wand and ensuring it worked correctly");

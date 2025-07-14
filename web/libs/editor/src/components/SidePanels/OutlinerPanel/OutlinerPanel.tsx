@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
-import { type FC, useCallback, useEffect, useMemo, useState } from "react";
+import { type FC, useCallback, useMemo } from "react";
 import { Block, Elem } from "../../../utils/bem";
-import { PanelBase, type PanelProps } from "../PanelBase";
+import type { PanelProps } from "../PanelBase";
 import { OutlinerTree } from "./OutlinerTree";
 import { ViewControls } from "./ViewControls";
 import "./OutlinerPanel.scss";

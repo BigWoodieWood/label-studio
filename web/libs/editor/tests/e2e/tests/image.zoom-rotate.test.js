@@ -288,7 +288,7 @@ Data(layoutVariations).Scenario(
   "Rotation in the two columns template",
   async ({ I, LabelStudio, AtImageView, AtOutliner, AtSettings, AtPanels, current }) => {
     I.amOnPage("/");
-    let isVerticalLayout = false;
+    const isVerticalLayout = false;
 
     const { config, inline, reversed } = current;
 

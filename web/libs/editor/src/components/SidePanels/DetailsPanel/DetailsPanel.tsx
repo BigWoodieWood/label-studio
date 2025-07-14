@@ -3,7 +3,6 @@ import type { FC } from "react";
 import { Block, Elem } from "../../../utils/bem";
 import { Comments as CommentsComponent } from "../../Comments/Comments";
 import { AnnotationHistory } from "../../CurrentEntity/AnnotationHistory";
-import { PanelBase, type PanelProps } from "../PanelBase";
 import "./DetailsPanel.scss";
 import { RegionDetailsMain, RegionDetailsMeta } from "./RegionDetails";
 import { RegionItem } from "./RegionItem";

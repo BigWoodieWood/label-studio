@@ -196,13 +196,7 @@ const Grouping = <T extends string>({
 
   return (
     <Dropdown.Trigger content={dropdownContent} style={{ width: 200 }}>
-      <Button
-        variant="neutral"
-        size="smaller"
-        data-testid={`grouping-${value}`}
-        look="string"
-        trailing={extraIcon}
-      >
+      <Button variant="neutral" size="smaller" data-testid={`grouping-${value}`} look="string" trailing={extraIcon}>
         {readableValue.selectedLabel}
       </Button>
     </Dropdown.Trigger>
