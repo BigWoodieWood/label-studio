@@ -300,7 +300,6 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
 
     def get_retrieve_serializer_context(self, request):
         fields = ['drafts', 'predictions', 'annotations']
-
         return {
             'resolve_uri': True,
             'predictions': 'predictions' in fields,
