@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
-import { Button } from "../../common/Button/Button";
+import { Button, IconChevronLeft, IconChevronRight } from "@humansignal/ui";
 import { Block, Elem } from "../../utils/bem";
 import { FF_DEV_4174, FF_LEAP_1173, FF_TASK_COUNT_FIX, isFF } from "../../utils/feature-flags";
 import { guidGenerator } from "../../utils/unique";
@@ -79,29 +79,28 @@ export const CurrentTask = observer(({ store }) => {
         </Elem>
         {historyEnabled && (
           <Elem name="history-controls">
-            <Elem
-              tag={Button}
-              name="prevnext"
-              mod={{ prev: true, disabled: !store.canGoPrevTask }}
-              type="link"
+            <Button
+              data-testid="prev-task"
+              aria-label="Previous task"
+              look="string"
               disabled={!historyEnabled || !store.canGoPrevTask}
               onClick={store.prevTask}
               style={{ backgroundColor: "none" }}
-            />
-            <Elem
-              tag={Button}
-              name="prevnext"
+              variant="neutral"
+            >
+              <IconChevronLeft />
+            </Button>
+            <Button
               data-testid="next-task"
-              mod={{
-                next: true,
-                disabled: !store.canGoNextTask && !canPostpone,
-                postpone: !store.canGoNextTask && canPostpone,
-              }}
-              type="link"
+              aria-label="Next task"
+              look="string"
               disabled={!store.canGoNextTask && !canPostpone}
               onClick={store.canGoNextTask ? store.nextTask : store.postponeTask}
               style={{ backgroundColor: "none" }}
-            />
+              variant={!store.canGoNextTask && canPostpone ? "primary" : "neutral"}
+            >
+              <IconChevronRight />
+            </Button>
           </Elem>
         )}
       </Block>

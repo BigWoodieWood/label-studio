@@ -50,7 +50,7 @@ export const Relations = {
     this.hiddenRelations.should("have.length", count);
   },
   toggleCreation() {
-    cy.get(".lsf-region-actions__group_align_left > :nth-child(1) > .lsf-button__icon").click();
+    cy.get('button[aria-label="Create Relation"]').click();
   },
   toggleCreationWithHotkey() {
     // hotkey is alt + r

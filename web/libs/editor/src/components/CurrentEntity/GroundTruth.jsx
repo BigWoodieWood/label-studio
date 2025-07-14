@@ -1,7 +1,6 @@
 import { observer } from "mobx-react";
-import { Button } from "../../common/Button/Button";
 import { IconStar, IconStarOutline } from "@humansignal/icons";
-import { Tooltip } from "@humansignal/ui";
+import { Button, Tooltip } from "@humansignal/ui";
 import { BemWithSpecifiContext } from "../../utils/bem";
 import "./GroundTruth.scss";
 
@@ -16,11 +15,10 @@ export const GroundTruth = observer(({ entity, disabled = false, size = "md" }) 
     entity.type !== "prediction" && (
       <Block name="ground-truth" mod={{ disabled, size }}>
         <Tooltip alignment="top-left" title={title}>
-          <Elem
-            tag={Button}
-            name="toggle"
+          <Button
             size="small"
-            type="link"
+            look="string"
+            className="!p-0"
             onClick={(ev) => {
               ev.preventDefault();
               entity.setGroundTruth(!entity.ground_truth);
@@ -31,7 +29,7 @@ export const GroundTruth = observer(({ entity, disabled = false, size = "md" }) 
               tag={!entity.ground_truth ? IconStarOutline : IconStar}
               mod={{ active: entity.ground_truth, dark: true }}
             />
-          </Elem>
+          </Button>
         </Tooltip>
       </Block>
     )

@@ -10,7 +10,7 @@ import {
   IconBoundingBox,
   IconPredictions,
 } from "@humansignal/icons";
-import { Button } from "../../../common/Button/Button";
+import { Button } from "@humansignal/ui";
 import { Dropdown } from "../../../common/Dropdown/Dropdown";
 // eslint-disable-next-line
 // @ts-ignore
@@ -194,18 +194,14 @@ const Grouping = <T extends string>({
     );
   }, [value, optionsList, readableValue, direction, onChange]);
 
-  const style = { padding: "0 12px 0 2px" };
-
   return (
     <Dropdown.Trigger content={dropdownContent} style={{ width: 200 }}>
       <Button
-        type="text"
+        variant="neutral"
+        size="smaller"
         data-testid={`grouping-${value}`}
-        icon={readableValue.icon}
-        style={style}
-        extra={extraIcon}
-        tooltip={readableValue.tooltip || undefined}
-        tooltipTheme="dark"
+        look="string"
+        trailing={extraIcon}
       >
         {readableValue.selectedLabel}
       </Button>
@@ -264,22 +260,20 @@ const ToggleRegionsVisibilityButton = observer<FC<ToggleRegionsVisibilityButton>
   const isAllHidden = !isDisabled && regions.isAllHidden;
 
   return (
-    <Elem
-      tag={Button}
-      type="text"
+    <Button
+      variant="neutral"
+      size="smaller"
+      look="string"
       disabled={isDisabled}
       onClick={toggleRegionsVisibility}
-      mod={{ hidden: isAllHidden }}
       aria-label={isAllHidden ? "Show all regions" : "Hide all regions"}
-      icon={
-        isAllHidden ? (
-          <IconOutlinerEyeClosed width={16} height={16} />
-        ) : (
-          <IconOutlinerEyeOpened width={16} height={16} />
-        )
-      }
       tooltip={isAllHidden ? "Show all regions" : "Hide all regions"}
-      tooltipTheme="dark"
-    />
+    >
+      {isAllHidden ? (
+        <IconOutlinerEyeClosed width={16} height={16} />
+      ) : (
+        <IconOutlinerEyeOpened width={16} height={16} />
+      )}
+    </Button>
   );
 });

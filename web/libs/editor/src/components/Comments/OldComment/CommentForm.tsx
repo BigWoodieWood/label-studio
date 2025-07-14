@@ -5,6 +5,7 @@ import { IconSend } from "@humansignal/icons";
 import "./CommentForm.scss";
 import { TextArea } from "../../../common/TextArea/TextArea";
 import { observer } from "mobx-react";
+import { Button } from "@humansignal/ui";
 
 export type CommentFormProps = {
   commentStore: any;
@@ -79,9 +80,9 @@ export const CommentForm: FC<CommentFormProps> = observer(
           onBlur={clearTooltipMessage}
         />
         <Elem tag="div" name="primary-action">
-          <button type="submit">
+          <Button type="submit" aria-label="Submit comment" variant="neutral" look="string">
             <IconSend />
-          </button>
+          </Button>
         </Elem>
         {commentStore.tooltipMessage && <Elem name="tooltipMessage">{commentStore.tooltipMessage}</Elem>}
       </Block>
