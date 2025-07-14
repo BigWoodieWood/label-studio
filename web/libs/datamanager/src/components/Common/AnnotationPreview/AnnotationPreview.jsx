@@ -89,7 +89,7 @@ class PreviewGenerator {
 
     try {
       return this.lsf.annotationStore.selected.generatePreviews();
-    } catch (err) {
+    } catch (_err) {
       await wait(1000);
       return this.createPreviews(attempts - 1);
     }

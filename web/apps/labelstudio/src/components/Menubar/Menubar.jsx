@@ -15,7 +15,6 @@ import {
 } from "@humansignal/icons";
 import { LSLogo } from "../../assets/images";
 import { Button, Userpic, ThemeToggle } from "@humansignal/ui";
-import { useConfig } from "../../providers/ConfigProvider";
 import { useContextComponent, useFixedLocation } from "../../providers/RoutesProvider";
 import { useCurrentUser } from "../../providers/CurrentUser";
 import { cn } from "../../utils/bem";
@@ -28,9 +27,8 @@ import { VersionNotifier, VersionProvider } from "../VersionNotifier/VersionNoti
 import "./Menubar.scss";
 import "./MenuContent.scss";
 import "./MenuSidebar.scss";
-import { FF_HOMEPAGE } from "../../utils/feature-flags";
+import { FF_HOMEPAGE, isFF } from "../../utils/feature-flags";
 import { pages } from "@humansignal/app-common";
-import { isFF } from "../../utils/feature-flags";
 import { ff } from "@humansignal/core";
 import { openHotkeyHelp } from "@humansignal/app-common/pages/AccountSettings/sections/Hotkeys/Help";
 
@@ -57,10 +55,9 @@ const RightContextMenu = ({ className, ...props }) => {
 export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSidebarToggle, onSidebarPin }) => {
   const menuDropdownRef = useRef();
   const useMenuRef = useRef();
-  const { user, fetch, isInProgress } = useCurrentUser();
+  const { user, isInProgress } = useCurrentUser();
   const location = useFixedLocation();
 
-  const config = useConfig();
   const [sidebarOpened, setSidebarOpened] = useState(defaultOpened ?? false);
   const [sidebarPinned, setSidebarPinned] = useState(defaultPinned ?? false);
   const [PageContext, setPageContext] = useState({

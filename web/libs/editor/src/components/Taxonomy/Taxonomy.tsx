@@ -220,8 +220,6 @@ const Item: React.FC<RowProps> = ({ style, item, dimensionCallback, maxWidth, is
   const isAddingItem = name === "" && onAddLabel;
 
   const itemContainer = useRef<any>();
-  const scrollSpace = maxWidth - itemContainer.current?.parentElement.offsetWidth || 0;
-  const labelMaxWidth = maxWidth - padding - scrollSpace - 90;
 
   useEffect(() => {
     const container = itemContainer?.current;
