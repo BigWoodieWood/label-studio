@@ -41,11 +41,11 @@ module.exports = {
     I.click(`[aria-label="${label}"]`, this._topbarLocator);
   },
   clickDeleteAnnotation() {
-    I.click(".lsf-annotation-button__trigger");
+    I.click(locate(".lsf-annotation-button__trigger"));
     I.wait(1);
     I.click(locate("div").withText("Delete Annotation"));
     I.wait(1);
-    I.click(locate(".lsf-button").withText("Delete"));
+    I.click(locate('[aria-label="Confirm"]'));
   },
   click(locator) {
     I.click(this.locate(locator));
