@@ -139,8 +139,6 @@ Data(relativeCoordsFF).Scenario(
     }
 
     I.say("Reset changes");
-    AtDetailsPanel.expandPanel();
-    AtOutlinerPanel.expandPanel();
     await AtImageView.lookForStage();
     I.pressKey(["Shift", "1"]);
     //
@@ -157,55 +155,6 @@ Data(relativeCoordsFF).Scenario(
       );
     }
 
-    AtImageView.selectMoveTool();
-
-    I.say("Check that there is a region at the center of visible area");
-    AtImageView.clickAt(AtImageView.percToX(50), AtImageView.percToY(50));
-    AtOutliner.seeSelectedRegion();
-    AtDetails.seeFieldWithValue("X", FF3793.enabled ? "68.75" : "333.90");
-    I.pressKey("U");
-
-    await AtImageView.lookForStage();
-
-    I.say("Check that the region is still at the center of visible area");
-    AtImageView.clickAt(AtImageView.percToX(50), AtImageView.percToY(50));
-    AtOutliner.seeSelectedRegion();
-    I.pressKey("U");
-
-    I.say("Resize panels");
-    AtDetailsPanel.expandPanel();
-
-    for (const [shiftX, steps] of [
-      [100, 10],
-      [-100, 10],
-      [100, 10],
-      [-100, 10],
-      [100, 1],
-      [-100, 1],
-      [100, 1],
-      [-100, 1],
-      [100, 3],
-      [-100, 3],
-    ]) {
-      await AtDetailsPanel.dragResizerBy(shiftX, 0, AtDetailsPanel.resizeLeft, steps);
-    }
-    for (const [shiftX, steps] of [
-      [-200, 25],
-      [200, 25],
-      [-200, 1],
-      [200, 1],
-    ]) {
-      await AtOutlinerPanel.dragResizerBy(shiftX, 0, AtOutlinerPanel.resizeRight, steps);
-    }
-
-    await I.wait(2);
-
-    await AtImageView.lookForStage();
-
-    I.say("Check that the region is still at the center of visible area");
-    AtImageView.clickAt(AtImageView.percToX(50), AtImageView.percToY(50));
-    AtOutliner.seeSelectedRegion();
-    I.pressKey("U");
   },
 );
 

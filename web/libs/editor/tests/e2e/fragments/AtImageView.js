@@ -45,7 +45,7 @@ module.exports = {
   },
 
   async grabStageBBox() {
-    const bbox = await I.grabElementBoundingRect(this._stageFrameSelector);
+    const bbox = await I.grabElementBoundingRect(locate("[class^='container--'],[class^='frame--']"));
 
     return bbox;
   },
