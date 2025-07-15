@@ -29,4 +29,3 @@ function generateResults(n) {
   }
   return results;
 }
-
