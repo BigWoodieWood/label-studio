@@ -93,6 +93,7 @@ Data(relativeCoordsFF).Scenario(
     I.say("Zoom into the first region");
     for (let k = 0; k < 3; k++) {
       I.click("[aria-label='zoom-in']");
+      I.waitTicks(3);
       AtImageView.drawByDrag(
         AtImageView.percToX(95),
         AtImageView.percToY(95),
@@ -105,6 +106,7 @@ Data(relativeCoordsFF).Scenario(
 
     I.say("Check that there is a region at the center of visible area");
     AtImageView.clickAt(AtImageView.percToX(50), AtImageView.percToY(50));
+    I.waitTicks(3);
     AtOutliner.seeSelectedRegion();
     // these values depend on screen size, interface elements size, etc.
     // so if they were changed slightly, just replace them with actual data.
@@ -115,6 +117,7 @@ Data(relativeCoordsFF).Scenario(
 
     I.say("Check that there is a region at the center of visible area");
     AtImageView.clickAt(AtImageView.percToX(50), AtImageView.percToY(50));
+    I.waitTicks(3);
     AtOutliner.seeSelectedRegion();
     I.pressKey("U");
 
