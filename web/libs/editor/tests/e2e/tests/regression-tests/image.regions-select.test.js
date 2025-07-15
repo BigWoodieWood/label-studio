@@ -108,7 +108,7 @@ Data(shapesTable).Scenario(
 
     I.amOnPage("/");
     LabelStudio.init(params);
-    LabelStudio.enableSetting("Select regions after creating");
+    LabelStudio.enableSetting("Select region after creating");
 
     LabelStudio.waitForObjectsReady();
     AtOutliner.seeRegions(0);

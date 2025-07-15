@@ -3,7 +3,7 @@ const { I } = inject();
 module.exports = {
   GENERAL_SETTINGS: {
     SHOW_LABELS: "Show labels inside the regions",
-    AUTO_SELECT_REGION: "Select regions after creating",
+    AUTO_SELECT_REGION: "Select region after creating",
   },
   LAYOUT_SETTINGS: {
     VERTICAL_LAYOUT: "Move sidepanel to the bottom",
