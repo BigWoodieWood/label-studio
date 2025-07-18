@@ -702,9 +702,8 @@ class ProjectReimportAPI(generics.RetrieveAPIView):
                 description='A unique integer value identifying this project.',
             ),
         ],
-        responses={204: 'Tasks deleted'},
         extensions={
-            'x-fern-sdk-group-name': 'projects',
+            'x-fern-sdk-group-name': 'tasks',
             'x-fern-sdk-method-name': 'delete_all_tasks',
             'x-fern-audiences': ['public'],
         },
