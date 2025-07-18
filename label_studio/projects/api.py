@@ -521,7 +521,10 @@ class LabelStreamHistoryAPI(generics.RetrieveAPIView):
         tags=['Projects'],
         summary='Validate label config',
         description='Validate an arbitrary labeling configuration.',
-        responses={204: 'Validation success'},
+        responses={
+            204: OpenApiResponse(description='Validation success'),
+            400: OpenApiResponse(description='Validation failed'),
+        },
         request=ProjectLabelConfigSerializer,
         extensions={
             'x-fern-audiences': ['internal'],
