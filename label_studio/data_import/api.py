@@ -220,29 +220,7 @@ task_create_response_scheme = {
         """.format(
             host=(settings.HOSTNAME or 'https://localhost:8080')
         ),
-        request={
-            'type': 'array',
-            'items': {'type': 'object'},
-            # TODO: this example doesn't work - perhaps we need to migrate to drf-spectacular for "anyOf" support
-            # also fern will change to at least provide a list of examples FER-1969
-            # right now we can only rely on documenation examples
-            # properties={
-            #     'data': openapi.Schema(type=OpenApiTypes.OBJECT, description='Data of the task'),
-            #     'annotations': openapi.Schema(
-            #         many=True,
-            #         description='Annotations for this task',
-            #     ),
-            #     'predictions': openapi.Schema(
-            #         many=True,
-            #         description='Predictions for this task',
-            #     )
-            # },
-            # example={
-            #     'data': {'image': 'http://example.com/image.jpg'},
-            #     'annotations': [annotation_response_example],
-            #     'predictions': [prediction_response_example]
-            # }
-        },
+        request=ImportApiSerializer(many=True),
         extensions={
             'x-fern-sdk-group-name': 'projects',
             'x-fern-sdk-method-name': 'import_tasks',
