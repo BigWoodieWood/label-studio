@@ -73,7 +73,7 @@ dependencies = [
     "djangorestframework-simplejwt[crypto] (>=5.4.0,<6.0.0)",
     "tldextract (>=5.1.3)",
     ## HumanSignal repo dependencies :start
-    "label-studio-sdk @ https://github.com/HumanSignal/label-studio-sdk/archive/bd5ceddce0a3bd314298013e26e892c68d72b708.zip",
+    "label-studio-sdk @ https://github.com/HumanSignal/label-studio-sdk/archive/2ff77e4514c9f0135b661f9eadd624215f647f95.zip",
     ## HumanSignal repo dependencies :end
 ]
 
