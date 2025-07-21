@@ -558,9 +558,7 @@ class LabelConfigValidateAPI(generics.CreateAPIView):
         tags=['Projects'],
         operation_id='api_projects_validate_label_config',
         summary='Validate project label config',
-        description="""
-        Determine whether the label configuration for a specific project is valid.
-        """,
+        description='Determine whether the label configuration for a specific project is valid.',
         parameters=[
             OpenApiParameter(
                 name='id',
@@ -570,6 +568,11 @@ class LabelConfigValidateAPI(generics.CreateAPIView):
             ),
         ],
         request=ProjectLabelConfigSerializer,
+        extensions={
+            'x-fern-sdk-group-name': 'projects',
+            'x-fern-sdk-method-name': 'validate_label_config',
+            'x-fern-audiences': ['public'],
+        },
     ),
 )
 class ProjectLabelConfigValidateAPI(generics.RetrieveAPIView):
