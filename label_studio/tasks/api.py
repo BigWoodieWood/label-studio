@@ -5,6 +5,7 @@ import logging
 from core.feature_flags import flag_set
 from core.mixins import GetParentObjectMixin
 from core.permissions import ViewClassPermission, all_permissions
+from core.utils.common import is_community
 from core.utils.params import bool_from_request
 from data_manager.api import TaskListAPI as DMTaskListAPI
 from data_manager.functions import evaluate_predictions
@@ -51,125 +52,129 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: fix after switch to api/tasks from api/dm/tasks
-# @method_decorator(
-#     name='post',
-#     decorator=extend_schema(
-#         tags=['Tasks'],
-#         summary='Create task',
-#         description='Create a new labeling task in Label Studio.',
-#         request={
-#             'application/json': task_request_schema,
-#         },
-#         responses={
-#             '201': OpenApiResponse(
-#                 description='Created task',
-#                 response=TaskSerializer,
-#                 examples=[OpenApiExample(name='response', value=task_response_example, media_type='application/json')],
-#             )
-#         },
-#         extensions={
-#             'x-fern-sdk-group-name': 'tasks',
-#             'x-fern-sdk-method-name': 'create',
-#             'x-fern-audiences': ['public'],
-#         },
-#     ),
-# )
-# @method_decorator(
-#     name='get',
-#     decorator=extend_schema(
-#         tags=['Tasks'],
-#         summary='Get tasks list',
-#         description="""
-#     Retrieve a list of tasks with pagination for a specific view or project, by using filters and ordering.
-#     """,
-#         parameters=[
-#             OpenApiParameter(name='view', type=OpenApiTypes.INT, location='query', description='View ID'),
-#             OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description='Project ID'),
-#             OpenApiParameter(
-#                 name='resolve_uri',
-#                 type=OpenApiTypes.BOOL,
-#                 location='query',
-#                 description='Resolve task data URIs using Cloud Storage',
-#             ),
-#             OpenApiParameter(
-#                 name='fields',
-#                 type=OpenApiTypes.STR,
-#                 enum=['all', 'task_only'],
-#                 default='task_only',
-#                 location='query',
-#                 description='Set to "all" if you want to include annotations and predictions in the response',
-#             ),
-#             OpenApiParameter(
-#                 name='review',
-#                 type=OpenApiTypes.BOOL,
-#                 location='query',
-#                 description='Get tasks for review',
-#             ),
-#             OpenApiParameter(
-#                 name='include',
-#                 type=OpenApiTypes.STR,
-#                 location='query',
-#                 description='Specify which fields to include in the response',
-#             ),
-#             OpenApiParameter(
-#                 name='query',
-#                 type=OpenApiTypes.STR,
-#                 location='query',
-#                 description='Additional query to filter tasks. It must be JSON encoded string of dict containing '
-#                 'one of the following parameters: `{"filters": ..., "selectedItems": ..., "ordering": ...}`. Check '
-#                 '[Data Manager > Create View > see `data` field](#tag/Data-Manager/operation/api_dm_views_create) '
-#                 'for more details about filters, selectedItems and ordering.\n\n'
-#                 '* **filters**: dict with `"conjunction"` string (`"or"` or `"and"`) and list of filters in `"items"` array. '
-#                 'Each filter is a dictionary with keys: `"filter"`, `"operator"`, `"type"`, `"value"`. '
-#                 '[Read more about available filters](https://labelstud.io/sdk/data_manager.html)<br/>'
-#                 '                   Example: `{"conjunction": "or", "items": [{"filter": "filter:tasks:completed_at", "operator": "greater", "type": "Datetime", "value": "2021-01-01T00:00:00.000Z"}]}`\n'
-#                 '* **selectedItems**: dictionary with keys: `"all"`, `"included"`, `"excluded"`. If "all" is `false`, `"included"` must be used. If "all" is `true`, `"excluded"` must be used.<br/>'
-#                 '                   Examples: `{"all": false, "included": [1, 2, 3]}` or `{"all": true, "excluded": [4, 5]}`\n'
-#                 '* **ordering**: list of fields to order by. Currently, ordering is supported by only one parameter. <br/>\n'
-#                 '                   Example: `["completed_at"]`',
-#             ),
-#         ],
-#         responses={
-#             '200': OpenApiResponse(
-#                 description='Tasks list',
-#                 response={
-#                     'type': 'object',
-#                     'properties': {
-#                         'tasks': {
-#                             'description': 'List of tasks',
-#                             'type': 'array',
-#                             'items': {
-#                                 'description': 'Task object',
-#                                 'type': 'object',
-#                             },
-#                         },
-#                         'total': {
-#                             'description': 'Total number of tasks',
-#                             'type': 'integer',
-#                         },
-#                         'total_annotations': {
-#                             'description': 'Total number of annotations',
-#                             'type': 'integer',
-#                         },
-#                         'total_predictions': {
-#                             'description': 'Total number of predictions',
-#                             'type': 'integer',
-#                         },
-#                     },
-#                 },
-#             )
-#         },
-#         extensions={
-#             'x-fern-sdk-group-name': 'tasks',
-#             'x-fern-sdk-method-name': 'list',
-#             'x-fern-pagination': {
-#                 'offset': '$request.page',
-#                 'results': '$response.results',
-#             },
-#             'x-fern-audiences': ['public'],
-#         },
-#     ),
-# )
+@method_decorator(
+    name='post',
+    decorator=extend_schema(
+        tags=['Tasks'],
+        summary='Create task',
+        description='Create a new labeling task in Label Studio.',
+        request={
+            'application/json': task_request_schema,
+        },
+        responses={
+            '201': OpenApiResponse(
+                description='Created task',
+                response=TaskSerializer,
+                examples=[OpenApiExample(name='response', value=task_response_example, media_type='application/json')],
+            )
+        },
+        extensions={
+            'x-fern-sdk-group-name': 'tasks',
+            'x-fern-sdk-method-name': 'create',
+            'x-fern-audiences': ['public'],
+        },
+    )
+    if is_community()
+    else lambda f: f,
+)
+@method_decorator(
+    name='get',
+    decorator=extend_schema(
+        tags=['Tasks'],
+        summary='Get tasks list',
+        description="""
+    Retrieve a list of tasks with pagination for a specific view or project, by using filters and ordering.
+    """,
+        parameters=[
+            OpenApiParameter(name='view', type=OpenApiTypes.INT, location='query', description='View ID'),
+            OpenApiParameter(name='project', type=OpenApiTypes.INT, location='query', description='Project ID'),
+            OpenApiParameter(
+                name='resolve_uri',
+                type=OpenApiTypes.BOOL,
+                location='query',
+                description='Resolve task data URIs using Cloud Storage',
+            ),
+            OpenApiParameter(
+                name='fields',
+                type=OpenApiTypes.STR,
+                enum=['all', 'task_only'],
+                default='task_only',
+                location='query',
+                description='Set to "all" if you want to include annotations and predictions in the response',
+            ),
+            OpenApiParameter(
+                name='review',
+                type=OpenApiTypes.BOOL,
+                location='query',
+                description='Get tasks for review',
+            ),
+            OpenApiParameter(
+                name='include',
+                type=OpenApiTypes.STR,
+                location='query',
+                description='Specify which fields to include in the response',
+            ),
+            OpenApiParameter(
+                name='query',
+                type=OpenApiTypes.STR,
+                location='query',
+                description='Additional query to filter tasks. It must be JSON encoded string of dict containing '
+                'one of the following parameters: `{"filters": ..., "selectedItems": ..., "ordering": ...}`. Check '
+                '[Data Manager > Create View > see `data` field](#tag/Data-Manager/operation/api_dm_views_create) '
+                'for more details about filters, selectedItems and ordering.\n\n'
+                '* **filters**: dict with `"conjunction"` string (`"or"` or `"and"`) and list of filters in `"items"` array. '
+                'Each filter is a dictionary with keys: `"filter"`, `"operator"`, `"type"`, `"value"`. '
+                '[Read more about available filters](https://labelstud.io/sdk/data_manager.html)<br/>'
+                '                   Example: `{"conjunction": "or", "items": [{"filter": "filter:tasks:completed_at", "operator": "greater", "type": "Datetime", "value": "2021-01-01T00:00:00.000Z"}]}`\n'
+                '* **selectedItems**: dictionary with keys: `"all"`, `"included"`, `"excluded"`. If "all" is `false`, `"included"` must be used. If "all" is `true`, `"excluded"` must be used.<br/>'
+                '                   Examples: `{"all": false, "included": [1, 2, 3]}` or `{"all": true, "excluded": [4, 5]}`\n'
+                '* **ordering**: list of fields to order by. Currently, ordering is supported by only one parameter. <br/>\n'
+                '                   Example: `["completed_at"]`',
+            ),
+        ],
+        responses={
+            '200': OpenApiResponse(
+                description='Tasks list',
+                response={
+                    'type': 'object',
+                    'properties': {
+                        'tasks': {
+                            'description': 'List of tasks',
+                            'type': 'array',
+                            'items': {
+                                'description': 'Task object',
+                                'type': 'object',
+                            },
+                        },
+                        'total': {
+                            'description': 'Total number of tasks',
+                            'type': 'integer',
+                        },
+                        'total_annotations': {
+                            'description': 'Total number of annotations',
+                            'type': 'integer',
+                        },
+                        'total_predictions': {
+                            'description': 'Total number of predictions',
+                            'type': 'integer',
+                        },
+                    },
+                },
+            )
+        },
+        extensions={
+            'x-fern-sdk-group-name': 'tasks',
+            'x-fern-sdk-method-name': 'list',
+            'x-fern-pagination': {
+                'offset': '$request.page',
+                'results': '$response.tasks',
+            },
+            'x-fern-audiences': ['public'],
+        },
+    )
+    if is_community()
+    else lambda f: f,
+)
 class TaskListAPI(DMTaskListAPI):
     serializer_class = TaskSerializer
     permission_required = ViewClassPermission(
