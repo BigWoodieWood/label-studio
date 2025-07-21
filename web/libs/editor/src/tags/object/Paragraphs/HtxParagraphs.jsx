@@ -2,9 +2,17 @@ import React, { Component } from "react";
 import { inject, observer } from "mobx-react";
 
 import ObjectTag from "../../../components/Tags/Object";
-import { FF_DEV_2669, FF_DEV_2918, FF_LSDV_4711, FF_LSDV_E_278, isFF } from "../../../utils/feature-flags";
+import {
+  FF_DEV_2669,
+  FF_DEV_2918,
+  FF_LSDV_4711,
+  FF_LSDV_E_278,
+  FF_NER_SELECT_ALL,
+  isFF,
+} from "../../../utils/feature-flags";
 import { findNodeAt, matchesSelector, splitBoundaries } from "../../../utils/html";
 import { isSelectionContainsSpan } from "../../../utils/selection-tools";
+import { debounce } from "../../../utils/debounce";
 import styles from "./Paragraphs.module.scss";
 import { AuthorFilter } from "./AuthorFilter";
 import { Phrases } from "./Phrases";
@@ -32,6 +40,9 @@ class HtxParagraphsView extends Component {
       canScroll: true,
       inViewport: true,
     };
+
+    // Create debounced version of annotation processing
+    this.processAnnotationDebounced = debounce(this.processAnnotation.bind(this), 300);
   }
 
   getSelectionText(sel) {
@@ -112,23 +123,44 @@ class HtxParagraphsView extends Component {
 
       if (r.endContainer.nodeType !== Node.TEXT_NODE) {
         // offsets work differently for nodes and texts, so we have to find #text.
-        // lastChild because most probably this is div of the whole paragraph,
-        // and it has author div and phrase div.
-        const el = this.getPhraseElement(r.endContainer.lastChild);
+        // Try multiple approaches to find the phrase element for robust triple-click support
+        let el = this.getPhraseElement(r.endContainer.lastChild);
+
+        if (!el) {
+          el = this.getPhraseElement(r.endContainer);
+        }
+
+        if (!el) {
+          // Look for any element with cls.text class within the range
+          const textElements = this.myRef.current.getElementsByClassName(this.props.item.layoutClasses.text);
+          for (const textEl of textElements) {
+            if (r.intersectsNode(textEl)) {
+              el = textEl;
+              break;
+            }
+          }
+        }
+
         let textNode = el;
 
-        while (textNode && textNode.nodeType !== Node.TEXT_NODE) {
-          textNode = textNode.firstChild;
+        if (el) {
+          while (textNode && textNode.nodeType !== Node.TEXT_NODE) {
+            textNode = textNode.firstChild;
+          }
         }
 
         // most probably this div is out of Paragraphs
         // @todo maybe select till the end of Paragraphs?
-        if (!textNode) continue;
+        if (!textNode) {
+          continue;
+        }
 
-        r.setEnd(textNode, 0);
+        r.setEnd(textNode, textNode.textContent.length);
       }
 
-      if (r.collapsed || /^\s*$/.test(r.toString())) continue;
+      if (r.collapsed || /^\s*$/.test(r.toString())) {
+        continue;
+      }
 
       try {
         splitBoundaries(r);
@@ -296,7 +328,156 @@ class HtxParagraphsView extends Component {
     }
   }
 
+  processAnnotation() {
+    const selection = window.getSelection();
+    if (selection.isCollapsed) return;
+
+    // Enhanced triple-click handling for better text selection with existing regions
+    if (isFF(FF_NER_SELECT_ALL)) {
+      const expandedSelection = this.expandSelectionForTripleClick(selection);
+      if (expandedSelection) {
+        // Use the expanded selection instead of the original
+        const selectedRanges = this.captureDocumentSelectionFromRange(expandedSelection);
+        if (selectedRanges.length > 0) {
+          this.createAnnotationFromRanges(selectedRanges); // Manual user selection - don't auto-select
+          return;
+        }
+      }
+    }
+
+    const selectedRanges = this.captureDocumentSelection();
+
+    if (selectedRanges.length === 0) {
+      return;
+    }
+
+    this.createAnnotationFromRanges(selectedRanges); // Manual user selection - don't auto-select
+  }
+
+  /**
+   * Detect if this looks like a triple-click and expand selection to full phrase
+   * ignoring existing region boundaries
+   */
+  expandSelectionForTripleClick(selection) {
+    if (!selection || selection.rangeCount === 0) return null;
+
+    const range = selection.getRangeAt(0);
+    const selectedText = selection.toString();
+
+    // Check if this looks like a triple-click (selection contains newline or spans multiple elements)
+    const hasNewline = selectedText.includes("\n");
+    const spanElements = range.commonAncestorContainer.querySelectorAll
+      ? range.commonAncestorContainer.querySelectorAll(".htx-highlight")
+      : [];
+
+    if (hasNewline || spanElements.length > 0) {
+      // Find the phrase element that contains the selection start
+      const startPhraseElement = this.getPhraseElement(range.startContainer);
+      if (startPhraseElement) {
+        // Create a new range that spans the entire phrase content, ignoring existing highlights
+        const expandedRange = document.createRange();
+
+        // Find first and last text nodes in the phrase
+        const walker = document.createTreeWalker(startPhraseElement, NodeFilter.SHOW_TEXT, {
+          acceptNode: (node) => {
+            // Skip empty text nodes
+            return node.textContent.trim().length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          },
+        });
+
+        const firstTextNode = walker.nextNode();
+        if (firstTextNode) {
+          let lastTextNode = firstTextNode;
+          let currentNode;
+          while ((currentNode = walker.nextNode())) {
+            lastTextNode = currentNode;
+          }
+
+          expandedRange.setStart(firstTextNode, 0);
+          expandedRange.setEnd(lastTextNode, lastTextNode.textContent.length);
+
+          console.log(`Expanded triple-click selection: "${expandedRange.toString()}"`);
+          return expandedRange;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Capture document selection from a specific range
+   */
+  captureDocumentSelectionFromRange(range) {
+    // Create a temporary selection with our expanded range
+    const tempSelection = window.getSelection();
+    tempSelection.removeAllRanges();
+    tempSelection.addRange(range);
+
+    // Use existing capture logic
+    const result = this.captureDocumentSelection();
+
+    return result;
+  }
+
+  /**
+   * Create annotation from selected ranges. If the enhanced feature is enabled,
+   * the newly created region will be automatically selected.
+   * @param {Array} selectedRanges - The ranges to create annotations from
+   */
+  createAnnotationFromRanges(selectedRanges) {
+    const item = this.props.item;
+    item._currentSpan = null;
+    let createdRegion = null;
+
+    if (isFF(FF_DEV_2918)) {
+      const htxRanges = item.addRegions(selectedRanges);
+      if (htxRanges && htxRanges.length > 0) {
+        createdRegion = htxRanges[0]; // Get the first created region
+        for (const htxRange of htxRanges) {
+          const spans = htxRange.createSpans();
+          htxRange.addEventsToSpans(spans);
+        }
+      }
+    } else {
+      createdRegion = item.addRegion(selectedRanges[0]);
+      if (createdRegion) {
+        const spans = createdRegion.createSpans();
+        createdRegion.addEventsToSpans(spans);
+      }
+    }
+
+    // Always select the newly created region if the feature flag is on.
+    // The createdRegion is based on the selectedRanges, which correctly
+    // comes from the user's manual selection if it exists.
+    if (isFF(FF_NER_SELECT_ALL) && createdRegion) {
+      setTimeout(() => {
+        item.annotation.selectArea(createdRegion);
+      }, 50);
+    }
+  }
+
   onMouseUp(ev) {
+    const selection = window.getSelection();
+
+    // The "click away to deselect" is part of the enhanced feature set.
+    // It should only be active when the feature flag is enabled.
+    if (isFF(FF_NER_SELECT_ALL)) {
+      // If the user clicks without creating a text selection, it's a clear
+      // intent to deselect any currently selected regions.
+      if (selection.isCollapsed) {
+        const target = ev.target;
+
+        // We only deselect if the click was on the container background,
+        // not on an existing annotation, which handles its own clicks.
+        if (!target.closest(this._regionSpanSelector)) {
+          this.props.item.annotation.unselectAll();
+        }
+        // In either case, a simple click shouldn't proceed to annotation creation.
+        return;
+      }
+    }
+
     const item = this.props.item;
     const states = item.activeStates();
 
@@ -307,29 +488,33 @@ class HtxParagraphsView extends Component {
       return;
     }
 
-    const selectedRanges = this.captureDocumentSelection();
-
-    if (selectedRanges.length === 0) {
-      return;
-    }
-
-    item._currentSpan = null;
-
-    if (isFF(FF_DEV_2918)) {
-      const htxRanges = item.addRegions(selectedRanges);
-
-      for (const htxRange of htxRanges) {
-        const spans = htxRange.createSpans();
-
-        htxRange.addEventsToSpans(spans);
-      }
+    if (isFF(FF_NER_SELECT_ALL)) {
+      // Enhanced behavior: use debounced processing for better UX
+      this.processAnnotationDebounced();
     } else {
-      const htxRange = item.addRegion(selectedRanges[0]);
+      // Original behavior: immediate processing
+      const selectedRanges = this.captureDocumentSelection();
 
-      if (htxRange) {
-        const spans = htxRange.createSpans();
+      if (selectedRanges.length === 0) {
+        return;
+      }
 
-        htxRange.addEventsToSpans(spans);
+      item._currentSpan = null;
+
+      if (isFF(FF_DEV_2918)) {
+        const htxRanges = item.addRegions(selectedRanges);
+
+        for (const htxRange of htxRanges) {
+          const spans = htxRange.createSpans();
+          htxRange.addEventsToSpans(spans);
+        }
+      } else {
+        const htxRange = item.addRegion(selectedRanges[0]);
+
+        if (htxRange) {
+          const spans = htxRange.createSpans();
+          htxRange.addEventsToSpans(spans);
+        }
       }
     }
   }
@@ -510,6 +695,27 @@ class HtxParagraphsView extends Component {
 
   _resizeObserver = new ResizeObserver(this._handleScrollContainerHeight);
 
+  handleSelection = () => {
+    // This entire method should be gated by the feature flag.
+    if (!isFF(FF_NER_SELECT_ALL)) return;
+
+    const item = this.props.item;
+    const selection = window.getSelection();
+
+    // We only care about mouseup events inside this component.
+    if (this.myRef.current?.contains(selection.anchorNode)) {
+      // If there's a valid, non-empty text selection, we save it.
+      // This is the proactive step to capture the user's intent.
+      if (selection && !selection.isCollapsed && selection.toString().trim().length > 0) {
+        item.setLastSelection(selection);
+      } else {
+        // Otherwise, it's a simple click inside the phrases area which deselects text.
+        // We must clear any previously saved selection.
+        item.clearLastSelection();
+      }
+    }
+  };
+
   componentDidUpdate() {
     this._handleUpdate();
   }
@@ -518,6 +724,14 @@ class HtxParagraphsView extends Component {
     if (isFF(FF_LSDV_E_278) && this.props.item.contextscroll)
       this._resizeObserver.observe(document.querySelector(this.mainContentSelector));
     this._handleUpdate();
+
+    // The event listener is always active, but the handler itself is now gated.
+    document.addEventListener("mouseup", this.handleSelection);
+
+    // Set reference to this component in the model for calling methods
+    if (isFF(FF_NER_SELECT_ALL)) {
+      this.props.item.setViewRef(this);
+    }
   }
 
   componentWillUnmount() {
@@ -525,6 +739,13 @@ class HtxParagraphsView extends Component {
 
     if (target) this._resizeObserver?.unobserve(target);
     this._resizeObserver?.disconnect();
+
+    document.removeEventListener("mouseup", this.handleSelection);
+
+    // Clean up reference
+    if (isFF(FF_NER_SELECT_ALL)) {
+      this.props.item.setViewRef(null);
+    }
   }
 
   setIsInViewPort(isInViewPort) {
@@ -615,6 +836,90 @@ class HtxParagraphsView extends Component {
         </div>
       </ObjectTag>
     );
+  }
+
+  processAnnotationFromRange(range) {
+    // When an annotation is triggered from a saved selection, this method is called.
+    const selectedRanges = this.captureDocumentSelectionFromRange(range);
+    if (selectedRanges.length > 0) {
+      this.createAnnotationFromRanges(selectedRanges);
+    }
+  }
+
+  /**
+   * Programmatically select and annotate a phrase by index
+   * @param {number} phraseIndex - The index of the phrase to select and annotate
+   */
+  selectAndAnnotatePhrase(phraseIndex) {
+    const item = this.props.item;
+    const phrases = item._value;
+
+    if (!phrases || phraseIndex < 0 || phraseIndex >= phrases.length) return;
+
+    const cls = item.layoutClasses;
+
+    // Find the phrase element by index
+    const phraseElements = this.myRef.current?.getElementsByClassName(cls.text);
+    if (!phraseElements || phraseIndex >= phraseElements.length) return;
+
+    const phraseElement = phraseElements[phraseIndex];
+    if (!phraseElement) return;
+
+    // Find the first text node in the phrase element
+    const walker = document.createTreeWalker(phraseElement, NodeFilter.SHOW_TEXT, null, false);
+
+    const firstTextNode = walker.nextNode();
+    if (!firstTextNode) return;
+
+    // Find the last text node
+    let lastTextNode = firstTextNode;
+    let currentNode;
+    while ((currentNode = walker.nextNode())) {
+      lastTextNode = currentNode;
+    }
+
+    // Create a selection range that spans the entire phrase
+    const range = document.createRange();
+    range.setStart(firstTextNode, 0);
+    range.setEnd(lastTextNode, lastTextNode.textContent.length);
+
+    // Set the selection
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    // Process the annotation using existing logic and select the created region
+    setTimeout(() => {
+      const selectedRanges = this.captureDocumentSelection();
+      if (selectedRanges.length === 0) return;
+
+      item._currentSpan = null;
+      let createdRegion = null;
+
+      if (isFF(FF_DEV_2918)) {
+        const htxRanges = item.addRegions(selectedRanges);
+        if (htxRanges && htxRanges.length > 0) {
+          createdRegion = htxRanges[0];
+          for (const htxRange of htxRanges) {
+            const spans = htxRange.createSpans();
+            htxRange.addEventsToSpans(spans);
+          }
+        }
+      } else {
+        createdRegion = item.addRegion(selectedRanges[0]);
+        if (createdRegion) {
+          const spans = createdRegion.createSpans();
+          createdRegion.addEventsToSpans(spans);
+        }
+      }
+
+      // Select the newly created region so the user can make further modifications
+      if (createdRegion) {
+        setTimeout(() => {
+          item.annotation.selectArea(createdRegion);
+        }, 50);
+      }
+    }, 10);
   }
 }
 

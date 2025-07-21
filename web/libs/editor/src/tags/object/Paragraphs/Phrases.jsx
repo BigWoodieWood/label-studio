@@ -3,7 +3,7 @@ import { getRoot } from "mobx-state-tree";
 import { Button } from "@humansignal/ui";
 import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import styles from "./Paragraphs.module.scss";
-import { FF_LSDV_E_278, isFF } from "../../../utils/feature-flags";
+import { FF_LSDV_E_278, FF_NER_SELECT_ALL, isFF } from "../../../utils/feature-flags";
 import { IconPause, IconPlay } from "@humansignal/icons";
 import { useCallback, useEffect, useState } from "react";
 
@@ -158,6 +158,15 @@ export const Phrases = observer(({ item, playingId, activeRef, setIsInViewport }
         data-testid={`phrase:${idx}`}
         className={`${classNames.join(" ")} ${isFF(FF_LSDV_E_278) && styles.newUI}`}
         style={style?.phrase}
+        // Enhanced annotation feature: clicking a phrase seeks audio to that timestamp.
+        // This functionality is only available when the enhanced annotation feature is enabled.
+        onClick={
+          isFF(FF_NER_SELECT_ALL)
+            ? () => {
+                item.seekToPhrase?.(idx);
+              }
+            : undefined
+        }
       >
         {isContentVisible && withAudio && !isNaN(v.start) && (
           <Button

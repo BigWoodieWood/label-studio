@@ -1,4 +1,5 @@
 import { createRef } from "react";
+import { reaction } from "mobx";
 import { getRoot, types } from "mobx-state-tree";
 import ColorScheme from "pleasejs";
 
@@ -9,7 +10,7 @@ import { SyncableMixin } from "../../../mixins/Syncable";
 import { ParagraphsRegionModel } from "../../../regions/ParagraphsRegion";
 import Utils from "../../../utils";
 import { parseValue } from "../../../utils/data";
-import { FF_DEV_2669, FF_DEV_2918, FF_LSDV_E_278, isFF } from "../../../utils/feature-flags";
+import { FF_DEV_2669, FF_DEV_2918, FF_LSDV_E_278, FF_NER_SELECT_ALL, isFF } from "../../../utils/feature-flags";
 import messages from "../../../utils/messages";
 import { clamp, isDefined, isValidObjectURL } from "../../../utils/utilities";
 import ObjectBase from "../Base";
@@ -190,6 +191,9 @@ const PlayableAndSyncable = types
     audioRef: createRef(),
     audioDuration: null,
     audioFrameHandler: null,
+    _viewRef: null, // Reference to HtxParagraphs component
+    _labelReactionDisposer: null, // MobX reaction disposer
+    lastSelection: null, // Proactively store the user's last valid text selection
   }))
   .views((self) => ({
     /**
@@ -403,6 +407,214 @@ const PlayableAndSyncable = types
       self.triggerSync("play");
       self.trackPlayingId();
     },
+
+    /**
+     * Seek to a specific phrase by index and select it
+     * @param {number} idx - The phrase index
+     */
+    seekToPhrase(idx) {
+      if (!isDefined(idx) || !self._value || idx < 0 || idx >= self._value.length) return;
+
+      const phrase = self._value[idx];
+      if (!isDefined(phrase.start)) return;
+
+      // If this phrase is already active, don't send seek messages (user might just be selecting text)
+      if (self.playingId === idx) {
+        return;
+      }
+
+      // Unselect regions that don't belong to the current phrase (enhanced annotation feature)
+      self.unselectRegionsNotInPhrase(idx);
+      // Unselect any currently selected labels to avoid confusion when clicking on a new phrase
+      self.annotation?.unselectStates();
+
+      // Set the playing ID to the clicked phrase
+      self.playingId = idx;
+
+      // Check if there are selected labels and automatically annotate the new phrase (enhanced annotation feature)
+      if (isFF(FF_NER_SELECT_ALL)) {
+        self.checkAndAnnotateNewPhrase();
+      }
+
+      // Send sync message if available
+      if (self.syncSend) {
+        self.syncSend({ time: phrase.start, playing: false }, "seek");
+      } else {
+        // Fallback: directly set audio time
+        const audio = self.audioRef?.current;
+        if (audio) {
+          audio.currentTime = phrase.start;
+        }
+      }
+    },
+
+    /**
+     * Unselect regions that don't belong to the specified phrase
+     * @param {number} phraseIdx - The phrase index to keep selected
+     */
+    unselectRegionsNotInPhrase(phraseIdx) {
+      if (!isFF(FF_NER_SELECT_ALL)) return;
+
+      const selectedRegions = self.annotation?.selectedRegions || [];
+
+      selectedRegions.forEach((region) => {
+        // Check if this region belongs to this paragraphs object
+        if (region.object === self) {
+          const regionData = region.serialize?.()?.value;
+          if (regionData && regionData.start !== undefined && regionData.end !== undefined) {
+            // Check if the current phrase index falls within this region
+            const phraseInRegion = phraseIdx >= regionData.start && phraseIdx <= regionData.end;
+
+            if (!phraseInRegion) {
+              // This region doesn't contain the current phrase, so unselect it
+              console.log(
+                `Unselecting region (${regionData.start}-${regionData.end}) - doesn't contain phrase ${phraseIdx}`,
+              );
+              self.annotation.unselectArea(region);
+            }
+          }
+        }
+      });
+    },
+
+    /**
+     * Check if there are selected labels and automatically annotate the current phrase
+     */
+    checkAndAnnotateNewPhrase() {
+      if (!isFF(FF_NER_SELECT_ALL)) return;
+
+      console.log(`checkAndAnnotateNewPhrase: checking phrase ${self.playingId}`);
+
+      // Get all label controls that target this paragraphs tag
+      const labelControls =
+        self.annotation?.toNames
+          ?.get(self.name)
+          ?.filter((control) => control.type === "paragraphlabels" || control.type === "labels") || [];
+
+      console.log(`checkAndAnnotateNewPhrase: found ${labelControls.length} label controls`);
+
+      // Check if any labels are currently selected
+      const hasSelectedLabels = labelControls.some((control) => {
+        const selectedCount = control.selectedLabels ? control.selectedLabels.length : 0;
+        console.log(`checkAndAnnotateNewPhrase: control ${control.name} has ${selectedCount} selected labels`);
+        return control.selectedLabels && control.selectedLabels.length > 0;
+      });
+
+      console.log(`checkAndAnnotateNewPhrase: hasSelectedLabels = ${hasSelectedLabels}`);
+
+      if (hasSelectedLabels) {
+        console.log(`Selected labels found when clicking phrase ${self.playingId}, attempting to annotate`);
+        // Trigger annotation for the new phrase
+        self.selectAndAnnotateActivePhrase();
+      } else {
+        console.log(`No selected labels found when clicking phrase ${self.playingId}, skipping annotation`);
+      }
+    },
+
+    /**
+     * Set a reference to the HtxParagraphs component for calling its methods
+     */
+    setViewRef(ref) {
+      self._viewRef = ref;
+    },
+
+    /**
+     * Trigger selection and annotation of the current active phrase
+     */
+    selectAndAnnotateActivePhrase() {
+      // Enhanced annotation feature - only run if feature flag is enabled
+      if (!isFF(FF_NER_SELECT_ALL)) return;
+
+      // Prioritize the proactively saved user selection. This is the core of the fix.
+      if (self.lastSelection) {
+        self._viewRef.processAnnotationFromRange(self.lastSelection);
+        // Clear the selection immediately after using it to prevent reuse.
+        self.clearLastSelection();
+        return;
+      }
+
+      // --- Fallback to original logic if no saved selection ---
+      if (self.playingId >= 0 && self._viewRef) {
+        // This part now primarily handles the "no user selection" case,
+        // where we annotate the entire active phrase.
+        const selection = window.getSelection();
+        const hasUserSelection = selection && !selection.isCollapsed && selection.toString().trim().length > 0;
+
+        if (hasUserSelection) {
+          // This is a fallback, but the primary path should be the saved selection.
+          self._viewRef.processAnnotation();
+          return;
+        }
+
+        const existingRegions = self.regs || [];
+        const hasExistingLabels = existingRegions.some((region) => {
+          // For paragraphs regions, check if there's already any annotation that covers this phrase
+          const regionData = region.serialize?.()?.value;
+          if (regionData && regionData.start !== undefined && regionData.end !== undefined) {
+            // Check if the current phrase index falls within any existing region
+            return self.playingId >= regionData.start && self.playingId <= regionData.end;
+          }
+          return false;
+        });
+
+        // Also check if there are any results/annotations that might be associated with this phrase
+        const annotationResults = self.annotation?.results || [];
+        const hasExistingResults = annotationResults.some((result) => {
+          // Check if this result is from a control that targets this paragraphs object
+          if (result.to_name === self && result.value) {
+            const resultValue = result.value;
+            // Check if the result covers this phrase index
+            if (resultValue.start !== undefined && resultValue.end !== undefined) {
+              return self.playingId >= resultValue.start && self.playingId <= resultValue.end;
+            }
+          }
+          return false;
+        });
+
+        // Only create automatic phrase annotation if there are NO existing labels/annotations for this phrase
+        if (!hasExistingLabels && !hasExistingResults) {
+          console.log(`Creating automatic annotation for phrase ${self.playingId}`);
+          self._viewRef.selectAndAnnotatePhrase(self.playingId);
+        } else {
+          console.log(
+            `Skipping automatic annotation for phrase ${self.playingId}: existing labels=${hasExistingLabels}, existing results=${hasExistingResults}`,
+          );
+        }
+      }
+    },
+
+    afterCreate() {
+      // Set up reaction to observe label selection changes (enhanced annotation feature)
+      if (isFF(FF_NER_SELECT_ALL)) {
+        self._labelReactionDisposer = reaction(
+          () => {
+            // Get all label controls that target this paragraphs tag
+            const labelControls =
+              self.annotation?.toNames
+                ?.get(self.name)
+                ?.filter((control) => control.type === "paragraphlabels" || control.type === "labels") || [];
+
+            // Return array of selected labels from all label controls
+            return labelControls.flatMap((control) => control.selectedLabels?.map((label) => label.id) || []);
+          },
+          (selectedLabelIds, prevSelectedLabelIds) => {
+            // Only trigger if labels were added (not removed)
+            if (selectedLabelIds.length > (prevSelectedLabelIds?.length || 0)) {
+              // Only create annotation if there's no existing annotation on the current phrase
+              self.selectAndAnnotateActivePhrase();
+            }
+          },
+        );
+      }
+    },
+
+    beforeDestroy() {
+      // Clean up the reaction
+      if (self._labelReactionDisposer) {
+        self._labelReactionDisposer();
+        self._labelReactionDisposer = null;
+      }
+    },
   }))
   .actions((self) => ({
     setAuthorSearch(value) {
@@ -411,6 +623,18 @@ const PlayableAndSyncable = types
 
     setAuthorFilter(value) {
       self.filterByAuthor = value;
+    },
+
+    setLastSelection(selection) {
+      if (selection && selection.rangeCount > 0) {
+        self.lastSelection = selection.getRangeAt(0);
+      } else {
+        self.lastSelection = null;
+      }
+    },
+
+    clearLastSelection() {
+      self.lastSelection = null;
     },
   }));
 
