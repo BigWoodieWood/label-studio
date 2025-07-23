@@ -60,6 +60,7 @@ const Result = types
       "pairwise",
       "videorectangle",
       "ranker",
+      "custominterface",
     ]),
     // @todo much better to have just a value, not a hash with empty fields
     value: types.model({
@@ -87,6 +88,7 @@ const Result = types
       bitmasklabels: types.maybe(types.array(types.string)),
       taxonomy: types.frozen(), // array of arrays of strings
       sequence: types.frozen(),
+      custom: types.maybe(types.frozen()), // for CustomInterface regions
     }),
     // info about object and region
     meta: types.frozen(),
