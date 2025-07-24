@@ -7,6 +7,18 @@ export const required = (fieldName, value) => {
   }
 };
 
+export const minLength = (min) => (fieldName, value, message) => {
+  if (isDefined(value) && String(value).length < min) {
+    return message || `${fieldName} must be at least ${min} characters.`;
+  }
+};
+
+export const maxLength = (max) => (fieldName, value, message) => {
+  if (isDefined(value) && String(value).length > max) {
+    return message || `${fieldName} must be no more than ${max} characters.`;
+  }
+};
+
 export const matchPattern = (pattern) => (fieldName, value) => {
   pattern = typeof pattern === "string" ? new RegExp(pattern) : pattern;
 

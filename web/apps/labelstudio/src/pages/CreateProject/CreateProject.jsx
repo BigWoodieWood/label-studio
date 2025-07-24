@@ -13,13 +13,13 @@ import "./CreateProject.scss";
 import { ImportPage } from "./Import/Import";
 import { useImportPage } from "./Import/useImportPage";
 import { useDraftProject } from "./utils/useDraftProject";
-import { Input, TextArea } from "../../components/Form";
+import { Form, Input, TextArea } from "../../components/Form";
 import { FF_LSDV_E_297, isFF } from "../../utils/feature-flags";
 import { createURL } from "../../components/HeidiTips/utils";
 
 const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) =>
   !show ? null : (
-    <form
+    <Form
       className={cn("project-name")}
       onSubmit={(e) => {
         e.preventDefault();
@@ -27,18 +27,17 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
       }}
     >
       <div className="w-full flex flex-col gap-2">
-        <label className="w-full" htmlFor="project_name">
-          Project Name
-        </label>
         <Input
           name="name"
           id="project_name"
+          label="Project Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onBlur={onSaveName}
           className="project-title w-full"
+          required
+          validate={[Form.Validator.minLength(3), Form.Validator.maxLength(50)]}
         />
-        {error && <span className="-mt-1 text-negative-content">{error}</span>}
       </div>
       <div className="w-full flex flex-col gap-2">
         <label className="w-full" htmlFor="project_description">
@@ -82,7 +81,7 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
           <HeidiTips collection="projectCreation" />
         </div>
       )}
-    </form>
+    </Form>
   );
 
 export const CreateProject = ({ onClose }) => {
