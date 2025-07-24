@@ -1,6 +1,4 @@
 import { observer } from "mobx-react";
-import { Fragment } from "react";
-import { IconClose } from "@humansignal/icons";
 import { BemWithSpecifiContext } from "../../../utils/bem";
 import { Button } from "@humansignal/ui";
 import { IconClose } from "@humansignal/icons";
