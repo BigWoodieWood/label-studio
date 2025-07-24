@@ -9,6 +9,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useAPI } from "../../../providers/ApiProvider";
 import { cn } from "../../../utils/bem";
 import { unique } from "../../../utils/helpers";
+import { Message, MessageType } from "../../../components/Message/Message";
 import { sampleDatasetAtom } from "../utils/atoms";
 import "./Import.scss";
 import samples from "./samples.json";
@@ -122,61 +123,41 @@ const ErrorMessage = ({ error }) => {
                           error?.id === 'IMPORT_RATE_LIMIT' ||
                           (error?.detail && error.detail.toLowerCase().includes('rate limit'));
   
-  let extra = error.validation_errors ?? error.extra;
-  // support all possible responses
-
-  if (extra && typeof extra === "object" && !Array.isArray(extra)) {
-    extra = extra.non_field_errors ?? Object.values(extra);
-  }
-  if (Array.isArray(extra)) extra = extra.join("; ");
-
-  const errorClass = importClass.elem("error").mod({ 'rate-limit': isRateLimitError });
-  
-  // Check if we're in a whitelabeling environment
-  const isWhitelabeled = window.APP_SETTINGS?.whitelabel_is_active;
-
-  return (
-    <div className={errorClass}>
-      <IconErrorAlt width="24" height="24" />
-      <div className={importClass.elem("error-content")}>
-        {isRateLimitError ? (
-          <>
-            <div className={importClass.elem("error-title")}>
-              {error.detail}
-            </div>
-            <div className={importClass.elem("error-message")}>
-              {error.message}
-              {!isWhitelabeled && (
-                <>
-                  {" "}
-                  <a 
-                    href="https://docs.humansignal.com/guide/saas.html#Usage-Limits" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className={importClass.elem("learn-more-link")}
-                  >
-                    Learn more
-                  </a>
-                  .
-                </>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <div className={importClass.elem("error-title")}>
-              {error.id && `[${error.id}] `}
-              {error.detail || error.message}
-            </div>
-            {extra && (
-              <div className={importClass.elem("error-extra")}>
-                {extra}
-              </div>
+  if (isRateLimitError) {
+    const isWhitelabeled = window.APP_SETTINGS?.whitelabel_is_active;
+    const showLearnMore = !isWhitelabeled;
+    
+    return (
+      <Message look={MessageType.warning}>
+        <div>
+          <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+            {error.detail || "Could not upload file(s): Upload rate limit reached"}
+          </div>
+          <div>
+            {error.message || "Only one file can be imported per second. Please wait a moment, then retry your upload."}
+            {showLearnMore && (
+              <>
+                {" "}
+                <a 
+                  href="https://docs.humansignal.com/guide/saas.html#Usage-Limits"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Learn more
+                </a>
+              </>
             )}
-          </>
-        )}
-      </div>
-    </div>
+          </div>
+        </div>
+      </Message>
+    );
+  }
+
+  // Default error display for non-rate-limit errors
+  return (
+    <Message look={MessageType.fail}>
+      {error.detail || error.message || error}
+    </Message>
   );
 };
 
