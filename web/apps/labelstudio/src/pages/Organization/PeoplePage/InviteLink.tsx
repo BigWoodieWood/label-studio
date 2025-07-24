@@ -1,4 +1,3 @@
-import { Description } from "apps/labelstudio/src/components/Description/Description";
 import { Block } from "apps/labelstudio/src/components/Menu/MenuContext";
 import { Input } from "../../../components/Form";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -7,7 +6,7 @@ import { API } from "apps/labelstudio/src/providers/ApiProvider";
 import { atomWithQuery } from "jotai-tanstack-query";
 import { useAtomValue } from "jotai";
 import { Modal } from "apps/labelstudio/src/components/Modal/ModalPopup";
-import { Button } from "apps/labelstudio/src/components";
+import { Button, Typography } from "@humansignal/ui";
 
 const linkAtom = atomWithQuery(() => ({
   queryKey: ["invite-link"],
@@ -57,14 +56,14 @@ const InvitationModal = () => {
   return (
     <Block name="invite">
       <Input value={link} style={{ width: "100%" }} readOnly />
-
-      <Description style={{ marginTop: 16 }}>
+      <Typography size="small" className="text-neutral-content-subtler mt-base mb-wider">
         Invite people to join your Label Studio instance. People that you invite have full access to all of your
         projects.{" "}
         <a
           href="https://labelstud.io/guide/signup.html"
           target="_blank"
           rel="noreferrer"
+          className="hover:underline"
           onClick={() =>
             __lsa("docs.organization.add_people.learn_more", { href: "https://labelstud.io/guide/signup.html" })
           }
@@ -72,7 +71,7 @@ const InvitationModal = () => {
           Learn more
         </a>
         .
-      </Description>
+      </Typography>
     </Block>
   );
 };
@@ -84,12 +83,17 @@ const InvitationFooter = () => {
   return (
     <Space spread>
       <Space>
-        <Button variant="secondary" style={{ width: 170 }} onClick={() => refetch()}>
+        <Button look="outlined" style={{ width: 170 }} onClick={() => refetch()} aria-label="Refresh invite link">
           Reset Link
         </Button>
       </Space>
       <Space>
-        <Button look="primary" style={{ width: 170 }} onClick={() => copyText(link!)}>
+        <Button
+          variant={copied ? "positive" : "primary"}
+          className="w-[170px]"
+          onClick={() => copyText(link!)}
+          aria-label="Copy invite link"
+        >
           {copied ? "Copied!" : "Copy link"}
         </Button>
       </Space>
