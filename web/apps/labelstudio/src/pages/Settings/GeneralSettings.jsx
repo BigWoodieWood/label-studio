@@ -8,6 +8,21 @@ import { Block, Elem } from "../../utils/bem";
 import { HeidiTips } from "../../components/HeidiTips/HeidiTips";
 import { FF_LSDV_E_297, isFF } from "../../utils/feature-flags";
 import { createURL } from "../../components/HeidiTips/utils";
+import { isDefined } from "../../utils/helpers";
+import { InlineError } from "../../components/Error/InlineError";
+
+// Custom validators for project name length validation
+const minLength = (min) => (fieldName, value, message) => {
+  if (isDefined(value) && String(value).length < min) {
+    return message || `${fieldName} must be at least ${min} characters.`;
+  }
+};
+
+const maxLength = (max) => (fieldName, value, message) => {
+  if (isDefined(value) && String(value).length > max) {
+    return message || `${fieldName} must be no more than ${max} characters.`;
+  }
+};
 
 export const GeneralSettings = () => {
   const { project, fetchProject } = useContext(ProjectContext);
@@ -30,7 +45,7 @@ export const GeneralSettings = () => {
         <Block name="settings-wrapper">
           <Form action="updateProject" formData={{ ...project }} params={{ pk: project.id }} onSubmit={updateProject}>
             <Form.Row columnCount={1} rowGap="16px">
-              <Input name="title" label="Project Name" />
+              <Input name="title" label="Project Name" required validate={[minLength(3), maxLength(50)]} />
 
               <TextArea name="description" label="Description" style={{ minHeight: 128 }} />
               {isFF(FF_LSDV_E_297) && (
@@ -114,6 +129,8 @@ export const GeneralSettings = () => {
                 Save
               </Button>
             </Form.Actions>
+
+            <InlineError />
           </Form>
         </Block>
       </Elem>
