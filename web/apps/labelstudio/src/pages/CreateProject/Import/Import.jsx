@@ -116,6 +116,12 @@ const Upload = ({ children, sendFiles }) => {
 
 const ErrorMessage = ({ error }) => {
   if (!error) return null;
+  
+  // Check if this is an import rate limit error
+  const isRateLimitError = error?.name === 'ImportRateLimitError' || 
+                          error?.id === 'IMPORT_RATE_LIMIT' ||
+                          (error?.detail && error.detail.toLowerCase().includes('rate limit'));
+  
   let extra = error.validation_errors ?? error.extra;
   // support all possible responses
 
@@ -124,12 +130,52 @@ const ErrorMessage = ({ error }) => {
   }
   if (Array.isArray(extra)) extra = extra.join("; ");
 
+  const errorClass = importClass.elem("error").mod({ 'rate-limit': isRateLimitError });
+  
+  // Check if we're in a whitelabeling environment
+  const isWhitelabeled = window.APP_SETTINGS?.whitelabel_is_active;
+
   return (
-    <div className={importClass.elem("error")}>
+    <div className={errorClass}>
       <IconErrorAlt width="24" height="24" />
-      {error.id && `[${error.id}] `}
-      {error.detail || error.message}
-      {extra && ` (${extra})`}
+      <div className={importClass.elem("error-content")}>
+        {isRateLimitError ? (
+          <>
+            <div className={importClass.elem("error-title")}>
+              {error.detail}
+            </div>
+            <div className={importClass.elem("error-message")}>
+              {error.message}
+              {!isWhitelabeled && (
+                <>
+                  {" "}
+                  <a 
+                    href="https://docs.humansignal.com/guide/saas.html#Usage-Limits" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={importClass.elem("learn-more-link")}
+                  >
+                    Learn more
+                  </a>
+                  .
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={importClass.elem("error-title")}>
+              {error.id && `[${error.id}] `}
+              {error.detail || error.message}
+            </div>
+            {extra && (
+              <div className={importClass.elem("error-extra")}>
+                {extra}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
