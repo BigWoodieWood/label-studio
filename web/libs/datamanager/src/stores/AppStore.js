@@ -32,7 +32,7 @@ export const AppStore = types
 
     loadingData: false,
 
-    users: types.optional(types.array(User), []),
+    users2: types.optional(types.array(User), []),
 
     taskStore: types.optional(
       types.late(() => {
@@ -130,7 +130,7 @@ export const AppStore = types
     },
 
     get usersMap() {
-      return new Map(self.users.map((user) => [user.id, user]));
+      return new Map(self.users2.map((user) => [user.id, user]));
     },
   }))
   .volatile(() => ({
@@ -559,7 +559,7 @@ export const AppStore = types
         },
       });
 
-      self.users.push(...list);
+      self.users2.push(...list);
     }),
 
     fetchData: flow(function* ({ isLabelStream } = {}) {

@@ -180,7 +180,7 @@ export class LSFWrapper {
       task: taskToLSFormat(this.task),
       description: this.instruction,
       interfaces,
-      users: dm.store.users.map((u) => u.toJSON()),
+      // users: dm.store.users.map((u) => u.toJSON()),
       keymap: options.keymap,
       forceAutoAnnotation: this.isInteractivePreannotations,
       forceAutoAcceptSuggestions: this.isInteractivePreannotations,
