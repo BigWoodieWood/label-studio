@@ -94,7 +94,7 @@ class ExportFormatsListAPI(generics.RetrieveAPIView):
             ),
             OpenApiParameter(
                 name='download_all_tasks',
-                type=OpenApiTypes.STR,
+                type=OpenApiTypes.BOOL,
                 location='query',
                 description='If true, download all tasks regardless of status. If false, download only annotated tasks.',
             ),
@@ -374,7 +374,7 @@ class ExportListAPI(generics.ListCreateAPIView):
             ),
             OpenApiParameter(
                 name='export_pk',
-                type=OpenApiTypes.STR,
+                type=OpenApiTypes.INT,
                 location='path',
                 description='Primary key identifying the export file.',
             ),
@@ -401,7 +401,7 @@ class ExportListAPI(generics.ListCreateAPIView):
             ),
             OpenApiParameter(
                 name='export_pk',
-                type=OpenApiTypes.STR,
+                type=OpenApiTypes.INT,
                 location='path',
                 description='Primary key identifying the export file.',
             ),
@@ -481,11 +481,20 @@ class ExportDetailAPI(generics.RetrieveDestroyAPIView):
             ),
             OpenApiParameter(
                 name='export_pk',
-                type=OpenApiTypes.STR,
+                type=OpenApiTypes.INT,
                 location='path',
                 description='Primary key identifying the export file.',
             ),
         ],
+        responses={
+            (200, 'application/*'): OpenApiResponse(
+                description='Export file',
+                response={
+                    'type': 'string',
+                    'format': 'binary',
+                },
+            ),
+        },
         extensions={
             'x-fern-sdk-group-name': ['projects', 'exports'],
             'x-fern-sdk-method-name': 'download',
@@ -627,7 +636,7 @@ def set_convert_background_failure(job, connection, type, value, traceback_obj):
             ),
             OpenApiParameter(
                 name='export_pk',
-                type=OpenApiTypes.STR,
+                type=OpenApiTypes.INT,
                 location='path',
                 description='Primary key identifying the export file.',
             ),
