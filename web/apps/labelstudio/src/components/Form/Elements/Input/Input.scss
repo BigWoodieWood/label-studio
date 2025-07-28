@@ -55,11 +55,18 @@
 .textarea-ls {
   &:not([disabled]):hover {
     border-color: var(--color-neutral-border-bold);
+
+    &.input-ls_error {
+      border-color: var(--color-negative-border-bold);
+    }
   }
-  
 
   &:not([disabled]):active {
     border-color: var(--color-neutral-border-bolder);
+
+    &.input-ls_error {
+      border-color: var(--color-negative-border-bold);
+    }
   }
 }
 
