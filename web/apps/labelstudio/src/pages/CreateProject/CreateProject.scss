@@ -91,6 +91,17 @@
         outline: none;
         box-shadow: 0 0 0 4px var(--color-primary-focus-outline);
       }
+
+
+
+      &.input-ls_error {
+        border: 1px solid var(--color-negative-border);
+        color: var(--color-negative-content);
+
+        &:focus {
+          border-color: var(--color-negative-border-bold) !important;
+        }
+      }
     }
 
     .form-validation {
