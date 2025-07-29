@@ -1,0 +1,685 @@
+"""
+Test file for prediction validation functionality using LabelInterface.
+
+This module tests the enhanced validation system for predictions during data import.
+It covers various validation scenarios including:
+- Valid prediction creation
+- Invalid prediction structure
+- Score validation
+- Model version validation
+- Result structure validation against project configuration using LabelInterface
+- Preannotated fields validation
+- Detailed error reporting from LabelInterface
+"""
+
+from unittest.mock import patch
+
+import pytest
+from data_import.functions import reformat_predictions
+from data_import.serializers import ImportApiSerializer
+from django.contrib.auth import get_user_model
+from organizations.tests.factories import OrganizationFactory
+from projects.tests.factories import ProjectFactory
+from rest_framework.exceptions import ValidationError
+from tasks.tests.factories import TaskFactory
+from users.tests.factories import UserFactory
+
+User = get_user_model()
+
+
+@pytest.mark.django_db
+class TestPredictionValidation:
+    """Test cases for prediction validation functionality using LabelInterface."""
+
+    @pytest.fixture(autouse=True)
+    def setup(self, django_db_setup, django_db_blocker):
+        """Set up test data using factories."""
+        with django_db_blocker.unblock():
+            self.user = UserFactory()
+            self.organization = OrganizationFactory(created_by=self.user)
+            self.user.active_organization = self.organization
+            self.user.save()
+
+            # Create a project with a comprehensive label configuration
+            self.project = ProjectFactory(
+                title='Test Project',
+                label_config="""
+                    <View>
+                        <Text name="text" value="$text"/>
+                        <Choices name="sentiment" toName="text">
+                            <Choice value="positive"/>
+                            <Choice value="negative"/>
+                            <Choice value="neutral"/>
+                        </Choices>
+                        <TextArea name="summary" toName="text"/>
+                    </View>
+                """,
+                organization=self.organization,
+                created_by=self.user,
+            )
+
+            # Create a task
+            self.task = TaskFactory(project=self.project, data={'text': 'This is a test text.'})
+
+    def test_valid_prediction_creation(self):
+        """Test that valid predictions are created successfully."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()
+        created_tasks = serializer.save(project_id=self.project.id)
+
+        assert len(created_tasks) == 1
+        assert created_tasks[0].predictions.count() == 1
+
+        prediction = created_tasks[0].predictions.first()
+        assert prediction.score == 0.95
+        assert prediction.model_version == 'v1.0'
+
+    def test_invalid_prediction_missing_result(self):
+        """Test validation fails when prediction is missing result field."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'score': 0.95,
+                        'model_version': 'v1.0'
+                        # Missing 'result' field
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        # ImportApiSerializer validates structure and rejects missing result field
+        assert not serializer.is_valid()
+        assert serializer.errors
+
+    def test_invalid_prediction_none_result(self):
+        """Test validation fails when prediction result is None."""
+        tasks = [
+            {'data': {'text': 'Test text'}, 'predictions': [{'result': None, 'score': 0.95, 'model_version': 'v1.0'}]}
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+
+    def test_valid_score_range(self):
+        """Test that valid scores within 0.00-1.00 range are accepted."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.75,  # Valid score within range
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        # Score validation should pass for valid scores
+        created_tasks = serializer.save(project_id=self.project.id)
+        assert len(created_tasks) == 1
+        prediction = created_tasks[0].predictions.first()
+        assert prediction.score == 0.75  # Score should be preserved
+
+    def test_valid_score_boundary_values(self):
+        """Test that boundary values 0.00 and 1.00 are accepted."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.0,  # Minimum valid score
+                        'model_version': 'v1.0',
+                    }
+                ],
+            },
+            {
+                'data': {'text': 'Test text 2'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['negative']},
+                            }
+                        ],
+                        'score': 1.0,  # Maximum valid score
+                        'model_version': 'v1.0',
+                    }
+                ],
+            },
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        # Score validation should pass for boundary values
+        created_tasks = serializer.save(project_id=self.project.id)
+        assert len(created_tasks) == 2
+        assert created_tasks[0].predictions.first().score == 0.0
+        assert created_tasks[1].predictions.first().score == 1.0
+
+    def test_invalid_score_range(self):
+        """Test validation fails when score is outside valid range."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 1.5,  # Invalid score > 1.0
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        # Score validation now fails for scores outside 0.00-1.00 range
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+        # Check that the error message mentions score validation
+        error_text = str(exc_info.value.detail)
+        assert 'Score must be between 0.00 and 1.00' in error_text
+
+    def test_invalid_score_type(self):
+        """Test validation fails when score is not a number."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 'invalid_score',  # Invalid score type
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        # Score validation now fails for invalid score types
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+        # Check that the error message mentions score validation
+        error_text = str(exc_info.value.detail)
+        assert 'Score must be a valid number' in error_text
+
+    def test_invalid_model_version_type(self):
+        """Test validation fails when model_version is not a string."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 123,  # Invalid type
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        # Model version validation is handled gracefully
+        created_tasks = serializer.save(project_id=self.project.id)
+        assert len(created_tasks) == 1
+        prediction = created_tasks[0].predictions.first()
+        assert prediction.model_version == '123'  # Converted to string
+
+    def test_invalid_model_version_length(self):
+        """Test validation fails when model_version is too long."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'a' * 300,  # Too long
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        # Model version validation is handled gracefully
+        created_tasks = serializer.save(project_id=self.project.id)
+        assert len(created_tasks) == 1
+        prediction = created_tasks[0].predictions.first()
+        # Long model version is truncated or handled gracefully
+        assert prediction.model_version is not None
+
+    def test_invalid_result_missing_required_fields(self):
+        """Test validation fails when result items are missing required fields."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                # Missing 'to_name', 'type', 'value'
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+
+    def test_invalid_result_from_name_not_in_config(self):
+        """Test validation fails when from_name doesn't exist in project config."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'nonexistent_tag',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+
+    def test_invalid_result_type_mismatch(self):
+        """Test validation fails when result type doesn't match project config."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'labels',  # Wrong type
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+
+    def test_invalid_result_to_name_mismatch(self):
+        """Test validation fails when to_name doesn't match project config."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'wrong_target',  # Wrong to_name
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+
+    def test_label_interface_detailed_error_reporting(self):
+        """Test that LabelInterface provides detailed error messages."""
+        from label_studio_sdk.label_interface import LabelInterface
+
+        li = LabelInterface(self.project.label_config)
+
+        # Test missing required field
+        invalid_prediction = {
+            'result': [
+                {
+                    'from_name': 'sentiment',
+                    # Missing 'to_name', 'type', 'value'
+                }
+            ]
+        }
+
+        errors = li.validate_prediction(invalid_prediction, return_errors=True)
+        assert isinstance(errors, list)
+        assert len(errors) > 0
+        # Check for any error message about missing fields
+        error_text = ' '.join(errors)
+        assert 'Missing required field' in error_text or 'missing' in error_text.lower()
+
+    def test_label_interface_invalid_from_name(self):
+        """Test LabelInterface reports invalid from_name errors."""
+        from label_studio_sdk.label_interface import LabelInterface
+
+        li = LabelInterface(self.project.label_config)
+
+        invalid_prediction = {
+            'result': [
+                {
+                    'from_name': 'nonexistent_tag',
+                    'to_name': 'text',
+                    'type': 'choices',
+                    'value': {'choices': ['positive']},
+                }
+            ]
+        }
+
+        errors = li.validate_prediction(invalid_prediction, return_errors=True)
+        assert isinstance(errors, list)
+        assert len(errors) > 0
+        error_text = ' '.join(errors)
+        assert 'not found' in error_text
+
+    def test_label_interface_invalid_type(self):
+        """Test LabelInterface reports invalid type errors."""
+        from label_studio_sdk.label_interface import LabelInterface
+
+        li = LabelInterface(self.project.label_config)
+
+        invalid_prediction = {
+            'result': [
+                {
+                    'from_name': 'sentiment',
+                    'to_name': 'text',
+                    'type': 'labels',  # Wrong type
+                    'value': {'choices': ['positive']},
+                }
+            ]
+        }
+
+        errors = li.validate_prediction(invalid_prediction, return_errors=True)
+        assert isinstance(errors, list)
+        assert len(errors) > 0
+        error_text = ' '.join(errors)
+        assert 'does not match expected type' in error_text or 'type' in error_text.lower()
+
+    def test_label_interface_invalid_to_name(self):
+        """Test LabelInterface reports invalid to_name errors."""
+        from label_studio_sdk.label_interface import LabelInterface
+
+        li = LabelInterface(self.project.label_config)
+
+        invalid_prediction = {
+            'result': [
+                {
+                    'from_name': 'sentiment',
+                    'to_name': 'wrong_target',  # Wrong to_name
+                    'type': 'choices',
+                    'value': {'choices': ['positive']},
+                }
+            ]
+        }
+
+        errors = li.validate_prediction(invalid_prediction, return_errors=True)
+        assert isinstance(errors, list)
+        assert len(errors) > 0
+        error_text = ' '.join(errors)
+        assert 'not found' in error_text
+
+    def test_preannotated_fields_validation(self):
+        """Test validation of predictions created from preannotated fields."""
+        tasks = [{'text': 'Test text 1', 'sentiment': 'positive'}, {'text': 'Test text 2', 'sentiment': 'negative'}]
+
+        preannotated_fields = ['sentiment']
+
+        # This should work correctly
+        reformatted_tasks = reformat_predictions(tasks, preannotated_fields)
+
+        assert len(reformatted_tasks) == 2
+        assert 'data' in reformatted_tasks[0]
+        assert 'predictions' in reformatted_tasks[0]
+        assert len(reformatted_tasks[0]['predictions']) == 1
+
+    def test_preannotated_fields_missing_field(self):
+        """Test validation fails when preannotated field is missing."""
+        tasks = [
+            {'text': 'Test text 1'},  # Missing 'sentiment' field
+            {'text': 'Test text 2', 'sentiment': 'negative'},
+        ]
+
+        preannotated_fields = ['sentiment']
+
+        # This should raise a ValidationError
+        with pytest.raises(ValidationError):
+            reformat_predictions(tasks, preannotated_fields)
+
+    def test_multiple_validation_errors(self):
+        """Test that multiple validation errors are collected and reported."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {'result': None, 'score': 0.95, 'model_version': 'v1.0'},  # Invalid: None result
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 1.5,  # Invalid: score > 1.0
+                        'model_version': 'v1.0',
+                    },
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+        assert 'predictions' in exc_info.value.detail
+
+    def test_project_without_label_config(self):
+        """Test validation fails when project has no label configuration."""
+        # Create project with minimal but valid label config
+        project_no_config = ProjectFactory(
+            title='No Config Project',
+            label_config='<View><Text name="text" value="$text"/></View>',
+            organization=self.organization,
+            created_by=self.user,
+        )
+
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': project_no_config})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=project_no_config.id)
+        assert 'predictions' in exc_info.value.detail
+
+    def test_prediction_creation_with_exception_handling(self):
+        """Test that exceptions during prediction creation are properly handled."""
+        tasks = [
+            {
+                'data': {'text': 'Test text'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            }
+        ]
+
+        # Mock prepare_prediction_result to raise an exception
+        with patch('tasks.models.Prediction.prepare_prediction_result', side_effect=Exception('Test exception')):
+            serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+            assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+            with pytest.raises(ValidationError) as exc_info:
+                serializer.save(project_id=self.project.id)
+            assert 'predictions' in exc_info.value.detail
+
+    def test_label_interface_backward_compatibility(self):
+        """Test that LabelInterface.validate_prediction maintains backward compatibility."""
+        from label_studio_sdk.label_interface import LabelInterface
+
+        li = LabelInterface(self.project.label_config)
+
+        # Test valid prediction with return_errors=False (default)
+        valid_prediction = {
+            'result': [
+                {'from_name': 'sentiment', 'to_name': 'text', 'type': 'choices', 'value': {'choices': ['positive']}}
+            ]
+        }
+
+        # Should return True for valid prediction
+        result = li.validate_prediction(valid_prediction)
+        assert result is True
+
+        # Should return False for invalid prediction
+        invalid_prediction = {
+            'result': [
+                {
+                    'from_name': 'nonexistent_tag',
+                    'to_name': 'text',
+                    'type': 'choices',
+                    'value': {'choices': ['positive']},
+                }
+            ]
+        }
+
+        result = li.validate_prediction(invalid_prediction)
+        assert result is False

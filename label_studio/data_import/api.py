@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from label_studio_sdk.label_interface import LabelInterface
 from projects.models import Project, ProjectImport, ProjectReimport
 from ranged_fileresponse import RangedFileResponse
 from rest_framework import generics, status
@@ -421,22 +422,53 @@ class ImportPredictionsAPI(generics.CreateAPIView):
         logger.debug(
             f'Importing {len(self.request.data)} predictions to project {project} with {len(tasks_ids)} tasks'
         )
+
+        li = LabelInterface(project.label_config)
+
+        # Validate all predictions before creating any
+        validation_errors = []
         predictions = []
-        for item in self.request.data:
+
+        for i, item in enumerate(self.request.data):
+            # Validate task ID
             if item.get('task') not in tasks_ids:
-                raise ValidationError(
-                    f'{item} contains invalid "task" field: corresponding task ID couldn\'t be retrieved '
-                    f'from project {project} tasks'
+                validation_errors.append(
+                    f'Prediction {i}: Invalid task ID {item.get("task")} - task not found in project'
                 )
-            predictions.append(
-                Prediction(
-                    task_id=item['task'],
-                    project_id=project.id,
-                    result=Prediction.prepare_prediction_result(item.get('result'), project),
-                    score=item.get('score'),
-                    model_version=item.get('model_version', 'undefined'),
+                continue
+
+            # Validate prediction using LabelInterface only
+            try:
+                validation_errors_list = li.validate_prediction(item, return_errors=True)
+
+                if validation_errors_list:
+                    # Format errors for better readability
+                    for error in validation_errors_list:
+                        validation_errors.append(f'Prediction {i}: {error}')
+                    continue
+
+            except Exception as e:
+                validation_errors.append(f'Prediction {i}: Error validating prediction - {str(e)}')
+                continue
+
+            # If there are validation errors, raise them before creating any predictions
+            if validation_errors:
+                raise ValidationError(validation_errors)
+
+            try:
+                predictions.append(
+                    Prediction(
+                        task_id=item['task'],
+                        project_id=project.id,
+                        result=Prediction.prepare_prediction_result(item.get('result'), project),
+                        score=item.get('score'),
+                        model_version=item.get('model_version', 'undefined'),
+                    )
                 )
-            )
+            except Exception as e:
+                validation_errors.append(f'Prediction {i}: Failed to create prediction - {str(e)}')
+                continue
+
         predictions_obj = Prediction.objects.bulk_create(predictions, batch_size=settings.BATCH_SIZE)
         start_job_async_or_sync(update_tasks_counters, Task.objects.filter(id__in=tasks_ids))
         return Response({'created': len(predictions_obj)}, status=status.HTTP_201_CREATED)
