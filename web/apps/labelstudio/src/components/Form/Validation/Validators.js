@@ -3,7 +3,7 @@ import "./Validation.scss";
 
 export const required = (fieldName, value) => {
   if (!isDefined(value) || isEmptyString(value)) {
-    return "This field is required.";
+    return "This field is required";
   }
 };
 
