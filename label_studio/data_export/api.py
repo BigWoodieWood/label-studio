@@ -641,6 +641,17 @@ def set_convert_background_failure(job, connection, type, value, traceback_obj):
                 description='Primary key identifying the export file.',
             ),
         ],
+        responses={
+            200: OpenApiResponse(
+                response={
+                    'type': 'object',
+                    'properties': {
+                        'export_type': {'type': 'string'},
+                        'converted_format': {'type': 'integer'},
+                    },
+                },
+            ),
+        },
         extensions={
             'x-fern-sdk-group-name': ['projects', 'exports'],
             'x-fern-sdk-method-name': 'convert',
