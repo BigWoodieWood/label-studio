@@ -26,7 +26,7 @@ alwaysApply: false
 ### Language Structure
 - Use active voice for all UI text
 - Example: Use "You can export your labels" instead of "Your labels can be exported by you"
-- Use sentence case for all headings, navigation items, input labels, and controls
+- Use sentence case for all headings, navigation items, input labels, and controls except buttons
 - Example: Use "Settings" for the menu item, not "SETTINGS"
 - Use contractions to foster a conversational tone
 - Example: Use "Don't worry, your changes are saved" instead of "Do not worry, your changes are saved"
@@ -48,6 +48,7 @@ alwaysApply: false
 
 ### Call to Actions (CTAs)
 - Use the Button component to create action-oriented, concise CTA labels (e.g., "Save Changes" not "Save")
+- Use title case for buttons
 - Establish clear visual hierarchy for multiple CTAs:
   - Primary action: `variant=primary, look=filled`
   - Secondary actions: `variant=neutral, look=outlined` unless they need visual highlighting (`variant=primary, look=outline`)
@@ -129,8 +130,7 @@ alwaysApply: false
 
 ### Semantic HTML
 - Always use semantic HTML
-- Apply appropriate ARIA roles and properties for complex components to maximize compatibility with assistive technologies
-- Example: Use `<button>` for clickable actions instead of `<div>` with a click handler, and `aria-label` for icon-only buttons
+- Apply appropriate ARIA roles and properties for complex components to maximize compatibility with assistive technologies. Example: Use the `<Button>` component for clickable actions instead of `<div>` with a click handler, and `aria-label` and `tooltip` for icon-only buttons
 
 ### Keyboard Navigation
 - Ensure all interactive elements are keyboard focusable with logical tab order and clearly visible focus indicators
