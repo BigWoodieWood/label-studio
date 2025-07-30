@@ -86,7 +86,7 @@ class TestSDKPredictionValidation:
                     'from_name': 'entities',
                     'to_name': 'text',
                     'type': 'labels',
-                    'value': {'labels': [['person']], 'start': 0, 'end': 10, 'text': 'John Smith'},
+                    'value': {'labels': ['person'], 'start': 0, 'end': 10, 'text': 'John Smith'},
                 }
             ],
             'score': 0.85,
@@ -205,7 +205,7 @@ class TestSDKPredictionValidation:
             ls.predictions.create(**prediction_data)
 
     def test_type_mismatch(self, django_live_url, business_client):
-        """Test prediction with incorrect type for the control using SDK"""
+        """Test prediction with type mismatch using SDK"""
         ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
 
         prediction_data = {
@@ -282,7 +282,7 @@ class TestSDKPredictionValidation:
                     'to_name': 'text',
                     'type': 'labels',
                     'value': {
-                        'labels': [['invalid_label']],  # Not in available labels
+                        'labels': ['invalid_label'],  # Not in available labels
                         'start': 0,
                         'end': 10,
                         'text': 'John Smith',
@@ -325,12 +325,9 @@ class TestSDKPredictionValidation:
 
         prediction_data = {'task': self.task.id, 'result': [], 'score': 0.95, 'model_version': 'v1.0'}  # Empty array
 
-        # This should be valid - empty results are allowed
-        prediction = ls.predictions.create(**prediction_data)
-
-        assert prediction.id is not None
-        assert prediction.task == self.task.id
-        assert prediction.result == prediction_data['result']
+        # Empty results are not allowed - this should fail validation
+        with pytest.raises(Exception):
+            ls.predictions.create(**prediction_data)
 
     def test_multiple_regions_mixed_validity(self, django_live_url, business_client):
         """Test prediction with multiple regions where some are valid and some are invalid using SDK"""
@@ -373,13 +370,13 @@ class TestSDKPredictionValidation:
                     'from_name': 'entities',
                     'to_name': 'text',
                     'type': 'labels',
-                    'value': {'labels': [['person']], 'start': 0, 'end': 10, 'text': 'John Smith'},
+                    'value': {'labels': ['person'], 'start': 0, 'end': 10, 'text': 'John Smith'},
                 },
                 {
                     'from_name': 'entities',
                     'to_name': 'text',
                     'type': 'labels',
-                    'value': {'labels': [['organization']], 'start': 17, 'end': 26, 'text': 'Microsoft'},
+                    'value': {'labels': ['organization'], 'start': 17, 'end': 26, 'text': 'Microsoft'},
                 },
                 {'from_name': 'quality', 'to_name': 'text', 'type': 'rating', 'value': {'rating': 4}},
                 {
