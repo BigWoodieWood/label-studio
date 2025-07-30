@@ -10,67 +10,54 @@ alwaysApply: false
 
 ### Writing Guidelines
 - Generate simple, concise language (aim for 7th-grade reading level or lower)
-- Avoid jargon, acronyms (unless commonly known, spell out first use), and abbreviations
-- Example: Use "Upload Dataset" instead of "Initiate Data Ingestion Process"
+- Avoid jargon, acronyms (unless commonly known, spell out first use), and abbreviations (e.g., use "Upload Dataset" instead of "Initiate Data Ingestion Process")
 
 ### Terminology Consistency  
 - Use consistent terminology for all UI elements (e.g., "category" not "type")
-- Example: Consistently refer to annotated items as "annotations" throughout the application, not "jobs" or "units"
 
 ### Tone and Voice
-- **Enterprise version**: Maintain a professional, clear, and efficient tone
-- **Open-source version**: Maintain a conversational, open, clear, practical, informal, optimistic, and friendly tone
-- Example (Open-Source): "Awesome work! Your project is all done!"
-- Example (Enterprise): "All tasks labeled successfully."
+- **Enterprise version**: Maintain a professional, clear, and efficient tone (e.g., "All tasks labeled successfully")
+- **Open-source version**: Maintain a conversational, open, clear, practical, informal, optimistic, and friendly tone (e.g., "Awesome work! Your tasks are all done!")
 
 ### Language Structure
 - Use active voice for all UI text
-- Example: Use "You can export your labels" instead of "Your labels can be exported by you"
 - Use sentence case for all headings, navigation items, input labels, and controls except buttons
-- Example: Use "Settings" for the menu item, not "SETTINGS"
 - Use contractions to foster a conversational tone
-- Example: Use "Don't worry, your changes are saved" instead of "Do not worry, your changes are saved"
 
 ### Error Messaging
 - Generate clear, specific, empathetic error messages with suggested solutions
-- Avoid technical jargon or stack traces by default; provide an expandable "View error details" option if needed
-- Example: Instead of "Error 500", display "Something went wrong on our end. Please try again in a moment, or contact support if the issue persists."
+- Avoid technical jargon or stack traces by default; provide an expandable "View error details" option if needed (e.g., instead of "Error 500", display "Something went wrong on our end. Please try again in a moment, or contact support if the issue persists")
+- For implementation details, see "Error Messages" section under User Guidance & Feedback Mechanisms
 
 ### Positive Feedback
-- Generate positive, encouraging, and informative feedback
-- Example: After a successful upload, show "Dataset uploaded successfully! You can now start labeling."
+- Generate positive, encouraging, and informative feedback (e.g., after a successful upload, show "Dataset uploaded successfully! You can now start labeling")
 
 ### Content Guidelines
-- Keep text friendly, clear, and succinct, providing helpful cues without overwhelming the user
-- Example: Use a tooltip "Adjust the bounding box size" instead of "This control allows for the modification of the dimensions of the rectangular annotation area."
+- Keep text friendly, clear, and succinct, providing helpful cues without overwhelming the user (e.g., use a tooltip "Adjust the bounding box size" instead of "This control allows for the modification of the dimensions of the rectangular annotation area")
 
 ## User Interaction Elements
 
 ### Call to Actions (CTAs)
 - Use the Button component to create action-oriented, concise CTA labels (e.g., "Save Changes" not "Save")
 - Use title case for buttons
-- Establish clear visual hierarchy for multiple CTAs:
-  - Primary action: `variant=primary, look=filled`
-  - Secondary actions: `variant=neutral, look=outlined` unless they need visual highlighting (`variant=primary, look=outline`)
+- Establish clear visual hierarchy for multiple CTAs (primary action: `variant=primary, look=filled`; secondary actions: `variant=neutral, look=outlined` unless they need visual highlighting: `variant=primary, look=outline`)
 - Include ample whitespace around buttons or button groups for better visibility where possible
+- Use the anchor element for navigation actions
 
 ### Form Field Layout
-- Align fields flow vertically for better readability and easier interaction
+- Align fields flow vertically for better readability and easier interaction, avoid multi column forms
 - Group related fields logically to guide the user naturally through the form
 - Use placeholder text as hints, not as labels
 - Place Save and Submit buttons under/after forms and aligned to the right
 
 ### Hover States
 - Implement distinct and visually noticeable hover effects to indicate clickable elements (buttons, interactive cards)
-- Provide concise tooltips for additional context on hover without overwhelming the main interface, especially on icon-only buttons
-- Add transition parameter for hover effects to ensure natural transitions
-- Example: Apply `transition-all duration-150 ease-out` to buttons for smooth color changes on hover
+- Add transition parameter for hover effects to ensure natural transitions (e.g., apply `transition-all duration-150 ease-out` to buttons for smooth color changes on hover)
+- For additional context on hover, see the Tooltips section below
 
 ### Disabled or Hidden States
-- Clearly indicate disabled elements using subdued colors and preventing interaction
-- Example: Apply `color-negative-content-subtlest` to text to convey disabled state
-- Provide explanations on tooltips when features are disabled (e.g., "This option is available when Task assignment is automatic")
-- Hide elements that are irrelevant to current user context to reduce clutter only when that is a better alternative to disabling the element
+- Clearly indicate disabled elements using subdued colors and preventing interaction (e.g., apply `color-negative-content-subtlest` to text to convey disabled state)
+- Provide explanations when features are disabled (see Tooltips section for implementation guidance)
 
 ### Destructive Actions
 - Use clear, explicit labels (e.g., "Delete Permanently" instead of "Delete")
@@ -81,13 +68,12 @@ alwaysApply: false
 
 ### External Links & Documentation Links
 - For all external links or links to documentation, use `target="_blank"` to open in a new tab
-- Always include `rel="noopener noreferrer"` for security and performance best practices when opening links in a new tab
-- Example: `<a href="https://docs.example.com" target="_blank" rel="noopener noreferrer">View Documentation</a>`
+- Always include `rel="noopener noreferrer"` for security and performance best practices when opening links in a new tab (e.g., `<a href="https://docs.example.com" target="_blank" rel="noopener noreferrer">View Documentation</a>`)
 
 ## User Guidance & Feedback Mechanisms
 
 ### Error Messages (Dialogs, In-Line, Full Pages)
-- Use plain, empathetic language that explains what went wrong without sounding accusatory
+- Use plain, empathetic language that explains what went wrong without sounding accusatory (see "Error Messaging" section for language guidelines)
 - Importantly, explain what actions the user can take to remedy the issue, if any
 - Display error messages close to the element causing the issue (e.g., inline validation errors for form fields)
 - Provide a link to documentation that explains how to work with the desired entity (e.g. "See docs.")
@@ -103,20 +89,24 @@ alwaysApply: false
 
 ### Tooltips
 - Use tooltips to provide context or explain the functionality of less obvious features without cluttering the interface
+- Provide concise tooltips for additional context on hover without overwhelming the main interface, especially on icon-only buttons
+- For disabled features, provide explanations via tooltips (e.g., "This option is available when Task assignment is automatic")
 - Ensure tooltips are concise, helpful, and disappear when users move away from the element
+- Make tooltips keyboard accessible and announced by screen readers using appropriate ARIA attributes
+- Use `aria-label` combined with tooltips for comprehensive accessibility on icon-only buttons (e.g., icon-only button with `aria-label="Delete project"` and tooltip showing "Permanently delete this project")
 - Avoid relying solely on tooltips for critical information, as they may be missed by some users
+
 
 ### Loading States, Progress, and Recovery
 - Implement loading animations (spinners, progress bars) that communicate progress when a component or data are being loaded or processed
-- Provide a friendly message to let users know their action is being processed (e.g., "Saving changes...")
 - Use skeleton animations and screens for more complex loading scenarios
 - Load pieces of data asynchronously to allow users to interact with elements while some parts are still loading
 - For long waiting times, provide an estimated time remaining or a progress percentage
 - Allow users to cancel the action if possible
 - Offer simple actions or suggestions to recover from loading errors (e.g., retry buttons, reconnect options)
 
-### Saving Entities, Forms, and Feedback
-- Provide clear feedback when saving is in progress (e.g., a spinner and/or "Saving..." message)
+#### Saving States and Form Feedback
+- Provide clear feedback when saving is in progress (e.g., a spinner and/or "Saving changes..." message)
 - Confirm successful saves with a clear message or visual indicator, using the Snackbar/Toast component (e.g., "Changes saved successfully")
 - Implement auto-save data periodically to minimize data loss
 - Allow users to manually save if they prefer, in addition to auto-save
@@ -124,39 +114,75 @@ alwaysApply: false
 
 ### Notifications
 - Keep notifications non-intrusive (use snackbars/toasts for non-urgent messages; modals only for urgent alerts)
-- Provide users with control over notification settings
+
+## Advanced UX Patterns
+
+### Progressive Disclosure & Information Hierarchy
+- Present only the most essential information first
+- Use progressive disclosure to reveal additional options when needed
+- Implement expand/collapse patterns for complex forms
+- Group advanced settings in collapsible sections (e.g., show basic upload options first, with "Advanced Settings" expandable section)
+- Use clear visual hierarchy with headings, subheadings, and proper spacing
+- Prioritize content based on user goals and frequency of use
+- Use "Show more" links for secondary actions or detailed information
+
+### Data Presentation & Tables
+- Use consistent sorting and filtering patterns across all data tables
+- Implement proper pagination for large datasets with clear navigation
+- Provide clear column headers with sorting indicators (arrows, text)
+- Use zebra striping or subtle borders for row separation to improve readability
+- Include bulk selection patterns with clear action buttons
+- Show loading states for individual table cells when applicable
+- Display helpful metadata (e.g., "Showing 10 of 245 results" or "Last updated 2 minutes ago")
+- Implement responsive table patterns for mobile (stacking, horizontal scroll, or card layouts)
+- Provide export options when appropriate (CSV, PDF, etc.)
+
+### Search & Filtering UX
+- Provide real-time search results when possible, with appropriate debouncing
+- Show search suggestions and auto-complete to guide users
+- Display clear filter states with visual indicators (badges, pills)
+- Include easy filter removal with individual "×" buttons and "Clear all filters" option
+- Show result counts and search query (e.g., "Showing 10 results for 'annotation'")
+- Implement search history or recent searches for returning users
+- Use proper empty states for "no results found" with suggested actions
+- Group filters logically and allow multiple selections within categories
+
+### Navigation & Wayfinding
+- Implement consistent breadcrumb patterns for deep navigation
+- Use clear, descriptive page titles and section headings
+- Provide contextual navigation for multi-step processes with progress indicators
+- Ensure consistent sidebar and top navigation behavior across the application
+- Include "back" functionality that makes sense contextually
+- Use landmarks and skip links for accessibility
+- Provide search functionality in global navigation when appropriate
+- Implement proper active states for current page/section indicators
 
 ## Accessibility Implementation
 
 ### Semantic HTML
 - Always use semantic HTML
-- Apply appropriate ARIA roles and properties for complex components to maximize compatibility with assistive technologies. Example: Use the `<Button>` component for clickable actions instead of `<div>` with a click handler, and `aria-label` and `tooltip` for icon-only buttons
+- Apply appropriate ARIA roles and properties for complex components to maximize compatibility with assistive technologies. Example: Use the `<Button>` component for clickable actions instead of `<div>` with a click handler, with proper `aria-label` for icon-only buttons (see Tooltips section for additional context guidance)
 
 ### Keyboard Navigation
 - Ensure all interactive elements are keyboard focusable with logical tab order and clearly visible focus indicators
-- Support standard keyboard shortcuts
-- Example: Ensure users can navigate through all form fields, buttons, and interactive elements using only the Tab key, and activate them with Enter or Space
+- Support standard keyboard shortcuts (e.g., ensure users can navigate through all form fields, buttons, and interactive elements using only the Tab key, and activate them with Enter or Space)
 - Only show the focus outline when navigating using tab or assistive devices
 
 ### Focus Management
 - Implement robust focus management, ensuring focus is visible and high contrast
 - Manage focus appropriately in complex interactions (e.g., modals trapping focus, returning focus on close)
-- Avoid focus traps
-- Example: When a modal opens, programmatically move focus to the first interactive element within the modal, and return focus to the element that triggered the modal when it closes
+- Avoid focus traps (e.g., when a modal opens, programmatically move focus to the first interactive element within the modal, and return focus to the element that triggered the modal when it closes)
 
 ### Responsive Text
-- Generate CSS/components that allow text to be resized up to 200% without loss of content or functionality (use relative units like rem, em)
-- Example: Define font sizes using rem units so that they scale correctly when the user adjusts their browser's default font size
+- Generate CSS/components that allow text to be resized up to 200% without loss of content or functionality using relative units like rem, em (e.g., define font sizes using rem units so that they scale correctly when the user adjusts their browser's default font size)
 
 ### Color and Contrast
-- Ensure a minimum contrast ratio of 4.5:1 for text and interactive elements
-- Never use color as the sole means of conveying information
-- Example: Verify that text on a light gray background has a dark enough color to meet the 4.5:1 contrast ratio, and when using color to convey state always use other elements such as icons (check, warning) or labels
+- Ensure a minimum contrast ratio of 4.5:1 for text and interactive elements (e.g., verify that text on a light gray background has a dark enough color to meet the 4.5:1 contrast ratio)
+- Never use color as the sole means of conveying information (e.g., when using color to convey state always use other elements such as icons (check, warning) or labels)
 
 ### Screen Reader Support
-- Ensure all dynamic content updates (e.g., status changes, form validation errors) are announced by screen readers using ARIA-live regions
-- Make tooltips and popovers keyboard accessible and announced by screen readers
-- Example: When a new validation error appears on a form field, ensure an aria-live region announces "Error: This field is required" to screen reader users
+- Ensure all dynamic content updates (e.g., status changes, form validation errors) are announced by screen readers using ARIA-live regions (e.g., when a new validation error appears on a form field, ensure an aria-live region announces "Error: This field is required" to screen reader users)
+- Ensure popovers and contextual information are keyboard accessible and announced by screen readers (see Tooltips section for specific implementation)
 
 ## Implementation Guidelines
 
@@ -164,13 +190,14 @@ alwaysApply: false
 - Use components from `@humansignal/ui` package for consistent UX patterns
 - Follow the established design system tokens for colors, spacing, and typography
 - Implement proper responsive design using semantic utilities
-- Ensure all components follow the accessibility standards outlined above
+- Follow the Tailwind CSS rules file for styling guidelines and best practices
+- Use the Typography component for implementing all text instances to ensure consistency
+- Avoid creating a new component if one exists that already covers the same use case, opt instead for extending or improving the existing component and reuse it
 
 ### Testing UX Implementation
 - When a screenshot is provided or a screenshot of the application is obtained through an MCP such as Playwright, analyze the UI copy (labels, helper text, descriptions, buttons) and suggest improvements or rewrites to increase clarity, conciseness, helpfulness and user-friendliness and to help it adhere to the standards outlined on these rules
 - Test all interactive elements with keyboard navigation
 - Verify color contrast ratios meet WCAG standards
-- Test with screen readers when possible
 - Validate that error messages and feedback are clear and actionable
 - Ensure loading states and empty states provide appropriate guidance
 
@@ -178,3 +205,34 @@ alwaysApply: false
 - Include accessibility considerations in component documentation in Storybook
 - Provide examples of proper usage for complex interactions
 - Maintain consistency with existing UX patterns in the application
+
+## Performance & User Experience
+
+### Performance & Perceived Performance
+- Use skeleton screens for content that takes time to load
+- Implement optimistic UI updates where safe (show expected result immediately, rollback if fails)
+- Provide immediate feedback for user actions, even if processing takes time
+- Use progressive image loading with appropriate placeholders
+- Batch API calls to reduce perceived loading time
+- Prioritize above-the-fold content loading
+- Implement proper caching strategies for frequently accessed data
+- Show partial results while full results are loading
+- Use intersection observers for lazy loading of off-screen content
+
+### Internationalization (i18n) Considerations
+- Design flexible layouts that accommodate text expansion (up to 30% longer for translations)
+- Use proper date, time, and number formatting based on user locale
+- Consider right-to-left (RTL) language support in layout design
+- Avoid text in images when possible; use overlays or separate text elements
+- Use semantic HTML that works well with translation tools
+
+### Animation & Micro-interactions
+- Use subtle animations to guide user attention and provide feedback
+- Implement state change animations (hover, focus, selection, loading)
+- Keep animations under 300ms for UI responsiveness (150ms for micro-interactions)
+- Provide animation controls for accessibility (respect `prefers-reduced-motion`)
+- Use natural easing functions (ease-out for most UI elements)
+- Implement meaningful transitions between states and pages
+- Use animation to show relationships between elements (parent-child, cause-effect)
+- Avoid excessive or distracting animations that don't serve a functional purpose
+- Test animations on lower-powered devices to ensure smooth performance
