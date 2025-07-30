@@ -6,6 +6,7 @@ from typing import Callable, Optional
 from core.utils.common import load_func
 from django.conf import settings
 from django.db import transaction
+from label_studio_sdk.label_interface import LabelInterface
 from projects.models import ProjectImport, ProjectReimport, ProjectSummary
 from rest_framework.exceptions import ValidationError
 from users.models import User
@@ -45,7 +46,7 @@ def async_import_background(
 
     if project_import.preannotated_from_fields:
         # turn flat task JSONs {"column1": value, "column2": value} into {"data": {"column1"..}, "predictions": [{..."column2"}]
-        tasks = reformat_predictions(tasks, project_import.preannotated_from_fields)
+        tasks = reformat_predictions(tasks, project_import.preannotated_from_fields, project)
 
     if project_import.commit_to_project:
         with transaction.atomic():
@@ -134,15 +135,28 @@ def set_reimport_background_failure(job, connection, type, value, _):
     )
 
 
-def reformat_predictions(tasks, preannotated_from_fields):
+def reformat_predictions(tasks, preannotated_from_fields, project=None):
     """
     Transform flat task JSON objects into proper format with separate data and predictions fields.
     Also validates the predictions to ensure they are properly formatted using LabelInterface.
+
+    Args:
+        tasks: List of task data
+        preannotated_from_fields: List of field names to convert to predictions
+        project: Optional project instance to determine correct to_name and type from label config
     """
     new_tasks = []
     validation_errors = []
 
     # Import LabelInterface here to avoid circular imports
+
+    # If project is provided, create LabelInterface to determine correct mappings
+    li = None
+    if project:
+        try:
+            li = LabelInterface(project.label_config)
+        except Exception as e:
+            logger.warning(f'Could not create LabelInterface for project {project.id}: {e}')
 
     for task_index, task in enumerate(tasks):
         if 'data' in task:
@@ -158,19 +172,57 @@ def reformat_predictions(tasks, preannotated_from_fields):
 
             value = task_data[field]
             if value is not None:
+                # Try to determine correct to_name and type from project configuration
+                to_name = 'text'  # Default fallback
+                prediction_type = 'choices'  # Default fallback
+
+                if li and li._controls:
+                    # Find a control tag that matches the field name
+                    for control_name, control_tag in li._controls.items():
+                        if control_name == field:
+                            # Use the control's to_name and determine type
+                            if hasattr(control_tag, 'to_name') and control_tag.to_name:
+                                to_name = (
+                                    control_tag.to_name[0]
+                                    if isinstance(control_tag.to_name, list)
+                                    else control_tag.to_name
+                                )
+                                prediction_type = control_tag.tag.lower()
+                            break
+
                 # Create prediction from preannotated field
+                # Handle different types of values
+                if isinstance(value, dict):
+                    # For complex structures like bounding boxes, use the value directly
+                    prediction_value = value
+                else:
+                    # For simple values, use the prediction_type as the key
+                    # Handle cases where the type doesn't match the expected key
+                    value_key = prediction_type
+                    if prediction_type == 'textarea':
+                        value_key = 'text'
+
+                    # Most types expect lists, but some expect single values
+                    if prediction_type in ['rating', 'number', 'datetime']:
+                        prediction_value = {value_key: value}
+                    else:
+                        # Wrap in list for most types
+                        prediction_value = {value_key: [value] if not isinstance(value, list) else value}
+
                 prediction = {
                     'result': [
                         {
                             'from_name': field,
-                            'to_name': 'text',  # Default target
-                            'type': 'choices',  # Default type
-                            'value': {'choices': [value] if isinstance(value, str) else value},
+                            'to_name': to_name,
+                            'type': prediction_type,
+                            'value': prediction_value,
                         }
                     ],
                     'score': 1.0,
                     'model_version': 'preannotated',
                 }
+
+                print(f'\nprediction: {prediction}\n')
 
                 # Validate the prediction using LabelInterface if project is available
                 # Note: We can't validate here since we don't have project context

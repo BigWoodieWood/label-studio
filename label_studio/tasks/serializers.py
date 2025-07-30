@@ -76,6 +76,10 @@ class PredictionSerializer(ModelSerializer):
 
     def validate(self, data):
         """Validate prediction using LabelInterface against project configuration"""
+        # Only validate if we're updating the result field
+        if 'result' not in data:
+            return data
+
         # Get the project from the task or directly from data
         project = None
         if 'task' in data:

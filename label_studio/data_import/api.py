@@ -289,7 +289,7 @@ class ImportAPI(generics.CreateAPIView):
 
         if preannotated_from_fields:
             # turn flat task JSONs {"column1": value, "column2": value} into {"data": {"column1"..}, "predictions": [{..."column2"}]
-            parsed_data = reformat_predictions(parsed_data, preannotated_from_fields)
+            parsed_data = reformat_predictions(parsed_data, preannotated_from_fields, project)
 
         if commit_to_project:
             # Immediately create project tasks and update project states and counters
