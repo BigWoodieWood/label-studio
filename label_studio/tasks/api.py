@@ -283,7 +283,8 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
         super().initial(request, *args, **kwargs)
         self.task = self.get_object()
 
-    def prefetch(self, queryset):
+    @staticmethod
+    def prefetch(queryset):
         return queryset.prefetch_related(
             'annotations',
             'predictions',

@@ -1,6 +1,5 @@
 import { inject } from "mobx-react";
 import clsx from "clsx";
-import { useMemo } from "react";
 import { useSDK } from "../../../providers/SDKProvider";
 import { cn } from "../../../utils/bem";
 import { isDefined } from "../../../utils/utils";
@@ -18,33 +17,16 @@ const isFilterMembers = isActive(FF_DM_FILTER_MEMBERS);
 export const Annotators = (cell) => {
   const { value, column, original: task } = cell;
   const sdk = useSDK();
-  const maxUsersToDisplay = window.APP_SETTINGS.data_manager.max_users_to_display;
-  const userList = Array.from(value).slice(0, maxUsersToDisplay);
+  const userList = Array.from(value);
+  const renderable = userList.slice(0, 10);
+  const extra = userList.length - renderable.length;
   const userPickBadge = cn("userpic-badge");
   const annotatorsCN = cn("annotators");
   const isEnterprise = window.APP_SETTINGS.billing?.enterprise;
 
-  // Memoize the count field calculation
-  const extraCount = useMemo(() => {
-    const getCountField = () => {
-      switch (column.alias) {
-        case "annotators":
-          return task?.annotators_count || 0;
-        case "reviewers":
-          return task?.reviewers_count || 0;
-        case "comment_authors":
-          return task?.comment_authors_count || 0;
-        default:
-          return 0;
-      }
-    };
-
-    return getCountField() - maxUsersToDisplay;
-  }, [column.alias, task?.annotators_count, task?.reviewers_count, task?.comment_authors_count]);
-
   return (
     <div className={annotatorsCN.toString()}>
-      {userList.map((item, index) => {
+      {renderable.map((item, index) => {
         const user = item.user ?? item;
         const { annotated, reviewed, review } = item;
 
@@ -78,7 +60,7 @@ export const Annotators = (cell) => {
           </div>
         );
       })}
-      {extraCount > 0 && (
+      {extra > 0 && (
         <div
           className={annotatorsCN.elem("item").toString()}
           onClick={(e) => {
@@ -87,7 +69,7 @@ export const Annotators = (cell) => {
             sdk.invoke("userCellCounterClick", e, column.alias, task, userList);
           }}
         >
-          <Userpic addCount={`+${extraCount}`} />
+          <Userpic addCount={`+${extra}`} />
         </div>
       )}
     </div>
@@ -120,11 +102,6 @@ Annotators.FilterItem = UsersInjector(({ item }) => {
 
 Annotators.searchFilter = (option, queryString) => {
   const user = DM.usersMap.get(option?.value);
-  if (!user) {
-    // Fallback to searching by ID if user not found
-    return option?.value?.toString().toLowerCase().includes(queryString.toLowerCase());
-  }
-
   return (
     user.id?.toString().toLowerCase().includes(queryString.toLowerCase()) ||
     user.email.toLowerCase().includes(queryString.toLowerCase()) ||
