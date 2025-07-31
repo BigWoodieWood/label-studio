@@ -1,8 +1,8 @@
 import json
+
 import boto3
 import pytest
 from io_storages.models import S3ImportStorage
-from io_storages.tests.factories import S3ImportStorageFactory
 from moto import mock_s3
 from projects.tests.factories import ProjectFactory
 from rest_framework.test import APIClient
