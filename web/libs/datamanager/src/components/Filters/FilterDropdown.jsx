@@ -54,14 +54,8 @@ export const FilterDropdown = observer(
         size="small"
         options={options}
         searchable={true}
+        triggerClassName="whitespace-nowrap"
         searchFilter={searchFilter}
-        triggerProps={{
-          style: {
-            paddingLeft: "8px",
-            paddingRight: "8px",
-          },
-        }}
-        style={style}
         isVirtualList={true}
       />
     );
