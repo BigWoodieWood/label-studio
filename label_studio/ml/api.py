@@ -467,7 +467,7 @@ class MLBackendInteractiveAnnotating(APIView):
     ),
 )
 class MLBackendVersionsAPI(generics.RetrieveAPIView):
-
+    # TODO(jo): implement this view with a serializer and replace the handwritten schema above with it
     permission_required = all_permissions.projects_change
 
     def get(self, request, *args, **kwargs):
