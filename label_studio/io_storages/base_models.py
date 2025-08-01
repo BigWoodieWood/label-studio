@@ -6,6 +6,7 @@ import itertools
 import json
 import logging
 import os
+import sys
 import traceback as tb
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
@@ -29,6 +30,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_rq import job
 from io_storages.utils import StorageObject, get_uri_via_regex, parse_bucket_uri
+from rest_framework.exceptions import ValidationError
 from rq.job import Job
 from tasks.models import Annotation, Task
 from tasks.serializers import AnnotationSerializer, PredictionSerializer
@@ -117,7 +119,42 @@ class StorageInfo(models.Model):
 
     def info_set_failed(self):
         self.status = self.Status.FAILED
-        self.traceback = str(tb.format_exc())
+
+        # Get the current exception info
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+
+        # Extract human-readable error messages from ValidationError
+        if exc_type and issubclass(exc_type, ValidationError):
+            error_messages = []
+            if hasattr(exc_value, 'detail'):
+                # Handle ValidationError.detail which can be a dict or list
+                if isinstance(exc_value.detail, dict):
+                    for field, errors in exc_value.detail.items():
+                        if isinstance(errors, list):
+                            for error in errors:
+                                if hasattr(error, 'string'):
+                                    error_messages.append(error.string)
+                                else:
+                                    error_messages.append(str(error))
+                        else:
+                            error_messages.append(str(errors))
+                elif isinstance(exc_value.detail, list):
+                    for error in exc_value.detail:
+                        if hasattr(error, 'string'):
+                            error_messages.append(error.string)
+                        else:
+                            error_messages.append(str(error))
+                else:
+                    error_messages.append(str(exc_value.detail))
+
+            # Use human-readable messages if available, otherwise fall back to full traceback
+            if error_messages:
+                self.traceback = '\n'.join(error_messages)
+            else:
+                self.traceback = str(tb.format_exc())
+        else:
+            # For non-ValidationError exceptions, use the full traceback
+            self.traceback = str(tb.format_exc())
 
         time_failure = timezone.now()
 
@@ -418,7 +455,9 @@ class ImportStorage(Storage):
                 prediction['task'] = task.id
                 prediction['project'] = project.id
             prediction_ser = PredictionSerializer(data=predictions, many=True)
-            if prediction_ser.is_valid(raise_exception=raise_exception):
+
+            # Always validate predictions and raise exception if invalid
+            if prediction_ser.is_valid(raise_exception=True):
                 prediction_ser.save()
 
             # add annotations
@@ -427,8 +466,15 @@ class ImportStorage(Storage):
                 annotation['task'] = task.id
                 annotation['project'] = project.id
             annotation_ser = AnnotationSerializer(data=annotations, many=True)
-            if annotation_ser.is_valid(raise_exception=raise_exception):
+
+            # Always validate annotations, but control error handling based on FF
+            if annotation_ser.is_valid():
                 annotation_ser.save()
+            else:
+                # Log validation errors but don't save invalid annotations
+                logger.error(f'Invalid annotations for task {task.id}: {annotation_ser.errors}')
+                if raise_exception:
+                    raise ValidationError(annotation_ser.errors)
         return task
         # FIXME: add_annotation_history / post_process_annotations should be here
 
