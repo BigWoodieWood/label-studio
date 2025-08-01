@@ -62,6 +62,7 @@ export const FilterDropdown = observer(
           },
         }}
         style={style}
+        isVirtualList={true}
       />
     );
   },
