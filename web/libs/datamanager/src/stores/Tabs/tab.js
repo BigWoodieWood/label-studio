@@ -144,15 +144,26 @@ export const Tab = types
     },
 
     get serializedFilters() {
-      return self.validFilters.map((el) => {
-        const filterItem = {
-          ...getSnapshot(el),
-          type: el.filter.currentType,
+      const serialize = (filterModel) => {
+        const item = {
+          ...getSnapshot(filterModel),
+          type: filterModel.filter.currentType,
         };
 
-        filterItem.value = normalizeFilterValue(filterItem.type, filterItem.operator, filterItem.value);
-        return filterItem;
-      });
+        // cleanup or recurse on child_filter
+        if (item.child_filter) {
+          if (!filterModel.child_filter?.isValidFilter) {
+            item.child_filter = null;
+          } else {
+            item.child_filter = serialize(filterModel.child_filter);
+          }
+        }
+
+        item.value = normalizeFilterValue(item.type, item.operator, item.value);
+        return item;
+      };
+
+      return self.validFilters.map((el) => serialize(el));
     },
 
     get selectedCount() {
