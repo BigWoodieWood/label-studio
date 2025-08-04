@@ -124,8 +124,7 @@ export const TabFilter = types
     setFilter(value, save = true) {
       if (!isDefined(value)) return;
 
-      // Remove previous child filters
-      self.view.clearJoinFilters(self);
+      self.view.clearChildFilter(self);
 
       const previousFilterType = self.filter.currentType;
       const previousFilter = self.filter;
@@ -136,8 +135,7 @@ export const TabFilter = types
       const filterChanged = previousFilter !== self.filter;
 
       if (typeChanged || filterChanged) {
-        // Spawn child filters (join_filters)
-        self.view.applyJoinFilters(self);
+        self.view.applyChildFilter(self);
 
         self.markUnsaved();
       }

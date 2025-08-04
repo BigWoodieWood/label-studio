@@ -388,15 +388,14 @@ export const Tab = types
 
       self.filters.push(filter);
 
-      // Immediately materialize join filters for the default column, if any
-      self.applyJoinFilters(filter);
+      // Immediately materialize child filter for the default column, if any
+      self.applyChildFilter(filter);
 
       if (filter.isValidFilter) self.save();
     },
 
     /**
      * Create a new filter row for the provided filter *type* (column).
-     * Used internally to materialize join filters.
      */
     createChildFilterForType(filterType, parentFilter) {
       const filter = TabFilter.create({
@@ -494,36 +493,35 @@ export const Tab = types
     },
 
     /**
-     * Create child filters for a given root filter according to its column's `join_filters` metadata.
+     * Create child filters for a given root filter according to its column's `child_filter` metadata.
      */
-    applyJoinFilters(rootFilter) {
+    applyChildFilter(rootFilter) {
       if (!rootFilter || !rootFilter.filter || !rootFilter.filter.field) return;
 
       const column = rootFilter.field;
-      const joinFilters = column?.join_filters;
-      console.debug("[DM] applyJoinFilters", { rootFilter, joinFilters });
+      const childFilter = column?.child_filter;
+      console.debug("[DM] applyChildFilter", { rootFilter, childFilter });
 
-      if (!joinFilters || !Array.isArray(joinFilters) || joinFilters.length === 0) return;
+      if (!childFilter) return;
 
-      // Only create one child filter for the first join filter column
-      // NOTE: using targetColumns instead of columns means that annotation results columns cannot be used in join_filters, but seems fine for now
-      const firstJoinColumn = self.targetColumns.find((c) => joinFilters.includes(c.alias));
+      // NOTE: using targetColumns instead of columns means that annotation results columns cannot be used in child_filters, but seems fine for now
+      const firstChildColumn = self.targetColumns.find((c) => c.alias === childFilter);
 
-      if (firstJoinColumn && !rootFilter.child_filter) {
-        const filterType = self.availableFilters.find((ft) => ft.field.id === firstJoinColumn.id);
+      if (firstChildColumn && !rootFilter.child_filter) {
+        const filterType = self.availableFilters.find((ft) => ft.field.id === firstChildColumn.id);
 
         if (filterType) {
           const childFilter = self.createChildFilterForType(filterType, rootFilter);
 
-          console.debug("[DM] join-filter created", { parent: rootFilter, child: childFilter });
+          console.debug("[DM] child-filter created", { parent: rootFilter, child: childFilter });
         }
       }
     },
 
     /** Remove any child filters previously created */
-    clearJoinFilters(rootFilter) {
+    clearChildFilter(rootFilter) {
       if (rootFilter.child_filter) {
-        console.debug("[DM] join-filter removed", { child: rootFilter.child_filter });
+        console.debug("[DM] child-filter removed", { child: rootFilter.child_filter });
         self.deleteFilter(rootFilter.child_filter);
         rootFilter.child_filter = null;
       }
