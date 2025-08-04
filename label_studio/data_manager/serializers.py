@@ -21,7 +21,11 @@ from users.models import User
 from label_studio.core.utils.common import round_floats
 
 
-class ChildFilterSerializer(serializers.Serializer):
+class ChildFilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Filter
+        fields = '__all__'
+
     def to_representation(self, value):
         parent = self.parent  # the owning FilterSerializer instance
         serializer = parent.__class__(instance=value, context=self.context)
