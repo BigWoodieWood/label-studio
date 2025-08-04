@@ -54,6 +54,7 @@ class StorageInfo(models.Model):
         IN_PROGRESS = 'in_progress', _('In progress')
         FAILED = 'failed', _('Failed')
         COMPLETED = 'completed', _('Completed')
+        COMPLETED_WITH_ERRORS = 'completed_with_errors', _('Completed with errors')
 
     class Meta:
         abstract = True
@@ -116,6 +117,18 @@ class StorageInfo(models.Model):
         self.meta['duration'] = (time_completed - self.time_in_progress).total_seconds()
         self.meta.update(kwargs)
         self.save(update_fields=['status', 'meta', 'last_sync', 'last_sync_count'])
+
+    def info_set_completed_with_errors(self, last_sync_count, validation_errors, **kwargs):
+        self.status = self.Status.COMPLETED_WITH_ERRORS
+        self.last_sync = timezone.now()
+        self.last_sync_count = last_sync_count
+        self.traceback = '\n'.join(validation_errors)
+        time_completed = timezone.now()
+        self.meta['time_completed'] = str(time_completed)
+        self.meta['duration'] = (time_completed - self.time_in_progress).total_seconds()
+        self.meta['tasks_failed_validation'] = len(validation_errors)
+        self.meta.update(kwargs)
+        self.save(update_fields=['status', 'meta', 'last_sync', 'last_sync_count', 'traceback'])
 
     def info_set_failed(self):
         self.status = self.Status.FAILED
@@ -539,6 +552,8 @@ class ImportStorage(Storage):
             if not flag_set('fflag_feat_dia_2092_multitasks_per_storage_link'):
                 link_objects = link_objects[:1]
 
+            validation_errors = []
+
             for link_object in link_objects:
                 # TODO: batch this loop body with add_task -> add_tasks in a single bulk write.
                 # See DIA-2062 for prerequisites
@@ -560,7 +575,9 @@ class ImportStorage(Storage):
                     tasks_for_webhook.append(task.id)
                 except ValidationError as e:
                     # Log validation errors but continue processing other tasks
-                    logger.error(f'Validation error for task from {link_object.key}: {e}')
+                    error_message = f'Validation error for task from {link_object.key}: {e}'
+                    logger.error(error_message)
+                    validation_errors.append(error_message)
                     continue
 
                 # settings.WEBHOOK_BATCH_SIZE
@@ -582,9 +599,14 @@ class ImportStorage(Storage):
         self.project.update_tasks_states(
             maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True
         )
-
-        # sync is finished, set completed status for storage info
-        self.info_set_completed(last_sync_count=tasks_created, tasks_existed=tasks_existed)
+        if validation_errors:
+            # sync is finished, set completed with errors status for storage info
+            self.info_set_completed_with_errors(
+                last_sync_count=tasks_created, tasks_existed=tasks_existed, validation_errors=validation_errors
+            )
+        else:
+            # sync is finished, set completed status for storage info
+            self.info_set_completed(last_sync_count=tasks_created, tasks_existed=tasks_existed)
 
     def scan_and_create_links(self):
         """This is proto method - you can override it, or just replace ImportStorageLink by your own model"""
