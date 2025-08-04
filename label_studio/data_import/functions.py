@@ -48,6 +48,33 @@ def async_import_background(
         # turn flat task JSONs {"column1": value, "column2": value} into {"data": {"column1"..}, "predictions": [{..."column2"}]
         tasks = reformat_predictions(tasks, project_import.preannotated_from_fields, project)
 
+    # Always validate predictions regardless of commit_to_project setting
+    validation_errors = []
+    li = LabelInterface(project.label_config)
+
+    for i, task in enumerate(tasks):
+        if 'predictions' in task:
+            for j, prediction in enumerate(task['predictions']):
+                try:
+                    validation_errors_list = li.validate_prediction(prediction, return_errors=True)
+                    if validation_errors_list:
+                        for error in validation_errors_list:
+                            validation_errors.append(f'Task {i}, prediction {j}: {error}')
+                except Exception as e:
+                    error_msg = f'Task {i}, prediction {j}: Error validating prediction - {str(e)}'
+                    validation_errors.append(error_msg)
+                    logger.error(f'Exception during validation: {error_msg}')
+
+    if validation_errors:
+        error_message = f'Prediction validation failed ({len(validation_errors)} errors):\n'
+        for error in validation_errors:
+            error_message += f'- {error}\n'
+
+        project_import.error = error_message
+        project_import.status = ProjectImport.Status.FAILED
+        project_import.save()
+        return
+
     if project_import.commit_to_project:
         with transaction.atomic():
             # Lock summary for update to avoid race conditions
@@ -84,15 +111,9 @@ def async_import_background(
 
                 summary.update_data_columns(tasks)
                 # TODO: summary.update_created_annotations_and_labels
-            except ValidationError as e:
-                # Store validation errors in the Import model
-                error_message = 'Prediction validation failed:\n'
-                if 'predictions' in e.detail:
-                    for error in e.detail['predictions']:
-                        error_message += f'- {error}\n'
-                else:
-                    error_message += str(e.detail)
-
+            except Exception as e:
+                # Handle any other unexpected errors during task creation
+                error_message = f'Error creating tasks: {str(e)}'
                 project_import.error = error_message
                 project_import.status = ProjectImport.Status.FAILED
                 project_import.save()
@@ -147,8 +168,6 @@ def reformat_predictions(tasks, preannotated_from_fields, project=None):
     """
     new_tasks = []
     validation_errors = []
-
-    # Import LabelInterface here to avoid circular imports
 
     # If project is provided, create LabelInterface to determine correct mappings
     li = None
