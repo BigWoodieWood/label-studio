@@ -406,8 +406,6 @@ export const Tab = types
       // Don't add to main filters array - child is owned by parent
       parentFilter.child_filter = filter;
 
-      console.debug("[DM] child filter instantiated", { parentFilter: parentFilter, child: filter });
-
       return filter;
     },
 
@@ -500,7 +498,6 @@ export const Tab = types
 
       const column = rootFilter.field;
       const childFilter = column?.child_filter;
-      console.debug("[DM] applyChildFilter", { rootFilter, childFilter });
 
       if (!childFilter) return;
 
@@ -512,8 +509,6 @@ export const Tab = types
 
         if (filterType) {
           const childFilter = self.createChildFilterForType(filterType, rootFilter);
-
-          console.debug("[DM] child-filter created", { parent: rootFilter, child: childFilter });
         }
       }
     },
@@ -521,7 +516,6 @@ export const Tab = types
     /** Remove any child filters previously created */
     clearChildFilter(rootFilter) {
       if (rootFilter.child_filter) {
-        console.debug("[DM] child-filter removed", { child: rootFilter.child_filter });
         self.deleteFilter(rootFilter.child_filter);
         rootFilter.child_filter = null;
       }
