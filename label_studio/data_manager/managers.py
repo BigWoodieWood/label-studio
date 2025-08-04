@@ -272,6 +272,7 @@ def apply_filters(queryset, filters, project, request):
         filter_expressions: list[Q] = []
 
         for _filter in filter_line:
+            is_child_filter = parent_filter.child_filter is not None and _filter is parent_filter.child_filter
 
             # we can also have annotations filters
             if not _filter.filter.startswith('filter:tasks:') or _filter.value is None:
@@ -286,7 +287,13 @@ def apply_filters(queryset, filters, project, request):
             _filter = preprocess_filter(_filter, field_name)
 
             # custom expressions for enterprise
-            filter_expression = custom_filter_expressions(_filter, field_name, project, request=request)
+            filter_expression = custom_filter_expressions(
+                _filter,
+                field_name,
+                project,
+                request=request,
+                is_child_filter=is_child_filter,
+            )
             if filter_expression:
                 filter_expressions.append(filter_expression)
                 continue

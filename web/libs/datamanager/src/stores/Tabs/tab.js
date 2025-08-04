@@ -399,13 +399,6 @@ export const Tab = types
      * Used internally to materialize join filters.
      */
     createChildFilterForType(filterType, parentFilter) {
-      // // HACK: Create a copy of filterType to avoid modifying the protected reference
-      // const filterTypeCopy = { ...filterType };
-      // if (filterType.field.title === "Annotators") {
-      //   filterTypeCopy.field = { ...filterType.field, id: "annotators__completed_by" };
-      // }
-      // filterType = filterTypeCopy;
-
       const filter = TabFilter.create({
         filter: filterType,
         view: self.id,
