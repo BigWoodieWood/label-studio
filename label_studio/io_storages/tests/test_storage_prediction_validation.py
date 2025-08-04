@@ -132,14 +132,8 @@ class TestStoragePredictionValidation:
             storage.save()
             storage.sync()
 
-            # Verify task was created (task creation should still work)
+            # Verify task was NOT created due to validation failure
             tasks_response = api_client.get(f'/api/tasks?project={project.id}')
             assert tasks_response.status_code == 200
             tasks = tasks_response.json()['tasks']
-            assert len(tasks) == 1
-
-            # Verify prediction was NOT created due to validation failure
-            predictions_response = api_client.get(f'/api/predictions?task={tasks[0]["id"]}')
-            assert predictions_response.status_code == 200
-            predictions = predictions_response.json()
-            assert len(predictions) == 0  # No predictions should be created
+            assert len(tasks) == 0  # No tasks should be created when predictions are invalid

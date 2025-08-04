@@ -95,7 +95,7 @@ class PredictionSerializer(ModelSerializer):
         validation_errors = li.validate_prediction(data, return_errors=True)
 
         if validation_errors:
-            raise ValidationError(validation_errors)
+            raise ValidationError(f'Error validating prediction: {validation_errors}')
 
         return data
 

@@ -542,21 +542,26 @@ class ImportStorage(Storage):
             for link_object in link_objects:
                 # TODO: batch this loop body with add_task -> add_tasks in a single bulk write.
                 # See DIA-2062 for prerequisites
-                task = self.add_task(
-                    self.project,
-                    maximum_annotations,
-                    max_inner_id,
-                    self,
-                    link_object,
-                    link_class=link_class,
-                )
-                max_inner_id += 1
+                try:
+                    task = self.add_task(
+                        self.project,
+                        maximum_annotations,
+                        max_inner_id,
+                        self,
+                        link_object,
+                        link_class=link_class,
+                    )
+                    max_inner_id += 1
 
-                # update progress counters for storage info
-                tasks_created += 1
+                    # update progress counters for storage info
+                    tasks_created += 1
 
-                # add task to webhook list
-                tasks_for_webhook.append(task.id)
+                    # add task to webhook list
+                    tasks_for_webhook.append(task.id)
+                except ValidationError as e:
+                    # Log validation errors but continue processing other tasks
+                    logger.error(f'Validation error for task from {link_object.key}: {e}')
+                    continue
 
                 # settings.WEBHOOK_BATCH_SIZE
                 # `WEBHOOK_BATCH_SIZE` sets the maximum number of tasks sent in a single webhook call, ensuring manageable payload sizes.
