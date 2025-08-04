@@ -221,29 +221,7 @@ task_create_response_scheme = {
         """.format(
             host=(settings.HOSTNAME or 'https://localhost:8080')
         ),
-        request={
-            'type': 'array',
-            'items': {'type': 'object'},
-            # TODO: this example doesn't work - perhaps we need to migrate to drf-spectacular for "anyOf" support
-            # also fern will change to at least provide a list of examples FER-1969
-            # right now we can only rely on documenation examples
-            # properties={
-            #     'data': openapi.Schema(type=OpenApiTypes.OBJECT, description='Data of the task'),
-            #     'annotations': openapi.Schema(
-            #         many=True,
-            #         description='Annotations for this task',
-            #     ),
-            #     'predictions': openapi.Schema(
-            #         many=True,
-            #         description='Predictions for this task',
-            #     )
-            # },
-            # example={
-            #     'data': {'image': 'http://example.com/image.jpg'},
-            #     'annotations': [annotation_response_example],
-            #     'predictions': [prediction_response_example]
-            # }
-        },
+        request=ImportApiSerializer(many=True),
         extensions={
             'x-fern-sdk-group-name': 'projects',
             'x-fern-sdk-method-name': 'import_tasks',
@@ -614,7 +592,7 @@ class ReImportAPI(ImportAPI):
         Retrieve the list of uploaded files used to create labeling tasks for a specific project.
         """,
         extensions={
-            'x-fern-sdk-group-name': ['projects', 'file_uploads'],
+            'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'list',
             'x-fern-audiences': ['public'],
         },
@@ -629,7 +607,7 @@ class ReImportAPI(ImportAPI):
         Delete uploaded files for a specific project.
         """,
         extensions={
-            'x-fern-sdk-group-name': ['projects', 'file_uploads'],
+            'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'delete_many',
             'x-fern-audiences': ['public'],
         },
@@ -678,7 +656,7 @@ class FileUploadListAPI(generics.mixins.ListModelMixin, generics.mixins.DestroyM
         summary='Get file upload',
         description='Retrieve details about a specific uploaded file.',
         extensions={
-            'x-fern-sdk-group-name': ['projects', 'file_uploads'],
+            'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'get',
             'x-fern-audiences': ['public'],
         },
@@ -692,7 +670,7 @@ class FileUploadListAPI(generics.mixins.ListModelMixin, generics.mixins.DestroyM
         description='Update a specific uploaded file.',
         request=FileUploadSerializer,
         extensions={
-            'x-fern-sdk-group-name': ['projects', 'file_uploads'],
+            'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'update',
             'x-fern-audiences': ['public'],
         },
@@ -705,7 +683,7 @@ class FileUploadListAPI(generics.mixins.ListModelMixin, generics.mixins.DestroyM
         summary='Delete file upload',
         description='Delete a specific uploaded file.',
         extensions={
-            'x-fern-sdk-group-name': ['projects', 'file_uploads'],
+            'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'delete',
             'x-fern-audiences': ['public'],
         },
@@ -738,7 +716,7 @@ class FileUploadAPI(generics.RetrieveUpdateDestroyAPIView):
         summary='Download file',
         description='Download a specific uploaded file.',
         extensions={
-            'x-fern-sdk-group-name': ['projects', 'file_uploads'],
+            'x-fern-sdk-group-name': ['files'],
             'x-fern-sdk-method-name': 'download',
             'x-fern-audiences': ['public'],
         },
