@@ -503,6 +503,7 @@ class ImportStorage(Storage):
         maximum_annotations = self.project.maximum_annotations
         task = self.project.tasks.order_by('-inner_id').first()
         max_inner_id = (task.inner_id + 1) if task else 1
+        validation_errors = []
 
         # Check feature flag once for the entire sync process
         check_file_extension = flag_set(
@@ -551,8 +552,6 @@ class ImportStorage(Storage):
 
             if not flag_set('fflag_feat_dia_2092_multitasks_per_storage_link'):
                 link_objects = link_objects[:1]
-
-            validation_errors = []
 
             for link_object in link_objects:
                 # TODO: batch this loop body with add_task -> add_tasks in a single bulk write.
