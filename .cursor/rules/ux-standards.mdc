@@ -9,14 +9,11 @@ alwaysApply: false
 ## Language & Microcopy Directives
 
 ### Writing Guidelines
-- Generate simple, concise language (aim for 7th-grade reading level or lower)
+- Generate simple, concise language. Aim for 7th-grade reading level or lower. For example, use "Upload Dataset" instead of "Initiate Data Ingestion Process."
 - Avoid jargon, acronyms (unless commonly known, spell out first use), and abbreviations
 
-### Terminology Consistency  
-- Use consistent terminology for all UI elements (e.g., "category" not "type")
-
 ### Tone and Voice
-- **Enterprise version**: Maintain a professional, clear, and efficient tone (e.g., "All tasks labeled successfully")
+- **Enterprise version**: Maintain a professional, clear, and efficient tone (e.g., "Successfully labeled all tasks")
 - **Open-source version**: Maintain a conversational, open, clear, practical, informal, optimistic, and friendly tone (e.g., "Awesome work! Your tasks are all done!")
 
 ### Language Structure
@@ -30,7 +27,7 @@ alwaysApply: false
 - For implementation details, see "Error Messages" section under User Guidance & Feedback Mechanisms
 
 ### Positive Feedback
-- Generate positive, encouraging, and informative feedback (e.g., after a successful upload, show "Dataset uploaded successfully! You can now start labeling")
+- Generate positive, encouraging, and informative feedback (e.g., after a successful upload, show "Successfully uploaded dataset! You may now start labeling")
 
 ### Content Guidelines
 - Keep text friendly, clear, and succinct, providing helpful cues without overwhelming the user (e.g., use a tooltip "Adjust the bounding box size" instead of "This control allows for the modification of the dimensions of the rectangular annotation area")
@@ -60,7 +57,7 @@ alwaysApply: false
 - Provide explanations when features are disabled (see Tooltips section for implementation guidance)
 
 ### Destructive Actions
-- Use clear, explicit labels (e.g., "Delete Permanently" instead of "Delete")
+- Use clear, explicit labels (e.g., "Delete Annotation" instead of "Delete")
 - Always require user confirmation (e.g., a modal) for destructive actions to prevent accidental data loss
 - Make destructive actions visually distinct, using the "negative" color palette to indicate danger or permanence
 - Place destructive actions away from primary actions to avoid accidental clicks
@@ -69,6 +66,7 @@ alwaysApply: false
 ### External Links & Documentation Links
 - For all external links or links to documentation, use `target="_blank"` to open in a new tab
 - Always include `rel="noopener noreferrer"` for security and performance best practices when opening links in a new tab (e.g., `<a href="https://docs.example.com" target="_blank" rel="noopener noreferrer">View Documentation</a>`)
+- Ensure that documentation links point to the correct Community or Enterprise URL (use `getDocsUrl` utility at `/web/libs/editor/src/utils/docs.ts`)
 
 ## User Guidance & Feedback Mechanisms
 
@@ -77,7 +75,6 @@ alwaysApply: false
 - Importantly, explain what actions the user can take to remedy the issue, if any
 - Display error messages close to the element causing the issue (e.g., inline validation errors for form fields)
 - Provide a link to documentation that explains how to work with the desired entity (e.g. "See docs.")
-- Ensure that doc links point to the correct Community or Enterprise URL (using an existing utility if the link would be available on both)
 - Offer a "Retry" or "Refresh" button if that is possible
 - Avoid displaying stack trace messages by default; allow the user to dig deeper if necessary by clicking on a "View error details" button
 - Clear error messages automatically when the error no longer applies
@@ -90,7 +87,7 @@ alwaysApply: false
 ### Tooltips
 - Use tooltips to provide context or explain the functionality of less obvious features without cluttering the interface
 - Provide concise tooltips for additional context on hover without overwhelming the main interface, especially on icon-only buttons
-- For disabled features, provide explanations via tooltips (e.g., "This option is available when Task assignment is automatic")
+- For disabled features, provide explanations via tooltips (e.g., "You can use this option when task assignment is automatic")
 - Ensure tooltips are concise, helpful, and disappear when users move away from the element
 - Make tooltips keyboard accessible and announced by screen readers using appropriate ARIA attributes
 - Use `aria-label` combined with tooltips for comprehensive accessibility on icon-only buttons (e.g., icon-only button with `aria-label="Delete project"` and tooltip showing "Permanently delete this project")
@@ -104,10 +101,11 @@ alwaysApply: false
 - For long waiting times, provide an estimated time remaining or a progress percentage
 - Allow users to cancel the action if possible
 - Offer simple actions or suggestions to recover from loading errors (e.g., retry buttons, reconnect options)
+- Avoid layout shifts when components change states. For example, ensure elements don't shift around when saving or loading, potentially causing users to click in the wrong place.
 
 #### Saving States and Form Feedback
 - Provide clear feedback when saving is in progress (e.g., a spinner and/or "Saving changes..." message)
-- Confirm successful saves with a clear message or visual indicator, using the Snackbar/Toast component (e.g., "Changes saved successfully")
+- Confirm successful saves with a clear message or visual indicator, using the Snackbar/Toast component (e.g., "Successfully saved changes")
 - Implement auto-save data periodically to minimize data loss if possible
 - Allow users to manually save if they prefer, in addition to auto-save
 - Warn users with a confirmation dialog when they attempt to navigate away from a form with unsaved changes
@@ -136,6 +134,7 @@ alwaysApply: false
 - Display helpful metadata (e.g., "Showing 10 of 245 results" or "Last updated 2 minutes ago")
 - Implement responsive table patterns for mobile (stacking, horizontal scroll, or card layouts)
 - Provide export options when appropriate (CSV, PDF, etc.)
+- Relative dates (2 minutes ago, 1 year ago, an hour ago, etc.) must always display a title or tooltip displaying the absolute date and time.
 
 ### Search & Filtering UX
 - Provide real-time search results when possible, with appropriate debouncing
