@@ -10,7 +10,7 @@ alwaysApply: false
 
 ### Writing Guidelines
 - Generate simple, concise language (aim for 7th-grade reading level or lower)
-- Avoid jargon, acronyms (unless commonly known, spell out first use), and abbreviations (e.g., use "Upload Dataset" instead of "Initiate Data Ingestion Process")
+- Avoid jargon, acronyms (unless commonly known, spell out first use), and abbreviations
 
 ### Terminology Consistency  
 - Use consistent terminology for all UI elements (e.g., "category" not "type")
