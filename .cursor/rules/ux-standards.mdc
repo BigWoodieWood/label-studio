@@ -108,7 +108,7 @@ alwaysApply: false
 #### Saving States and Form Feedback
 - Provide clear feedback when saving is in progress (e.g., a spinner and/or "Saving changes..." message)
 - Confirm successful saves with a clear message or visual indicator, using the Snackbar/Toast component (e.g., "Changes saved successfully")
-- Implement auto-save data periodically to minimize data loss
+- Implement auto-save data periodically to minimize data loss if possible
 - Allow users to manually save if they prefer, in addition to auto-save
 - Warn users with a confirmation dialog when they attempt to navigate away from a form with unsaved changes
 
