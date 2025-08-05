@@ -141,7 +141,7 @@ alwaysApply: false
 - Provide real-time search results when possible, with appropriate debouncing
 - Show search suggestions and auto-complete to guide users
 - Display clear filter states with visual indicators (badges, pills)
-- Include easy filter removal with individual "×" buttons and "Clear all filters" option
+- Include easy filter removal with individual "×" buttons or "Clear all filters" option
 - Show result counts and search query (e.g., "Showing 10 results for 'annotation'")
 - Implement search history or recent searches for returning users
 - Use proper empty states for "no results found" with suggested actions
