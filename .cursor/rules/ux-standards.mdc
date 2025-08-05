@@ -190,7 +190,7 @@ alwaysApply: false
 - Use components from `@humansignal/ui` package for consistent UX patterns
 - Follow the established design system tokens for colors, spacing, and typography
 - Implement proper responsive design using semantic utilities
-- Follow the Tailwind CSS rules file for styling guidelines and best practices
+- Follow @tailwind.mdc rules file for styling guidelines and best practices
 - Use the Typography component for implementing all text instances to ensure consistency
 - Avoid creating a new component if one exists that already covers the same use case, opt instead for extending or improving the existing component and reuse it
 
