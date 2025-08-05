@@ -12,11 +12,15 @@ Use with the following data types: video
 
 ### Video format
 
-Label Studio relies on your web browser to play videos and evaluate the total frame number. So it's essential that your videos use a format and codecs that are universally supported. To ensure maximum compatibility, we recommend using an MP4 container with video encoded using the H.264 (AVC) codec and audio encoded with AAC. This combination is widely supported across all modern browsers and minimizes issues like incorrect total duration detection or problems with playback. In addition, it's important to convert your videos to a constant frame rate (CFR), ideally around 30 fps, to avoid discrepancies in frame counts and issues with duplicated or missing frames. 
+Label Studio relies on your web browser to play videos and evaluate the total frame number. So it's essential that your videos use a format and codecs that are universally supported. 
+
+To ensure maximum compatibility, we recommend using an MP4 container with video encoded using the H.264 (AVC) codec and audio encoded with AAC. This combination is widely supported across all modern browsers and minimizes issues like incorrect total duration detection or problems with playback. In addition, it's important to convert your videos to a constant frame rate (CFR), ideally around 30 fps, to avoid discrepancies in frame counts and issues with duplicated or missing frames. 
 
 All audio and video streams from your file must also have the same durations; otherwise, you will have extra total frames.
 
-Converting your videos to this recommended format will help ensure that they play smoothly in Label Studio and that the frame rate and duration are correctly recognized for accurate annotations. To convert any video to this format, you can use FFmpeg. For example, the following commands convert an input video to MP4 with H.264 video, AAC audio, and a constant frame rate of 30 fps:
+Converting your videos to this recommended format will help ensure that they play smoothly in Label Studio and that the frame rate and duration are correctly recognized for accurate annotations. 
+
+To convert any video to this format, you can use FFmpeg. For example, the following commands convert an input video to MP4 with H.264 video, AAC audio, and a constant frame rate of 30 fps:
 
 ```bash
 # Extract the exact video stream duration in seconds
@@ -24,6 +28,7 @@ DUR=$(ffprobe -v error -select_streams v:0 -show_entries stream=duration -of def
 # Re-encode media file to recommended format
 ffmpeg -i input_video.mp4 -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p -r 30 -c:a aac -b:a 128k -to $DUR output_video.mp4
 ```
+
 
 In this command:
 - `-i input_video.mp4` specifies your source video.
@@ -43,6 +48,12 @@ ffprobe -v error -show_format -show_streams -print_format json input.mp4
 ```
 
 {% insertmd includes/tags/video.md %}
+
+!!! attention
+
+    If your video frame rate does not match the default value of `24`, then you must specify it explicitly. You can do this on the project level using the `frameRate` parameter. 
+    
+    You can also do this on a per-task basis using a variable and then specifying the value in your task data. For example, `frameRate="$fps"` and `task.data {“fps”:“29.97", “video”: “…”}`.
 
 ### Example
 
