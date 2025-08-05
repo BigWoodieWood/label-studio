@@ -442,6 +442,7 @@ class ImportPredictionsAPI(generics.CreateAPIView):
             try:
                 validation_errors_list = li.validate_prediction(item, return_errors=True)
 
+                # If prediction is invalid, add error to validation_errors list and continue to next prediction
                 if validation_errors_list:
                     # Format errors for better readability
                     for error in validation_errors_list:
@@ -452,10 +453,7 @@ class ImportPredictionsAPI(generics.CreateAPIView):
                 validation_errors.append(f'Prediction {i}: Error validating prediction - {str(e)}')
                 continue
 
-            # If there are validation errors, raise them before creating any predictions
-            if validation_errors:
-                raise ValidationError(validation_errors)
-
+            # If prediction is valid, add it to predictions list to be created
             try:
                 predictions.append(
                     Prediction(
@@ -469,6 +467,10 @@ class ImportPredictionsAPI(generics.CreateAPIView):
             except Exception as e:
                 validation_errors.append(f'Prediction {i}: Failed to create prediction - {str(e)}')
                 continue
+
+        # If there are validation errors, raise them before creating any predictions
+        if validation_errors:
+            raise ValidationError(validation_errors)
 
         predictions_obj = Prediction.objects.bulk_create(predictions, batch_size=settings.BATCH_SIZE)
         start_job_async_or_sync(update_tasks_counters, Task.objects.filter(id__in=tasks_ids))

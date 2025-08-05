@@ -195,19 +195,21 @@ def reformat_predictions(tasks, preannotated_from_fields, project=None):
                 to_name = 'text'  # Default fallback
                 prediction_type = 'choices'  # Default fallback
 
-                if li and li._controls:
+                if li:
                     # Find a control tag that matches the field name
-                    for control_name, control_tag in li._controls.items():
-                        if control_name == field:
-                            # Use the control's to_name and determine type
-                            if hasattr(control_tag, 'to_name') and control_tag.to_name:
-                                to_name = (
-                                    control_tag.to_name[0]
-                                    if isinstance(control_tag.to_name, list)
-                                    else control_tag.to_name
-                                )
-                                prediction_type = control_tag.tag.lower()
-                            break
+                    try:
+                        control_tag = li.get_control(field)
+                        # Use the control's to_name and determine type
+                        if hasattr(control_tag, 'to_name') and control_tag.to_name:
+                            to_name = (
+                                control_tag.to_name[0]
+                                if isinstance(control_tag.to_name, list)
+                                else control_tag.to_name
+                            )
+                            prediction_type = control_tag.tag.lower()
+                    except Exception:
+                        # Control not found, use defaults
+                        pass
 
                 # Create prediction from preannotated field
                 # Handle different types of values
@@ -241,11 +243,6 @@ def reformat_predictions(tasks, preannotated_from_fields, project=None):
                     'model_version': 'preannotated',
                 }
 
-                print(f'\nprediction: {prediction}\n')
-
-                # Validate the prediction using LabelInterface if project is available
-                # Note: We can't validate here since we don't have project context
-                # The validation will happen during the actual import process
                 predictions.append(prediction)
 
         # Create new task structure
