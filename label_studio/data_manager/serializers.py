@@ -275,7 +275,7 @@ class ViewSerializer(serializers.ModelSerializer):
                 if filter_group is None:
                     filter_group = FilterGroup.objects.create(**filter_group_data)
                     instance.filter_group = filter_group
-                    instance.save()
+                    instance.save(update_fields=['filter_group'])
 
                 conjunction = filter_group_data.get('conjunction')
                 if conjunction and filter_group.conjunction != conjunction:
