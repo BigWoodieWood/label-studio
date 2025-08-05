@@ -241,7 +241,6 @@ def reformat_predictions(tasks, preannotated_from_fields, project=None):
                     'model_version': 'preannotated',
                 }
 
-                print(f'\nprediction: {prediction}\n')
 
                 # Validate the prediction using LabelInterface if project is available
                 # Note: We can't validate here since we don't have project context
