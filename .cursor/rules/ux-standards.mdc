@@ -9,7 +9,7 @@ alwaysApply: false
 ## Language & Microcopy Directives
 
 ### Writing Guidelines
-- Generate simple, concise language (aim for 7th-grade reading level or lower)
+- Generate simple, concise language. Aim for 7th-grade reading level or lower. For example, use "Upload Dataset" instead of "Initiate Data Ingestion Process."
 - Avoid jargon, acronyms (unless commonly known, spell out first use), and abbreviations
 
 ### Terminology Consistency  
