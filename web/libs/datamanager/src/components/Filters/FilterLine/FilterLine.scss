@@ -9,10 +9,10 @@
   align-items: start;
 
   &__remove {
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: -4px;
 
     .button-dm {
       height: 24px;
