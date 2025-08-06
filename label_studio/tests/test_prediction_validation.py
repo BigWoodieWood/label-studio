@@ -21,6 +21,7 @@ from django.contrib.auth import get_user_model
 from organizations.tests.factories import OrganizationFactory
 from projects.tests.factories import ProjectFactory
 from rest_framework.exceptions import ValidationError
+from tasks.models import Annotation, Prediction, Task
 from tasks.tests.factories import TaskFactory
 from users.tests.factories import UserFactory
 
@@ -683,3 +684,108 @@ class TestPredictionValidation:
 
         result = li.validate_prediction(invalid_prediction)
         assert result is False
+
+    def test_atomic_transaction_rollback_on_prediction_validation_failure(self):
+        """Test that when prediction validation fails, the entire transaction is rolled back.
+
+        This ensures that no tasks or annotations are saved to the database when
+        prediction validation errors occur, since the entire create() method is wrapped
+        in an atomic transaction.
+        """
+        # Get initial counts
+        initial_task_count = Task.objects.filter(project=self.project).count()
+        initial_annotation_count = Annotation.objects.filter(project=self.project).count()
+        initial_prediction_count = Prediction.objects.filter(project=self.project).count()
+
+        tasks = [
+            {
+                'data': {'text': 'Test text 1'},
+                'annotations': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'completed_by': self.user.id,
+                    }
+                ],
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['positive']},
+                            }
+                        ],
+                        'score': 0.95,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            },
+            {
+                'data': {'text': 'Test text 2'},
+                'annotations': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['negative']},
+                            }
+                        ],
+                        'completed_by': self.user.id,
+                    }
+                ],
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'sentiment',
+                                'to_name': 'text',
+                                'type': 'choices',
+                                'value': {'choices': ['invalid_choice']},  # This will cause validation failure
+                            }
+                        ],
+                        'score': 0.85,
+                        'model_version': 'v1.0',
+                    }
+                ],
+            },
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': self.project})
+        assert serializer.is_valid()  # ImportApiSerializer validates structure, not content
+
+        # Attempt to save - this should fail due to invalid prediction in second task
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=self.project.id)
+
+        # Verify the error is about predictions
+        assert 'predictions' in exc_info.value.detail
+
+        # Verify that NO tasks, annotations, or predictions were saved
+        # (the entire transaction should have been rolled back)
+        final_task_count = Task.objects.filter(project=self.project).count()
+        final_annotation_count = Annotation.objects.filter(project=self.project).count()
+        final_prediction_count = Prediction.objects.filter(project=self.project).count()
+
+        assert final_task_count == initial_task_count, 'Tasks should not be saved when prediction validation fails'
+        assert (
+            final_annotation_count == initial_annotation_count
+        ), 'Annotations should not be saved when prediction validation fails'
+        assert (
+            final_prediction_count == initial_prediction_count
+        ), 'Predictions should not be saved when prediction validation fails'
+
+        # Verify the error message contains details about the validation failure
+        error_message = str(exc_info.value.detail['predictions'][0])
+        assert 'Task 1, prediction 0' in error_message
+        assert 'invalid_choice' in error_message
+        assert 'positive' in error_message or 'negative' in error_message or 'neutral' in error_message
