@@ -393,31 +393,78 @@ class ImportPredictionsAPI(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         # check project permissions
         project = self.get_object()
-
-        tasks_ids = set(Task.objects.filter(project=project).values_list('id', flat=True))
-
+        
+        # Configure batch processing settings
+        # Use smaller batch size for processing to avoid memory issues
+        PROCESSING_BATCH_SIZE = getattr(settings, 'PREDICTION_IMPORT_BATCH_SIZE', 500)
+        
+        request_data = self.request.data
+        total_predictions = len(request_data)
+        
         logger.debug(
-            f'Importing {len(self.request.data)} predictions to project {project} with {len(tasks_ids)} tasks'
+            f'Importing {total_predictions} predictions to project {project} using batch size {PROCESSING_BATCH_SIZE}'
         )
-        predictions = []
-        for item in self.request.data:
-            if item.get('task') not in tasks_ids:
-                raise ValidationError(
-                    f'{item} contains invalid "task" field: corresponding task ID couldn\'t be retrieved '
-                    f'from project {project} tasks'
-                )
-            predictions.append(
-                Prediction(
-                    task_id=item['task'],
-                    project_id=project.id,
-                    result=Prediction.prepare_prediction_result(item.get('result'), project),
-                    score=item.get('score'),
-                    model_version=item.get('model_version', 'undefined'),
-                )
+        
+        total_created = 0
+        all_task_ids = set()
+        
+        # Process predictions in smaller batches to avoid memory issues
+        for batch_start in range(0, total_predictions, PROCESSING_BATCH_SIZE):
+            batch_end = min(batch_start + PROCESSING_BATCH_SIZE, total_predictions)
+            batch_items = request_data[batch_start:batch_end]
+            
+            # Extract task IDs for this batch
+            batch_task_ids = [item.get('task') for item in batch_items]
+            
+            # Validate that all task IDs in this batch exist in the project
+            # This is much more memory efficient than loading all project task IDs upfront
+            existing_task_ids = set(
+                Task.objects.filter(
+                    project=project, 
+                    id__in=batch_task_ids
+                ).values_list('id', flat=True)
             )
-        predictions_obj = Prediction.objects.bulk_create(predictions, batch_size=settings.BATCH_SIZE)
-        start_job_async_or_sync(update_tasks_counters, Task.objects.filter(id__in=tasks_ids))
-        return Response({'created': len(predictions_obj)}, status=status.HTTP_201_CREATED)
+            
+            # Build predictions for this batch
+            batch_predictions = []
+            for item in batch_items:
+                task_id = item.get('task')
+                
+                if task_id not in existing_task_ids:
+                    raise ValidationError(
+                        f'{item} contains invalid "task" field: task ID {task_id} '
+                        f'not found in project {project}'
+                    )
+                
+                batch_predictions.append(
+                    Prediction(
+                        task_id=task_id,
+                        project_id=project.id,
+                        result=Prediction.prepare_prediction_result(item.get('result'), project),
+                        score=item.get('score'),
+                        model_version=item.get('model_version', 'undefined'),
+                    )
+                )
+                all_task_ids.add(task_id)
+            
+            # Bulk create this batch with the configured batch size
+            batch_created = Prediction.objects.bulk_create(
+                batch_predictions, 
+                batch_size=settings.BATCH_SIZE
+            )
+            total_created += len(batch_created)
+            
+            logger.debug(
+                f'Processed batch {batch_start}-{batch_end-1}: created {len(batch_created)} predictions '
+                f'(total so far: {total_created})'
+            )
+        
+        # Update task counters for all affected tasks
+        # Only pass the unique task IDs that were actually processed
+        if all_task_ids:
+            start_job_async_or_sync(update_tasks_counters, Task.objects.filter(id__in=all_task_ids))
+        
+        return Response({'created': total_created}, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(exclude=True)
