@@ -448,7 +448,7 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
         db_predictions = []
         validation_errors = []
 
-        li = LabelInterface(self.project.label_config)
+        should_validate = self.project.label_config_is_not_default
 
         # add predictions
         last_model_version = None
@@ -458,19 +458,21 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
                     validation_errors.append(f'Task {i}, prediction {j}: Prediction must be a dictionary')
                     continue
 
-                # Validate prediction using LabelInterface only
-                try:
-                    validation_errors_list = li.validate_prediction(prediction, return_errors=True)
+                # Validate prediction only when project label config is not default
+                if should_validate:
+                    try:
+                        li = LabelInterface(self.project.label_config) if should_validate else None
+                        validation_errors_list = li.validate_prediction(prediction, return_errors=True)
 
-                    if validation_errors_list:
-                        # Format errors for better readability
-                        for error in validation_errors_list:
-                            validation_errors.append(f'Task {i}, prediction {j}: {error}')
+                        if validation_errors_list:
+                            # Format errors for better readability
+                            for error in validation_errors_list:
+                                validation_errors.append(f'Task {i}, prediction {j}: {error}')
+                            continue
+
+                    except Exception as e:
+                        validation_errors.append(f'Task {i}, prediction {j}: Error validating prediction - {str(e)}')
                         continue
-
-                except Exception as e:
-                    validation_errors.append(f'Task {i}, prediction {j}: Error validating prediction - {str(e)}')
-                    continue
 
                 try:
                     # we need to call result normalizer here since "bulk_create" doesn't call save() method

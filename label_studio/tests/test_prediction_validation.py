@@ -789,3 +789,147 @@ class TestPredictionValidation:
         assert 'Task 1, prediction 0' in error_message
         assert 'invalid_choice' in error_message
         assert 'positive' in error_message or 'negative' in error_message or 'neutral' in error_message
+
+    def test_import_predictions_with_default_and_changed_configs(self):
+        """End-to-end: importing predictions before and after setting label config.
+
+        1) With default config (empty View), predictions should not be validated and import succeeds.
+        2) After setting a matching config, import with same prediction succeeds.
+        3) After changing config to mismatch the prediction, import should fail with validation error.
+        """
+        # 1) Create a new project with default config (do not override label_config)
+        project_default = ProjectFactory(organization=self.organization, created_by=self.user)
+        # Ensure default config is indeed default
+        assert project_default.label_config_is_not_default is False
+
+        tasks = [
+            {
+                'data': {'image': 'https://example.com/img1.png'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'polylabel',
+                                'to_name': 'image',
+                                'type': 'polygonlabels',
+                                'value': {'points': [[0, 0], [10, 10]], 'polygonlabels': ['A']},
+                            }
+                        ]
+                    }
+                ],
+            }
+        ]
+
+        # Import should work (skip validation due to default config)
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': project_default})
+        assert serializer.is_valid()
+        serializer.save(project_id=project_default.id)
+
+        # 2) Set label config to match the prediction and import again
+        matching_config = """
+            <View>
+              <Image name="image" value="$image"/>
+              <PolygonLabels name="polylabel" toName="image">
+                <Label value="A"/>
+              </PolygonLabels>
+            </View>
+            """
+        project_default.label_config = matching_config
+        project_default.save()
+        assert project_default.label_config_is_not_default
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': project_default})
+        assert serializer.is_valid()
+        serializer.save(project_id=project_default.id)  # should pass now that config matches
+
+        # 3) Change config to not match the prediction (different control name)
+        mismatching_config = """
+            <View>
+              <Image name="image" value="$image"/>
+              <PolygonLabels name="otherlabel" toName="image">
+                <Label value="A"/>
+              </PolygonLabels>
+            </View>
+            """
+        project_default.label_config = mismatching_config
+        project_default.save()
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': project_default})
+        assert serializer.is_valid()
+        with pytest.raises(ValidationError) as exc_info:
+            serializer.save(project_id=project_default.id)
+        assert 'predictions' in exc_info.value.detail
+
+    @pytest.mark.django_db
+    def test_import_api_skip_then_validate(self, client):
+        """Exercise the HTTP ImportAPI to verify validation skip with default config and enforcement later.
+
+        - POST /api/projects/{id}/import?commit_to_project=false with default config should succeed (skip validation)
+        - Update project to matching config: same request with commit_to_project=true should succeed
+        - Update project to mismatching config: same request with commit_to_project=true should fail
+        """
+        from django.urls import reverse
+
+        project = ProjectFactory(organization=self.organization, created_by=self.user)
+        # Use DRF APIClient to authenticate
+        from rest_framework.test import APIClient
+
+        api_client = APIClient()
+        api_client.force_authenticate(user=self.user)
+        assert project.label_config_is_not_default is False
+
+        tasks = [
+            {
+                'data': {'image': 'https://example.com/img1.png'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'polylabel',
+                                'to_name': 'image',
+                                'type': 'polygonlabels',
+                                'value': {'points': [[0, 0], [10, 10]], 'polygonlabels': ['A']},
+                            }
+                        ]
+                    }
+                ],
+            }
+        ]
+
+        url = reverse('data_import:api-projects:project-import', kwargs={'pk': project.id})
+
+        # 1) Default config, commit_to_project=false -> async path, expect 201
+        resp = api_client.post(f'{url}?commit_to_project=false', data=tasks, format='json')
+        assert resp.status_code in (201, 200)
+
+        # 2) Set matching config, commit_to_project=true -> sync path for community edition
+        matching_config = """
+            <View>
+              <Image name="image" value="$image"/>
+              <PolygonLabels name="polylabel" toName="image">
+                <Label value="A"/>
+              </PolygonLabels>
+            </View>
+            """
+        project.label_config = matching_config
+        project.save()
+
+        resp2 = api_client.post(f'{url}?commit_to_project=true', data=tasks, format='json')
+        assert resp2.status_code in (201, 200)
+
+        # 3) Set mismatching config, commit_to_project=true -> should fail validation
+        mismatching_config = """
+            <View>
+              <Image name="image" value="$image"/>
+              <PolygonLabels name="otherlabel" toName="image">
+                <Label value="A"/>
+              </PolygonLabels>
+            </View>
+            """
+        project.label_config = mismatching_config
+        project.save()
+
+        resp3 = api_client.post(f'{url}?commit_to_project=true', data=tasks, format='json')
+        assert resp3.status_code == 400
+        data = resp3.json() or {}
+        assert ('predictions' in data) or (data.get('detail') == 'Validation error')
