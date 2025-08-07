@@ -576,7 +576,7 @@ main {
   color: var(--color-gray-900);
 }
 
-.page-sidebar .page-sidebar-list li:has(.page-sidebar-children-link[aria-current="page"]) > .page-sidebar-toggle-children-list svg {
+.page-sidebar .page-sidebar-list li:has(.page-sidebar-children-link[aria-current="page"])>.page-sidebar-toggle-children-list svg {
   transform: rotate(180deg);
 }
 
@@ -2848,7 +2848,8 @@ code.hljs {
   font-weight: 500;
 }
 
-.person-avatar, .avatar-letter {
+.person-avatar,
+.avatar-letter {
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -2906,17 +2907,20 @@ code.hljs {
   color: #0366d6;
 }
 
-.issue-icon, .github-icon {
+.issue-icon,
+.github-icon {
   color: var(--color-gray-600);
   transition: color 0.2s;
 }
 
-.issue-icon:hover, .github-icon:hover {
+.issue-icon:hover,
+.github-icon:hover {
   color: var(--color-blue-600);
 }
 
 .community-footer {
   margin-top: 2rem;
+  margin-bottom: 2rem;
   padding: 0.8rem 1rem;
   background-color: var(--color-gray-100);
   border-radius: 3px;
