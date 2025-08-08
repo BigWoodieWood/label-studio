@@ -1,6 +1,7 @@
 import { atom } from "jotai";
 import { getQueryParams } from "../utils/query";
 
+//forcing ci
 export const defaultConfig = "<View>\n  <!-- Paste your XML config here -->\n</View>";
 
 export const configAtom = atom<string>(defaultConfig);
