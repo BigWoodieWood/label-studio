@@ -933,3 +933,52 @@ class TestPredictionValidation:
         assert resp3.status_code == 400
         data = resp3.json() or {}
         assert ('predictions' in data) or (data.get('detail') == 'Validation error')
+
+    def test_taxonomy_prediction_validation(self):
+        """Taxonomy predictions with nested paths should validate using flattened labels subset check."""
+        # Create a project with Taxonomy tag and labels covering both paths
+        project = ProjectFactory(
+            organization=self.organization,
+            created_by=self.user,
+            label_config=(
+                """
+                <View>
+                  <Text name="text" value="$text"/>
+                  <Taxonomy name="taxonomy" toName="text">
+                    <Choice value="Eukarya"/>
+                    <Choice value="Oppossum"/>
+                    <Choice value="Bacteria"/>
+                    <Choice value="Archaea"/>
+                  </Taxonomy>
+                </View>
+                """
+            ),
+        )
+
+        tasks = [
+            {
+                'data': {'text': 'Taxonomy sample'},
+                'predictions': [
+                    {
+                        'result': [
+                            {
+                                'from_name': 'taxonomy',
+                                'to_name': 'text',
+                                'type': 'taxonomy',
+                                'value': {
+                                    'taxonomy': [
+                                        ['Eukarya'],
+                                        ['Eukarya', 'Oppossum'],
+                                    ]
+                                },
+                            }
+                        ]
+                    }
+                ],
+            }
+        ]
+
+        serializer = ImportApiSerializer(data=tasks, many=True, context={'project': project})
+        assert serializer.is_valid()
+        # Should not raise due to taxonomy flattening in value label validation
+        serializer.save(project_id=project.id)
