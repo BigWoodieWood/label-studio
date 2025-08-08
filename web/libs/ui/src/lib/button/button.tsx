@@ -5,7 +5,7 @@ import styles from "./button.module.scss";
 import { setRef } from "@humansignal/core/lib/utils/unwrapRef";
 import { Tooltip } from "../Tooltip/Tooltip";
 
-const isEnhancedTooltip = ff.isActive(ff.FF_TOOLTIP_ENHANCEMENT);
+const isEnhancedTooltip = true;
 
 const variants = {
   primary: styles["variant-primary"],

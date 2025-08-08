@@ -19,7 +19,7 @@ import { setRef } from "@humansignal/core/lib/utils/unwrapRef";
 import styles from "./Tooltip.module.scss";
 import clsx from "clsx";
 
-const isEnhancedTooltip = ff.isActive(ff.FF_TOOLTIP_ENHANCEMENT);
+const isEnhancedTooltip = true;
 
 export type TooltipProps = PropsWithChildren<{
   title: React.ReactNode;

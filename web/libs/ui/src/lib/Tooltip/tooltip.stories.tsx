@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Tooltip } from "./Tooltip";
 import { Button } from "../button/button";
 
-const isEnhancedTooltip = ff.isActive(ff.FF_TOOLTIP_ENHANCEMENT);
+const isEnhancedTooltip = true;
 
 const meta: Meta<typeof Tooltip> = {
   component: Tooltip,
