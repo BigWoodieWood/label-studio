@@ -538,6 +538,7 @@ class ProjectStateAPI(APIView):
                             'title': {'type': 'string', 'title': 'Title'},
                             'order': {'type': 'integer', 'title': 'Order'},
                             'permission': {'type': 'string', 'title': 'Permission'},
+                            'experimental': {'type': 'boolean', 'title': 'Experimental'},
                             'dialog': {
                                 'type': 'object',
                                 'title': 'Dialog',
@@ -545,7 +546,12 @@ class ProjectStateAPI(APIView):
                                     'title': {'type': 'string', 'title': 'Title', 'nullable': True},
                                     'text': {'type': 'string', 'title': 'Text', 'nullable': True},
                                     'type': {'type': 'string', 'title': 'Type', 'nullable': True},
-                                    'form': {'type': 'object', 'title': 'Form', 'nullable': True},
+                                    'form': {
+                                        'type': 'array',
+                                        'title': 'Form',
+                                        'items': {'type': 'object'},
+                                        'nullable': True,
+                                    },
                                 },
                             },
                         },
@@ -560,6 +566,7 @@ class ProjectStateAPI(APIView):
                                 'title': 'Create Annotations From Predictions',
                                 'order': 91,
                                 'permission': 'tasks.change',
+                                'experimental': False,
                                 'dialog': {
                                     'title': 'Create Annotations From Predictions',
                                     'text': 'Create annotations from predictions using selected predictions set for each selected task. Your account will be assigned as an owner to those annotations.',
