@@ -130,7 +130,7 @@ class AnnotationSerializer(FlexFieldsModelSerializer):
             return ''
 
         name = user.first_name
-        if len(user.last_name):fields
+        if len(user.last_name):
             name = name + ' ' + user.last_name
 
         name += f' {user.email}, {user.id}'
