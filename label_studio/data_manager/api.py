@@ -514,6 +514,65 @@ class ProjectStateAPI(APIView):
         tags=['Data Manager'],
         summary='Get actions',
         description='Retrieve all the registered actions with descriptions that data manager can use.',
+        parameters=[
+            OpenApiParameter(
+                name='project',
+                type=OpenApiTypes.INT,
+                location='query',
+                description='Project ID',
+                required=True,
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(
+                description='Actions retrieved successfully',
+                response={
+                    'type': 'array',
+                    'title': 'Action list',
+                    'description': 'List of available actions',
+                    'items': {
+                        'type': 'object',
+                        'title': 'Action',
+                        'properties': {
+                            'id': {'type': 'string', 'title': 'Action ID'},
+                            'title': {'type': 'string', 'title': 'Title'},
+                            'order': {'type': 'integer', 'title': 'Order'},
+                            'permission': {'type': 'string', 'title': 'Permission'},
+                            'dialog': {
+                                'type': 'object',
+                                'title': 'Dialog',
+                                'properties': {
+                                    'title': {'type': 'string', 'title': 'Title', 'nullable': True},
+                                    'text': {'type': 'string', 'title': 'Text', 'nullable': True},
+                                    'type': {'type': 'string', 'title': 'Type', 'nullable': True},
+                                    'form': {'type': 'object', 'title': 'Form', 'nullable': True},
+                                },
+                            },
+                        },
+                    },
+                },
+                examples=[
+                    OpenApiExample(
+                        name='response',
+                        value=[
+                            {
+                                'id': 'predictions_to_annotations',
+                                'title': 'Create Annotations From Predictions',
+                                'order': 91,
+                                'permission': 'tasks.change',
+                                'dialog': {
+                                    'title': 'Create Annotations From Predictions',
+                                    'text': 'Create annotations from predictions using selected predictions set for each selected task. Your account will be assigned as an owner to those annotations.',
+                                    'type': 'confirm',
+                                    'form': None,
+                                },
+                            }
+                        ],
+                        media_type='application/json',
+                    ),
+                ],
+            )
+        },
         extensions={
             'x-fern-sdk-group-name': 'actions',
             'x-fern-sdk-method-name': 'list',
