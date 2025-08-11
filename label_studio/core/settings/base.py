@@ -555,6 +555,10 @@ MAX_TASK_BATCH_SIZE = int(get_env('MAX_TASK_BATCH_SIZE', 1000))
 # Total size of task data (in bytes) to process per batch - used to calculate dynamic batch sizes
 # For example: if task data is 10MB, batch will be ~5 tasks to stay under 50MB limit
 TASK_DATA_PER_BATCH = int(get_env('TASK_DATA_PER_BATCH', 50 * 1024 * 1024))  # 50 MB in bytes
+# Batch size for streaming reimport operations to reduce memory usage
+REIMPORT_BATCH_SIZE = int(get_env('REIMPORT_BATCH_SIZE', 1000))
+# Batch size for processing prediction imports to avoid memory issues with large datasets
+PREDICTION_IMPORT_BATCH_SIZE = int(get_env('PREDICTION_IMPORT_BATCH_SIZE', 500))
 PROJECT_TITLE_MIN_LEN = 3
 PROJECT_TITLE_MAX_LEN = 50
 LOGIN_REDIRECT_URL = '/'
@@ -691,6 +695,7 @@ FUTURE_SAVE_TASK_TO_STORAGE = get_bool_env('FUTURE_SAVE_TASK_TO_STORAGE', defaul
 FUTURE_SAVE_TASK_TO_STORAGE_JSON_EXT = get_bool_env('FUTURE_SAVE_TASK_TO_STORAGE_JSON_EXT', default=True)
 STORAGE_IN_PROGRESS_TIMER = float(get_env('STORAGE_IN_PROGRESS_TIMER', 5.0))
 STORAGE_EXPORT_CHUNK_SIZE = int(get_env('STORAGE_EXPORT_CHUNK_SIZE', 100))
+DEFAULT_STORAGE_LIST_LIMIT = int(get_env('DEFAULT_STORAGE_LIST_LIMIT', 100))
 
 USE_NGINX_FOR_EXPORT_DOWNLOADS = get_bool_env('USE_NGINX_FOR_EXPORT_DOWNLOADS', False)
 USE_NGINX_FOR_UPLOADS = get_bool_env('USE_NGINX_FOR_UPLOADS', True)
@@ -775,7 +780,10 @@ PUBLIC_API_DOCS = get_bool_env('PUBLIC_API_DOCS', False)
 # By default, we disallow filters with foreign keys in data manager for security reasons.
 # Add to this list (either here in code, or via the env) to allow specific filters that rely on foreign keys.
 DATA_MANAGER_FILTER_ALLOWLIST = list(
-    set(get_env_list('DATA_MANAGER_FILTER_ALLOWLIST') + ['updated_by__active_organization'])
+    set(
+        get_env_list('DATA_MANAGER_FILTER_ALLOWLIST')
+        + ['updated_by__active_organization', 'annotations__completed_by']
+    )
 )
 
 if ENABLE_CSP := get_bool_env('ENABLE_CSP', True):
@@ -860,3 +868,13 @@ RESOLVER_PROXY_CACHE_TIMEOUT = int(get_env('RESOLVER_PROXY_CACHE_TIMEOUT', 3600)
 
 # Advanced validator for ImportStorageSerializer in enterprise
 IMPORT_STORAGE_SERIALIZER_VALIDATE = None
+
+# User activity Redis caching settings
+USER_ACTIVITY_REDIS_KEY_PREFIX = get_env('USER_ACTIVITY_REDIS_KEY_PREFIX', 'user_activity')
+USER_ACTIVITY_BATCH_SIZE = int(get_env('USER_ACTIVITY_BATCH_SIZE', '100'))
+USER_ACTIVITY_SYNC_THRESHOLD = int(get_env('USER_ACTIVITY_SYNC_THRESHOLD', '500'))
+USER_ACTIVITY_REDIS_TTL = int(get_env('USER_ACTIVITY_REDIS_TTL', '86400'))  # 24 hours
+
+# Data Manager
+# Max number of users to display in the Data Manager in Annotators/Reviewers/Comment Authors, etc
+DM_MAX_USERS_TO_DISPLAY = int(get_env('DM_MAX_USERS_TO_DISPLAY', 10))
