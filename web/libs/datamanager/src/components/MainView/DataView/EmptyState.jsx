@@ -1,7 +1,8 @@
 import { IconUpload } from "@humansignal/icons";
-import { Button, Typography } from "@humansignal/ui";
+import { Button, IconExternal, Typography } from "@humansignal/ui";
 import { clsx } from "clsx";
 import { useState } from "react";
+import { getDocsUrl } from "../../../../../editor/src/utils/docs";
 import { cn } from "../../../utils/bem";
 
 /**
@@ -142,6 +143,19 @@ export const EmptyState = ({
 							</Button>
 						)}
 					</div>
+
+					{!window.APP_SETTINGS?.whitelabel_is_active && (
+						<a
+							href={getDocsUrl("guide/tasks")}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-1 text-body-small text-primary-link hover:underline mt-6"
+							data-testid="dm-docs-data-import-link"
+						>
+							See docs on importing data
+							<IconExternal width={20} height={20} />
+						</a>
+					)}
 
 					<input
 						id="dm-empty-file-input"
