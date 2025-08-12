@@ -165,9 +165,16 @@ class ViewAPI(viewsets.ModelViewSet):
     @extend_schema(
         tags=['Data Manager'],
         summary='Delete all project views',
-        description='Delete all views for a specific project. Request body example: `{"project": 1}`.',
-        # Note: OpenAPI3 does not support request body for DELETE requests
-        # see https://github.com/tfranzel/drf-spectacular/issues/431#issuecomment-862738643
+        description='Delete all views for a specific project.',
+        parameters=[
+            OpenApiParameter(
+                name='project',
+                type=OpenApiTypes.INT,
+                location='query',
+                description='Project ID',
+                required=True,
+            ),
+        ],
         extensions={
             'x-fern-sdk-group-name': 'views',
             'x-fern-sdk-method-name': 'delete_all',
@@ -176,7 +183,12 @@ class ViewAPI(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['delete'])
     def reset(self, request):
-        serializer = ViewResetSerializer(data=request.data)
+        # Note: OpenAPI 3.0 does not support request body for DELETE requests
+        # see https://github.com/tfranzel/drf-spectacular/issues/431#issuecomment-862738643
+        # as a hack for the SDK, fallback to query params if request body is empty
+        serializer = ViewResetSerializer(
+            data=request.data if 'project' in request.data else {'project': request.query_params.get('project')}
+        )
         serializer.is_valid(raise_exception=True)
         project = generics.get_object_or_404(
             Project.objects.for_user(request.user), pk=serializer.validated_data['project'].id
@@ -190,6 +202,7 @@ class ViewAPI(viewsets.ModelViewSet):
         summary='Update order of views',
         description='Update the order field of views based on the provided list of view IDs',
         request=ViewOrderSerializer,
+        responses={200: OpenApiResponse(description='View order updated successfully')},
         extensions={
             'x-fern-sdk-group-name': 'views',
             'x-fern-sdk-method-name': 'update_order',
