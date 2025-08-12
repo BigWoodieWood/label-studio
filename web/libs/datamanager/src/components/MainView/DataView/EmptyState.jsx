@@ -89,7 +89,7 @@ export const EmptyState = ({ canImport, onOpenSourceStorageModal, onStartImportW
       )}
     >
       <div className="w-full h-full">
-        <div className="w-full h-full transition-border-color duration-150 border border-primary-border-subtler rounded-md bg-primary-background flex flex-col items-center justify-center text-center p-base hover:border-primary-border-bold">
+        <div className="w-full h-full transition-border-color duration-150 border border-primary-border-subtler rounded-md bg-primary-background flex flex-col items-center justify-center text-center p-wide hover:border-primary-border-bold">
           <div className="flex items-center justify-center bg-primary-emphasis text-primary-icon rounded-full p-tight mb-4">
             <IconUpload size={40} />
           </div>
