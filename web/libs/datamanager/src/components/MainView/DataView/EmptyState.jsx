@@ -141,7 +141,7 @@ export const EmptyState = ({ canImport, onOpenSourceStorageModal, onStartImportW
             )}
           </div>
 
-          {!(typeof window !== "undefined" && window.APP_SETTINGS?.whitelabel_is_active) && (
+          {!window.APP_SETTINGS?.whitelabel_is_active && (
             <a
               href={getDocsUrl("guide/tasks")}
               target="_blank"

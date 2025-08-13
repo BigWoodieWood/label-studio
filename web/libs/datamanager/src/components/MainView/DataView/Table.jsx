@@ -59,7 +59,6 @@ export const DataView = injector(
     ...props
   }) => {
     const [datasetStatusID, setDatasetStatusID] = useState(store.SDK.dataset?.status?.id);
-    const [dzHovered, setDzHovered] = useState(false);
     const focusedItem = useMemo(() => {
       return props.focusedItem;
     }, [props.focusedItem]);
@@ -203,72 +202,7 @@ export const DataView = injector(
               </Block>
             );
           }
-
           // New empty state for projects with no data yet
-          const sdk = getRoot(store)?.SDK;
-
-          // Helpers to collect dropped files, including folders
-          const flatten = (nested) => [].concat(...nested);
-          const traverseFileTree = (item, path) => {
-            return new Promise((resolve) => {
-              if (!item) return resolve([]);
-              path = path || "";
-              if (item.isFile) {
-                // Avoid hidden files
-                if (item.name && item.name[0] === ".") return resolve([]);
-                return item.file((file) => resolve([file]));
-              }
-              if (item.isDirectory) {
-                const dirReader = item.createReader();
-                dirReader.readEntries((entries) => {
-                  Promise.all(entries.map((entry) => traverseFileTree(entry, `${path}${item.name}/`)))
-                    .then(flatten)
-                    .then(resolve);
-                });
-              } else {
-                resolve([]);
-              }
-            });
-          };
-          const getDroppedFiles = (dataTransfer) => {
-            return new Promise((resolve) => {
-              const items = Array.from(dataTransfer?.items ?? []);
-              if (!items.length || !items[0].webkitGetAsEntry) {
-                return resolve(Array.from(dataTransfer?.files ?? []));
-              }
-              const entries = items.map((it) => it.webkitGetAsEntry());
-              Promise.all(entries.map((entry) => traverseFileTree(entry)))
-                .then(flatten)
-                .then(resolve);
-            });
-          };
-
-          const onDrop = async (e) => {
-            e.preventDefault();
-            const files = await getDroppedFiles(e.dataTransfer);
-            if (files?.length) sdk?.invoke?.("startImportWithFiles", { files });
-            setDzHovered(false);
-          };
-
-          const onDragOver = (e) => {
-            e.preventDefault();
-            setDzHovered(true);
-          };
-
-          const onDragLeave = () => setDzHovered(false);
-
-          const onBrowseFiles = () => {
-            const input = document.getElementById("dm-empty-file-input");
-            input?.click();
-          };
-
-          const onFileInputChange = (e) => {
-            const files = Array.from(e.target.files ?? []);
-            if (files.length) sdk?.invoke?.("startImportWithFiles", { files });
-            // reset input so selecting the same file again triggers change
-            e.target.value = "";
-          };
-
           return (
             <Block name="no-results">
               <EmptyState

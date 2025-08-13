@@ -16,23 +16,13 @@ import { StorageForm } from "./StorageForm";
 export const StorageSet = forwardRef(({ title, target, rootClass, buttonLabel }, ref) => {
   const api = useContext(ApiContext);
   const project = useAtomValue(projectAtom);
-  const storageTypesQueryKey = ["storage-types", target];
-  const storagesQueryKey = ["storages", target, project?.id];
+  // Deprecated local query keys removed in favor of useStorageCard internals
   const useNewStorageScreen = ff.isActive(ff.FF_NEW_STORAGES);
 
-  const {
-    storageTypes,
-    storageTypesLoading,
-    storageTypesLoaded,
-    reloadStorageTypes,
-    storages,
-    storagesLoading,
-    storagesLoaded,
-    reloadStoragesList,
-    loading,
-    loaded,
-    fetchStorages,
-  } = useStorageCard(target, project?.id);
+  const { storageTypes, storages, storagesLoaded, loading, loaded, fetchStorages } = useStorageCard(
+    target,
+    project?.id,
+  );
 
   const showStorageFormModal = useCallback(
     (storage) => {
@@ -106,7 +96,7 @@ export const StorageSet = forwardRef(({ title, target, rootClass, buttonLabel },
       confirm({
         title: "Deleting storage",
         body: "This action cannot be undone. Are you sure?",
-        buttonLook: "destructive",
+        buttonLook: "negative",
         onOk: async () => {
           const response = await api.callApi("deleteStorage", {
             params: {
