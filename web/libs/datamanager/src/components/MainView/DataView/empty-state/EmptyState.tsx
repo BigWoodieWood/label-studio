@@ -119,6 +119,29 @@ export const EmptyState: FC<EmptyStateProps> = ({
     e.target.value = "";
   };
 
+  // If filters are applied, show the filter-specific empty state (regardless of user role)
+  if (hasFilters) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
+        <div className="flex items-center justify-center bg-warning-background text-warning-icon rounded-full p-tight mb-4">
+          <IconSearch width={40} height={40} />
+        </div>
+
+        <Typography variant="headline" size="medium" className="mb-tight">
+          No tasks found
+        </Typography>
+
+        <Typography size="medium" className="text-neutral-content-subtler mb-8 max-w-xl">
+          Try adjusting or clearing the filters to see more results
+        </Typography>
+
+        <Button variant="primary" look="outlined" onClick={onClearFilters} data-testid="dm-clear-filters-button">
+          Clear Filters
+        </Button>
+      </div>
+    );
+  }
+
   // Role-based empty state logic (from RoleBasedEmptyState)
   // For service roles (reviewers/annotators), show role-specific empty states when they have no visible tasks
   // This applies whether the project has tasks or not - what matters is what's visible to this user
@@ -212,29 +235,6 @@ export const EmptyState: FC<EmptyStateProps> = ({
     }
   }
 
-  // If filters are applied (for non-role users like Owners/Admins/Managers), show the filter-specific empty state
-  if (hasFilters) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
-        <div className="flex items-center justify-center bg-warning-background text-warning-icon rounded-full p-tight mb-4">
-          <IconSearch width={40} height={40} />
-        </div>
-
-        <Typography variant="headline" size="medium" className="mb-tight">
-          No tasks found
-        </Typography>
-
-        <Typography size="medium" className="text-neutral-content-subtler mb-8 max-w-xl">
-          Try adjusting or clearing the filters to see more results
-        </Typography>
-
-        <Button variant="primary" look="outlined" onClick={onClearFilters} data-testid="dm-clear-filters-button">
-          Clear Filters
-        </Button>
-      </div>
-    );
-  }
-
   // Default case: show import functionality (existing behavior for Owners/Admins/Managers)
   return (
     <label
@@ -255,7 +255,7 @@ export const EmptyState: FC<EmptyStateProps> = ({
       <div className="w-full h-full">
         <div className="w-full h-full transition-border-color duration-150 border border-primary-border-subtler rounded-md bg-primary-background flex flex-col items-center justify-center text-center p-wide hover:border-primary-border-bold">
           <div className="flex items-center justify-center bg-primary-emphasis text-primary-icon rounded-full p-tight mb-4">
-            <IconUpload size={40} />
+            <IconUpload width={40} height={40} />
           </div>
 
           <Typography id="dm-empty-title" variant="headline" size="medium" className="mb-tight">

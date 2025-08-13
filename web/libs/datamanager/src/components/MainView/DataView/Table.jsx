@@ -202,21 +202,7 @@ export const DataView = injector(
         }
         // Unified empty state handling - EmptyState now handles all cases internally
         if (total === 0 || !hasData) {
-          // Handle legacy "Nothing found" case for hasData && !hasFilters scenario
-          if (hasData && !hasFilters) {
-            return (
-              <Block name="no-results">
-                <Elem name="description">
-                  <>
-                    <h3>Nothing found</h3>
-                    Try adjusting the filter
-                  </>
-                </Elem>
-              </Block>
-            );
-          }
-
-          // Use unified EmptyState for all other cases
+          // Use unified EmptyState for all cases
           return (
             <Block name="no-results">
               <EmptyState
