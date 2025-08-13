@@ -63,7 +63,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
 
   const config = useConfig();
   const [sidebarOpened, setSidebarOpened] = useState(defaultOpened ?? false);
-  const [sidebarPinned, setSidebarPinned] = useState(defaultPinned ?? false);
+  const [sidebarPinned, setSidebarPinned] = useState(isIconMenu || (defaultPinned ?? false));
   const [PageContext, setPageContext] = useState({
     Component: null,
     props: {},
@@ -140,8 +140,8 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
         <div className={menubarClass}>
           <Dropdown.Trigger dropdown={menuDropdownRef} closeOnClickOutside={!sidebarPinned}>
             <div className={`${menubarClass.elem("trigger")} main-menu-trigger`}>
-              <LSLogo className={`${menubarClass.elem("logo")}`} alt="Label Studio Logo" />
               <Hamburger opened={sidebarOpened} />
+              <LSLogo className={`${menubarClass.elem("logo")}`} alt="Label Studio Logo" />
             </div>
           </Dropdown.Trigger>
 
@@ -224,7 +224,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
                 <Menu.Item label="Projects" isUseTooltip={isIconMenu} to="/projects" icon={<IconFolder />} data-external exact />
                 <Menu.Item label="Organization" isUseTooltip={isIconMenu} to="/organization" icon={<IconPersonInCircle />} data-external exact />
 
-                {!isIconMenu && <Menu.Spacer />}
+                <Menu.Spacer />
 
                 <VersionNotifier showNewVersion />
 
@@ -257,15 +257,17 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
 
                 {!isIconMenu && <Menu.Divider />}
 
-                <Menu.Item
-                  isUseTooltip={isIconMenu}
-                  icon={<IconPin />}
-                  className={sidebarClass.elem("pin")}
-                  onClick={sidebarPin}
-                  active={sidebarPinned}
-                >
-                  {sidebarPinned ? "Unpin menu" : "Pin menu"}
-                </Menu.Item>
+                {!isIconMenu &&(
+                  <Menu.Item
+                    isUseTooltip={isIconMenu}
+                    icon={<IconPin />}
+                    className={sidebarClass.elem("pin")}
+                    onClick={sidebarPin}
+                    active={sidebarPinned}
+                  >
+                    {sidebarPinned ? "Unpin menu" : "Pin menu"}
+                  </Menu.Item>
+                )}
               </Menu>
             </Dropdown>
           )}

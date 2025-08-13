@@ -1,6 +1,6 @@
 .sidebar {
   left: 0;
-  overflow: auto;
+  // overflow: auto;
   position: fixed;
   z-index: 100 !important;
   top: var(--header-height);
@@ -21,8 +21,8 @@
     &__item {
       padding: 0;
       width: 100%;
-      background: var(--color-neutral-background);
-      border: 1px solid var(--color-neutral-border);
+      background: var(--color-neutral-background-subtle);
+      // border: 1px solid var(--color-neutral-border);
     }
     &__item_active:not(.sidebar__pin){
       background: var(--color-neutral-emphasis);

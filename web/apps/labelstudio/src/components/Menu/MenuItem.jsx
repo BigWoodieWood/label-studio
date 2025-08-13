@@ -77,5 +77,12 @@ export const MenuItem = ({
     </li>
   ), [to, finalHref, linkAttributes, exact, activeClassName, linkContent]);
 
-  return isUseTooltip ? <Tooltip title={children ?? label}>{output}</Tooltip> : output;
+  return isUseTooltip ? (
+    <div className="relative">
+      {output}
+      <div className="block text-size-10 pointer">{children ?? label}</div>
+    </div>
+  ) : (
+    output
+  );
 };
