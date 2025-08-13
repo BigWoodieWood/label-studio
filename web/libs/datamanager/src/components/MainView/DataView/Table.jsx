@@ -229,7 +229,7 @@ export const DataView = injector(
                   })
                 }
                 // Role-based functionality props
-                role={role}
+                userRole={role}
                 project={project}
                 hasData={hasData}
                 hasFilters={hasFilters}
