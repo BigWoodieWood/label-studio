@@ -19,7 +19,7 @@ jest.mock("@humansignal/ui", () => ({
 }));
 
 jest.mock("@humansignal/icons", () => ({
-  IconUpload: ({ size }: any) => <span data-testid="icon-upload" />,
+  IconUpload: () => <span data-testid="icon-upload" />,
   IconLsLabeling: ({ width, height }: any) => <span data-testid="icon-ls-labeling" width={width} height={height} />,
   IconCheck: ({ width, height }: any) => <span data-testid="icon-check" width={width} height={height} />,
   IconSearch: ({ width, height }: any) => <span data-testid="icon-search" width={width} height={height} />,
@@ -178,7 +178,7 @@ describe("EmptyState Component", () => {
 
     describe("Reviewer Role", () => {
       it("should render reviewer empty state", () => {
-        render(<EmptyState {...defaultProps} role="REVIEWER" />);
+        render(<EmptyState {...defaultProps} userRole="REVIEWER" />);
 
         expect(screen.getByText("No tasks available for review or labeling")).toBeInTheDocument();
         expect(screen.getByText("Tasks imported to this project will appear here")).toBeInTheDocument();
@@ -195,7 +195,7 @@ describe("EmptyState Component", () => {
           },
         };
 
-        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
+        render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
 
         expect(screen.getByText("Start labeling tasks")).toBeInTheDocument();
         expect(screen.getByText("Tasks you've labeled will appear here")).toBeInTheDocument();
@@ -212,7 +212,7 @@ describe("EmptyState Component", () => {
           },
         };
 
-        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
+        render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
 
         const labelButton = screen.getByTestId("dm-label-all-tasks-button");
         await user.click(labelButton);
@@ -227,7 +227,7 @@ describe("EmptyState Component", () => {
           },
         };
 
-        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} />);
+        render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} />);
 
         expect(screen.getByText("No tasks available")).toBeInTheDocument();
         expect(screen.getByText("Tasks assigned to you will appear here")).toBeInTheDocument();
@@ -242,7 +242,7 @@ describe("EmptyState Component", () => {
           },
         };
 
-        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} />);
+        render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} />);
 
         expect(screen.getByText("No tasks available")).toBeInTheDocument();
         expect(screen.getByText("Tasks will appear here when they become available")).toBeInTheDocument();
@@ -368,7 +368,7 @@ describe("EmptyState Component", () => {
         },
       };
 
-      render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} onLabelAllTasks={jest.fn()} />);
+      render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} onLabelAllTasks={jest.fn()} />);
 
       const labelButton = screen.getByTestId("dm-label-all-tasks-button");
       expect(labelButton).toHaveTextContent("Label All Tasks");
@@ -378,7 +378,7 @@ describe("EmptyState Component", () => {
 
   describe("Edge Cases", () => {
     it("should handle missing project object gracefully", () => {
-      render(<EmptyState {...defaultProps} role="ANNOTATOR" />);
+      render(<EmptyState {...defaultProps} userRole="ANNOTATOR" />);
 
       // Should render fallback state
       expect(screen.getByText("No tasks available")).toBeInTheDocument();
@@ -388,7 +388,7 @@ describe("EmptyState Component", () => {
     it("should handle missing assignment settings gracefully", () => {
       const project = {}; // No assignment_settings
 
-      render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} />);
+      render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} />);
 
       // Should render fallback state
       expect(screen.getByText("No tasks available")).toBeInTheDocument();
