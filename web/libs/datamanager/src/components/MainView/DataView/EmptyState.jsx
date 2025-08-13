@@ -1,4 +1,4 @@
-import { IconUpload } from "@humansignal/icons";
+import { IconUpload, IconLsLabeling, IconCheck, IconSearch, IconInbox } from "@humansignal/icons";
 import { Button, IconExternal, Typography } from "@humansignal/ui";
 import { clsx } from "clsx";
 import { useRef, useState } from "react";
@@ -6,11 +6,20 @@ import { getDocsUrl } from "../../../../../editor/src/utils/docs";
 import { cn } from "../../../utils/bem";
 
 /**
- * Empty state for Data Manager when there is no data yet
+ * Unified empty state for Data Manager
+ * Handles different empty states based on user role and context
+ *
  * Props:
  * - canImport: boolean — whether import is enabled in interfaces
  * - onOpenSourceStorageModal: () => void — opens Connect Source Storage modal
  * - onStartImportWithFiles: (files: File[]) => void — triggers Import modal with files
+ * - role: string — User role (REVIEWER, ANNOTATOR, etc.) - optional
+ * - project: object — Project object with assignment settings - optional
+ * - hasData: boolean — Whether the project has any tasks - optional
+ * - hasFilters: boolean — Whether filters are currently applied - optional
+ * - canLabel: boolean — Whether the Label All Tasks button would be enabled - optional
+ * - onLabelAllTasks: function — Callback for Label All Tasks action - optional
+ * - onClearFilters: function — Callback to clear all applied filters - optional
  */
 const flatten = (nested) => [].concat(...nested);
 
@@ -47,7 +56,19 @@ const getDroppedFiles = (dataTransfer) => {
   });
 };
 
-export const EmptyState = ({ canImport, onOpenSourceStorageModal, onStartImportWithFiles }) => {
+export const EmptyState = ({
+  canImport,
+  onOpenSourceStorageModal,
+  onStartImportWithFiles,
+  // Role-based props (optional)
+  role,
+  project,
+  hasData: _hasData,
+  hasFilters,
+  canLabel: _canLabel,
+  onLabelAllTasks,
+  onClearFilters,
+}) => {
   const [dzHovered, setDzHovered] = useState(false);
   const fileInputRef = useRef(null);
   const isImportEnabled = Boolean(canImport);
@@ -79,6 +100,123 @@ export const EmptyState = ({ canImport, onOpenSourceStorageModal, onStartImportW
     e.target.value = "";
   };
 
+  // Role-based empty state logic (from RoleBasedEmptyState)
+  // If filters are applied, show the filter-specific empty state
+  if (hasFilters) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
+        <div className="flex items-center justify-center bg-warning-background text-warning-icon rounded-full p-tight mb-4">
+          <IconSearch width={40} height={40} />
+        </div>
+
+        <Typography variant="headline" size="medium" className="mb-tight">
+          No tasks found
+        </Typography>
+
+        <Typography size="medium" className="text-neutral-content-subtler mb-8 max-w-xl">
+          Try adjusting or clearing the filters to see more results
+        </Typography>
+
+        <Button variant="primary" look="outlined" onClick={onClearFilters} data-testid="dm-clear-filters-button">
+          Clear Filters
+        </Button>
+      </div>
+    );
+  }
+
+  // For service roles (reviewers/annotators), show role-specific empty states when they have no visible tasks
+  // This applies whether the project has tasks or not - what matters is what's visible to this user
+  if (role === "REVIEWER" || role === "ANNOTATOR") {
+    // Reviewer empty state
+    if (role === "REVIEWER") {
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
+          <div className="flex items-center justify-center bg-primary-emphasis text-primary-icon rounded-full p-tight mb-4">
+            <IconCheck width={40} height={40} />
+          </div>
+
+          <Typography variant="headline" size="medium" className="mb-tight">
+            No tasks available for review or labeling
+          </Typography>
+
+          <Typography size="medium" className="text-neutral-content-subtler max-w-xl">
+            Tasks imported to this project will appear here
+          </Typography>
+        </div>
+      );
+    }
+
+    // Annotator empty state
+    if (role === "ANNOTATOR") {
+      const isAutoDistribution = project?.assignment_settings?.label_stream_task_distribution === "auto_distribution";
+      const isManualDistribution = project?.assignment_settings?.label_stream_task_distribution === "assigned_only";
+
+      if (isAutoDistribution) {
+        return (
+          <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
+            <div className="flex items-center justify-center bg-primary-emphasis text-primary-icon rounded-full p-tight mb-4">
+              <IconLsLabeling width={40} height={40} />
+            </div>
+
+            <Typography variant="headline" size="medium" className="mb-tight">
+              Start labeling tasks
+            </Typography>
+
+            <Typography size="medium" className="text-neutral-content-subtler mb-8 max-w-xl">
+              Tasks you've labeled will appear here
+            </Typography>
+
+            <Button
+              variant="primary"
+              look="filled"
+              disabled={false}
+              onClick={onLabelAllTasks}
+              data-testid="dm-label-all-tasks-button"
+            >
+              Label All Tasks
+            </Button>
+          </div>
+        );
+      }
+
+      if (isManualDistribution) {
+        return (
+          <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
+            <div className="flex items-center justify-center bg-primary-emphasis text-primary-icon rounded-full p-tight mb-4">
+              <IconInbox width={40} height={40} />
+            </div>
+
+            <Typography variant="headline" size="medium" className="mb-tight">
+              No tasks available
+            </Typography>
+
+            <Typography size="medium" className="text-neutral-content-subtler max-w-xl">
+              Tasks assigned to you will appear here
+            </Typography>
+          </div>
+        );
+      }
+
+      // Fallback for annotators with unknown distribution setting
+      return (
+        <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
+          <div className="flex items-center justify-center bg-primary-emphasis text-primary-icon rounded-full p-tight mb-4">
+            <IconInbox width={40} height={40} />
+          </div>
+
+          <Typography variant="headline" size="medium" className="mb-tight">
+            No tasks available
+          </Typography>
+
+          <Typography size="medium" className="text-neutral-content-subtler max-w-xl">
+            Tasks will appear here when they become available
+          </Typography>
+        </div>
+      );
+    }
+  }
+
+  // Default case: show import functionality (existing behavior for Owners/Admins/Managers)
   return (
     <label
       htmlFor={isImportEnabled ? "dm-empty-file-input" : undefined}
