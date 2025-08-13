@@ -195,7 +195,9 @@ describe("EmptyState Component", () => {
           },
         };
 
-        render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
+        render(
+          <EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />,
+        );
 
         expect(screen.getByText("Start labeling tasks")).toBeInTheDocument();
         expect(screen.getByText("Tasks you've labeled will appear here")).toBeInTheDocument();
@@ -212,7 +214,9 @@ describe("EmptyState Component", () => {
           },
         };
 
-        render(<EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
+        render(
+          <EmptyState {...defaultProps} userRole="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />,
+        );
 
         const labelButton = screen.getByTestId("dm-label-all-tasks-button");
         await user.click(labelButton);
