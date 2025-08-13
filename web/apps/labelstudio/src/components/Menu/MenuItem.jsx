@@ -1,6 +1,8 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "../../utils/bem";
 import { absoluteURL } from "../../utils/helpers";
+import { Tooltip } from "@humansignal/ui";
+import { useMemo } from "react";
 
 export const MenuItem = ({
   children,
@@ -14,6 +16,7 @@ export const MenuItem = ({
   active = false,
   isDangerous = false,
   onClick,
+  isUseTooltip = false,
   ...rest
 }) => {
   const rootClass = cn("main-menu", { elem: "item" });
@@ -34,7 +37,11 @@ export const MenuItem = ({
 
   if (className) classList.push(className);
 
-  const linkContent = (
+  const linkContent = isUseTooltip ? (
+    <span className={rootClass.elem("item-icon")}>
+      {icon}
+    </span>
+  ) : (
     <>
       {icon && <span className={rootClass.elem("item-icon")}>{icon}</span>}
       {children ?? label}
@@ -54,7 +61,7 @@ export const MenuItem = ({
     linkAttributes.onClick = () => (location.href = to ?? href);
   }
 
-  return (
+  const output = useMemo(() => (
     <li>
       {to ? (
         <NavLink to={finalHref} {...linkAttributes} exact={exact} activeClassName={activeClassName} data-external>
@@ -68,5 +75,7 @@ export const MenuItem = ({
         <span {...linkAttributes}>{linkContent}</span>
       )}
     </li>
-  );
+  ), [to, finalHref, linkAttributes, exact, activeClassName, linkContent]);
+
+  return isUseTooltip ? <Tooltip title={children ?? label}>{output}</Tooltip> : output;
 };

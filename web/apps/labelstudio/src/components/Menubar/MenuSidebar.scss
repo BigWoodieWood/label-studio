@@ -5,10 +5,34 @@
   z-index: 100 !important;
   top: var(--header-height);
   height: calc(100vh - var(--header-height));
-  width: var(--menu-sidebar-width);
   background: none;
   transition: all 150ms ease-out;
   border-radius: 0;
+  width: var(--menu-sidebar-width);
+
+  &_iconMenu {
+    &.sidebar_floating {
+      box-shadow: none;
+    }
+  }
+  .main-menu {
+    background: none;
+    border-right: none;
+    &__item {
+      padding: 0;
+      width: 100%;
+      background: var(--color-neutral-background);
+      border: 1px solid var(--color-neutral-border);
+    }
+    &__item_active:not(.sidebar__pin){
+      background: var(--color-neutral-emphasis);
+    }
+    &__item-icon {
+      width: 100%;
+      justify-content: center;
+      margin-right: 0;
+    }
+  }
 
   .icon {
     transition: transform 0.1s ease;
