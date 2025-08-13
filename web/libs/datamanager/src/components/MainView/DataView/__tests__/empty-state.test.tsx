@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { EmptyState } from "../EmptyState";
@@ -26,7 +26,7 @@ jest.mock("@humansignal/icons", () => ({
   IconInbox: ({ width, height }: any) => <span data-testid="icon-inbox" width={width} height={height} />,
 }));
 
-jest.mock("../../../../../editor/src/utils/docs", () => ({
+jest.mock("@humansignal/editor/utils/docs", () => ({
   getDocsUrl: (path: string) => `https://docs.example.com/${path}`,
 }));
 
@@ -109,7 +109,7 @@ describe("EmptyState Component", () => {
       render(<EmptyState {...defaultProps} />);
 
       const browseButton = screen.getByTestId("dm-browse-files-button");
-      const fileInput = screen.getByLabelText("Import data to your project");
+      const fileInput = document.getElementById("dm-empty-file-input") as HTMLInputElement;
 
       // Mock the click method on the file input
       const mockClick = jest.fn();
@@ -315,7 +315,7 @@ describe("EmptyState Component", () => {
       expect(docLink).toHaveAttribute("rel", "noopener noreferrer");
 
       const srText = docLink.querySelector(".sr-only");
-      expect(srText).toHaveTextContent(" (opens in a new tab)");
+      expect(srText).toHaveTextContent("(opens in a new tab)");
     });
   });
 

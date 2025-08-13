@@ -1,8 +1,8 @@
-import { IconUpload, IconLsLabeling, IconCheck, IconInbox, IconSearch } from "@humansignal/icons";
+import { getDocsUrl } from "@humansignal/editor/utils/docs";
+import { IconCheck, IconInbox, IconLsLabeling, IconSearch, IconUpload } from "@humansignal/icons";
 import { Button, IconExternal, Typography } from "@humansignal/ui";
 import { clsx } from "clsx";
 import { useRef, useState } from "react";
-import { getDocsUrl } from "../../../../../editor/src/utils/docs";
 import { cn } from "../../../utils/bem";
 
 // TypeScript interfaces for props
