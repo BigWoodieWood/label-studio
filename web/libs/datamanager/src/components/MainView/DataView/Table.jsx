@@ -15,7 +15,7 @@ import { GridView } from "../GridView/GridView";
 import "./Table.scss";
 import { Button } from "@humansignal/ui";
 import { useEffect, useState } from "react";
-import { EmptyState } from "./EmptyState";
+import { EmptyState } from "./empty-state";
 
 const injector = inject(({ store }) => {
   const { dataStore, currentView } = store;

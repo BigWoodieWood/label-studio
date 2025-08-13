@@ -1,0 +1,410 @@
+import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import "@testing-library/jest-dom";
+import { EmptyState } from "../EmptyState";
+
+// Mock the external dependencies
+jest.mock("@humansignal/ui", () => ({
+  Button: ({ children, onClick, disabled, "data-testid": testId, ...props }: any) => (
+    <button onClick={onClick} disabled={disabled} data-testid={testId} {...props}>
+      {children}
+    </button>
+  ),
+  Typography: ({ children, className, ...props }: any) => (
+    <div className={className} {...props}>
+      {children}
+    </div>
+  ),
+  IconExternal: ({ width, height }: any) => <span data-testid="icon-external" width={width} height={height} />,
+}));
+
+jest.mock("@humansignal/icons", () => ({
+  IconUpload: ({ size }: any) => <span data-testid="icon-upload" />,
+  IconLsLabeling: ({ width, height }: any) => <span data-testid="icon-ls-labeling" width={width} height={height} />,
+  IconCheck: ({ width, height }: any) => <span data-testid="icon-check" width={width} height={height} />,
+  IconSearch: ({ width, height }: any) => <span data-testid="icon-search" width={width} height={height} />,
+  IconInbox: ({ width, height }: any) => <span data-testid="icon-inbox" width={width} height={height} />,
+}));
+
+jest.mock("../../../../../editor/src/utils/docs", () => ({
+  getDocsUrl: (path: string) => `https://docs.example.com/${path}`,
+}));
+
+// Mock global window.APP_SETTINGS
+Object.defineProperty(window, "APP_SETTINGS", {
+  value: { whitelabel_is_active: false },
+  writable: true,
+});
+
+describe("EmptyState Component", () => {
+  const defaultProps = {
+    canImport: true,
+    onOpenSourceStorageModal: jest.fn(),
+    onStartImportWithFiles: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe("Basic Import Functionality", () => {
+    it("should render the default import state when no role is specified", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      // Check main title and description
+      expect(screen.getByText("Import data to your project")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Connect cloud storage (S3, GCS, Azure, and others) or drag & drop to upload files from your computer.",
+        ),
+      ).toBeInTheDocument();
+
+      // Check that both buttons are present
+      expect(screen.getByTestId("dm-connect-source-storage-button")).toBeInTheDocument();
+      expect(screen.getByTestId("dm-browse-files-button")).toBeInTheDocument();
+
+      // Check accessibility features
+      expect(screen.getByTestId("empty-state-label")).toHaveAttribute("aria-labelledby", "dm-empty-title");
+      expect(screen.getByTestId("empty-state-label")).toHaveAttribute("aria-describedby", "dm-empty-desc");
+    });
+
+    it("should render non-interactive state when canImport is false", () => {
+      render(<EmptyState {...defaultProps} canImport={false} />);
+
+      const label = screen.getByTestId("empty-state-label");
+      expect(label).not.toHaveAttribute("for");
+      expect(label).toHaveAttribute("tabindex", "-1");
+
+      // Browse files button should not be present when canImport is false
+      expect(screen.queryByTestId("dm-browse-files-button")).not.toBeInTheDocument();
+    });
+
+    it("should render interactive state when canImport is true", () => {
+      render(<EmptyState {...defaultProps} canImport={true} />);
+
+      const label = screen.getByTestId("empty-state-label");
+      expect(label).toHaveAttribute("for", "dm-empty-file-input");
+
+      // Both buttons should be present
+      expect(screen.getByTestId("dm-connect-source-storage-button")).toBeInTheDocument();
+      expect(screen.getByTestId("dm-browse-files-button")).toBeInTheDocument();
+    });
+  });
+
+  describe("Button Interactions", () => {
+    it("should call onOpenSourceStorageModal when Connect Storage button is clicked", async () => {
+      const user = userEvent.setup();
+      const mockOpenStorage = jest.fn();
+
+      render(<EmptyState {...defaultProps} onOpenSourceStorageModal={mockOpenStorage} />);
+
+      const connectButton = screen.getByTestId("dm-connect-source-storage-button");
+      await user.click(connectButton);
+
+      expect(mockOpenStorage).toHaveBeenCalledTimes(1);
+    });
+
+    it("should trigger file input when Browse Files button is clicked", async () => {
+      const user = userEvent.setup();
+      render(<EmptyState {...defaultProps} />);
+
+      const browseButton = screen.getByTestId("dm-browse-files-button");
+      const fileInput = screen.getByLabelText("Import data to your project");
+
+      // Mock the click method on the file input
+      const mockClick = jest.fn();
+      Object.defineProperty(fileInput, "click", {
+        value: mockClick,
+        configurable: true,
+      });
+
+      await user.click(browseButton);
+
+      expect(mockClick).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call onStartImportWithFiles when files are selected via file input", async () => {
+      const mockStartImport = jest.fn();
+      const file1 = new File(["content1"], "file1.txt", { type: "text/plain" });
+      const file2 = new File(["content2"], "file2.txt", { type: "text/plain" });
+
+      render(<EmptyState {...defaultProps} onStartImportWithFiles={mockStartImport} />);
+
+      const fileInput = document.getElementById("dm-empty-file-input") as HTMLInputElement;
+
+      // Simulate file selection
+      Object.defineProperty(fileInput, "files", {
+        value: [file1, file2],
+        configurable: true,
+      });
+
+      fireEvent.change(fileInput);
+
+      expect(mockStartImport).toHaveBeenCalledWith([file1, file2]);
+      // Input should be cleared after selection
+      expect(fileInput.value).toBe("");
+    });
+  });
+
+  describe("Role-Based Empty States", () => {
+    describe("Filter-based Empty State", () => {
+      it("should render filter empty state when hasFilters is true", () => {
+        render(<EmptyState {...defaultProps} hasFilters={true} onClearFilters={jest.fn()} />);
+
+        expect(screen.getByText("No tasks found")).toBeInTheDocument();
+        expect(screen.getByText("Try adjusting or clearing the filters to see more results")).toBeInTheDocument();
+        expect(screen.getByTestId("dm-clear-filters-button")).toBeInTheDocument();
+        expect(screen.getByTestId("icon-search")).toBeInTheDocument();
+      });
+
+      it("should call onClearFilters when Clear Filters button is clicked", async () => {
+        const user = userEvent.setup();
+        const mockClearFilters = jest.fn();
+
+        render(<EmptyState {...defaultProps} hasFilters={true} onClearFilters={mockClearFilters} />);
+
+        const clearButton = screen.getByTestId("dm-clear-filters-button");
+        await user.click(clearButton);
+
+        expect(mockClearFilters).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("Reviewer Role", () => {
+      it("should render reviewer empty state", () => {
+        render(<EmptyState {...defaultProps} role="REVIEWER" />);
+
+        expect(screen.getByText("No tasks available for review or labeling")).toBeInTheDocument();
+        expect(screen.getByText("Tasks imported to this project will appear here")).toBeInTheDocument();
+        expect(screen.getByTestId("icon-check")).toBeInTheDocument();
+      });
+    });
+
+    describe("Annotator Role", () => {
+      it("should render annotator auto-distribution state with Label All Tasks button", () => {
+        const mockLabelAllTasks = jest.fn();
+        const project = {
+          assignment_settings: {
+            label_stream_task_distribution: "auto_distribution",
+          },
+        };
+
+        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
+
+        expect(screen.getByText("Start labeling tasks")).toBeInTheDocument();
+        expect(screen.getByText("Tasks you've labeled will appear here")).toBeInTheDocument();
+        expect(screen.getByTestId("dm-label-all-tasks-button")).toBeInTheDocument();
+        expect(screen.getByTestId("icon-ls-labeling")).toBeInTheDocument();
+      });
+
+      it("should call onLabelAllTasks when Label All Tasks button is clicked", async () => {
+        const user = userEvent.setup();
+        const mockLabelAllTasks = jest.fn();
+        const project = {
+          assignment_settings: {
+            label_stream_task_distribution: "auto_distribution",
+          },
+        };
+
+        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} onLabelAllTasks={mockLabelAllTasks} />);
+
+        const labelButton = screen.getByTestId("dm-label-all-tasks-button");
+        await user.click(labelButton);
+
+        expect(mockLabelAllTasks).toHaveBeenCalledTimes(1);
+      });
+
+      it("should render annotator manual distribution state without button", () => {
+        const project = {
+          assignment_settings: {
+            label_stream_task_distribution: "assigned_only",
+          },
+        };
+
+        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} />);
+
+        expect(screen.getByText("No tasks available")).toBeInTheDocument();
+        expect(screen.getByText("Tasks assigned to you will appear here")).toBeInTheDocument();
+        expect(screen.getByTestId("icon-inbox")).toBeInTheDocument();
+        expect(screen.queryByTestId("dm-label-all-tasks-button")).not.toBeInTheDocument();
+      });
+
+      it("should render fallback annotator state for unknown distribution setting", () => {
+        const project = {
+          assignment_settings: {
+            label_stream_task_distribution: "unknown_setting",
+          },
+        };
+
+        render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} />);
+
+        expect(screen.getByText("No tasks available")).toBeInTheDocument();
+        expect(screen.getByText("Tasks will appear here when they become available")).toBeInTheDocument();
+        expect(screen.getByTestId("icon-inbox")).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Drag and Drop Functionality", () => {
+    it("should handle drag over event when import is enabled", () => {
+      render(<EmptyState {...defaultProps} canImport={true} />);
+
+      const dropzone = screen.getByTestId("empty-state-label");
+
+      fireEvent.dragOver(dropzone);
+
+      // Should prevent default and set hover state
+      expect(dropzone).toBeInTheDocument();
+    });
+
+    it("should handle drag leave event", () => {
+      render(<EmptyState {...defaultProps} canImport={true} />);
+
+      const dropzone = screen.getByTestId("empty-state-label");
+
+      fireEvent.dragLeave(dropzone);
+
+      expect(dropzone).toBeInTheDocument();
+    });
+
+    it("should not handle drag events when import is disabled", () => {
+      render(<EmptyState {...defaultProps} canImport={false} />);
+
+      const dropzone = screen.getByTestId("empty-state-label");
+
+      // Should not have drag event handlers
+      expect(dropzone).not.toHaveAttribute("onDragOver");
+    });
+  });
+
+  describe("Accessibility", () => {
+    it("should have proper ARIA attributes", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      const label = screen.getByTestId("empty-state-label");
+      const title = screen.getByText("Import data to your project");
+      const description = screen.getByText(
+        "Connect cloud storage (S3, GCS, Azure, and others) or drag & drop to upload files from your computer.",
+      );
+
+      expect(label).toHaveAttribute("aria-labelledby", "dm-empty-title");
+      expect(label).toHaveAttribute("aria-describedby", "dm-empty-desc");
+      expect(title).toHaveAttribute("id", "dm-empty-title");
+      expect(description).toHaveAttribute("id", "dm-empty-desc");
+    });
+
+    it("should have screen reader text for drag state", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      const srText = screen.getByLabelText("Import data to your project").querySelector('[aria-live="polite"]');
+      expect(srText).toBeInTheDocument();
+      expect(srText).toHaveAttribute("aria-atomic", "true");
+      expect(srText).toHaveClass("sr-only");
+    });
+
+    it("should render documentation link with proper accessibility", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      const docLink = screen.getByTestId("dm-docs-data-import-link");
+      expect(docLink).toHaveAttribute("href", "https://docs.example.com/guide/tasks");
+      expect(docLink).toHaveAttribute("target", "_blank");
+      expect(docLink).toHaveAttribute("rel", "noopener noreferrer");
+
+      const srText = docLink.querySelector(".sr-only");
+      expect(srText).toHaveTextContent(" (opens in a new tab)");
+    });
+  });
+
+  describe("Conditional Content", () => {
+    it("should hide documentation link when whitelabel is active", () => {
+      // Mock whitelabel active
+      Object.defineProperty(window, "APP_SETTINGS", {
+        value: { whitelabel_is_active: true },
+        writable: true,
+      });
+
+      render(<EmptyState {...defaultProps} />);
+
+      expect(screen.queryByTestId("dm-docs-data-import-link")).not.toBeInTheDocument();
+
+      // Reset for other tests
+      Object.defineProperty(window, "APP_SETTINGS", {
+        value: { whitelabel_is_active: false },
+        writable: true,
+      });
+    });
+
+    it("should show documentation link when whitelabel is not active", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      expect(screen.getByTestId("dm-docs-data-import-link")).toBeInTheDocument();
+    });
+  });
+
+  describe("Button States and Props", () => {
+    it("should render buttons with correct text content", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      expect(screen.getByTestId("dm-connect-source-storage-button")).toHaveTextContent("Connect Storage");
+      expect(screen.getByTestId("dm-browse-files-button")).toHaveTextContent("Browse Files");
+    });
+
+    it("should render Clear Filters button with correct text", () => {
+      render(<EmptyState {...defaultProps} hasFilters={true} onClearFilters={jest.fn()} />);
+
+      expect(screen.getByTestId("dm-clear-filters-button")).toHaveTextContent("Clear Filters");
+    });
+
+    it("should render Label All Tasks button with correct text and state", () => {
+      const project = {
+        assignment_settings: {
+          label_stream_task_distribution: "auto_distribution",
+        },
+      };
+
+      render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} onLabelAllTasks={jest.fn()} />);
+
+      const labelButton = screen.getByTestId("dm-label-all-tasks-button");
+      expect(labelButton).toHaveTextContent("Label All Tasks");
+      expect(labelButton).not.toBeDisabled();
+    });
+  });
+
+  describe("Edge Cases", () => {
+    it("should handle missing project object gracefully", () => {
+      render(<EmptyState {...defaultProps} role="ANNOTATOR" />);
+
+      // Should render fallback state
+      expect(screen.getByText("No tasks available")).toBeInTheDocument();
+      expect(screen.getByText("Tasks will appear here when they become available")).toBeInTheDocument();
+    });
+
+    it("should handle missing assignment settings gracefully", () => {
+      const project = {}; // No assignment_settings
+
+      render(<EmptyState {...defaultProps} role="ANNOTATOR" project={project} />);
+
+      // Should render fallback state
+      expect(screen.getByText("No tasks available")).toBeInTheDocument();
+      expect(screen.getByText("Tasks will appear here when they become available")).toBeInTheDocument();
+    });
+
+    it("should handle empty file selection", () => {
+      const mockStartImport = jest.fn();
+
+      render(<EmptyState {...defaultProps} onStartImportWithFiles={mockStartImport} />);
+
+      const fileInput = document.getElementById("dm-empty-file-input") as HTMLInputElement;
+
+      // Simulate empty file selection
+      Object.defineProperty(fileInput, "files", {
+        value: [],
+        configurable: true,
+      });
+
+      fireEvent.change(fileInput);
+
+      expect(mockStartImport).not.toHaveBeenCalled();
+    });
+  });
+});

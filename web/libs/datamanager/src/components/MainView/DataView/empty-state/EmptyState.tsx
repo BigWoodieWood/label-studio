@@ -1,9 +1,9 @@
+import { type FC, type DragEvent, type ChangeEvent, type MouseEvent, useRef, useState } from "react";
 import { IconUpload, IconLsLabeling, IconCheck, IconSearch, IconInbox } from "@humansignal/icons";
 import { Button, IconExternal, Typography } from "@humansignal/ui";
 import { clsx } from "clsx";
-import { useRef, useState } from "react";
-import { getDocsUrl } from "../../../../../editor/src/utils/docs";
-import { cn } from "../../../utils/bem";
+import { getDocsUrl } from "../../../../../../editor/src/utils/docs";
+import { cn } from "../../../../utils/bem";
 
 // TypeScript interfaces for props
 interface EmptyStateProps {
@@ -40,9 +40,9 @@ interface EmptyStateProps {
  * - onLabelAllTasks: function — Callback for Label All Tasks action - optional
  * - onClearFilters: function — Callback to clear all applied filters - optional
  */
-const flatten = (nested) => [].concat(...nested);
+const flatten = (nested: any[]) => [].concat(...nested);
 
-const traverseFileTree = (item, path) => {
+const traverseFileTree = (item: any, path?: string): Promise<File[]> => {
   return new Promise((resolve) => {
     if (!item) return resolve([]);
     if (item.isFile) {
@@ -62,7 +62,7 @@ const traverseFileTree = (item, path) => {
   });
 };
 
-const getDroppedFiles = (dataTransfer) => {
+const getDroppedFiles = (dataTransfer: DataTransfer | null): Promise<File[]> => {
   return new Promise((resolve) => {
     const items = Array.from(dataTransfer?.items ?? []);
     if (!items.length || !items[0].webkitGetAsEntry) {
@@ -75,7 +75,7 @@ const getDroppedFiles = (dataTransfer) => {
   });
 };
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+export const EmptyState: FC<EmptyStateProps> = ({
   canImport,
   onOpenSourceStorageModal,
   onStartImportWithFiles,
@@ -89,10 +89,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   onClearFilters,
 }) => {
   const [dzHovered, setDzHovered] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isImportEnabled = Boolean(canImport);
 
-  const onDrop = async (e) => {
+  const onDrop = async (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     if (!isImportEnabled) return;
     const files = await getDroppedFiles(e.dataTransfer);
@@ -100,7 +100,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     setDzHovered(false);
   };
 
-  const onDragOver = (e) => {
+  const onDragOver = (e: DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
     if (!isImportEnabled) return;
     setDzHovered(true);
@@ -113,7 +113,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     fileInputRef.current?.click();
   };
 
-  const onFileInputChange = (e) => {
+  const onFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (files.length) onStartImportWithFiles?.(files);
     e.target.value = "";
@@ -275,7 +275,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               variant="primary"
               look="filled"
               className="flex-1"
-              onClick={(e) => {
+              onClick={(e: MouseEvent<HTMLButtonElement>) => {
                 e.preventDefault();
                 e.stopPropagation();
                 onOpenSourceStorageModal?.();
