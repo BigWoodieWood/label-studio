@@ -42,7 +42,12 @@ const injector = inject(({ store }) => {
     // Role-based empty state props
     role: store.SDK?.role ?? null,
     project: store.project ?? {},
-    hasFilters: (currentView?.filtersApplied ?? 0) > 0,
+    hasFilters: (() => {
+      const filtersApplied = currentView?.filtersApplied ?? 0;
+      const hasFilters = filtersApplied > 0;
+      console.log("DEBUG hasFilters:", { filtersApplied, hasFilters, currentView: currentView?.id });
+      return hasFilters;
+    })(),
     canLabel: totalTasks > 0 && foundTasks > 0,
   };
 
