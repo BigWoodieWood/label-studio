@@ -10,11 +10,6 @@
   border-radius: 0;
   width: var(--menu-sidebar-width);
 
-  &_iconMenu {
-    &.sidebar_floating {
-      box-shadow: none;
-    }
-  }
   .main-menu {
     background: none;
     border-right: none;
@@ -87,5 +82,26 @@
   &:not(.sidebar_floating) &__pin .icon {
     opacity: 1;
     transform: rotate(-45deg);
+  }
+
+  &_iconMenu {
+    &.sidebar_floating {
+      box-shadow: none;
+    }
+
+    .main-menu {
+      &__item {
+        --item-size: 40px;
+        height: var(--item-size);
+        width: var(--item-size);
+      }
+      &__item-icon {
+        svg {
+          --icon-size: 30px;
+          width: var(--icon-size);
+          height: var(--icon-size);
+        }
+      }
+    }
   }
 }

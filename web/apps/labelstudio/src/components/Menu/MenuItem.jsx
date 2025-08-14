@@ -16,7 +16,7 @@ export const MenuItem = ({
   active = false,
   isDangerous = false,
   onClick,
-  isUseTooltip = false,
+  isIconMenuItem = false,
   ...rest
 }) => {
   const rootClass = cn("main-menu", { elem: "item" });
@@ -37,7 +37,7 @@ export const MenuItem = ({
 
   if (className) classList.push(className);
 
-  const linkContent = isUseTooltip ? (
+  const linkContent = isIconMenuItem ? (
     <span className={rootClass.elem("item-icon")}>
       {icon}
     </span>
@@ -61,8 +61,8 @@ export const MenuItem = ({
     linkAttributes.onClick = () => (location.href = to ?? href);
   }
 
-  const output = useMemo(() => (
-    <li>
+  return (
+    <li className={isIconMenuItem ? "flex flex-col items-center gap-1" : ""}>
       {to ? (
         <NavLink to={finalHref} {...linkAttributes} exact={exact} activeClassName={activeClassName} data-external>
           {linkContent}
@@ -74,15 +74,7 @@ export const MenuItem = ({
       ) : (
         <span {...linkAttributes}>{linkContent}</span>
       )}
+      {isIconMenuItem && <div className="text-center text-[10px] font-medium text-neutral-surface-subtle pointer">{children ?? label}</div>}
     </li>
-  ), [to, finalHref, linkAttributes, exact, activeClassName, linkContent]);
-
-  return isUseTooltip ? (
-    <div className="relative">
-      {output}
-      <div className="block text-size-10 pointer">{children ?? label}</div>
-    </div>
-  ) : (
-    output
   );
 };

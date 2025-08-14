@@ -220,9 +220,9 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
               className={[sidebarClass, sidebarClass.mod({ floating: !sidebarPinned, iconMenu: isIconMenu })].join(" ")}
             >
               <Menu>
-                {isFF(FF_HOMEPAGE) && <Menu.Item label="Home" isUseTooltip={isIconMenu} to="/" icon={<IconHome />} data-external exact />}
-                <Menu.Item label="Projects" isUseTooltip={isIconMenu} to="/projects" icon={<IconFolder />} data-external exact />
-                <Menu.Item label="Organization" isUseTooltip={isIconMenu} to="/organization" icon={<IconPersonInCircle />} data-external exact />
+                {isFF(FF_HOMEPAGE) && <Menu.Item label="Home" isIconMenuItem={isIconMenu} to="/" icon={<IconHome />} data-external exact />}
+                <Menu.Item label="Projects" isIconMenuItem={isIconMenu} to="/projects" icon={<IconFolder />} data-external exact />
+                <Menu.Item label="Organization" isIconMenuItem={isIconMenu} to="/organization" icon={<IconPersonInCircle />} data-external exact />
 
                 <Menu.Spacer />
 
@@ -230,14 +230,14 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
 
                 <Menu.Item
                   label="API"
-                  isUseTooltip={isIconMenu}
+                  isIconMenuItem={isIconMenu}
                   href="https://api.labelstud.io/api-reference/introduction/getting-started"
                   icon={<IconTerminal />}
                   target="_blank"
                 />
-                <Menu.Item label="Docs" isUseTooltip={isIconMenu} href="https://labelstud.io/guide" icon={<IconBook />} target="_blank" />
+                <Menu.Item label="Docs" isIconMenuItem={isIconMenu} href="https://labelstud.io/guide" icon={<IconBook />} target="_blank" />
                 <Menu.Item
-                  isUseTooltip={isIconMenu}
+                  isIconMenuItem={isIconMenu}
                   label="GitHub"
                   href="https://github.com/HumanSignal/label-studio"
                   icon={<IconGithub />}
@@ -245,7 +245,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
                   rel="noreferrer"
                 />
                 <Menu.Item
-                  isUseTooltip={isIconMenu}
+                  isIconMenuItem={isIconMenu}
                   label="Slack Community"
                   href="https://slack.labelstud.io/?source=product-menu"
                   icon={<IconSlack />}
@@ -259,7 +259,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
 
                 {!isIconMenu &&(
                   <Menu.Item
-                    isUseTooltip={isIconMenu}
+                    isIconMenuItem={isIconMenu}
                     icon={<IconPin />}
                     className={sidebarClass.elem("pin")}
                     onClick={sidebarPin}
