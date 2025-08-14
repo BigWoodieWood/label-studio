@@ -54,6 +54,7 @@ export const confirm = ({ okText, onOk, cancelText, onCancel, buttonLook, ...pro
           look="outlined"
           autoFocus
           aria-label="Cancel"
+          data-testid="dialog-cancel-button"
         >
           {cancelText ?? "Cancel"}
         </Button>
@@ -65,6 +66,7 @@ export const confirm = ({ okText, onOk, cancelText, onCancel, buttonLook, ...pro
           }}
           variant={buttonLook === "negative" ? "negative" : "primary"}
           aria-label={okText ?? "OK"}
+          data-testid="dialog-ok-button"
         >
           {okText ?? "OK"}
         </Button>
@@ -86,6 +88,7 @@ export const info = ({ okText, onOkPress, ...props }) => {
             modal.close();
           }}
           aria-label="OK"
+          data-testid="dialog-ok-button"
         >
           {okText ?? "OK"}
         </Button>
