@@ -6,6 +6,7 @@ import itertools
 import json
 import logging
 import os
+import sys
 import traceback as tb
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
@@ -29,6 +30,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_rq import job
 from io_storages.utils import StorageObject, get_uri_via_regex, parse_bucket_uri
+from rest_framework.exceptions import ValidationError
 from rq.job import Job
 from tasks.models import Annotation, Task
 from tasks.serializers import AnnotationSerializer, PredictionSerializer
@@ -52,6 +54,7 @@ class StorageInfo(models.Model):
         IN_PROGRESS = 'in_progress', _('In progress')
         FAILED = 'failed', _('Failed')
         COMPLETED = 'completed', _('Completed')
+        COMPLETED_WITH_ERRORS = 'completed_with_errors', _('Completed with errors')
 
     class Meta:
         abstract = True
@@ -76,7 +79,7 @@ class StorageInfo(models.Model):
         self.last_sync_job = job_id
         self.save(update_fields=['last_sync_job'])
 
-    def info_set_queued(self):
+    def _update_queued_status(self):
         self.last_sync = None
         self.last_sync_count = None
         self.last_sync_job = None
@@ -86,6 +89,32 @@ class StorageInfo(models.Model):
         self.meta = {'attempts': self.meta.get('attempts', 0) + 1, 'time_queued': str(timezone.now())}
 
         self.save(update_fields=['last_sync_job', 'last_sync', 'last_sync_count', 'status', 'meta'])
+
+    def info_set_queued(self):
+        if settings.DJANGO_DB == settings.DJANGO_DB_SQLITE:
+            self._update_queued_status()
+            return True
+
+        with transaction.atomic():
+            try:
+                locked_storage = self.__class__.objects.select_for_update().get(pk=self.pk)
+            except self.__class__.DoesNotExist:
+                logger.error(f'Storage {self.__class__.__name__} with pk={self.pk} does not exist')
+                return False
+
+            if locked_storage.status in [self.Status.QUEUED, self.Status.IN_PROGRESS]:
+                logger.error(
+                    f'Storage {locked_storage} (id={locked_storage.id}) is already in status '
+                    f'"{locked_storage.status}". Cannot set to QUEUED. '
+                    f'Last sync job: {locked_storage.last_sync_job}, '
+                    f'Meta: {locked_storage.meta}'
+                )
+                return False
+
+            locked_storage._update_queued_status()
+
+            self.refresh_from_db()
+            return True
 
     def info_set_in_progress(self):
         # only QUEUED => IN_PROGRESS transition is possible, because in QUEUED we reset states
@@ -101,7 +130,10 @@ class StorageInfo(models.Model):
 
     @property
     def time_in_progress(self):
-        return datetime.fromisoformat(self.meta['time_in_progress'])
+        if 'time_failure' not in self.meta:
+            return datetime.fromisoformat(self.meta['time_in_progress'])
+        else:
+            return datetime.fromisoformat(self.meta['time_failure'])
 
     def info_set_completed(self, last_sync_count, **kwargs):
         self.status = self.Status.COMPLETED
@@ -115,9 +147,56 @@ class StorageInfo(models.Model):
         self.meta.update(kwargs)
         self.save(update_fields=['status', 'meta', 'last_sync', 'last_sync_count'])
 
+    def info_set_completed_with_errors(self, last_sync_count, validation_errors, **kwargs):
+        self.status = self.Status.COMPLETED_WITH_ERRORS
+        self.last_sync = timezone.now()
+        self.last_sync_count = last_sync_count
+        self.traceback = '\n'.join(validation_errors)
+        time_completed = timezone.now()
+        self.meta['time_completed'] = str(time_completed)
+        self.meta['duration'] = (time_completed - self.time_in_progress).total_seconds()
+        self.meta['tasks_failed_validation'] = len(validation_errors)
+        self.meta.update(kwargs)
+        self.save(update_fields=['status', 'meta', 'last_sync', 'last_sync_count', 'traceback'])
+
     def info_set_failed(self):
         self.status = self.Status.FAILED
-        self.traceback = str(tb.format_exc())
+
+        # Get the current exception info
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+
+        # Extract human-readable error messages from ValidationError
+        if exc_type and issubclass(exc_type, ValidationError):
+            error_messages = []
+            if hasattr(exc_value, 'detail'):
+                # Handle ValidationError.detail which can be a dict or list
+                if isinstance(exc_value.detail, dict):
+                    for field, errors in exc_value.detail.items():
+                        if isinstance(errors, list):
+                            for error in errors:
+                                if hasattr(error, 'string'):
+                                    error_messages.append(error.string)
+                                else:
+                                    error_messages.append(str(error))
+                        else:
+                            error_messages.append(str(errors))
+                elif isinstance(exc_value.detail, list):
+                    for error in exc_value.detail:
+                        if hasattr(error, 'string'):
+                            error_messages.append(error.string)
+                        else:
+                            error_messages.append(str(error))
+                else:
+                    error_messages.append(str(exc_value.detail))
+
+            # Use human-readable messages if available, otherwise fall back to full traceback
+            if error_messages:
+                self.traceback = '\n'.join(error_messages)
+            else:
+                self.traceback = str(tb.format_exc())
+        else:
+            # For non-ValidationError exceptions, use the full traceback
+            self.traceback = str(tb.format_exc())
 
         time_failure = timezone.now()
 
@@ -418,7 +497,9 @@ class ImportStorage(Storage):
                 prediction['task'] = task.id
                 prediction['project'] = project.id
             prediction_ser = PredictionSerializer(data=predictions, many=True)
-            if prediction_ser.is_valid(raise_exception=raise_exception):
+
+            # Always validate predictions and raise exception if invalid
+            if prediction_ser.is_valid(raise_exception=True):
                 prediction_ser.save()
 
             # add annotations
@@ -427,8 +508,15 @@ class ImportStorage(Storage):
                 annotation['task'] = task.id
                 annotation['project'] = project.id
             annotation_ser = AnnotationSerializer(data=annotations, many=True)
-            if annotation_ser.is_valid(raise_exception=raise_exception):
+
+            # Always validate annotations, but control error handling based on FF
+            if annotation_ser.is_valid():
                 annotation_ser.save()
+            else:
+                # Log validation errors but don't save invalid annotations
+                logger.error(f'Invalid annotations for task {task.id}: {annotation_ser.errors}')
+                if raise_exception:
+                    raise ValidationError(annotation_ser.errors)
         return task
         # FIXME: add_annotation_history / post_process_annotations should be here
 
@@ -444,6 +532,7 @@ class ImportStorage(Storage):
         maximum_annotations = self.project.maximum_annotations
         task = self.project.tasks.order_by('-inner_id').first()
         max_inner_id = (task.inner_id + 1) if task else 1
+        validation_errors = []
 
         # Check feature flag once for the entire sync process
         check_file_extension = flag_set(
@@ -496,21 +585,28 @@ class ImportStorage(Storage):
             for link_object in link_objects:
                 # TODO: batch this loop body with add_task -> add_tasks in a single bulk write.
                 # See DIA-2062 for prerequisites
-                task = self.add_task(
-                    self.project,
-                    maximum_annotations,
-                    max_inner_id,
-                    self,
-                    link_object,
-                    link_class=link_class,
-                )
-                max_inner_id += 1
+                try:
+                    task = self.add_task(
+                        self.project,
+                        maximum_annotations,
+                        max_inner_id,
+                        self,
+                        link_object,
+                        link_class=link_class,
+                    )
+                    max_inner_id += 1
 
-                # update progress counters for storage info
-                tasks_created += 1
+                    # update progress counters for storage info
+                    tasks_created += 1
 
-                # add task to webhook list
-                tasks_for_webhook.append(task.id)
+                    # add task to webhook list
+                    tasks_for_webhook.append(task.id)
+                except ValidationError as e:
+                    # Log validation errors but continue processing other tasks
+                    error_message = f'Validation error for task from {link_object.key}: {e}'
+                    logger.error(error_message)
+                    validation_errors.append(error_message)
+                    continue
 
                 # settings.WEBHOOK_BATCH_SIZE
                 # `WEBHOOK_BATCH_SIZE` sets the maximum number of tasks sent in a single webhook call, ensuring manageable payload sizes.
@@ -531,9 +627,14 @@ class ImportStorage(Storage):
         self.project.update_tasks_states(
             maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True
         )
-
-        # sync is finished, set completed status for storage info
-        self.info_set_completed(last_sync_count=tasks_created, tasks_existed=tasks_existed)
+        if validation_errors:
+            # sync is finished, set completed with errors status for storage info
+            self.info_set_completed_with_errors(
+                last_sync_count=tasks_created, tasks_existed=tasks_existed, validation_errors=validation_errors
+            )
+        else:
+            # sync is finished, set completed status for storage info
+            self.info_set_completed(last_sync_count=tasks_created, tasks_existed=tasks_existed)
 
     def scan_and_create_links(self):
         """This is proto method - you can override it, or just replace ImportStorageLink by your own model"""
@@ -546,7 +647,8 @@ class ImportStorage(Storage):
             if not is_job_in_queue(queue, 'import_sync_background', meta=meta) and not is_job_on_worker(
                 job_id=self.last_sync_job, queue_name='low'
             ):
-                self.info_set_queued()
+                if not self.info_set_queued():
+                    return
                 sync_job = queue.enqueue(
                     import_sync_background,
                     self.__class__,
@@ -562,7 +664,8 @@ class ImportStorage(Storage):
         else:
             try:
                 logger.info(f'Start syncing storage {self}')
-                self.info_set_queued()
+                if not self.info_set_queued():
+                    return
                 import_sync_background(self.__class__, self.id)
             except Exception:
                 # needed to facilitate debugging storage-related testcases, since otherwise no exception is logged
@@ -727,7 +830,8 @@ class ExportStorage(Storage, ProjectStorageMixin):
 
         if redis_connected():
             queue = django_rq.get_queue('low')
-            self.info_set_queued()
+            if not self.info_set_queued():
+                return
             sync_job = queue.enqueue(
                 export_sync_fn,
                 self.__class__,
@@ -742,7 +846,8 @@ class ExportStorage(Storage, ProjectStorageMixin):
         else:
             try:
                 logger.info(f'Start syncing storage {self}')
-                self.info_set_queued()
+                if not self.info_set_queued():
+                    return
                 export_sync_fn(self.__class__, self.id)
             except Exception:
                 storage_background_failure(self)
