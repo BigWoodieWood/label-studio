@@ -15,7 +15,7 @@ export const minLength = (min) => (fieldName, value) => {
 
 export const maxLength = (max) => (fieldName, value) => {
   if (isDefined(value) && String(value).length > max) {
-    return `Must have no more than ${max} characters`;
+    return `Must not be longer than ${max} characters`;
   }
 };
 
