@@ -315,18 +315,6 @@ export const ImportPage = ({
     }
   }, [project?.id, loadFilesList]);
 
-  // Auto-start upload when DM triggers startImportWithFiles
-  useEffect(() => {
-    const handler = (e) => {
-      const files = e?.detail?.files ?? [];
-      if (files.length) {
-        sendFiles(files);
-      }
-    };
-    window.addEventListener("ls:startImportWithFiles", handler);
-    return () => window.removeEventListener("ls:startImportWithFiles", handler);
-  }, [sendFiles]);
-
   const urlRef = useRef();
 
   if (!project) return null;
