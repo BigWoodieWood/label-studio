@@ -209,11 +209,7 @@ export const DataView = injector(
                 // Import functionality props
                 canImport={!!store.interfaces.get("import")}
                 onOpenSourceStorageModal={() => getRoot(store)?.SDK?.invoke?.("openSourceStorageModal")}
-                onStartImportWithFiles={(files) =>
-                  getRoot(store)?.SDK?.invoke?.("startImportWithFiles", {
-                    files,
-                  })
-                }
+                onOpenImportModal={() => getRoot(store)?.SDK?.invoke?.("importClicked")}
                 // Role-based functionality props
                 userRole={role}
                 project={project}

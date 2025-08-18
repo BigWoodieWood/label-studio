@@ -1,15 +1,31 @@
-import { type FC, type DragEvent, type ChangeEvent, type MouseEvent, useRef, useState } from "react";
-import { IconUpload, IconLsLabeling, IconCheck, IconSearch, IconInbox } from "@humansignal/icons";
-import { Button, IconExternal, Typography } from "@humansignal/ui";
-import { clsx } from "clsx";
+import type { FC } from "react";
+import {
+  IconUpload,
+  IconLsLabeling,
+  IconCheck,
+  IconSearch,
+  IconInbox,
+  IconCloudProviderS3,
+  IconCloudProviderGCS,
+  IconCloudProviderAzure,
+  IconCloudProviderRedis,
+} from "@humansignal/icons";
+import { Button, IconExternal, Typography, Tooltip } from "@humansignal/ui";
 import { getDocsUrl } from "../../../../../../editor/src/utils/docs";
-import { cn } from "../../../../utils/bem";
+
+declare global {
+  interface Window {
+    APP_SETTINGS?: {
+      whitelabel_is_active?: boolean;
+    };
+  }
+}
 
 // TypeScript interfaces for props
 interface EmptyStateProps {
   canImport: boolean;
   onOpenSourceStorageModal?: () => void;
-  onStartImportWithFiles?: (files: File[]) => void;
+  onOpenImportModal?: () => void;
   // Role-based props (optional)
   userRole?: string;
   project?: {
@@ -31,7 +47,7 @@ interface EmptyStateProps {
  * Props:
  * - canImport: boolean — whether import is enabled in interfaces
  * - onOpenSourceStorageModal: () => void — opens Connect Source Storage modal
- * - onStartImportWithFiles: (files: File[]) => void — triggers Import modal with files
+ * - onOpenImportModal: () => void — opens Import modal
  * - userRole: string — User role (REVIEWER, ANNOTATOR, etc.) - optional
  * - project: object — Project object with assignment settings - optional
  * - hasData: boolean — Whether the project has any tasks - optional
@@ -40,45 +56,11 @@ interface EmptyStateProps {
  * - onLabelAllTasks: function — Callback for Label All Tasks action - optional
  * - onClearFilters: function — Callback to clear all applied filters - optional
  */
-const flatten = (nested: any[]) => [].concat(...nested);
-
-const traverseFileTree = (item: any, path?: string): Promise<File[]> => {
-  return new Promise((resolve) => {
-    if (!item) return resolve([]);
-    if (item.isFile) {
-      if (item.name && item.name[0] === ".") return resolve([]);
-      return item.file((file) => resolve([file]));
-    }
-    if (item.isDirectory) {
-      const dirReader = item.createReader();
-      dirReader.readEntries((entries) => {
-        Promise.all(entries.map((entry) => traverseFileTree(entry, `${path ?? ""}${item.name}/`)))
-          .then(flatten)
-          .then(resolve);
-      });
-    } else {
-      resolve([]);
-    }
-  });
-};
-
-const getDroppedFiles = (dataTransfer: DataTransfer | null): Promise<File[]> => {
-  return new Promise((resolve) => {
-    const items = Array.from(dataTransfer?.items ?? []);
-    if (!items.length || !items[0].webkitGetAsEntry) {
-      return resolve(Array.from(dataTransfer?.files ?? []));
-    }
-    const entries = items.map((it) => it.webkitGetAsEntry());
-    Promise.all(entries.map((entry) => traverseFileTree(entry)))
-      .then(flatten)
-      .then(resolve);
-  });
-};
 
 export const EmptyState: FC<EmptyStateProps> = ({
   canImport,
   onOpenSourceStorageModal,
-  onStartImportWithFiles,
+  onOpenImportModal,
   // Role-based props (optional)
   userRole,
   project,
@@ -88,36 +70,7 @@ export const EmptyState: FC<EmptyStateProps> = ({
   onLabelAllTasks,
   onClearFilters,
 }) => {
-  const [dzHovered, setDzHovered] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const isImportEnabled = Boolean(canImport);
-
-  const onDrop = async (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    if (!isImportEnabled) return;
-    const files = await getDroppedFiles(e.dataTransfer);
-    if (files?.length) onStartImportWithFiles?.(files);
-    setDzHovered(false);
-  };
-
-  const onDragOver = (e: DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    if (!isImportEnabled) return;
-    setDzHovered(true);
-  };
-
-  const onDragLeave = () => setDzHovered(false);
-
-  const onBrowseFiles = () => {
-    if (!isImportEnabled) return;
-    fileInputRef.current?.click();
-  };
-
-  const onFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (files.length) onStartImportWithFiles?.(files);
-    e.target.value = "";
-  };
 
   // If filters are applied, show the filter-specific empty state (regardless of user role)
   if (hasFilters) {
@@ -237,37 +190,47 @@ export const EmptyState: FC<EmptyStateProps> = ({
 
   // Default case: show import functionality (existing behavior for Owners/Admins/Managers)
   return (
-    <label
-      htmlFor={isImportEnabled ? "dm-empty-file-input" : undefined}
-      onDragOver={isImportEnabled ? onDragOver : undefined}
-      onDrop={isImportEnabled ? onDrop : undefined}
-      onDragLeave={isImportEnabled ? onDragLeave : undefined}
-      tabIndex={-1}
+    <div
       data-testid="empty-state-label"
       aria-labelledby="dm-empty-title"
       aria-describedby="dm-empty-desc"
-      className={clsx(
-        cn("dropzone").mod({ "is-dragging": dzHovered }).toString(),
-        "transition-all duration-150 w-full flex items-center justify-center p-base m-0",
-        isImportEnabled && "cursor-pointer",
-      )}
+      className="w-full flex items-center justify-center m-0"
     >
       <div className="w-full h-full">
-        <div className="w-full h-full transition-border-color duration-150 border border-primary-border-subtler rounded-md bg-primary-background flex flex-col items-center justify-center text-center p-wide hover:border-primary-border-bold">
+        <div className="w-full h-full flex flex-col items-center justify-center text-center p-wide">
           <div className="flex items-center justify-center bg-primary-emphasis text-primary-icon rounded-full p-tight mb-4">
             <IconUpload width={40} height={40} />
           </div>
 
           <Typography id="dm-empty-title" variant="headline" size="medium" className="mb-tight">
-            Import data to your project
+            Import data to get your project started
           </Typography>
 
-          <Typography id="dm-empty-desc" size="medium" className="text-neutral-content-subtler mb-8 max-w-xl">
-            Connect cloud storage (S3, GCS, Azure, and others) or drag &amp; drop to upload files from your computer.
+          <Typography id="dm-empty-desc" size="medium" className="text-neutral-content-subtler mb-tighter max-w-xl">
+            Start by connecting your cloud storage or uploading files from your computer
           </Typography>
 
-          <div aria-live="polite" aria-atomic="true" className="sr-only">
-            {isImportEnabled && dzHovered ? "Drop files to upload" : ""}
+          <div className="flex items-center justify-center gap-base mb-wide" data-testid="dm-storage-provider-icons">
+            <Tooltip title="Amazon S3">
+              <div className="flex items-center justify-center p-2" aria-label="Amazon S3">
+                <IconCloudProviderS3 width={32} height={32} className="text-neutral-content-subtler" />
+              </div>
+            </Tooltip>
+            <Tooltip title="Google Cloud Storage">
+              <div className="flex items-center justify-center p-2" aria-label="Google Cloud Storage">
+                <IconCloudProviderGCS width={32} height={32} className="text-neutral-content-subtler" />
+              </div>
+            </Tooltip>
+            <Tooltip title="Azure Blob Storage">
+              <div className="flex items-center justify-center p-2" aria-label="Azure Blob Storage">
+                <IconCloudProviderAzure width={32} height={32} className="text-neutral-content-subtler" />
+              </div>
+            </Tooltip>
+            <Tooltip title="Redis Storage">
+              <div className="flex items-center justify-center p-2" aria-label="Redis Storage">
+                <IconCloudProviderRedis width={32} height={32} className="text-neutral-content-subtler" />
+              </div>
+            </Tooltip>
           </div>
 
           <div className="flex gap-4 w-full max-w-md">
@@ -275,14 +238,10 @@ export const EmptyState: FC<EmptyStateProps> = ({
               variant="primary"
               look="filled"
               className="flex-1"
-              onClick={(e: MouseEvent<HTMLButtonElement>) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onOpenSourceStorageModal?.();
-              }}
+              onClick={onOpenSourceStorageModal}
               data-testid="dm-connect-source-storage-button"
             >
-              Connect Storage
+              Connect Cloud Storage
             </Button>
 
             {isImportEnabled && (
@@ -290,10 +249,10 @@ export const EmptyState: FC<EmptyStateProps> = ({
                 variant="primary"
                 look="outlined"
                 className="flex-1"
-                onClick={onBrowseFiles}
-                data-testid="dm-browse-files-button"
+                onClick={onOpenImportModal}
+                data-testid="dm-import-button"
               >
-                Browse Files
+                Import
               </Button>
             )}
           </div>
@@ -311,18 +270,8 @@ export const EmptyState: FC<EmptyStateProps> = ({
               <IconExternal width={20} height={20} />
             </a>
           )}
-
-          <input
-            id="dm-empty-file-input"
-            type="file"
-            multiple
-            onChange={onFileInputChange}
-            style={{ display: "none" }}
-            ref={fileInputRef}
-            aria-hidden
-          />
         </div>
       </div>
-    </label>
+    </div>
   );
 };

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { EmptyState } from "./EmptyState";
@@ -16,6 +16,7 @@ jest.mock("@humansignal/ui", () => ({
     </div>
   ),
   IconExternal: ({ width, height }: any) => <span data-testid="icon-external" width={width} height={height} />,
+  Tooltip: ({ children, title }: any) => <div data-tooltip={title}>{children}</div>,
 }));
 
 jest.mock("@humansignal/icons", () => ({
@@ -24,6 +25,18 @@ jest.mock("@humansignal/icons", () => ({
   IconCheck: ({ width, height }: any) => <span data-testid="icon-check" width={width} height={height} />,
   IconSearch: ({ width, height }: any) => <span data-testid="icon-search" width={width} height={height} />,
   IconInbox: ({ width, height }: any) => <span data-testid="icon-inbox" width={width} height={height} />,
+  IconCloudProviderS3: ({ width, height, className }: any) => (
+    <span data-testid="icon-cloud-provider-s3" width={width} height={height} className={className} />
+  ),
+  IconCloudProviderGCS: ({ width, height, className }: any) => (
+    <span data-testid="icon-cloud-provider-gcs" width={width} height={height} className={className} />
+  ),
+  IconCloudProviderAzure: ({ width, height, className }: any) => (
+    <span data-testid="icon-cloud-provider-azure" width={width} height={height} className={className} />
+  ),
+  IconCloudProviderRedis: ({ width, height, className }: any) => (
+    <span data-testid="icon-cloud-provider-redis" width={width} height={height} className={className} />
+  ),
 }));
 
 jest.mock("../../../../../../editor/src/utils/docs", () => ({
@@ -40,7 +53,7 @@ describe("EmptyState Component", () => {
   const defaultProps = {
     canImport: true,
     onOpenSourceStorageModal: jest.fn(),
-    onStartImportWithFiles: jest.fn(),
+    onOpenImportModal: jest.fn(),
   };
 
   beforeEach(() => {
@@ -52,16 +65,17 @@ describe("EmptyState Component", () => {
       render(<EmptyState {...defaultProps} />);
 
       // Check main title and description
-      expect(screen.getByText("Import data to your project")).toBeInTheDocument();
+      expect(screen.getByText("Import data to get your project started")).toBeInTheDocument();
       expect(
-        screen.getByText(
-          "Connect cloud storage (S3, GCS, Azure, and others) or drag & drop to upload files from your computer.",
-        ),
+        screen.getByText("Start by connecting your cloud storage or uploading files from your computer"),
       ).toBeInTheDocument();
+
+      // Check that storage provider icons are present
+      expect(screen.getByTestId("dm-storage-provider-icons")).toBeInTheDocument();
 
       // Check that both buttons are present
       expect(screen.getByTestId("dm-connect-source-storage-button")).toBeInTheDocument();
-      expect(screen.getByTestId("dm-browse-files-button")).toBeInTheDocument();
+      expect(screen.getByTestId("dm-import-button")).toBeInTheDocument();
 
       // Check accessibility features
       expect(screen.getByTestId("empty-state-label")).toHaveAttribute("aria-labelledby", "dm-empty-title");
@@ -72,28 +86,25 @@ describe("EmptyState Component", () => {
       render(<EmptyState {...defaultProps} canImport={false} />);
 
       const label = screen.getByTestId("empty-state-label");
-      expect(label).not.toHaveAttribute("for");
-      expect(label).not.toHaveAttribute("role");
-      expect(label).toHaveAttribute("tabindex", "-1");
       expect(label).toHaveAttribute("aria-labelledby", "dm-empty-title");
       expect(label).toHaveAttribute("aria-describedby", "dm-empty-desc");
 
-      // Browse files button should not be present when canImport is false
-      expect(screen.queryByTestId("dm-browse-files-button")).not.toBeInTheDocument();
+      // Import button should not be present when canImport is false
+      expect(screen.queryByTestId("dm-import-button")).not.toBeInTheDocument();
+      // Connect Storage button should still be present
+      expect(screen.getByTestId("dm-connect-source-storage-button")).toBeInTheDocument();
     });
 
     it("should render interactive state when canImport is true", () => {
       render(<EmptyState {...defaultProps} canImport={true} />);
 
       const label = screen.getByTestId("empty-state-label");
-      expect(label).toHaveAttribute("for", "dm-empty-file-input");
-      expect(label).toHaveAttribute("tabindex", "-1");
       expect(label).toHaveAttribute("aria-labelledby", "dm-empty-title");
       expect(label).toHaveAttribute("aria-describedby", "dm-empty-desc");
 
       // Both buttons should be present
       expect(screen.getByTestId("dm-connect-source-storage-button")).toBeInTheDocument();
-      expect(screen.getByTestId("dm-browse-files-button")).toBeInTheDocument();
+      expect(screen.getByTestId("dm-import-button")).toBeInTheDocument();
     });
   });
 
@@ -110,45 +121,16 @@ describe("EmptyState Component", () => {
       expect(mockOpenStorage).toHaveBeenCalledTimes(1);
     });
 
-    it("should trigger file input when Browse Files button is clicked", async () => {
+    it("should call onOpenImportModal when Import button is clicked", async () => {
       const user = userEvent.setup();
-      render(<EmptyState {...defaultProps} />);
+      const mockOpenImport = jest.fn();
 
-      const browseButton = screen.getByTestId("dm-browse-files-button");
-      const fileInput = document.getElementById("dm-empty-file-input") as HTMLInputElement;
+      render(<EmptyState {...defaultProps} onOpenImportModal={mockOpenImport} />);
 
-      // Mock the click method on the file input
-      const mockClick = jest.fn();
-      Object.defineProperty(fileInput, "click", {
-        value: mockClick,
-        configurable: true,
-      });
+      const importButton = screen.getByTestId("dm-import-button");
+      await user.click(importButton);
 
-      await user.click(browseButton);
-
-      expect(mockClick).toHaveBeenCalledTimes(1);
-    });
-
-    it("should call onStartImportWithFiles when files are selected via file input", async () => {
-      const mockStartImport = jest.fn();
-      const file1 = new File(["content1"], "file1.txt", { type: "text/plain" });
-      const file2 = new File(["content2"], "file2.txt", { type: "text/plain" });
-
-      render(<EmptyState {...defaultProps} onStartImportWithFiles={mockStartImport} />);
-
-      const fileInput = document.getElementById("dm-empty-file-input") as HTMLInputElement;
-
-      // Simulate file selection
-      Object.defineProperty(fileInput, "files", {
-        value: [file1, file2],
-        configurable: true,
-      });
-
-      fireEvent.change(fileInput);
-
-      expect(mockStartImport).toHaveBeenCalledWith([file1, file2]);
-      // Input should be cleared after selection
-      expect(fileInput.value).toBe("");
+      expect(mockOpenImport).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -255,61 +237,20 @@ describe("EmptyState Component", () => {
     });
   });
 
-  describe("Drag and Drop Functionality", () => {
-    it("should handle drag over event when import is enabled", () => {
-      render(<EmptyState {...defaultProps} canImport={true} />);
-
-      const dropzone = screen.getByTestId("empty-state-label");
-
-      fireEvent.dragOver(dropzone);
-
-      // Should prevent default and set hover state
-      expect(dropzone).toBeInTheDocument();
-    });
-
-    it("should handle drag leave event", () => {
-      render(<EmptyState {...defaultProps} canImport={true} />);
-
-      const dropzone = screen.getByTestId("empty-state-label");
-
-      fireEvent.dragLeave(dropzone);
-
-      expect(dropzone).toBeInTheDocument();
-    });
-
-    it("should not handle drag events when import is disabled", () => {
-      render(<EmptyState {...defaultProps} canImport={false} />);
-
-      const dropzone = screen.getByTestId("empty-state-label");
-
-      // Should not have drag event handlers
-      expect(dropzone).not.toHaveAttribute("onDragOver");
-    });
-  });
-
   describe("Accessibility", () => {
     it("should have proper ARIA attributes", () => {
       render(<EmptyState {...defaultProps} />);
 
       const label = screen.getByTestId("empty-state-label");
-      const title = screen.getByText("Import data to your project");
+      const title = screen.getByText("Import data to get your project started");
       const description = screen.getByText(
-        "Connect cloud storage (S3, GCS, Azure, and others) or drag & drop to upload files from your computer.",
+        "Start by connecting your cloud storage or uploading files from your computer",
       );
 
       expect(label).toHaveAttribute("aria-labelledby", "dm-empty-title");
       expect(label).toHaveAttribute("aria-describedby", "dm-empty-desc");
       expect(title).toHaveAttribute("id", "dm-empty-title");
       expect(description).toHaveAttribute("id", "dm-empty-desc");
-    });
-
-    it("should have screen reader text for drag state", () => {
-      render(<EmptyState {...defaultProps} />);
-
-      const srText = screen.getByLabelText("Import data to your project").querySelector('[aria-live="polite"]');
-      expect(srText).toBeInTheDocument();
-      expect(srText).toHaveAttribute("aria-atomic", "true");
-      expect(srText).toHaveClass("sr-only");
     });
 
     it("should render documentation link with proper accessibility", () => {
@@ -351,12 +292,45 @@ describe("EmptyState Component", () => {
     });
   });
 
+  describe("Storage Provider Icons", () => {
+    it("should render storage provider icons with proper tooltips", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      const iconsContainer = screen.getByTestId("dm-storage-provider-icons");
+      expect(iconsContainer).toBeInTheDocument();
+
+      // Check for aria-labels on storage provider containers
+      const s3Container = screen.getByLabelText("Amazon S3");
+      const gcsContainer = screen.getByLabelText("Google Cloud Storage");
+      const azureContainer = screen.getByLabelText("Azure Blob Storage");
+      const redisContainer = screen.getByLabelText("Redis Storage");
+
+      expect(s3Container).toBeInTheDocument();
+      expect(gcsContainer).toBeInTheDocument();
+      expect(azureContainer).toBeInTheDocument();
+      expect(redisContainer).toBeInTheDocument();
+    });
+
+    it("should show storage icons in correct order", () => {
+      render(<EmptyState {...defaultProps} />);
+
+      const iconsContainer = screen.getByTestId("dm-storage-provider-icons");
+      const iconContainers = iconsContainer.querySelectorAll("[aria-label]");
+
+      expect(iconContainers).toHaveLength(4);
+      expect(iconContainers[0]).toHaveAttribute("aria-label", "Amazon S3");
+      expect(iconContainers[1]).toHaveAttribute("aria-label", "Google Cloud Storage");
+      expect(iconContainers[2]).toHaveAttribute("aria-label", "Azure Blob Storage");
+      expect(iconContainers[3]).toHaveAttribute("aria-label", "Redis Storage");
+    });
+  });
+
   describe("Button States and Props", () => {
     it("should render buttons with correct text content", () => {
       render(<EmptyState {...defaultProps} />);
 
-      expect(screen.getByTestId("dm-connect-source-storage-button")).toHaveTextContent("Connect Storage");
-      expect(screen.getByTestId("dm-browse-files-button")).toHaveTextContent("Browse Files");
+      expect(screen.getByTestId("dm-connect-source-storage-button")).toHaveTextContent("Connect Cloud Storage");
+      expect(screen.getByTestId("dm-import-button")).toHaveTextContent("Import");
     });
 
     it("should render Clear Filters button with correct text", () => {
@@ -397,49 +371,6 @@ describe("EmptyState Component", () => {
       // Should render fallback state
       expect(screen.getByText("No tasks available")).toBeInTheDocument();
       expect(screen.getByText("Tasks will appear here when they become available")).toBeInTheDocument();
-    });
-
-    it("should handle empty file selection", () => {
-      const mockStartImport = jest.fn();
-
-      render(<EmptyState {...defaultProps} onStartImportWithFiles={mockStartImport} />);
-
-      const fileInput = document.getElementById("dm-empty-file-input") as HTMLInputElement;
-
-      // Simulate empty file selection
-      Object.defineProperty(fileInput, "files", {
-        value: [],
-        configurable: true,
-      });
-
-      fireEvent.change(fileInput);
-
-      expect(mockStartImport).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("Legacy Test Coverage - Dropzone Attributes", () => {
-    it("should have correct dropzone attributes for non-interactive state", () => {
-      render(<EmptyState canImport={false} onOpenSourceStorageModal={jest.fn()} onStartImportWithFiles={jest.fn()} />);
-
-      const label = screen.getByTestId("empty-state-label");
-
-      expect(label).not.toHaveAttribute("for");
-      expect(label).not.toHaveAttribute("role");
-      expect(label).toHaveAttribute("tabindex", "-1");
-      expect(label).toHaveAttribute("aria-labelledby", "dm-empty-title");
-      expect(label).toHaveAttribute("aria-describedby", "dm-empty-desc");
-    });
-
-    it("should have correct dropzone attributes for interactive state", () => {
-      render(<EmptyState canImport onOpenSourceStorageModal={jest.fn()} onStartImportWithFiles={jest.fn()} />);
-
-      const label = screen.getByTestId("empty-state-label");
-
-      expect(label).toHaveAttribute("for", "dm-empty-file-input");
-      expect(label).toHaveAttribute("tabindex", "-1");
-      expect(label).toHaveAttribute("aria-labelledby", "dm-empty-title");
-      expect(label).toHaveAttribute("aria-describedby", "dm-empty-desc");
     });
   });
 });
