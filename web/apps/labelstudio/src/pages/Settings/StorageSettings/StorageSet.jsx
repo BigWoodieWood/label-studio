@@ -16,7 +16,9 @@ import { StorageForm } from "./StorageForm";
 export const StorageSet = forwardRef(({ title, target, rootClass, buttonLabel }, ref) => {
   const api = useContext(ApiContext);
   const project = useAtomValue(projectAtom);
-  // Deprecated local query keys removed in favor of useStorageCard internals
+  // The useStorageCard hook now consolidates this
+  // logic providing only the essential state needed by this component/
+
   const useNewStorageScreen = ff.isActive(ff.FF_NEW_STORAGES);
 
   const { storageTypes, storages, storagesLoaded, loading, loaded, fetchStorages } = useStorageCard(
