@@ -131,17 +131,6 @@ export const DataManagerPage = ({ ...props }) => {
       history.push(buildLink("/settings/storage?open=source", { id: params.id }));
     });
 
-    // Start Import modal with provided files and auto-upload
-    dataManager.on("startImportWithFiles", async ({ files }) => {
-      // navigate to import modal route which renders <ImportModal />
-      history.push(buildLink("/data/import", { id: params.id }));
-      // Defer a tick to ensure ImportModal is mounted
-      setTimeout(() => {
-        // Fire a global event that ImportPage can listen to for initial files
-        window.dispatchEvent(new CustomEvent("ls:startImportWithFiles", { detail: { files } }));
-      }, 0);
-    });
-
     dataManager.on("exportClicked", () => {
       history.push(buildLink("/data/export", { id: params.id }));
     });
