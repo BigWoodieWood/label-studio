@@ -288,7 +288,7 @@ export const EmptyState: FC<EmptyStateProps> = ({
   return renderEmptyStateLayout({
     icon: <IconUpload />,
     title: "Import data to get your project started",
-    description: "Start by connecting your cloud storage or uploading files from your computer",
+    description: "Connect your cloud storage or uploading files from your computer",
     testId: "empty-state-label",
     ariaLabelledBy: "dm-empty-title",
     ariaDescribedBy: "dm-empty-desc",
