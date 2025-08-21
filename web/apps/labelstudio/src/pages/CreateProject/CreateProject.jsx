@@ -217,11 +217,29 @@ export const CreateProject = ({ onClose }) => {
       return;
     }
 
+    setWaitingStatus(true);
+
+    // Save the complete project data including label_config
+    const updateResult = await api.callApi("updateProjectRaw", {
+      params: {
+        pk: project.id,
+      },
+      body: projectBody,
+    });
+
+    if (!updateResult.ok) {
+      const err = await updateResult.json();
+      setError(err.validation_errors?.title || "Failed to save project configuration");
+      setWaitingStatus(false);
+      return;
+    }
+
     const imported = await finishUpload();
 
-    if (!imported) return;
-
-    setWaitingStatus(true);
+    if (!imported) {
+      setWaitingStatus(false);
+      return;
+    }
 
     if (sample) await uploadSample(sample);
 
@@ -229,8 +247,8 @@ export const CreateProject = ({ onClose }) => {
 
     setWaitingStatus(false);
 
-    if (response !== null) {
-      history.push(`/projects/${response.id}/data`);
+    if (imported !== null && project) {
+      history.push(`/projects/${project.id}/data`);
     }
   }, [
     project,
@@ -239,6 +257,7 @@ export const CreateProject = ({ onClose }) => {
     sample,
     uploadSample,
     api.callApi,
+    setError,
     // Including these stable references to satisfy linter, though they don't change
     history.push,
     setStep,
