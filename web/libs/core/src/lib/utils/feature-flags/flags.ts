@@ -74,6 +74,11 @@ export const FF_ADJUSTABLE_SPANS = "fflag_feat_front_leap_1973_adjustable_spans_
 export const FF_THEME_TOGGLE = "fflag_feat_front_optic_1217_theme_toggle_short";
 
 /**
+ * Fixes synced audio/video buffering
+ */
+export const FF_SYNCED_BUFFERING = "fflag_fix_front_fit_31_synced_media_buffering";
+
+/**
  * Enables the summary view for annotations
  */
 export const FF_SUMMARY = "fflag_feat_front_leap_2036_annotations_summary";
@@ -107,8 +112,6 @@ export const FF_NEW_STORAGES = "fflag_feat_bros_193_new_cloud_storage_providers_
 export const FF_DM_FILTER_MEMBERS = "fflag_feat_fit_449_datamanager_filter_members_short";
 
 /**
- * Allow tooltip working with the disabled button
- *
- * @link https://app.launchdarkly.com/projects/default/flags/fflag_feat_front_fit_418_tooltip_enhancements_short
+ * Modify MST models to allow custom tags
  */
-export const FF_TOOLTIP_ENHANCEMENT = "fflag_feat_front_fit_418_tooltip_enhancements_short";
+export const FF_CUSTOM_TAGS = "fflag_feat_front_bros_194_custom_tags_short";
