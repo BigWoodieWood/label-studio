@@ -195,6 +195,49 @@
       }
     }
   },
+  "Chat": {
+    "name": "Chat",
+    "description": "The `Chat` tag displays a conversational chat interface for labeling LLM conversations and message exchanges. Use for conversational AI evaluation, chat flow analysis, and dialogue annotation tasks.\n\nThe Chat tag can display existing chat transcripts from task data and allows annotators to extend conversations with new messages during annotation. Each message can be individually selected and annotated with classification controls.\n\nUse with the following data types: JSON arrays containing chat messages.",
+    "attrs": {
+      "name": {
+        "name": "name",
+        "description": "Name of the element",
+        "type": "string",
+        "required": true
+      },
+      "value": {
+        "name": "value",
+        "description": "Data field containing an array of chat messages with 'role', 'content', and optional 'timestamp' fields",
+        "type": "string",
+        "required": true
+      },
+      "llm": {
+        "name": "llm",
+        "description": "LLM model identifier for AI-assisted conversation continuation (e.g., \"gpt-5\")",
+        "type": "string",
+        "required": false
+      },
+      "messageRoles": {
+        "name": "messageRoles",
+        "description": "Comma or pipe-separated list of available message roles for new messages",
+        "type": "string",
+        "required": false,
+        "default": "user,assistant"
+      },
+      "minMessages": {
+        "name": "minMessages",
+        "description": "Minimum number of messages required for annotation completion",
+        "type": "string",
+        "required": false
+      },
+      "maxMessages": {
+        "name": "maxMessages",
+        "description": "Maximum number of messages allowed in the conversation",
+        "type": "string",
+        "required": false
+      }
+    }
+  },
   "HyperText": {
     "name": "HyperText",
     "description": "The `HyperText` tag displays hypertext markup for labeling. Use for labeling HTML-encoded text and webpages for NER and NLP projects.\n\nUse with the following data types: HTML.",
@@ -2746,6 +2789,7 @@
     "children": [
       "Audio",
       "Channel",
+      "Chat",
       "HyperText",
       "Image",
       "List",
