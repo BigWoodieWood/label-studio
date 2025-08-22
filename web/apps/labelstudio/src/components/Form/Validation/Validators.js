@@ -53,7 +53,7 @@ export const regexp = (_fieldName, value) => {
 
 export const url = (_fieldName, value) => {
   if (!isDefined(value) || isEmptyString(value)) return;
-  
+
   try {
     new URL(value);
   } catch (_err) {

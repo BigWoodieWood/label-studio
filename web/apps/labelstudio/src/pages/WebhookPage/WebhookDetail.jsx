@@ -147,11 +147,11 @@ const WebhookDetail = ({ webhook, webhooksInfo, fetchWebhooks, onBack, onSelectA
             <Form.Row columnCount={1}>
               <Label text="Payload URL" large />
               <Space className={rootClass.elem("url-space")}>
-                                <Input 
-                  name="url" 
+                <Input
+                  name="url"
                   label="Payload URL"
-                  className={rootClass.elem("url-input")} 
-                  placeholder="URL" 
+                  className={rootClass.elem("url-input")}
+                  placeholder="URL"
                   required
                   validate={[Form.Validator.url]}
                 />
