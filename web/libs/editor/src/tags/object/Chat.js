@@ -31,7 +31,7 @@
  * @meta_title Chat Tags for Conversational AI Labeling
  * @meta_description Label Studio Chat Tags enable labeling and evaluation of conversational AI interactions, chat transcripts, and dialogue flows for machine learning projects.
  * @param {string} name                                   Name of the element
- * @param {string} value                                  Data field containing an array of chat messages with 'author', 'text', and optional 'timestamp' fields
+ * @param {string} value                                  Data field containing an array of chat messages with 'role', 'content', and optional 'timestamp' fields
  * @param {string} [llm]                                  LLM model identifier for AI-assisted conversation continuation (e.g., "gpt-5")
  * @param {string} [messageRoles=user,assistant]          Comma or pipe-separated list of available message roles for new messages
  * @param {string} [minMessages]                          Minimum number of messages required for annotation completion
