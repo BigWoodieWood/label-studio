@@ -20,7 +20,7 @@ const Input = ({
 }) => {
   const input = (
     <FormField label={label} name={props.name} validate={validate} required={required} skip={skip} {...props}>
-      {(ref, dependencyField, context, fieldProps) => {
+      {(ref, _dependencyField, _context, fieldProps) => {
         const hasError = error || fieldProps?.error;
         const finalClassList = [cn("input-ls").mod({ ghost, error: hasError }), className].join(" ").trim();
         return <input {...props} ref={ref} className={finalClassList} />;

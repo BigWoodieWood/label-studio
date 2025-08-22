@@ -89,7 +89,7 @@ export const FormField = forwardRef(
         evt.initEvent("change", false, true);
         input.dispatchEvent(evt);
       },
-      [field, setValue],
+      [field],
     );
 
     useEffect(() => {
@@ -109,7 +109,7 @@ export const FormField = forwardRef(
         setError,
       });
       return () => context?.unregisterField(name);
-    }, [field, setValueCallback, label, name, validation, skip, allowEmpty, skipAutofill, protectedValue, context]);
+    }, [field, setValueCallback]);
 
     return children(field, dependencyField, context, {
       error: (error?.length ?? 0) > 0,

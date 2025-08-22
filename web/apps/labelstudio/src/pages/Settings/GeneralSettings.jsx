@@ -1,35 +1,26 @@
-import { Button, EnterpriseBadge, Select, Typography } from "@humansignal/ui";
-import { useCallback, useContext, useRef } from "react";
-import { InlineError } from "../../components/Error/InlineError";
+import { EnterpriseBadge, Select, Typography } from "@humansignal/ui";
+import { useCallback, useContext } from "react";
+import { Button } from "@humansignal/ui";
 import { Form, Input, TextArea } from "../../components/Form";
 import { RadioGroup } from "../../components/Form/Elements/RadioGroup/RadioGroup";
-import { HeidiTips } from "../../components/HeidiTips/HeidiTips";
-import { createURL } from "../../components/HeidiTips/utils";
 import { ProjectContext } from "../../providers/ProjectProvider";
 import { Block, Elem } from "../../utils/bem";
+import { HeidiTips } from "../../components/HeidiTips/HeidiTips";
 import { FF_LSDV_E_297, isFF } from "../../utils/feature-flags";
+import { createURL } from "../../components/HeidiTips/utils";
 
 export const GeneralSettings = () => {
   const { project, fetchProject } = useContext(ProjectContext);
-  const formRef = useRef();
 
   const updateProject = useCallback(() => {
     if (project.id) fetchProject(project.id, true);
-  }, [project, fetchProject]);
+  }, [project]);
 
   const colors = ["#FDFDFC", "#FF4C25", "#FF750F", "#ECB800", "#9AC422", "#34988D", "#617ADA", "#CC6FBE"];
 
   const samplings = [
-    {
-      value: "Sequential",
-      label: "Sequential",
-      description: "Tasks are ordered by Task ID",
-    },
-    {
-      value: "Uniform",
-      label: "Random",
-      description: "Tasks are chosen with uniform random",
-    },
+    { value: "Sequential", label: "Sequential", description: "Tasks are ordered by Task ID" },
+    { value: "Uniform", label: "Random", description: "Tasks are chosen with uniform random" },
   ];
 
   return (
@@ -37,23 +28,13 @@ export const GeneralSettings = () => {
       <Elem name={"wrapper"}>
         <h1>General Settings</h1>
         <Block name="settings-wrapper">
-          <Form
-            ref={formRef}
-            action="updateProject"
-            formData={{ ...project }}
-            params={{ pk: project.id }}
-            onSubmit={updateProject}
-          >
+          <Form action="updateProject" formData={{ ...project }} params={{ pk: project.id }} onSubmit={updateProject}>
             <Form.Row columnCount={1} rowGap="16px">
               <Input
                 name="title"
                 label="Project Name"
                 required
                 validate={[Form.Validator.minLength(3), Form.Validator.maxLength(50)]}
-                onBlur={() => {
-                  // Trigger form validation to show errors immediately
-                  formRef.current?.validateFields();
-                }}
               />
 
               <TextArea name="description" label="Description" style={{ minHeight: 128 }} />
@@ -138,8 +119,6 @@ export const GeneralSettings = () => {
                 Save
               </Button>
             </Form.Actions>
-
-            <InlineError />
           </Form>
         </Block>
       </Elem>
