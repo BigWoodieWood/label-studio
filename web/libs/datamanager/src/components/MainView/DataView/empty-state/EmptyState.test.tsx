@@ -67,7 +67,7 @@ describe("EmptyState Component", () => {
       // Check main title and description
       expect(screen.getByText("Import data to get your project started")).toBeInTheDocument();
       expect(
-        screen.getByText("Start by connecting your cloud storage or uploading files from your computer"),
+        screen.getByText("Connect your cloud storage or upload files from your computer"),
       ).toBeInTheDocument();
 
       // Check that storage provider icons are present
@@ -244,7 +244,7 @@ describe("EmptyState Component", () => {
       const label = screen.getByTestId("empty-state-label");
       const title = screen.getByText("Import data to get your project started");
       const description = screen.getByText(
-        "Start by connecting your cloud storage or uploading files from your computer",
+        "Connect your cloud storage or upload files from your computer",
       );
 
       expect(label).toHaveAttribute("aria-labelledby", "dm-empty-title");
