@@ -8,8 +8,7 @@ The Label Studio FSM system provides:
 
 - **Core Infrastructure**: Base state tracking models and managers
 - **UUID7 Optimization**: Time-series optimized state records using UUID7
-- **Extension Mechanism**: Allows Label Studio Enterprise to extend functionality
-- **Basic API**: REST endpoints for state management
+- **REST API**: Endpoints for state management
 - **Admin Interface**: Django admin integration for state inspection
 
 ## Architecture
@@ -19,30 +18,6 @@ The Label Studio FSM system provides:
 1. **BaseState**: Abstract model providing common state tracking functionality
 2. **StateManager**: High-performance state management with caching
 3. **Core State Models**: Task, Annotation, and Project state tracking
-4. **Extension Registry**: Allows enterprise extensions to register additional functionality
-
-### Extension System
-
-The FSM system is designed to be extended by Label Studio Enterprise:
-
-```python
-# Core provides foundation
-from label_studio.fsm.models import BaseState
-from label_studio.fsm.state_manager import StateManager
-
-# Enterprise extends with advanced features  
-class EnterpriseTaskState(BaseState):
-    # Additional enterprise-specific fields
-    organization_id = models.PositiveIntegerField(db_index=True)
-    # Advanced indexes and denormalization
-
-class EnterpriseStateManager(StateManager):
-    # Bulk operations, advanced caching, etc.
-    @classmethod
-    def bulk_get_states(cls, entities):
-        # Enterprise-specific bulk optimization
-        pass
-```
 
 ## Usage
 
@@ -142,10 +117,6 @@ INSTALLED_APPS = [
 FSM_CACHE_TTL = 300  # Cache timeout in seconds (default: 300)
 FSM_AUTO_CREATE_STATES = False  # Auto-create states on entity creation (default: False)
 FSM_STATE_MANAGER_CLASS = None  # Custom state manager class (default: None)
-
-# Enterprise Settings (when using Label Studio Enterprise)
-FSM_ENABLE_BULK_OPERATIONS = True  # Enable bulk operations (default: False)
-FSM_CACHE_STATS_ENABLED = True  # Enable cache statistics (default: False)
 ```
 
 ## Database Migrations
@@ -184,35 +155,6 @@ Critical indexes for performance:
 - `(entity_id, id DESC)`: Current state lookup using UUID7 ordering
 - `(entity_id, id)`: State history queries
 
-## Extension by Label Studio Enterprise
-
-Label Studio Enterprise extends this system with:
-
-1. **Advanced State Models**: Additional entities (Reviews, Assignments, etc.)
-2. **Complex Workflows**: Review, arbitration, and approval flows
-3. **Bulk Operations**: High-performance batch state transitions
-4. **Enhanced Caching**: Multi-level caching with cache warming
-5. **Analytics**: State-based reporting and metrics
-6. **Denormalization**: Performance optimization with redundant fields
-
-### Enterprise Extension Example
-
-```python
-# In Label Studio Enterprise
-from label_studio.fsm.extension import BaseFSMExtension
-from label_studio.fsm.models import register_state_model
-
-class EnterpriseExtension(BaseFSMExtension):
-    @classmethod
-    def initialize(cls):
-        # Register enterprise models
-        register_state_model('review', AnnotationReviewState)
-        register_state_model('assignment', TaskAssignmentState)
-        
-    @classmethod
-    def get_state_manager(cls):
-        return EnterpriseStateManager
-```
 
 ## Monitoring and Debugging
 
@@ -230,9 +172,6 @@ FSM operations are logged at appropriate levels:
 - `ERROR`: Failed transitions and system errors
 - `DEBUG`: Cache hits/misses and detailed operation info
 
-### Cache Statistics
-
-When `FSM_CACHE_STATS_ENABLED=True`, cache performance metrics are available for monitoring.
 
 ## Migration from Existing Systems
 

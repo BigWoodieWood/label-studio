@@ -54,6 +54,13 @@ class BaseState(models.Model):
         help_text='UUID7 provides natural time ordering and global uniqueness',
     )
 
+    organization = models.ForeignKey(
+        'organizations.Organization',
+        on_delete=models.CASCADE,
+        null=True,
+        help_text='Organization which owns this state record',
+    )
+
     # Core State Fields
     state = models.CharField(max_length=50, db_index=True, help_text='Current state of the entity')
     previous_state = models.CharField(
