@@ -58,7 +58,6 @@ class ProjectStateChoices(models.TextChoices):
 
     # Setup States
     CREATED = 'CREATED', _('Created')
-    PUBLISHED = 'PUBLISHED', _('Published')
 
     # Work States
     IN_PROGRESS = 'IN_PROGRESS', _('In Progress')

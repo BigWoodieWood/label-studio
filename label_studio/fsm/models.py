@@ -185,19 +185,27 @@ class TaskState(BaseState):
     """
 
     # Entity Relationship
-    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='fsm_states')
+    task = models.ForeignKey('tasks.Task', related_name='fsm_states', on_delete=models.CASCADE, db_index=True)
 
     # Override state field to add choices constraint
     state = models.CharField(max_length=50, choices=TaskStateChoices.choices, db_index=True)
 
+    project_id = models.PositiveIntegerField(
+        db_index=True, help_text='From task.project_id - denormalized for performance'
+    )
+
     class Meta:
-        db_table = 'fsm_task_states'
         indexes = [
-            # Critical: Latest state lookup using UUID7 ordering
-            models.Index(fields=['task_id', '-id'], name='fsm_task_current_state_idx'),
+            # Critical: Latest state lookup (current state determined by latest UUID7 id)
+            # Index with DESC order explicitly supports ORDER BY id DESC queries
+            models.Index(fields=['task_id', '-id'], name='task_current_state_idx'),
+            # Reporting and filtering
+            models.Index(fields=['project_id', 'state', '-id'], name='task_project_state_idx'),
+            models.Index(fields=['organization_id', 'state', '-id'], name='task_org_reporting_idx'),
             # History queries
-            models.Index(fields=['task_id', 'id'], name='fsm_task_history_idx'),
+            models.Index(fields=['task_id', 'id'], name='task_history_idx'),
         ]
+        # No constraints needed - INSERT-only approach
         ordering = ['-id']
 
     @property
@@ -212,7 +220,6 @@ class AnnotationState(BaseState):
 
     Provides basic annotation state management with:
     - Simple 3-state workflow (DRAFT → SUBMITTED → COMPLETED)
-    - Draft and submission tracking
     """
 
     # Entity Relationship
@@ -221,11 +228,25 @@ class AnnotationState(BaseState):
     # Override state field to add choices constraint
     state = models.CharField(max_length=50, choices=AnnotationStateChoices.choices, db_index=True)
 
+    # Denormalized fields for performance (avoid JOINs in common queries)
+    task_id = models.PositiveIntegerField(
+        db_index=True, help_text='From annotation.task_id - denormalized for performance'
+    )
+    project_id = models.PositiveIntegerField(
+        db_index=True, help_text='From annotation.task.project_id - denormalized for performance'
+    )
+    completed_by_id = models.PositiveIntegerField(
+        null=True, db_index=True, help_text='From annotation.completed_by_id - denormalized for performance'
+    )
+
     class Meta:
-        db_table = 'fsm_annotation_states'
         indexes = [
             # Critical: Latest state lookup
-            models.Index(fields=['annotation_id', '-id'], name='fsm_anno_current_state_idx'),
+            models.Index(fields=['annotation_id', '-id'], name='anno_current_state_idx'),
+            # Filtering and reporting
+            models.Index(fields=['task_id', 'state', '-id'], name='anno_task_state_idx'),
+            models.Index(fields=['completed_by_id', 'state', '-id'], name='anno_user_report_idx'),
+            models.Index(fields=['project_id', 'state', '-id'], name='anno_project_report_idx'),
         ]
         ordering = ['-id']
 
@@ -240,21 +261,32 @@ class ProjectState(BaseState):
     Core project state tracking for Label Studio.
 
     Provides basic project state management with:
-    - Simple 4-state workflow (CREATED → PUBLISHED → IN_PROGRESS → COMPLETED)
+    - Simple 3-state workflow (CREATED → IN_PROGRESS → COMPLETED)
     - Project lifecycle tracking
     """
 
     # Entity Relationship
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='fsm_states')
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='states')
 
     # Override state field to add choices constraint
     state = models.CharField(max_length=50, choices=ProjectStateChoices.choices, db_index=True)
+
+    # Denormalized fields for performance (avoid JOINs in common queries)
+    organization_id = models.PositiveIntegerField(
+        db_index=True, help_text='From project.organization_id - denormalized for performance'
+    )
+    created_by_id = models.PositiveIntegerField(
+        null=True, db_index=True, help_text='From project.created_by_id - denormalized for performance'
+    )
 
     class Meta:
         db_table = 'fsm_project_states'
         indexes = [
             # Critical: Latest state lookup
-            models.Index(fields=['project_id', '-id'], name='fsm_proj_current_state_idx'),
+            models.Index(fields=['project_id', '-id'], name='project_current_state_idx'),
+            # Filtering and reporting
+            models.Index(fields=['organization_id', 'state', '-id'], name='project_org_state_idx'),
+            models.Index(fields=['organization_id', '-id'], name='project_org_reporting_idx'),
         ]
         ordering = ['-id']
 
