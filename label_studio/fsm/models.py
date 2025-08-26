@@ -1,8 +1,5 @@
 """
 Core FSM models for Label Studio.
-
-Provides the base infrastructure for state tracking that can be extended
-by Label Studio Enterprise and other applications.
 """
 
 from datetime import datetime
@@ -37,13 +34,6 @@ class BaseState(models.Model):
     - Global uniqueness enables distributed system support
     - Time-based partitioning for billion-record scalability
     - Complete audit trail by design
-
-    Usage:
-        # In Label Studio Enterprise:
-        class TaskState(BaseState):
-            task = models.ForeignKey('tasks.Task', ...)
-            state = models.CharField(choices=EnterpriseTaskStateChoices.choices, ...)
-            # Additional enterprise-specific fields
     """
 
     # UUID7 Primary Key - provides natural time ordering and global uniqueness
@@ -183,7 +173,6 @@ class BaseState(models.Model):
 
 
 # Core state models for basic Label Studio entities
-# These provide the foundation that Enterprise can extend
 
 
 class TaskState(BaseState):
@@ -193,12 +182,6 @@ class TaskState(BaseState):
     Provides basic task state management with:
     - Simple 3-state workflow (CREATED → IN_PROGRESS → COMPLETED)
     - High-performance queries with UUID7 ordering
-    - Extensible design for enterprise features
-
-    Label Studio Enterprise extends this with:
-    - Additional workflow states (review, arbitration)
-    - Denormalized fields for performance
-    - Advanced state transition logic
     """
 
     # Entity Relationship
@@ -230,7 +213,6 @@ class AnnotationState(BaseState):
     Provides basic annotation state management with:
     - Simple 3-state workflow (DRAFT → SUBMITTED → COMPLETED)
     - Draft and submission tracking
-    - Extensible design for enterprise review workflows
     """
 
     # Entity Relationship
@@ -260,7 +242,6 @@ class ProjectState(BaseState):
     Provides basic project state management with:
     - Simple 4-state workflow (CREATED → PUBLISHED → IN_PROGRESS → COMPLETED)
     - Project lifecycle tracking
-    - Extensible design for enterprise features
     """
 
     # Entity Relationship
@@ -284,7 +265,6 @@ class ProjectState(BaseState):
 
 
 # Registry for dynamic state model extension
-# Enterprise can register additional state models here
 STATE_MODEL_REGISTRY = {
     'task': TaskState,
     'annotation': AnnotationState,
@@ -296,20 +276,9 @@ def register_state_model(entity_name: str, model_class):
     """
     Register state model for an entity type.
 
-    This allows Label Studio Enterprise to register additional state models
-    or override existing ones with enterprise-specific implementations.
-
     Args:
         entity_name: Name of the entity (e.g., 'review', 'assignment')
         model_class: Django model class inheriting from BaseState
-
-    Example:
-        # In LSE code:
-        register_state_model('review', AnnotationReviewState)
-        register_state_model('assignment', TaskAssignmentState)
-
-        # Override core model with enterprise version:
-        register_state_model('task', EnterpriseTaskState)
     """
     STATE_MODEL_REGISTRY[entity_name.lower()] = model_class
 

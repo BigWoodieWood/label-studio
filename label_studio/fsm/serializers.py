@@ -1,8 +1,7 @@
 """
 Core FSM serializers for Label Studio.
 
-Provides basic serializers for state management API that can be extended
-by Label Studio Enterprise with additional functionality.
+Provides basic serializers for state management API
 """
 
 from rest_framework import serializers
@@ -12,8 +11,7 @@ class StateHistorySerializer(serializers.Serializer):
     """
     Serializer for state history records.
 
-    Provides basic state history information that can be extended
-    by Enterprise with additional fields.
+    Provides basic state history information
     """
 
     id = serializers.UUIDField(read_only=True)
@@ -80,7 +78,6 @@ class StateInfoSerializer(serializers.Serializer):
     entity_type = serializers.CharField()
     entity_id = serializers.IntegerField()
 
-    # Optional fields that Enterprise can populate
     available_transitions = serializers.ListField(
         child=serializers.CharField(), required=False, help_text='List of valid transitions from current state'
     )

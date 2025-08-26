@@ -2,8 +2,6 @@
 Core state choice enums for Label Studio entities.
 
 These enums define the essential states for core Label Studio entities.
-Label Studio Enterprise can extend these with additional states or
-define entirely new state enums for enterprise-specific entities.
 """
 
 from django.db import models
@@ -18,8 +16,6 @@ class TaskStateChoices(models.TextChoices):
     - Creation and assignment
     - Annotation work
     - Completion
-
-    Enterprise can extend with review, arbitration, and advanced workflow states.
     """
 
     # Initial State
@@ -40,8 +36,6 @@ class AnnotationStateChoices(models.TextChoices):
     - Draft work
     - Submission
     - Completion
-
-    Enterprise can extend with review, approval, and rejection states.
     """
 
     # Working States
@@ -60,8 +54,6 @@ class ProjectStateChoices(models.TextChoices):
     - Setup and configuration
     - Active work
     - Completion
-
-    Enterprise can extend with advanced workflow, review, and approval states.
     """
 
     # Setup States
@@ -76,7 +68,6 @@ class ProjectStateChoices(models.TextChoices):
 
 
 # Registry for dynamic state choices extension
-# Enterprise can register additional choices here
 STATE_CHOICES_REGISTRY = {
     'task': TaskStateChoices,
     'annotation': AnnotationStateChoices,
@@ -88,17 +79,9 @@ def register_state_choices(entity_name: str, choices_class):
     """
     Register state choices for an entity type.
 
-    This allows Label Studio Enterprise and other extensions to register
-    their own state choices dynamically.
-
     Args:
         entity_name: Name of the entity (e.g., 'review', 'assignment')
         choices_class: Django TextChoices class defining valid states
-
-    Example:
-        # In LSE code:
-        register_state_choices('review', ReviewStateChoices)
-        register_state_choices('assignment', AssignmentStateChoices)
     """
     STATE_CHOICES_REGISTRY[entity_name.lower()] = choices_class
 

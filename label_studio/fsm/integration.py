@@ -21,15 +21,6 @@ class FSMIntegrationMixin:
 
     This mixin can be added to Task, Annotation, and Project models to provide
     convenient methods for state management without modifying the core models.
-
-    Example usage in Enterprise:
-        # In LSE models.py:
-        from label_studio.fsm.integration import FSMIntegrationMixin
-        from label_studio.tasks.models import Task as CoreTask
-
-        class Task(FSMIntegrationMixin, CoreTask):
-            class Meta:
-                proxy = True
     """
 
     @property
@@ -237,7 +228,6 @@ def get_entities_by_state(model_class, state: str, limit: int = 100):
     # Get entity IDs that have the specified current state
     f'{model_class._meta.model_name.lower()}_id'
 
-    # This is a simplified version - Enterprise can optimize with window functions
     current_state_subquery = (
         state_model.objects.filter(**{f'{model_class._meta.model_name.lower()}__pk': models.OuterRef('pk')})
         .order_by('-id')
@@ -252,8 +242,6 @@ def get_entities_by_state(model_class, state: str, limit: int = 100):
 def bulk_transition_entities(entities, new_state: str, user=None, **kwargs):
     """
     Bulk transition multiple entities to the same state.
-
-    Basic implementation that Enterprise can optimize with bulk operations.
 
     Args:
         entities: List of entity instances

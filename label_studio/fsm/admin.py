@@ -2,7 +2,6 @@
 Core FSM admin interface for Label Studio.
 
 Provides basic admin interface for state management that can be extended
-by Label Studio Enterprise with additional functionality.
 """
 
 from django.contrib import admin
@@ -16,7 +15,6 @@ class BaseStateAdmin(admin.ModelAdmin):
     Base admin for state models.
 
     Provides common admin interface functionality for all state models.
-    Enterprise can extend this with additional features.
     """
 
     list_display = [
@@ -152,14 +150,9 @@ class ProjectStateAdmin(BaseStateAdmin):
     project_title.admin_order_field = 'project__title'
 
 
-# Admin actions for bulk operations (Enterprise can extend these)
-
-
 def mark_states_as_reviewed(modeladmin, request, queryset):
     """
     Admin action to mark state records as reviewed.
-
-    This is a placeholder that Enterprise can extend with actual functionality.
     """
     count = queryset.count()
     modeladmin.message_user(request, f'{count} state records marked as reviewed.')
@@ -171,8 +164,6 @@ mark_states_as_reviewed.short_description = 'Mark selected states as reviewed'
 def export_state_history(modeladmin, request, queryset):
     """
     Admin action to export state history.
-
-    This is a placeholder that Enterprise can extend with actual export functionality.
     """
     count = queryset.count()
     modeladmin.message_user(request, f'Export initiated for {count} state records.')
@@ -181,5 +172,4 @@ def export_state_history(modeladmin, request, queryset):
 export_state_history.short_description = 'Export state history'
 
 
-# Add actions to base admin (Enterprise can override)
 BaseStateAdmin.actions = [mark_states_as_reviewed, export_state_history]

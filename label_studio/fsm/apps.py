@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 class FsmConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
+    default_auto_field = 'django.db.models.UUIDField'
     name = 'label_studio.fsm'
-    verbose_name = 'Finite State Machine'
+    verbose_name = 'Label Studio FSM'
 
     def ready(self):
         """Initialize FSM system when Django app is ready"""
@@ -25,18 +25,10 @@ class FsmConfig(AppConfig):
     def _initialize_extensions(self):
         """Initialize FSM extension system"""
         try:
-            from .extension import (
-                auto_register_enterprise_choices,
-                auto_register_enterprise_models,
-                extension_registry,
-            )
+            # Import the extension registry to ensure it's initialized
 
-            # Load configured extensions
-            extension_registry.load_extensions()
-
-            # Auto-register enterprise models if available
-            auto_register_enterprise_models()
-            auto_register_enterprise_choices()
+            # Basic extension system is ready
+            logger.debug('FSM extension system ready')
 
         except Exception as e:
             logger.error(f'Failed to initialize FSM extensions: {e}')

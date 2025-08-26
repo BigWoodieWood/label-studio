@@ -2,7 +2,6 @@
 Core FSM API endpoints for Label Studio.
 
 Provides basic API endpoints for state management that can be extended
-by Label Studio Enterprise with additional functionality.
 """
 
 import logging
@@ -30,9 +29,6 @@ class FSMViewSet(viewsets.ViewSet):
     - Get current state
     - Get state history
     - Trigger state transitions
-
-    Label Studio Enterprise can extend this with additional endpoints
-    for advanced state management operations.
     """
 
     permission_classes = [AllPermissions]
@@ -228,30 +224,3 @@ class FSMViewSet(viewsets.ViewSet):
         except Exception as e:
             logger.error(f'Error transitioning state for {entity_type} {entity_id}: {e}')
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# Extension point for Label Studio Enterprise
-class ExtendedFSMViewSet(FSMViewSet):
-    """
-    Extension point for Label Studio Enterprise.
-
-    Enterprise can override this class to add:
-    - Bulk state operations
-    - Advanced state queries
-    - Enterprise-specific endpoints
-    - Enhanced permissions and validation
-
-    Example Enterprise usage:
-        class EnterpriseFSMViewSet(ExtendedFSMViewSet):
-            @action(detail=False, methods=['post'])
-            def bulk_transition(self, request):
-                # Enterprise bulk transition endpoint
-                pass
-
-            @action(detail=False, methods=['get'])
-            def state_analytics(self, request):
-                # Enterprise state analytics endpoint
-                pass
-    """
-
-    pass
