@@ -271,16 +271,11 @@ class ProjectState(BaseState):
     # Override state field to add choices constraint
     state = models.CharField(max_length=50, choices=ProjectStateChoices.choices, db_index=True)
 
-    # Denormalized fields for performance (avoid JOINs in common queries)
-    organization_id = models.PositiveIntegerField(
-        db_index=True, help_text='From project.organization_id - denormalized for performance'
-    )
     created_by_id = models.PositiveIntegerField(
         null=True, db_index=True, help_text='From project.created_by_id - denormalized for performance'
     )
 
     class Meta:
-        db_table = 'fsm_project_states'
         indexes = [
             # Critical: Latest state lookup
             models.Index(fields=['project_id', '-id'], name='project_current_state_idx'),

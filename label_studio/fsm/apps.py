@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class FsmConfig(AppConfig):
     default_auto_field = 'django.db.models.UUIDField'
-    name = 'label_studio.fsm'
+    name = 'fsm'
     verbose_name = 'Label Studio FSM'
 
     def ready(self):
