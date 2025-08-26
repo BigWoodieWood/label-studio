@@ -266,7 +266,7 @@ class ProjectState(BaseState):
     """
 
     # Entity Relationship
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='states')
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='fsm_states')
 
     # Override state field to add choices constraint
     state = models.CharField(max_length=50, choices=ProjectStateChoices.choices, db_index=True)
