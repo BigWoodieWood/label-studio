@@ -8,8 +8,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from django.test import TestCase
-
-from label_studio.fsm.utils import (
+from fsm.utils import (
     UUID7Generator,
     generate_uuid7,
     timestamp_from_uuid7,

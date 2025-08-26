@@ -76,8 +76,8 @@ def add_fsm_to_model(model_class):
     This provides an alternative to inheritance for adding FSM capabilities.
 
     Example:
-        from label_studio.fsm.integration import add_fsm_to_model
-        from label_studio.tasks.models import Task
+        from fsm.integration import add_fsm_to_model
+        from tasks.models import Task
 
         @add_fsm_to_model
         class Task(Task):
@@ -126,8 +126,8 @@ def handle_task_created(sender, instance, created, **kwargs):
 
     Connect this to the Task model's post_save signal:
         from django.db.models.signals import post_save
-        from label_studio.tasks.models import Task
-        from label_studio.fsm.integration import handle_task_created
+        from tasks.models import Task
+        from fsm.integration import handle_task_created
 
         post_save.connect(handle_task_created, sender=Task)
     """
@@ -151,8 +151,8 @@ def handle_annotation_created(sender, instance, created, **kwargs):
 
     Connect this to the Annotation model's post_save signal:
         from django.db.models.signals import post_save
-        from label_studio.tasks.models import Annotation
-        from label_studio.fsm.integration import handle_annotation_created
+        from tasks.models import Annotation
+        from fsm.integration import handle_annotation_created
 
         post_save.connect(handle_annotation_created, sender=Annotation)
     """
@@ -176,8 +176,8 @@ def handle_project_created(sender, instance, created, **kwargs):
 
     Connect this to the Project model's post_save signal:
         from django.db.models.signals import post_save
-        from label_studio.projects.models import Project
-        from label_studio.fsm.integration import handle_project_created
+        from projects.models import Project
+        from fsm.integration import handle_project_created
 
         post_save.connect(handle_project_created, sender=Project)
     """
@@ -211,8 +211,8 @@ def get_entities_by_state(model_class, state: str, limit: int = 100):
         QuerySet of entities in the specified state
 
     Example:
-        from label_studio.tasks.models import Task
-        from label_studio.fsm.integration import get_entities_by_state
+        from tasks.models import Task
+        from fsm.integration import get_entities_by_state
 
         completed_tasks = get_entities_by_state(Task, 'COMPLETED', limit=50)
     """

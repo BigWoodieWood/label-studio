@@ -24,8 +24,8 @@ The Label Studio FSM system provides:
 ### Basic State Management
 
 ```python
-from label_studio.fsm.state_manager import get_state_manager
-from label_studio.tasks.models import Task
+from fsm.state_manager import get_state_manager
+from tasks.models import Task
 
 # Get current state
 StateManager = get_state_manager()
@@ -48,7 +48,7 @@ history = StateManager.get_state_history(task, limit=10)
 
 ```python
 # Add FSM functionality to existing models
-from label_studio.fsm.integration import FSMIntegrationMixin
+from fsm.integration import FSMIntegrationMixin
 
 class Task(FSMIntegrationMixin, BaseTask):
     class Meta:
@@ -186,8 +186,8 @@ The FSM system can run alongside existing state management:
 Test the FSM system:
 
 ```python
-from label_studio.fsm.state_manager import StateManager
-from label_studio.tasks.models import Task
+from fsm.state_manager import StateManager
+from tasks.models import Task
 
 def test_task_state_transition():
     task = Task.objects.create(...)
