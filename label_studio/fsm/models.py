@@ -195,6 +195,7 @@ class TaskState(BaseState):
     )
 
     class Meta:
+        app_label = 'fsm'
         indexes = [
             # Critical: Latest state lookup (current state determined by latest UUID7 id)
             # Index with DESC order explicitly supports ORDER BY id DESC queries
@@ -240,6 +241,7 @@ class AnnotationState(BaseState):
     )
 
     class Meta:
+        app_label = 'fsm'
         indexes = [
             # Critical: Latest state lookup
             models.Index(fields=['annotation_id', '-id'], name='anno_current_state_idx'),
@@ -276,6 +278,7 @@ class ProjectState(BaseState):
     )
 
     class Meta:
+        app_label = 'fsm'
         indexes = [
             # Critical: Latest state lookup
             models.Index(fields=['project_id', '-id'], name='project_current_state_idx'),
