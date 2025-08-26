@@ -9,13 +9,12 @@ from datetime import datetime, timezone
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from fsm.models import AnnotationState, ProjectState, TaskState
+from fsm.state_manager import get_state_manager
 from rest_framework.test import APITestCase
 
 from label_studio.projects.models import Project
 from label_studio.tasks.models import Annotation, Task
-
-from ..models import AnnotationState, ProjectState, TaskState
-from ..state_manager import get_state_manager
 
 User = get_user_model()
 
