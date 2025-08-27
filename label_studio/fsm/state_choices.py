@@ -5,29 +5,67 @@ This module provides the infrastructure for registering and managing
 state choices for different entity types in the FSM framework.
 """
 
-# Registry for dynamic state choices extension
-STATE_CHOICES_REGISTRY = {}
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from fsm.registry import register_state_choices
+
+"""
+Core state choice enums for Label Studio entities.
+These enums define the essential states for core Label Studio entities.
+"""
 
 
-def register_state_choices(entity_name: str, choices_class):
+@register_state_choices('task')
+class TaskStateChoices(models.TextChoices):
     """
-    Register state choices for an entity type.
-
-    Args:
-        entity_name: Name of the entity (e.g., 'order', 'ticket')
-        choices_class: Django TextChoices class defining valid states
+    Core task states for basic Label Studio workflow.
+    Simplified states covering the essential task lifecycle:
+    - Creation and assignment
+    - Annotation work
+    - Completion
     """
-    STATE_CHOICES_REGISTRY[entity_name.lower()] = choices_class
+
+    # Initial State
+    CREATED = 'CREATED', _('Created')
+
+    # Work States
+    IN_PROGRESS = 'IN_PROGRESS', _('In Progress')
+
+    # Terminal State
+    COMPLETED = 'COMPLETED', _('Completed')
 
 
-def get_state_choices(entity_name: str):
+@register_state_choices('annotation')
+class AnnotationStateChoices(models.TextChoices):
     """
-    Get state choices for an entity type.
-
-    Args:
-        entity_name: Name of the entity
-
-    Returns:
-        Django TextChoices class or None if not found
+    Core annotation states for basic Label Studio workflow.
+    Simplified states covering the essential annotation lifecycle:
+    - Submission
+    - Completion
     """
-    return STATE_CHOICES_REGISTRY.get(entity_name.lower())
+
+    # Working States
+    SUBMITTED = 'SUBMITTED', _('Submitted')
+
+    # Terminal State
+    COMPLETED = 'COMPLETED', _('Completed')
+
+
+@register_state_choices('project')
+class ProjectStateChoices(models.TextChoices):
+    """
+    Core project states for basic Label Studio workflow.
+    Simplified states covering the essential project lifecycle:
+    - Setup and configuration
+    - Active work
+    - Completion
+    """
+
+    # Setup States
+    CREATED = 'CREATED', _('Created')
+
+    # Work States
+    IN_PROGRESS = 'IN_PROGRESS', _('In Progress')
+
+    # Terminal State
+    COMPLETED = 'COMPLETED', _('Completed')
