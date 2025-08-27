@@ -50,9 +50,13 @@ class TestUUID7Utils(TestCase):
 
         extracted_timestamp = timestamp_from_uuid7(uuid7_id)
 
-        # Timestamp should be between before and after
-        self.assertGreaterEqual(extracted_timestamp, before)
-        self.assertLessEqual(extracted_timestamp, after)
+        # Timestamp should be close to the generation time (within 1 second tolerance)
+        # UUID7 has millisecond precision, so some rounding variance is expected
+        time_diff_before = abs((extracted_timestamp - before).total_seconds())
+        time_diff_after = abs((extracted_timestamp - after).total_seconds())
+
+        self.assertLess(time_diff_before, 1.0)  # Within 1 second of before
+        self.assertLess(time_diff_after, 1.0)   # Within 1 second of after
 
     def test_uuid7_from_timestamp(self):
         """Test creating UUID7 from specific timestamp"""
@@ -97,10 +101,13 @@ class TestUUID7Utils(TestCase):
 
         after_call = datetime.now(timezone.utc)
 
-        # End timestamp should be close to now
+        # End timestamp should be close to now (within 1 second tolerance)
         end_extracted = timestamp_from_uuid7(end_uuid)
-        self.assertGreaterEqual(end_extracted, before_call)
-        self.assertLessEqual(end_extracted, after_call)
+        time_diff_before = abs((end_extracted - before_call).total_seconds())
+        time_diff_after = abs((end_extracted - after_call).total_seconds())
+
+        self.assertLess(time_diff_before, 1.0)  # Within 1 second of before_call
+        self.assertLess(time_diff_after, 1.0)   # Within 1 second of after_call
 
     def test_validate_uuid7_with_other_versions(self):
         """Test UUID7 validation with other UUID versions"""

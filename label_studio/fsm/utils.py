@@ -7,10 +7,11 @@ for INSERT-only architectures with millions of records.
 Uses the uuid-utils library for RFC 9562 compliant UUID7 generation.
 """
 
+import uuid
 from datetime import datetime, timezone
 from typing import Optional, Tuple
 
-import uuid_utils as uuid
+import uuid_utils
 
 
 def generate_uuid7() -> uuid.UUID:
@@ -26,7 +27,9 @@ def generate_uuid7() -> uuid.UUID:
         UUID7 instance with embedded timestamp
     """
     # Use uuid-utils library for RFC 9562 compliant UUID7 generation
-    return uuid.uuid7()
+    # Convert to standard uuid.UUID to maintain type consistency
+    uuid7_obj = uuid_utils.uuid7()
+    return uuid.UUID(str(uuid7_obj))
 
 
 def timestamp_from_uuid7(uuid7_id: uuid.UUID) -> datetime:
@@ -46,6 +49,7 @@ def timestamp_from_uuid7(uuid7_id: uuid.UUID) -> datetime:
     """
     # UUID7 embeds timestamp in first 48 bits
     timestamp_ms = (uuid7_id.int >> 80) & ((1 << 48) - 1)
+    # Return with millisecond precision (UUID7 spec)
     return datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc)
 
 
@@ -76,11 +80,10 @@ def uuid7_time_range(start_time: datetime, end_time: Optional[datetime] = None) 
     start_timestamp_ms = int(start_time.timestamp() * 1000)
     end_timestamp_ms = int(end_time.timestamp() * 1000)
 
-    # Create UUID7 with specific timestamp and zero random bits for range start
-    start_uuid = uuid.UUID(int=(start_timestamp_ms << 80), version=7)
-
-    # Create UUID7 with specific timestamp and max random bits for range end
-    end_uuid = uuid.UUID(int=(end_timestamp_ms << 80) | ((1 << 80) - 1), version=7)
+    # Create UUID7 with specific timestamp using proper bit layout
+    # UUID7 format: timestamp_ms(48) + ver(4) + rand_a(12) + var(2) + rand_b(62)
+    start_uuid = uuid.UUID(int=(start_timestamp_ms << 80) | (0x7 << 76) | (0b10 << 62))
+    end_uuid = uuid.UUID(int=(end_timestamp_ms << 80) | (0x7 << 76) | (0b10 << 62) | ((1 << 62) - 1))
 
     return start_uuid, end_uuid
 
@@ -176,14 +179,11 @@ class UUID7Generator:
         Returns:
             UUID7 with adjusted timestamp
         """
-        # For testing purposes, we'll generate a standard UUID7
-        # and then optionally create one with specific timestamp if needed
-        if offset_ms == 0:
-            return uuid.uuid7()
-
         # For offset timestamps, use manual construction for precise control
         timestamp_ms = int(self.base_timestamp.timestamp() * 1000) + offset_ms
         self._counter += 1
 
         # Create UUID7 with specific timestamp and counter for monotonicity
-        return uuid.UUID(int=(timestamp_ms << 80) | (0x7 << 76) | (self._counter & 0xFFF) << 64 | (0b10 << 62))
+        # UUID7 format: timestamp_ms(48) + ver(4) + rand_a(12) + var(2) + rand_b(62)
+        uuid_int = (timestamp_ms << 80) | (0x7 << 76) | ((self._counter & 0xFFF) << 64) | (0b10 << 62)
+        return uuid.UUID(int=uuid_int)
