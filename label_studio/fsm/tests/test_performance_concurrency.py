@@ -702,10 +702,12 @@ class ConcurrencyTests(TransactionTestCase):
 
         # Validate stress test results
         total_operations = sum(
-            stats['transitions_created']
-            + stats['validations_performed']
-            + stats['transitions_executed']
-            + stats['registry_lookups']
+            [
+                stats['transitions_created'],
+                stats['validations_performed'],
+                stats['transitions_executed'],
+                stats['registry_lookups'],
+            ]
         )
 
         # Should have performed substantial work
