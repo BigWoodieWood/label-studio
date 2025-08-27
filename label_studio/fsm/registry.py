@@ -10,6 +10,7 @@ from typing import Any, Callable, Dict, Optional, Type
 
 from django.db.models import Model, TextChoices
 from fsm.models import BaseState
+from fsm.transitions import BaseTransition, StateModelType, TransitionContext, User
 
 logger = logging.getLogger(__name__)
 

@@ -12,9 +12,8 @@ from typing import Any, Dict, Generic, Optional, TypeVar
 
 from django.contrib.auth import get_user_model
 from django.db.models import Model
+from fsm.models import BaseState
 from pydantic import BaseModel, ConfigDict, Field
-
-from .models import BaseState
 
 User = get_user_model()
 
