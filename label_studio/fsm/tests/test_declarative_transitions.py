@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.test import TestCase
 from django.utils.translation import gettext_lazy as _
+from fsm.registry import register_transition, transition_registry
 from fsm.transition_utils import (
     TransitionBuilder,
     get_available_transitions,
@@ -22,8 +23,6 @@ from fsm.transitions import (
     BaseTransition,
     TransitionContext,
     TransitionValidationError,
-    register_transition,
-    transition_registry,
 )
 from pydantic import Field, ValidationError
 

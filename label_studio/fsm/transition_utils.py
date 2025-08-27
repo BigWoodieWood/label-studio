@@ -9,8 +9,9 @@ from typing import Any, Dict, List, Optional, Type
 
 from django.db.models import Model
 from fsm.models import BaseState
+from fsm.registry import transition_registry
 from fsm.state_manager import StateManager
-from fsm.transitions import BaseTransition, TransitionValidationError, transition_registry
+from fsm.transitions import BaseTransition, TransitionValidationError
 
 
 def execute_transition(

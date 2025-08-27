@@ -14,8 +14,9 @@ from typing import Any, Dict
 from unittest.mock import Mock
 
 from django.test import TestCase
+from fsm.registry import transition_registry
 from fsm.transition_utils import TransitionBuilder
-from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError, transition_registry
+from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError
 from pydantic import Field, ValidationError
 
 

@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import Mock
 
 from django.test import TestCase
+from fsm.registry import register_transition, transition_registry
 from fsm.transition_utils import (
     get_transition_schema,
 )
@@ -19,8 +20,6 @@ from fsm.transitions import (
     BaseTransition,
     TransitionContext,
     TransitionValidationError,
-    register_transition,
-    transition_registry,
 )
 from pydantic import Field, validator
 
