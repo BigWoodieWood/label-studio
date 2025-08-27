@@ -8,10 +8,9 @@ the new Pydantic-based transition system with existing Label Studio code.
 from typing import Any, Dict, List, Optional, Type
 
 from django.db.models import Model
-
-from .models import BaseState
-from .state_manager import StateManager
-from .transitions import BaseTransition, TransitionValidationError, transition_registry
+from fsm.models import BaseState
+from fsm.state_manager import StateManager
+from fsm.transitions import BaseTransition, TransitionValidationError, transition_registry
 
 
 def execute_transition(

@@ -9,14 +9,13 @@ import logging
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from fsm.registry import get_state_model_for_entity
+from fsm.serializers import StateHistorySerializer, StateTransitionSerializer
+from fsm.state_manager import get_state_manager
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from .models import get_state_model_for_entity
-from .serializers import StateHistorySerializer, StateTransitionSerializer
-from .state_manager import get_state_manager
 
 logger = logging.getLogger(__name__)
 

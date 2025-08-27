@@ -13,12 +13,12 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Model
-
-from .models import BaseState, get_state_model_for_entity
+from fsm.models import BaseState
+from fsm.registry import get_state_model_for_entity
 
 # Avoid circular import
 if TYPE_CHECKING:
-    from .transitions import BaseTransition
+    from fsm.transitions import BaseTransition
 
 logger = logging.getLogger(__name__)
 
