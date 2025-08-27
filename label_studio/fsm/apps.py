@@ -37,22 +37,9 @@ class FsmConfig(AppConfig):
         """Set up signal handlers for automatic state creation"""
         try:
             from django.conf import settings
-            from django.db.models.signals import post_save
 
             # Only set up signals if enabled in settings
             if getattr(settings, 'FSM_AUTO_CREATE_STATES', False):
-                from label_studio.projects.models import Project
-
-                # Import models
-                from label_studio.tasks.models import Annotation, Task
-
-                from .integration import handle_annotation_created, handle_project_created, handle_task_created
-
-                # Connect signal handlers
-                post_save.connect(handle_task_created, sender=Task)
-                post_save.connect(handle_annotation_created, sender=Annotation)
-                post_save.connect(handle_project_created, sender=Project)
-
                 logger.info('FSM signal handlers registered')
 
         except Exception as e:
