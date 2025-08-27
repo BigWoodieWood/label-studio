@@ -8,8 +8,7 @@ from typing import Optional
 from django.conf import settings
 from django.db import models
 from django.db.models import UUIDField
-
-from .utils import UUID7Field, generate_uuid7, timestamp_from_uuid7
+from fsm.utils import UUID7Field, generate_uuid7, timestamp_from_uuid7
 
 
 class BaseState(models.Model):

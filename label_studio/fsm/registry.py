@@ -6,11 +6,14 @@ allowing the FSM to be decoupled from concrete implementations.
 """
 
 import logging
+import typing
 from typing import Any, Callable, Dict, Optional, Type
 
 from django.db.models import Model, TextChoices
-from fsm.models import BaseState
 from fsm.transitions import BaseTransition, StateModelType, TransitionContext, User
+
+if typing.TYPE_CHECKING:
+    from fsm.models import BaseState
 
 logger = logging.getLogger(__name__)
 
