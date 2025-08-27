@@ -30,7 +30,9 @@ The FSM framework provides:
 ```python
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from fsm.registry import register_state_choices
 
+@register_state_choices('order')
 class OrderStateChoices(models.TextChoices):
     CREATED = 'CREATED', _('Created')
     PROCESSING = 'PROCESSING', _('Processing')
@@ -43,11 +45,9 @@ class OrderStateChoices(models.TextChoices):
 
 ```python
 from fsm.models import BaseState
-from fsm.state_choices import register_state_choices
+from fsm.registry import register_state_model
 
-# Register state choices
-register_state_choices('order', OrderStateChoices)
-
+@register_state_model('order')
 class OrderState(BaseState):
     # Entity relationship
     order = models.ForeignKey('shop.Order', related_name='fsm_states', on_delete=models.CASCADE)
@@ -67,7 +67,8 @@ class OrderState(BaseState):
 ### 3. Define Transitions
 
 ```python
-from fsm.transitions import BaseTransition, register_transition
+from fsm.transitions import BaseTransition
+from fsm.registry import register_transition
 from pydantic import Field
 
 @register_transition('order', 'process_order')
