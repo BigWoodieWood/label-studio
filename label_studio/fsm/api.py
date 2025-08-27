@@ -1,7 +1,8 @@
 """
-Core FSM API endpoints for Label Studio.
+Core FSM API endpoints.
 
-Provides basic API endpoints for state management that can be extended
+Provides generic API endpoints for state management that can be extended
+for any application using the FSM framework.
 """
 
 import logging
@@ -50,15 +51,22 @@ class FSMViewSet(viewsets.ViewSet):
         return entity, state_model
 
     def _get_entity_model(self, entity_type: str):
-        """Get Django model class for entity type"""
+        """
+        Get Django model class for entity type.
+
+        This method should be overridden by subclasses to provide
+        application-specific entity type mappings.
+
+        Example:
+            entity_mapping = {
+                'order': 'shop.Order',
+                'ticket': 'support.Ticket',
+            }
+        """
         from django.apps import apps
 
-        # Map entity types to app.model
-        entity_mapping = {
-            'task': 'tasks.Task',
-            'annotation': 'tasks.Annotation',
-            'project': 'projects.Project',
-        }
+        # Default empty mapping - override in subclasses
+        entity_mapping = {}
 
         model_path = entity_mapping.get(entity_type.lower())
         if not model_path:

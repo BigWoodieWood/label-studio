@@ -1,207 +1,228 @@
-# Label Studio FSM (Finite State Machine)
+# FSM (Finite State Machine) Framework
 
-Core finite state machine functionality for Label Studio that provides the foundation for state tracking across entities like Tasks, Annotations, and Projects.
+A high-performance Django-based finite state machine framework with UUID7 optimization, declarative transitions, and comprehensive state management capabilities.
 
 ## Overview
 
-The Label Studio FSM system provides:
+The FSM framework provides:
 
-- **Core Infrastructure**: Base state tracking models and managers
-- **UUID7 Optimization**: Time-series optimized state records using UUID7
-- **REST API**: Endpoints for state management
-- **Admin Interface**: Django admin integration for state inspection
+- **Core Infrastructure**: Abstract base state models and managers
+- **UUID7 Optimization**: Time-series optimized state records with natural ordering
+- **Declarative Transitions**: Pydantic-based transition system with validation
+- **REST API**: Generic endpoints for state management
+- **High Performance**: Optimized for high-volume state changes with caching
+- **Extensible**: Plugin-based architecture for custom implementations
 
 ## Architecture
 
 ### Core Components
 
-1. **BaseState**: Abstract model providing common state tracking functionality
-2. **StateManager**: High-performance state management with caching
-3. **Core State Models**: Task, Annotation, and Project state tracking
+1. **BaseState**: Abstract model providing UUID7-optimized state tracking
+2. **StateManager**: High-performance state management with intelligent caching
+3. **Transition System**: Declarative, Pydantic-based transitions with validation
+4. **State Registry**: Dynamic registration system for entities and transitions
+5. **API Layer**: Generic REST endpoints for state operations
 
-## Usage
+## Quick Start
 
-### Basic State Management
+### 1. Define State Choices
+
+```python
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+class OrderStateChoices(models.TextChoices):
+    CREATED = 'CREATED', _('Created')
+    PROCESSING = 'PROCESSING', _('Processing')
+    SHIPPED = 'SHIPPED', _('Shipped')
+    DELIVERED = 'DELIVERED', _('Delivered')
+    CANCELLED = 'CANCELLED', _('Cancelled')
+```
+
+### 2. Create State Model
+
+```python
+from fsm.models import BaseState
+from fsm.state_choices import register_state_choices
+
+# Register state choices
+register_state_choices('order', OrderStateChoices)
+
+class OrderState(BaseState):
+    # Entity relationship
+    order = models.ForeignKey('shop.Order', related_name='fsm_states', on_delete=models.CASCADE)
+    
+    # Override state field with choices
+    state = models.CharField(max_length=50, choices=OrderStateChoices.choices, db_index=True)
+    
+    # Denormalized fields for performance
+    customer_id = models.PositiveIntegerField(db_index=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['order_id', '-id'], name='order_current_state_idx'),
+        ]
+```
+
+### 3. Define Transitions
+
+```python
+from fsm.transitions import BaseTransition, register_transition
+from pydantic import Field
+
+@register_transition('order', 'process_order')
+class ProcessOrderTransition(BaseTransition):
+    processor_id: int = Field(..., description="ID of user processing the order")
+    priority: str = Field('normal', description="Processing priority")
+    
+    @property
+    def target_state(self) -> str:
+        return OrderStateChoices.PROCESSING
+    
+    def validate_transition(self, context) -> bool:
+        return context.current_state == OrderStateChoices.CREATED
+        
+    def transition(self, context) -> dict:
+        return {
+            "processor_id": self.processor_id,
+            "priority": self.priority,
+            "processed_at": context.timestamp.isoformat()
+        }
+```
+
+### 4. Execute Transitions
+
+```python
+from fsm.transition_utils import execute_transition
+
+# Execute transition
+result = execute_transition(
+    entity=order,
+    transition_name='process_order',
+    transition_data={'processor_id': 123, 'priority': 'high'},
+    user=request.user
+)
+```
+
+### 5. Query States
 
 ```python
 from fsm.state_manager import get_state_manager
-from tasks.models import Task
+
+StateManager = get_state_manager()
 
 # Get current state
-StateManager = get_state_manager()
-task = Task.objects.get(id=123)
-current_state = StateManager.get_current_state(task)
+current_state = StateManager.get_current_state(order)
 
-# Transition state
-success = StateManager.transition_state(
-    entity=task,
-    new_state='IN_PROGRESS',
-    user=request.user,
-    reason='User started annotation work'
+# Get state history
+history = StateManager.get_state_history(order, limit=10)
+
+# Bulk operations for performance
+orders = Order.objects.all()[:1000]
+states = StateManager.bulk_get_current_states(orders)
+```
+
+## Key Features
+
+### UUID7 Performance Optimization
+
+- **Natural Time Ordering**: UUID7 provides chronological ordering without separate timestamp indexes
+- **High Concurrency**: INSERT-only approach eliminates locking contention
+- **Scalability**: Supports billions of state records with consistent performance
+
+### Declarative Transitions
+
+- **Pydantic Validation**: Strong typing and automatic validation
+- **Composable Logic**: Reusable transition classes with inheritance
+- **Hooks System**: Pre/post transition hooks for custom logic
+
+### Advanced Querying
+
+```python
+# Time-range queries using UUID7
+from datetime import datetime, timedelta
+recent_states = StateManager.get_states_since(
+    entity=order, 
+    since=datetime.now() - timedelta(hours=24)
 )
 
-# Get state history
-history = StateManager.get_state_history(task, limit=10)
+# Bulk operations
+orders = Order.objects.filter(status='active')
+current_states = StateManager.bulk_get_current_states(orders)
 ```
 
-### Integration with Existing Models
+### API Integration
+
+The framework provides generic REST endpoints:
+
+```
+GET /api/fsm/{entity_type}/{entity_id}/current/     # Current state
+GET /api/fsm/{entity_type}/{entity_id}/history/     # State history  
+POST /api/fsm/{entity_type}/{entity_id}/transition/ # Execute transition
+```
+
+Extend the base viewset for your application:
 
 ```python
-# Add FSM functionality to existing models
-from fsm.integration import FSMIntegrationMixin
+from fsm.api import FSMViewSet
 
-class Task(FSMIntegrationMixin, BaseTask):
-    class Meta:
-        proxy = True
-
-# Now you can use FSM methods directly
-task = Task.objects.get(id=123)
-current_state = task.current_fsm_state
-task.transition_fsm_state('COMPLETED', user=user)
+class MyFSMViewSet(FSMViewSet):
+    def _get_entity_model(self, entity_type: str):
+        entity_mapping = {
+            'order': 'shop.Order',
+            'ticket': 'support.Ticket',
+        }
+        # ... implementation
 ```
 
-### API Usage
+## Performance Characteristics
 
-```bash
-# Get current state
-GET /api/fsm/task/123/current/
+- **State Queries**: O(1) current state lookup via UUID7 ordering
+- **History Queries**: Optimal for time-series access patterns
+- **Bulk Operations**: Efficient batch processing for thousands of entities
+- **Cache Integration**: Intelligent caching with automatic invalidation
+- **Memory Efficiency**: Minimal memory footprint for state objects
 
-# Get state history
-GET /api/fsm/task/123/history/?limit=10
+## Extension Points
 
-# Transition state
-POST /api/fsm/task/123/transition/
-{
-    "new_state": "COMPLETED",
-    "reason": "Task completed by user"
-}
-```
-
-## Dependencies
-
-The FSM system requires the `uuid-utils` library for UUID7 support:
-
-```bash
-pip install uuid-utils>=0.11.0
-```
-
-This dependency is automatically included in Label Studio's requirements.
-
-### Why UUID7?
-
-UUID7 provides significant performance benefits for time-series data like state transitions:
-
-- **Natural Time Ordering**: Records are naturally ordered by creation time without requiring additional indexes
-- **Global Uniqueness**: Works across distributed systems and database shards
-- **INSERT-only Architecture**: No UPDATE operations needed, maximizing concurrency
-- **Time-based Partitioning**: Enables horizontal scaling to billions of records
-
-## Configuration
-
-### Django Settings
-
-Add the FSM app to your `INSTALLED_APPS`:
+### Custom State Manager
 
 ```python
-INSTALLED_APPS = [
-    # ... other apps
-    'label_studio.fsm',
-    # ... other apps
-]
+from fsm.state_manager import BaseStateManager
+
+class CustomStateManager(BaseStateManager):
+    def get_current_state(self, entity):
+        # Custom logic
+        return super().get_current_state(entity)
 ```
 
-### Optional Settings
+### Custom Validation
 
 ```python
-# FSM Configuration
-FSM_CACHE_TTL = 300  # Cache timeout in seconds (default: 300)
-FSM_AUTO_CREATE_STATES = False  # Auto-create states on entity creation (default: False)
-FSM_STATE_MANAGER_CLASS = None  # Custom state manager class (default: None)
+@register_transition('order', 'validate_payment')  
+class PaymentValidationTransition(BaseTransition):
+    def validate_transition(self, context) -> bool:
+        # Custom business logic
+        return self.check_payment_method(context.entity)
 ```
 
-## Database Migrations
+## Framework vs Implementation
 
-Run migrations to create the FSM tables:
+This is the **core framework** - a clean, generic FSM system. Product-specific implementations (state definitions, concrete models, business logic) should be in separate branches/modules for:
 
-```bash
-python manage.py migrate fsm
-```
+- **Clean Architecture**: Framework logic separated from business logic
+- **Reusability**: Framework can be used across different projects
+- **Maintainability**: Changes to business logic don't affect framework
+- **Review Process**: Framework and implementation can be reviewed independently
 
-This will create:
-- `fsm_task_states`: Task state tracking
-- `fsm_annotation_states`: Annotation state tracking  
-- `fsm_project_states`: Project state tracking
+## Migration from Other FSM Libraries
 
-## Performance Considerations
+The framework provides migration utilities and is designed to be compatible with existing Django FSM patterns while offering significant performance improvements through UUID7 optimization.
 
-### UUID7 Benefits
+## Contributing
 
-The FSM system uses UUID7 for optimal time-series performance:
-
-- **Natural Time Ordering**: No need for `created_at` indexes
-- **INSERT-only Architecture**: Maximum concurrency, no row locks
-- **Global Uniqueness**: Supports distributed systems
-- **Time-based Partitioning**: Scales to billions of records
-
-### Caching Strategy
-
-- **Write-through Caching**: Immediate consistency after state transitions
-- **Configurable TTL**: Balance between performance and freshness
-- **Cache Key Strategy**: Optimized for entity-based lookups
-
-### Indexes
-
-Critical indexes for performance:
-- `(entity_id, id DESC)`: Current state lookup using UUID7 ordering
-- `(entity_id, id)`: State history queries
-
-
-## Monitoring and Debugging
-
-### Admin Interface
-
-Access state records via Django admin:
-- `/admin/fsm/taskstate/`
-- `/admin/fsm/annotationstate/`
-- `/admin/fsm/projectstate/`
-
-### Logging
-
-FSM operations are logged at appropriate levels:
-- `INFO`: Successful state transitions
-- `ERROR`: Failed transitions and system errors
-- `DEBUG`: Cache hits/misses and detailed operation info
-
-
-## Migration from Existing Systems
-
-The FSM system can run alongside existing state management:
-
-1. **Parallel Operation**: FSM tracks states without affecting existing logic
-2. **Gradual Migration**: Replace existing state checks with FSM calls over time
-3. **Backfill Support**: Historical states can be backfilled from existing data
-
-## Testing
-
-Test the FSM system:
-
-```python
-from fsm.state_manager import StateManager
-from tasks.models import Task
-
-def test_task_state_transition():
-    task = Task.objects.create(...)
-    
-    # Test initial state
-    assert StateManager.get_current_state(task) is None
-    
-    # Test transition
-    success = StateManager.transition_state(task, 'CREATED')
-    assert success
-    assert StateManager.get_current_state(task) == 'CREATED'
-    
-    # Test history
-    history = StateManager.get_state_history(task)
-    assert len(history) == 1
-    assert history[0].state == 'CREATED'
-```
+When contributing:
+- Keep framework code generic and reusable
+- Add product-specific code to appropriate implementation branches
+- Include performance tests for UUID7 optimizations
+- Document extension points and customization options
