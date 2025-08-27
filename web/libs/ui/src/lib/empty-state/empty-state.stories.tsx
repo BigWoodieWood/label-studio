@@ -407,7 +407,7 @@ export const ComplexContent: Story = {
     footer: (
       <div className="text-center space-y-1">
         <Typography variant="label" size="small" className="text-primary-link">
-          <a href="#" className="hover:underline">
+          <a href="/docs/import-guide" className="hover:underline">
             Need help? View our import guide
           </a>
         </Typography>
