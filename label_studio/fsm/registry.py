@@ -224,11 +224,32 @@ class StateModelRegistry:
 state_model_registry = StateModelRegistry()
 
 
-def register_state_model(
+def register_state_model(entity_name: str, denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None):
+    """
+    Decorator to register a state model.
+
+    Args:
+        entity_name: Name of the entity (e.g., 'task', 'annotation')
+        denormalizer: Optional function to extract denormalized fields
+
+    Example:
+        @register_state_model('task')
+        class TaskState(BaseState):
+            # ... implementation
+    """
+
+    def decorator(state_model: Type['BaseState']) -> Type['BaseState']:
+        state_model_registry.register_model(entity_name, state_model, denormalizer)
+        return state_model
+
+    return decorator
+
+
+def register_state_model_class(
     entity_name: str, state_model: Type['BaseState'], denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None
 ):
     """
-    Convenience function to register a state model.
+    Convenience function to register a state model programmatically.
 
     Args:
         entity_name: Name of the entity (e.g., 'task', 'annotation')

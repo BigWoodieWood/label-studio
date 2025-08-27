@@ -8,18 +8,23 @@ functionality for enhanced declarative state management.
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, TypeVar
 
 from django.contrib.auth import get_user_model
 from django.db.models import Model
-from fsm.models import BaseState
 from pydantic import BaseModel, ConfigDict, Field
 
 User = get_user_model()
 
-# Type variables for generic transition context
-EntityType = TypeVar('EntityType', bound=Model)
-StateModelType = TypeVar('StateModelType', bound=BaseState)
+if TYPE_CHECKING:
+    from fsm.models import BaseState
+
+    # Type variables for generic transition context
+    EntityType = TypeVar('EntityType', bound=Model)
+    StateModelType = TypeVar('StateModelType', bound=BaseState)
+else:
+    EntityType = TypeVar('EntityType')
+    StateModelType = TypeVar('StateModelType')
 
 
 class TransitionContext(BaseModel, Generic[EntityType, StateModelType]):
