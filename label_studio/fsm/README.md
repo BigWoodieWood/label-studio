@@ -162,7 +162,7 @@ GET /api/fsm/{entity_type}/{entity_id}/history/     # State history
 POST /api/fsm/{entity_type}/{entity_id}/transition/ # Execute transition
 ```
 
-Extend the base viewset for your application:
+Extend the base viewset
 
 ```python
 from fsm.api import FSMViewSet
