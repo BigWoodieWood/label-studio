@@ -209,6 +209,13 @@ class TaskState(BaseState):
         # No constraints needed - INSERT-only approach
         ordering = ['-id']
 
+    @classmethod
+    def get_denormalized_fields(cls, entity):
+        """Get denormalized fields for TaskState creation"""
+        return {
+            'project_id': entity.project_id,
+        }
+
     @property
     def is_terminal_state(self) -> bool:
         """Check if this is a terminal task state"""
@@ -251,6 +258,15 @@ class AnnotationState(BaseState):
             models.Index(fields=['project_id', 'state', '-id'], name='anno_project_report_idx'),
         ]
         ordering = ['-id']
+
+    @classmethod
+    def get_denormalized_fields(cls, entity):
+        """Get denormalized fields for AnnotationState creation"""
+        return {
+            'task_id': entity.task.id,
+            'project_id': entity.task.project_id,
+            'completed_by_id': entity.completed_by.id if entity.completed_by else None,
+        }
 
     @property
     def is_terminal_state(self) -> bool:

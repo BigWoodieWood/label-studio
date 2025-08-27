@@ -7,7 +7,7 @@ that can be extended by Label Studio Enterprise with additional features.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 
 from django.conf import settings
 from django.core.cache import cache
@@ -15,6 +15,10 @@ from django.db import transaction
 from django.db.models import Model
 
 from .models import BaseState, get_state_model_for_entity
+
+# Avoid circular import
+if TYPE_CHECKING:
+    from .transitions import BaseTransition
 
 logger = logging.getLogger(__name__)
 
@@ -184,6 +188,11 @@ class StateManager:
         try:
             with transaction.atomic():
                 # INSERT-only approach - no UPDATE operations needed
+                # Get denormalized fields from the state model itself
+                denormalized_fields = {}
+                if hasattr(state_model, 'get_denormalized_fields'):
+                    denormalized_fields = state_model.get_denormalized_fields(entity)
+
                 new_state_record = state_model.objects.create(
                     **{entity._meta.model_name: entity},
                     state=new_state,
@@ -192,7 +201,7 @@ class StateManager:
                     triggered_by=user,
                     context_data=context or {},
                     reason=reason,
-                    # Note: Denormalized fields would be added here by Enterprise
+                    **denormalized_fields,
                 )
 
                 # Update cache with new state
@@ -281,34 +290,69 @@ class StateManager:
             cache.set_many(cache_updates, cls.CACHE_TTL)
             logger.debug(f'Warmed cache for {len(cache_updates)} entities')
 
+    @classmethod
+    def execute_declarative_transition(
+        cls, transition: 'BaseTransition', entity: Model, user=None, **context_kwargs
+    ) -> BaseState:
+        """
+        Execute a declarative Pydantic-based transition.
 
-# Extension point for Label Studio Enterprise
-# Enterprise can subclass this and add advanced features
-class ExtendedStateManager(StateManager):
-    """
-    Extension point for Label Studio Enterprise.
+        This method integrates the new declarative transition system with
+        the existing StateManager, providing a bridge between the two approaches.
 
-    Enterprise can override this class to add:
-    - Bulk operations with window functions
-    - Advanced caching strategies
-    - Complex transition validation
-    - Enterprise-specific optimizations
+        Args:
+            transition: Instance of a BaseTransition subclass
+            entity: The entity to transition
+            user: User executing the transition
+            **context_kwargs: Additional context data
 
-    Example Enterprise usage:
-        class EnterpriseStateManager(ExtendedStateManager):
-            @classmethod
-            def bulk_get_states(cls, entities):
-                # Enterprise-specific bulk optimization
-                return super().bulk_get_states_optimized(entities)
+        Returns:
+            The newly created state record
 
-            @classmethod
-            def transition_state(cls, entity, new_state, **kwargs):
-                # Enterprise transition validation
-                cls.validate_enterprise_transition(entity, new_state)
-                return super().transition_state(entity, new_state, **kwargs)
-    """
+        Raises:
+            TransitionValidationError: If transition validation fails
+            StateManagerError: If transition execution fails
+        """
+        from .transitions import TransitionContext
 
-    pass
+        # Get current state information
+        current_state_object = cls.get_current_state_object(entity)
+        current_state = current_state_object.state if current_state_object else None
+
+        # Build transition context
+        context = TransitionContext(
+            entity=entity,
+            current_user=user,
+            current_state_object=current_state_object,
+            current_state=current_state,
+            target_state=transition.target_state,
+            organization_id=getattr(entity, 'organization_id', None),
+            **context_kwargs,
+        )
+
+        logger.info(
+            f'Executing declarative transition {transition.__class__.__name__} '
+            f'for {entity._meta.label_lower} {entity.pk}: '
+            f'{current_state} → {transition.target_state}'
+        )
+
+        try:
+            # Execute the transition through the declarative system
+            state_record = transition.execute(context)
+
+            logger.info(
+                f'Declarative transition successful: {entity._meta.label_lower} {entity.pk} '
+                f'now in state {transition.target_state} (record ID: {state_record.id})'
+            )
+
+            return state_record
+
+        except Exception as e:
+            logger.error(
+                f'Declarative transition failed for {entity._meta.label_lower} {entity.pk}: '
+                f'{current_state} → {transition.target_state}: {e}'
+            )
+            raise
 
 
 # Allow runtime configuration of which StateManager to use

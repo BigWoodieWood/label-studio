@@ -29,7 +29,11 @@ class TestFSMModels(TestCase):
     def test_task_state_creation(self):
         """Test TaskState creation and basic functionality"""
         task_state = TaskState.objects.create(
-            task=self.task, state='CREATED', triggered_by=self.user, reason='Task created for testing'
+            task=self.task,
+            project_id=self.task.project_id,  # Denormalized from task.project_id
+            state='CREATED',
+            triggered_by=self.user,
+            reason='Task created for testing',
         )
 
         # Check basic fields
@@ -51,7 +55,13 @@ class TestFSMModels(TestCase):
         annotation = Annotation.objects.create(task=self.task, completed_by=self.user, result=[])
 
         annotation_state = AnnotationState.objects.create(
-            annotation=annotation, state='DRAFT', triggered_by=self.user, reason='Annotation draft created'
+            annotation=annotation,
+            task_id=annotation.task.id,  # Denormalized from annotation.task_id
+            project_id=annotation.task.project_id,  # Denormalized from annotation.task.project_id
+            completed_by_id=annotation.completed_by.id if annotation.completed_by else None,  # Denormalized
+            state='DRAFT',
+            triggered_by=self.user,
+            reason='Annotation draft created',
         )
 
         # Check basic fields
@@ -63,7 +73,12 @@ class TestFSMModels(TestCase):
 
         # Test completed state
         completed_state = AnnotationState.objects.create(
-            annotation=annotation, state='COMPLETED', triggered_by=self.user
+            annotation=annotation,
+            task_id=annotation.task.id,
+            project_id=annotation.task.project_id,
+            completed_by_id=annotation.completed_by.id if annotation.completed_by else None,
+            state='COMPLETED',
+            triggered_by=self.user,
         )
         self.assertTrue(completed_state.is_terminal_state)
 
