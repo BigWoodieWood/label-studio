@@ -379,6 +379,14 @@ class TransitionRegistry:
         """Get a list of all registered entity types."""
         return list(self._transitions.keys())
 
+    def clear(self):
+        """
+        Clear all registered transitions.
+
+        Useful for testing to ensure clean state between tests.
+        """
+        self._transitions.clear()
+
     def execute_transition(
         self,
         entity_name: str,
