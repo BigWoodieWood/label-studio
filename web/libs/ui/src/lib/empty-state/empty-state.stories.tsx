@@ -172,7 +172,7 @@ export const SizeComparison: Story = {
             description="Start labeling and track your results using this panel"
             footer={
               <Typography variant="label" size="small" className="text-primary-link">
-                <a href="#" className="inline-flex items-center gap-1 hover:underline">
+                <a href="/docs/labeling-interface" className="inline-flex items-center gap-1 hover:underline">
                   Learn more
                   <IconExternal width={16} height={16} />
                 </a>
@@ -296,7 +296,7 @@ export const DataManagerImport: Story = {
     ),
     footer: (
       <Typography variant="label" size="small" className="text-primary-link hover:underline">
-        <a href="#" className="inline-flex items-center gap-1">
+        <a href="/docs/import-data" className="inline-flex items-center gap-1">
           See docs on importing data
           <IconExternal width={20} height={20} />
         </a>
@@ -384,7 +384,7 @@ export const ComplexContent: Story = {
           Supported formats: CSV, JSON, TSV, TXT
         </Typography>
         <div className="flex justify-center items-center gap-2 text-neutral-content-subtler">
-          <div className="w-2 h-2 bg-positive-icon rounded-full"></div>
+          <div className="w-2 h-2 bg-positive-icon rounded-full" />
           <Typography variant="label" size="smallest">
             Drag and drop enabled
           </Typography>
