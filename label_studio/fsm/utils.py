@@ -77,8 +77,9 @@ def uuid7_time_range(start_time: datetime, end_time: Optional[datetime] = None) 
     if end_time is None:
         end_time = datetime.now(timezone.utc)
 
-    start_timestamp_ms = int(start_time.timestamp() * 1000)
-    end_timestamp_ms = int(end_time.timestamp() * 1000)
+    # Add a small buffer to account for timing precision issues
+    start_timestamp_ms = int(start_time.timestamp() * 1000) - 1  # 1ms buffer before
+    end_timestamp_ms = int(end_time.timestamp() * 1000) + 1  # 1ms buffer after
 
     # Create UUID7 with specific timestamp using proper bit layout
     # UUID7 format: timestamp_ms(48) + ver(4) + rand_a(12) + var(2) + rand_b(62)

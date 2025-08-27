@@ -193,6 +193,13 @@ class StateManager:
                 if hasattr(state_model, 'get_denormalized_fields'):
                     denormalized_fields = state_model.get_denormalized_fields(entity)
 
+                # Get organization from user's active organization
+                organization_id = (
+                    user.active_organization.id
+                    if user and hasattr(user, 'active_organization') and user.active_organization
+                    else None
+                )
+
                 new_state_record = state_model.objects.create(
                     **{entity._meta.model_name: entity},
                     state=new_state,
@@ -201,6 +208,7 @@ class StateManager:
                     triggered_by=user,
                     context_data=context or {},
                     reason=reason,
+                    organization_id=organization_id,
                     **denormalized_fields,
                 )
 
@@ -274,7 +282,7 @@ class StateManager:
     @classmethod
     def warm_cache(cls, entities: List[Model]):
         """
-        Warm cache with current states for a list of entities.
+        invalidate_cacheWarm cache with current states for a list of entities.
 
         Basic implementation that can be optimized by Enterprise with
         bulk queries and advanced caching strategies.

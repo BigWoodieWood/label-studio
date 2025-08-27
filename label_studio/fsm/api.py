@@ -10,9 +10,8 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from label_studio.core.permissions import AllPermissions
 
 from .models import get_state_model_for_entity
 from .serializers import StateHistorySerializer, StateTransitionSerializer
@@ -31,7 +30,7 @@ class FSMViewSet(viewsets.ViewSet):
     - Trigger state transitions
     """
 
-    permission_classes = [AllPermissions]
+    permission_classes = [IsAuthenticated]
 
     def _get_entity_and_state_model(self, entity_type: str, entity_id: int):
         """Helper to get entity instance and its state model"""
@@ -82,9 +81,10 @@ class FSMViewSet(viewsets.ViewSet):
                 "entity_id": 123
             }
         """
-        try:
-            entity, state_model = self._get_entity_and_state_model(entity_type, int(entity_id))
+        # Let Http404 from _get_entity_and_state_model pass through
+        entity, state_model = self._get_entity_and_state_model(entity_type, int(entity_id))
 
+        try:
             # Get current state using the configured state manager
             StateManager = get_state_manager()
             current_state = StateManager.get_current_state(entity)
@@ -130,9 +130,10 @@ class FSMViewSet(viewsets.ViewSet):
                 ]
             }
         """
-        try:
-            entity, state_model = self._get_entity_and_state_model(entity_type, int(entity_id))
+        # Let Http404 from _get_entity_and_state_model pass through
+        entity, state_model = self._get_entity_and_state_model(entity_type, int(entity_id))
 
+        try:
             # Get query parameters
             limit = min(int(request.query_params.get('limit', 100)), 1000)  # Max 1000
             include_context = request.query_params.get('include_context', 'false').lower() == 'true'
@@ -181,9 +182,10 @@ class FSMViewSet(viewsets.ViewSet):
                 "entity_id": 123
             }
         """
-        try:
-            entity, state_model = self._get_entity_and_state_model(entity_type, int(entity_id))
+        # Let Http404 from _get_entity_and_state_model pass through
+        entity, state_model = self._get_entity_and_state_model(entity_type, int(entity_id))
 
+        try:
             # Validate request data
             serializer = StateTransitionSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)

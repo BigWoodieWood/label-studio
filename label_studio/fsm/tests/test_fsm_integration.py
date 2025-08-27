@@ -26,6 +26,11 @@ class TestFSMModels(TestCase):
         self.project = Project.objects.create(title='Test Project', created_by=self.user)
         self.task = Task.objects.create(project=self.project, data={'text': 'test'})
 
+        # Clear cache to ensure tests start with clean state
+        from django.core.cache import cache
+
+        cache.clear()
+
     def test_task_state_creation(self):
         """Test TaskState creation and basic functionality"""
         task_state = TaskState.objects.create(
@@ -108,6 +113,11 @@ class TestStateManager(TestCase):
         self.task = Task.objects.create(project=self.project, data={'text': 'test'})
         self.StateManager = get_state_manager()
 
+        # Clear cache to ensure tests start with clean state
+        from django.core.cache import cache
+
+        cache.clear()
+
     def test_get_current_state_empty(self):
         """Test getting current state when no states exist"""
         current_state = self.StateManager.get_current_state(self.task)
@@ -178,6 +188,10 @@ class TestStateManager(TestCase):
         states = [h.state for h in history]
         self.assertEqual(states, ['COMPLETED', 'IN_PROGRESS', 'CREATED'])
 
+        print(history)
+        ids = [str(h.id) for h in history]
+        print(ids)
+
         # Check previous states are set correctly
         self.assertIsNone(history[2].previous_state)  # First state has no previous
         self.assertEqual(history[1].previous_state, 'CREATED')
@@ -210,6 +224,11 @@ class TestFSMAPI(APITestCase):
         self.project = Project.objects.create(title='Test Project', created_by=self.user)
         self.task = Task.objects.create(project=self.project, data={'text': 'test'})
         self.client.force_authenticate(user=self.user)
+
+        # Clear cache to ensure tests start with clean state
+        from django.core.cache import cache
+
+        cache.clear()
 
         # Create initial state
         StateManager = get_state_manager()

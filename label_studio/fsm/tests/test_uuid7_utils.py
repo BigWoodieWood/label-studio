@@ -85,12 +85,13 @@ class TestUUID7Utils(TestCase):
         # Start should be less than end
         self.assertLess(start_uuid.int, end_uuid.int)
 
-        # Timestamps should match input times
+        # Timestamps should match input times (with 1ms buffer tolerance)
         start_extracted = timestamp_from_uuid7(start_uuid)
         end_extracted = timestamp_from_uuid7(end_uuid)
 
-        self.assertLess(abs((start_extracted - start_time).total_seconds()), 0.001)
-        self.assertLess(abs((end_extracted - end_time).total_seconds()), 0.001)
+        # Account for 1ms buffer added in uuid7_time_range
+        self.assertLess(abs((start_extracted - start_time).total_seconds()), 0.002)
+        self.assertLess(abs((end_extracted - end_time).total_seconds()), 0.002)
 
     def test_uuid7_time_range_default_end(self):
         """Test UUID7 time range with default end time (now)"""

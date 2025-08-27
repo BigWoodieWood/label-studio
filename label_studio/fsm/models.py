@@ -304,6 +304,13 @@ class ProjectState(BaseState):
         ]
         ordering = ['-id']
 
+    @classmethod
+    def get_denormalized_fields(cls, entity):
+        """Get denormalized fields for ProjectState creation"""
+        return {
+            'created_by_id': entity.created_by.id if entity.created_by else None,
+        }
+
     @property
     def is_terminal_state(self) -> bool:
         """Check if this is a terminal project state"""
