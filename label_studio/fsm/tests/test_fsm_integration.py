@@ -11,10 +11,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from fsm.models import AnnotationState, ProjectState, TaskState
 from fsm.state_manager import get_state_manager
+from projects.models import Project
 from rest_framework.test import APITestCase
-
-from label_studio.projects.models import Project
-from label_studio.tasks.models import Annotation, Task
+from tasks.models import Annotation, Task
 
 User = get_user_model()
 
