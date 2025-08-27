@@ -41,7 +41,7 @@ const descriptionVariants = {
 export type EmptyStateSize = keyof typeof sizes;
 export type EmptyStateVariant = keyof typeof variants;
 
-export interface EmptyStateProps {
+export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Size of the empty state
    * - large: 40px icon, headline medium text, wider spacing (Data Manager style)

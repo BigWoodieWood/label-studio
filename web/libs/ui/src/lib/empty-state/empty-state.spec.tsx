@@ -47,7 +47,7 @@ describe("EmptyState Component", () => {
   });
 
   it("applies correct size classes", () => {
-    const { container, rerender } = render(<EmptyState {...defaultProps} size="large" data-testid="empty-state" />);
+    const { rerender } = render(<EmptyState {...defaultProps} size="large" data-testid="empty-state" />);
 
     expect(screen.getByTestId("empty-state")).toHaveClass("size-large");
 
