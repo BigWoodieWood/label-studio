@@ -6,17 +6,14 @@ Pydantic models with built-in validation, context passing, and middleware-like
 functionality for enhanced declarative state management.
 """
 
-import typing
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, Generic, Optional, TypeVar
 
 from django.contrib.auth import get_user_model
 from django.db.models import Model
+from fsm.models import BaseState
 from pydantic import BaseModel, ConfigDict, Field
-
-if typing.TYPE_CHECKING:
-    from fsm.models import BaseState
 
 User = get_user_model()
 

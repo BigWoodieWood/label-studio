@@ -10,10 +10,15 @@ import typing
 from typing import Any, Callable, Dict, Optional, Type
 
 from django.db.models import Model, TextChoices
-from fsm.transitions import BaseTransition, StateModelType, TransitionContext, User
 
 if typing.TYPE_CHECKING:
     from fsm.models import BaseState
+    from fsm.transitions import BaseTransition, StateModelType, TransitionContext, User
+else:
+    from fsm.transitions import BaseTransition, TransitionContext, User
+
+    # Import StateModelType at runtime to avoid circular import
+    StateModelType = None
 
 logger = logging.getLogger(__name__)
 
@@ -112,14 +117,14 @@ class StateModelRegistry:
     """
 
     def __init__(self):
-        self._models: Dict[str, Type[BaseState]] = {}
+        self._models: Dict[str, Type['BaseState']] = {}
         self._denormalizers: Dict[str, Callable[[Model], Dict[str, Any]]] = {}
         self._initialized = False
 
     def register_model(
         self,
         entity_name: str,
-        state_model: Type[BaseState],
+        state_model: Type['BaseState'],
         denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None,
     ):
         """
@@ -145,7 +150,7 @@ class StateModelRegistry:
 
         logger.debug(f'Registered state model for {entity_key}: {state_model.__name__}')
 
-    def get_model(self, entity_name: str) -> Optional[Type[BaseState]]:
+    def get_model(self, entity_name: str) -> Optional[Type['BaseState']]:
         """
         Get the state model for an entity type.
 
@@ -201,7 +206,7 @@ class StateModelRegistry:
         self._initialized = False
         logger.debug('Cleared state model registry')
 
-    def get_all_models(self) -> Dict[str, Type[BaseState]]:
+    def get_all_models(self) -> Dict[str, Type['BaseState']]:
         """Get all registered models."""
         return self._models.copy()
 
@@ -220,7 +225,7 @@ state_model_registry = StateModelRegistry()
 
 
 def register_state_model(
-    entity_name: str, state_model: Type[BaseState], denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None
+    entity_name: str, state_model: Type['BaseState'], denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None
 ):
     """
     Convenience function to register a state model.
@@ -233,7 +238,7 @@ def register_state_model(
     state_model_registry.register_model(entity_name, state_model, denormalizer)
 
 
-def get_state_model(entity_name: str) -> Optional[Type[BaseState]]:
+def get_state_model(entity_name: str) -> Optional[Type['BaseState']]:
     """
     Convenience function to get a state model.
 
@@ -246,7 +251,7 @@ def get_state_model(entity_name: str) -> Optional[Type[BaseState]]:
     return state_model_registry.get_model(entity_name)
 
 
-def get_state_model_for_entity(entity: Model) -> Optional[Type[BaseState]]:
+def get_state_model_for_entity(entity: Model) -> Optional[Type['BaseState']]:
     """Get the state model for an entity."""
     entity_name = entity._meta.model_name.lower()
     return get_state_model(entity_name)
@@ -261,9 +266,9 @@ class TransitionRegistry:
     """
 
     def __init__(self):
-        self._transitions: Dict[str, Dict[str, Type[BaseTransition]]] = {}
+        self._transitions: Dict[str, Dict[str, Type['BaseTransition']]] = {}
 
-    def register(self, entity_name: str, transition_name: str, transition_class: Type[BaseTransition]):
+    def register(self, entity_name: str, transition_name: str, transition_class: Type['BaseTransition']):
         """
         Register a transition class for an entity.
 
@@ -277,7 +282,7 @@ class TransitionRegistry:
 
         self._transitions[entity_name][transition_name] = transition_class
 
-    def get_transition(self, entity_name: str, transition_name: str) -> Optional[Type[BaseTransition]]:
+    def get_transition(self, entity_name: str, transition_name: str) -> Optional[Type['BaseTransition']]:
         """
         Get a registered transition class.
 
@@ -290,7 +295,7 @@ class TransitionRegistry:
         """
         return self._transitions.get(entity_name, {}).get(transition_name)
 
-    def get_transitions_for_entity(self, entity_name: str) -> Dict[str, Type[BaseTransition]]:
+    def get_transitions_for_entity(self, entity_name: str) -> Dict[str, Type['BaseTransition']]:
         """
         Get all registered transitions for an entity type.
 
@@ -320,9 +325,9 @@ class TransitionRegistry:
         transition_name: str,
         entity: Model,
         transition_data: Dict[str, Any],
-        user: Optional[User] = None,
+        user: Optional['User'] = None,
         **context_kwargs,
-    ) -> StateModelType:
+    ) -> 'BaseState':
         """
         Execute a registered transition.
 
@@ -387,7 +392,7 @@ def register_transition(entity_name: str, transition_name: str = None):
             # ... implementation
     """
 
-    def decorator(transition_class: Type[BaseTransition]) -> Type[BaseTransition]:
+    def decorator(transition_class: Type['BaseTransition']) -> Type['BaseTransition']:
         name = transition_name
         if name is None:
             # Generate name from class name
