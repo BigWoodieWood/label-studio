@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { EmptyState } from "./empty-state";
 import { Button } from "../button/button";
-import { 
-  IconUpload, 
-  IconSearch, 
-  IconInbox, 
-  IconLsLabeling, 
+import {
+  IconUpload,
+  IconSearch,
+  IconInbox,
+  IconLsLabeling,
   IconLsReview,
   IconCheck,
   IconCloudProviderS3,
   IconCloudProviderGCS,
   IconCloudProviderAzure,
   IconCloudProviderRedis,
-  IconExternal 
+  IconExternal,
 } from "@humansignal/icons";
 import { Typography } from "../typography/typography";
 import { Tooltip } from "../Tooltip/Tooltip";
@@ -23,46 +23,47 @@ const meta: Meta<typeof EmptyState> = {
   parameters: {
     docs: {
       description: {
-        component: "A reusable empty state component for displaying various empty states throughout the application with support for different sizes and customizable content."
-      }
-    }
+        component:
+          "A reusable empty state component for displaying various empty states throughout the application with support for different sizes and customizable content.",
+      },
+    },
   },
   argTypes: {
-    size: { 
+    size: {
       control: "select",
       options: ["large", "medium", "small"],
-      description: "Size of the empty state"
+      description: "Size of the empty state",
     },
-    variant: { 
+    variant: {
       control: "select",
       options: ["primary", "neutral", "negative", "positive", "warning", "gradient"],
-      description: "Color variant of the empty state"
+      description: "Color variant of the empty state",
     },
-    icon: { 
+    icon: {
       control: false,
-      description: "Icon element to display"
+      description: "Icon element to display",
     },
 
     title: {
       control: "text",
-      description: "Main title text"
+      description: "Main title text",
     },
     description: {
       control: "text",
-      description: "Description text below the title"
+      description: "Description text below the title",
     },
     actions: {
       control: false,
-      description: "Action buttons or other interactive elements"
+      description: "Action buttons or other interactive elements",
     },
     additionalContent: {
       control: false,
-      description: "Additional content to display between description and actions"
+      description: "Additional content to display between description and actions",
     },
     footer: {
       control: false,
-      description: "Footer content displayed at the bottom"
-    }
+      description: "Footer content displayed at the bottom",
+    },
   },
 };
 
@@ -141,7 +142,7 @@ export const SizeComparison: Story = {
           />
         </div>
       </div>
-      
+
       <div>
         <h3 className="text-lg font-semibold mb-4">Medium Size (Home Page Style)</h3>
         <div className="border border-neutral-border rounded-lg p-4 h-64">
@@ -159,7 +160,7 @@ export const SizeComparison: Story = {
           />
         </div>
       </div>
-      
+
       <div>
         <h3 className="text-lg font-semibold mb-4">Small Size (Sidepanel Style)</h3>
         <div className="border border-neutral-border rounded-lg p-4 h-48">
@@ -197,7 +198,7 @@ export const ColorVariants: Story = {
           description="Default blue theme for standard empty states"
         />
       </div>
-      
+
       <div className="border border-neutral-border rounded-lg p-4 h-64">
         <EmptyState
           size="medium"
@@ -207,7 +208,7 @@ export const ColorVariants: Story = {
           description="Gray theme for neutral states"
         />
       </div>
-      
+
       <div className="border border-neutral-border rounded-lg p-4 h-64">
         <EmptyState
           size="medium"
@@ -217,7 +218,7 @@ export const ColorVariants: Story = {
           description="Red theme for error states and failures"
         />
       </div>
-      
+
       <div className="border border-neutral-border rounded-lg p-4 h-64">
         <EmptyState
           size="medium"
@@ -227,7 +228,7 @@ export const ColorVariants: Story = {
           description="Green theme for success states"
         />
       </div>
-      
+
       <div className="border border-neutral-border rounded-lg p-4 h-64">
         <EmptyState
           size="medium"
@@ -237,7 +238,7 @@ export const ColorVariants: Story = {
           description="Orange/Yellow theme for warning states"
         />
       </div>
-      
+
       <div className="border border-neutral-border rounded-lg p-4 h-64">
         <EmptyState
           size="medium"
@@ -369,8 +370,6 @@ export const LabelingQueueComplete: Story = {
   },
 };
 
-
-
 // Complex Content Example
 export const ComplexContent: Story = {
   args: {
@@ -408,7 +407,9 @@ export const ComplexContent: Story = {
     footer: (
       <div className="text-center space-y-1">
         <Typography variant="label" size="small" className="text-primary-link">
-          <a href="#" className="hover:underline">Need help? View our import guide</a>
+          <a href="#" className="hover:underline">
+            Need help? View our import guide
+          </a>
         </Typography>
         <Typography variant="label" size="smallest" className="text-neutral-content-subtler">
           Maximum file size: 100MB per file
