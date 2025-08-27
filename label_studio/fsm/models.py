@@ -27,7 +27,7 @@ class BaseState(models.Model):
     - INSERT-only operations for maximum concurrency
     - Natural time ordering eliminates need for created_at indexes
     - Global uniqueness enables distributed system support
-    - Time-based partitioning for billion-record scalability
+    - Time-based partitioning for large amounts of state records with consistent performance
     - Complete audit trail by design
     """
 

@@ -128,7 +128,7 @@ states = StateManager.bulk_get_current_states(orders)
 
 - **Natural Time Ordering**: UUID7 provides chronological ordering without separate timestamp indexes
 - **High Concurrency**: INSERT-only approach eliminates locking contention
-- **Scalability**: Supports billions of state records with consistent performance
+- **Scalability**: Supports large amounts of state records with consistent performance
 
 ### Declarative Transitions
 
