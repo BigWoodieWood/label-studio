@@ -95,10 +95,10 @@ class OrderState(BaseState):
 
 ```python
 from fsm.transitions import BaseTransition
-from fsm.registry import register_transition
+from fsm.registry import register_state_transition
 from pydantic import Field
 
-@register_transition('order', 'process_order')
+@register_state_transition('order', 'process_order')
 class ProcessOrderTransition(BaseTransition):
     processor_id: int = Field(..., description="ID of user processing the order")
     priority: str = Field('normal', description="Processing priority")
@@ -223,7 +223,7 @@ from fsm.registry import (
     transition_registry,
     register_state_model,
     register_state_choices,
-    register_transition,
+    register_state_transition,
 )
 
 # Register state choices
@@ -237,7 +237,7 @@ class TaskState(BaseState):
     # ...
 
 # Register transitions
-@register_transition('task', 'start_task')
+@register_state_transition('task', 'start_task')
 class StartTaskTransition(BaseTransition):
     # ...
 
@@ -337,7 +337,7 @@ class CustomStateManager(BaseStateManager):
 ### Custom Validation
 
 ```python
-@register_transition('order', 'validate_payment')  
+@register_state_transition('order', 'validate_payment')  
 class PaymentValidationTransition(BaseTransition):
     def validate_transition(self, context) -> bool:
         # Custom business logic

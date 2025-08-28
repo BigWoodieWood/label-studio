@@ -399,16 +399,16 @@ class TransitionRegistry:
 transition_registry = TransitionRegistry()
 
 
-def register_transition(entity_name: str, transition_name: str = None):
+def register_state_transition(entity_name: str, transition_name: str = None):
     """
-    Decorator to register a transition class.
+    Decorator to register a state transition class.
 
     Args:
         entity_name: Name of the entity type
         transition_name: Name of the transition (defaults to class name in snake_case)
 
     Example:
-        @register_transition('task', 'start_task')
+        @register_state_transition('task', 'start_task')
         class StartTaskTransition(BaseTransition[Task, TaskState]):
             # ... implementation
     """

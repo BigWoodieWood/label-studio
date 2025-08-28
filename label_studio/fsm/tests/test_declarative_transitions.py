@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from fsm.registry import register_transition, transition_registry
+from fsm.registry import register_state_transition, transition_registry
 from fsm.state_choices import AnnotationStateChoices, TaskStateChoices
 from fsm.transition_utils import (
     TransitionBuilder,
@@ -661,13 +661,12 @@ class ComprehensiveUsageExampleTests(TestCase):
         Shows how to register transitions and use the decorator syntax.
         """
 
-        @register_transition('document', 'publish')
+        @register_state_transition('document', 'publish')
         class PublishDocumentTransition(BaseTransition):
             """Example: Using the registration decorator"""
 
             publish_immediately: bool = Field(True, description='Publish immediately')
             scheduled_time: datetime = Field(None, description='Scheduled publish time')
-
             @property
             def target_state(self) -> str:
                 return 'PUBLISHED' if self.publish_immediately else 'SCHEDULED'

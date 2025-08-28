@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import Mock
 
 from django.test import TestCase
-from fsm.registry import register_transition, transition_registry
+from fsm.registry import register_state_transition, transition_registry
 from fsm.transition_utils import (
     get_transition_schema,
 )
@@ -53,7 +53,7 @@ class APIIntegrationExampleTests(TestCase):
         declarative transitions with proper validation and error handling.
         """
 
-        @register_transition('task', 'api_assign_task')
+        @register_state_transition('task', 'api_assign_task')
         class APITaskAssignmentTransition(BaseTransition):
             """Task assignment via API with comprehensive validation"""
 
@@ -190,7 +190,7 @@ class APIIntegrationExampleTests(TestCase):
         from Pydantic transition models.
         """
 
-        @register_transition('annotation', 'api_submit_annotation')
+        @register_state_transition('annotation', 'api_submit_annotation')
         class APIAnnotationSubmissionTransition(BaseTransition):
             """Submit annotation via API with rich metadata"""
 
@@ -294,7 +294,7 @@ class APIIntegrationExampleTests(TestCase):
         need to be transitioned with the same or different parameters.
         """
 
-        @register_transition('task', 'bulk_status_update')
+        @register_state_transition('task', 'bulk_status_update')
         class BulkStatusUpdateTransition(BaseTransition):
             """Bulk status update for multiple tasks"""
 
@@ -408,7 +408,7 @@ class APIIntegrationExampleTests(TestCase):
         for external notifications and integrations.
         """
 
-        @register_transition('task', 'webhook_completion')
+        @register_state_transition('task', 'webhook_completion')
         class WebhookTaskCompletionTransition(BaseTransition):
             """Task completion with webhook notifications"""
 
@@ -518,7 +518,7 @@ class APIIntegrationExampleTests(TestCase):
         using the transition system with proper HTTP status codes and messages.
         """
 
-        @register_transition('task', 'api_critical_update')
+        @register_state_transition('task', 'api_critical_update')
         class APICriticalUpdateTransition(BaseTransition):
             """Critical update with extensive validation"""
 
@@ -701,7 +701,7 @@ class APIIntegrationExampleTests(TestCase):
         """
 
         # Version 1 API
-        @register_transition('task', 'update_task_v1')
+        @register_state_transition('task', 'update_task_v1')
         class UpdateTaskV1Transition(BaseTransition):
             """Version 1 task update API"""
 
@@ -721,7 +721,7 @@ class APIIntegrationExampleTests(TestCase):
                 }
 
         # Version 2 API with additional features
-        @register_transition('task', 'update_task_v2')
+        @register_state_transition('task', 'update_task_v2')
         class UpdateTaskV2Transition(UpdateTaskV1Transition):
             """Version 2 task update API with enhanced features"""
 
