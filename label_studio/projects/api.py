@@ -808,7 +808,7 @@ def read_templates_and_groups():
         config = read_yaml(config_file)
 
         if settings.VERSION_EDITION != 'Community':
-            if config.get('group', '').lower() == 'Community Contributions':
+            if config.get('group', '').lower() == 'community contributions':
                 continue
 
         if settings.VERSION_EDITION == 'Community':
@@ -824,7 +824,7 @@ def read_templates_and_groups():
         groups = f.read().splitlines()
 
     if settings.VERSION_EDITION != 'Community':
-        groups = [group for group in groups if group.lower() != 'Community Contributions']
+        groups = [group for group in groups if group.lower() != 'community contributions']
 
     logger.debug(f'{len(configs)} templates found.')
     return {'templates': configs, 'groups': groups}
