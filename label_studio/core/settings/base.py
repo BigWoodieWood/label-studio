@@ -369,6 +369,9 @@ RQ_QUEUES = {
     },
 }
 
+# How long to keep failed RQ jobs (in seconds); default is 30 days
+RQ_FAILED_JOB_TTL = int(get_env('RQ_FAILED_JOB_TTL', 30 * 24 * 60 * 60))
+
 # drf-spectacular settings for OpenAPI 3.0 schema generation
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Label Studio API',
@@ -881,6 +884,9 @@ USER_ACTIVITY_REDIS_KEY_PREFIX = get_env('USER_ACTIVITY_REDIS_KEY_PREFIX', 'user
 USER_ACTIVITY_BATCH_SIZE = int(get_env('USER_ACTIVITY_BATCH_SIZE', '100'))
 USER_ACTIVITY_SYNC_THRESHOLD = int(get_env('USER_ACTIVITY_SYNC_THRESHOLD', '500'))
 USER_ACTIVITY_REDIS_TTL = int(get_env('USER_ACTIVITY_REDIS_TTL', '86400'))  # 24 hours
+
+# QuerySet iterator settings
+QS_ITERATOR_DEFAULT_CHUNK_SIZE = int(get_env('QS_ITERATOR_DEFAULT_CHUNK_SIZE', 1000))
 
 # Data Manager
 # Max number of users to display in the Data Manager in Annotators/Reviewers/Comment Authors, etc
