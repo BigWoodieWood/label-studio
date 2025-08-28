@@ -174,15 +174,15 @@ class AudioViewHelper extends withMedia(
       this.toggleControlsMenu();
     }
 
-    setPlaybackSpeedInput(value: number, checkVideo = true) {
+    setPlaybackSpeedInput(value: number) {
       cy.log(`🎵 Setting playback speed to ${value}x`);
       this.toggleSettingsMenu();
       this.playbackSpeedInput.dblclick().clear().type(value.toString());
       this.playbackSpeedInput.should("have.value", value.toString());
       this.toggleSettingsMenu();
 
-      // Wait for the speed change to propagate to audio/video elements
-      this.waitForPlaybackRate(value, 8000, checkVideo);
+      // Wait for the speed change to propagate to audio element
+      this.waitForPlaybackRate(value, 8000);
       cy.log(`✅ Playback speed set to ${value}x`);
     }
 
@@ -498,94 +498,43 @@ class AudioViewHelper extends withMedia(
     }
 
     /**
-     * Waits for audio and video elements to be synchronized
-     * @param tolerance tolerance for time/rate differences
+     * Waits for audio element to be ready for playback
      * @param timeout maximum time to wait
-     * @param checkVideo whether to check video sync (default: true)
      */
-    waitForMediaSync(tolerance = 0.01, timeout = 5000, checkVideo = true) {
-      const startTime = Date.now();
-
-      const checkSync = (): Cypress.Chainable => {
-        if (Date.now() - startTime > timeout) {
-          cy.log(`⏰ Media sync timeout after ${timeout}ms`);
-          return cy.wrap(null);
-        }
-
-        if (checkVideo) {
-          // Audio+Video mode: Must sync both elements
-          return cy.get("audio").then(([audio]) => {
-            return cy.get("video").then(([video]) => {
-              const timeDiff = Math.abs(audio.currentTime - video.currentTime);
-              const rateDiff = Math.abs(audio.playbackRate - video.playbackRate);
-
-              if (timeDiff <= tolerance && rateDiff <= tolerance) {
-                cy.log(`🎯 Media sync achieved! Time diff: ${timeDiff.toFixed(3)}s, Rate diff: ${rateDiff.toFixed(3)}`);
-                return cy.wrap(null);
-              }
-              cy.log(`🔄 Media syncing... Time diff: ${timeDiff.toFixed(3)}s, Rate diff: ${rateDiff.toFixed(3)}`);
-              cy.wait(50);
-              return checkSync();
-            });
-          });
-        }
-        // Audio-only mode - no sync needed
-        cy.log("🎯 Audio-only mode - sync achieved!");
-        return cy.wrap(null);
-      };
-
-      cy.log(`🏁 Waiting for ${checkVideo ? "audio/video" : "audio-only"} synchronization...`);
-      return checkSync();
+    waitForAudioReady(timeout = 5000) {
+      cy.log("🎵 Waiting for audio element to be ready...");
+      return cy
+        .get("audio", { timeout })
+        .should("exist")
+        .should(([audio]) => {
+          expect(audio.readyState).to.be.greaterThan(0);
+        });
     }
 
     /**
-     * Waits for audio/video to be in a specific play state
+     * Waits for audio to be in a specific play state
      * @param shouldBePlaying expected play state
      * @param timeout maximum time to wait
-     * @param checkVideo whether to check video state (default: true)
      */
-    waitForPlayState(shouldBePlaying: boolean, timeout = 8000, checkVideo = true) {
-      cy.log(
-        `🎵 Waiting for ${checkVideo ? "audio/video" : "audio"} to ${shouldBePlaying ? "start playing" : "be paused"}...`,
-      );
+    waitForPlayState(shouldBePlaying: boolean, timeout = 8000) {
+      cy.log(`🎵 Waiting for audio to ${shouldBePlaying ? "start playing" : "be paused"}...`);
 
-      return cy
-        .get("audio", { timeout })
-        .should(([audio]) => {
-          expect(audio.paused).to.equal(!shouldBePlaying);
-        })
-        .then(() => {
-          if (checkVideo) {
-            return cy.get("video").should(([video]) => {
-              expect(video.paused).to.equal(!shouldBePlaying);
-            });
-          }
-          return cy.wrap(null);
-        });
+      return cy.get("audio", { timeout }).should(([audio]) => {
+        expect(audio.paused).to.equal(!shouldBePlaying);
+      });
     }
 
     /**
-     * Waits for audio/video playback rate to reach expected value
+     * Waits for audio playback rate to reach expected value
      * @param expectedRate expected playback rate
      * @param timeout maximum time to wait
-     * @param checkVideo whether to check video rate (default: true)
      */
-    waitForPlaybackRate(expectedRate: number, timeout = 8000, checkVideo = true) {
-      cy.log(`🎵 Waiting for ${checkVideo ? "audio/video" : "audio"} playback rate to be ${expectedRate}x...`);
+    waitForPlaybackRate(expectedRate: number, timeout = 8000) {
+      cy.log(`🎵 Waiting for audio playback rate to be ${expectedRate}x...`);
 
-      return cy
-        .get("audio", { timeout })
-        .should(([audio]) => {
-          expect(audio.playbackRate).to.equal(expectedRate);
-        })
-        .then(() => {
-          if (checkVideo) {
-            return cy.get("video").should(([video]) => {
-              expect(video.playbackRate).to.equal(expectedRate);
-            });
-          }
-          return cy.wrap(null);
-        });
+      return cy.get("audio", { timeout }).should(([audio]) => {
+        expect(audio.playbackRate).to.equal(expectedRate);
+      });
     }
 
     /**
