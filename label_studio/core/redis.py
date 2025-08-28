@@ -7,6 +7,7 @@ from functools import partial
 
 import django_rq
 import redis
+from django.conf import settings
 from django_rq import get_connection
 from rq.command import send_stop_job_command
 from rq.exceptions import InvalidJobOperation
@@ -17,13 +18,24 @@ logger = logging.getLogger(__name__)
 
 def _truncate_args_for_logging(args, kwargs, max_length=30):
     try:
-        truncated_args = [repr(arg)[:max_length] + ('...' if len(repr(arg)) > max_length else '') for arg in args]
 
-        truncated_kwargs = {
-            k: repr(v)[:max_length] + ('...' if len(repr(v)) > max_length else '')
-            for k, v in kwargs.items()
-            if k != 'on_failure'
-        }
+        def _truncate_scalar(value):
+            v_repr = repr(value)
+            return v_repr[:max_length] + ('...' if len(v_repr) > max_length else '')
+
+        def _truncate_top_level(value):
+            # If dict at the top level, expand only one level of keys
+            if isinstance(value, dict):
+                parts = []
+                for dk, dv in value.items():
+                    # Do NOT recurse: treat nested dicts as scalars
+                    parts.append(f'{repr(dk)}: {_truncate_scalar(dv)}')
+                return '{' + ', '.join(parts) + '}'
+            return _truncate_scalar(value)
+
+        truncated_args = [_truncate_top_level(arg) for arg in args]
+
+        truncated_kwargs = {k: _truncate_top_level(v) for k, v in kwargs.items() if k != 'on_failure'}
 
         result = []
         if truncated_args:
@@ -128,7 +140,13 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
         enqueue_method = queue.enqueue
         if in_seconds > 0:
             enqueue_method = partial(queue.enqueue_in, timedelta(seconds=in_seconds))
-        job = enqueue_method(job, *args, **kwargs, job_timeout=job_timeout)
+        job = enqueue_method(
+            job,
+            *args,
+            **kwargs,
+            job_timeout=job_timeout,
+            failure_ttl=settings.RQ_FAILED_JOB_TTL,
+        )
         return job
     else:
         on_failure = kwargs.pop('on_failure', None)
