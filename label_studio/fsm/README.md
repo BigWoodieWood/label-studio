@@ -20,8 +20,7 @@ The FSM framework provides:
 1. **BaseState**: Abstract model providing UUID7-optimized state tracking
 2. **StateManager**: High-performance state management with intelligent caching
 3. **Transition System**: Declarative, Pydantic-based transitions with validation
-4. **State Registry**: Dynamic registration system for entities and transitions
-5. **API Layer**: Generic REST endpoints for state operations
+4. **State Registry**: Dynamic registration system for entity states, choices and transitions
 
 ## Quick Start
 
@@ -41,13 +40,22 @@ class OrderStateChoices(models.TextChoices):
     CANCELLED = 'CANCELLED', _('Cancelled')
 ```
 
-### 2. Create State Model
+### 2. Create State Model with Optional Denormalizer
 
 ```python
 from fsm.models import BaseState
 from fsm.registry import register_state_model
 
-@register_state_model('order')
+# Optional: Define denormalizer for performance optimization
+def denormalize_order(entity):
+    """Extract frequently queried fields to avoid JOINs."""
+    return {
+        'customer_id': entity.customer_id,
+        'store_id': entity.store_id,
+        'total_amount': entity.total_amount,
+    }
+
+@register_state_model('order', denormalizer=denormalize_order)
 class OrderState(BaseState):
     # Entity relationship
     order = models.ForeignKey('shop.Order', related_name='fsm_states', on_delete=models.CASCADE)
@@ -55,8 +63,10 @@ class OrderState(BaseState):
     # Override state field with choices
     state = models.CharField(max_length=50, choices=OrderStateChoices.choices, db_index=True)
     
-    # Denormalized fields for performance
+    # Denormalized fields for performance (automatically populated by denormalizer)
     customer_id = models.PositiveIntegerField(db_index=True)
+    store_id = models.PositiveIntegerField(db_index=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     
     class Meta:
         indexes = [
@@ -64,7 +74,24 @@ class OrderState(BaseState):
         ]
 ```
 
-### 3. Define Transitions
+### 3. Alternative: Use Built-in State Model Methods
+
+For simpler use cases, state models can define denormalization directly:
+
+```python
+class OrderState(BaseState):
+    # ... fields ...
+    
+    @classmethod
+    def get_denormalized_fields(cls, entity):
+        """Built-in method for denormalization without registry."""
+        return {
+            'customer_id': entity.customer_id,
+            'store_id': entity.store_id,
+        }
+```
+
+### 4. Define Transitions
 
 ```python
 from fsm.transitions import BaseTransition
@@ -91,7 +118,7 @@ class ProcessOrderTransition(BaseTransition):
         }
 ```
 
-### 4. Execute Transitions
+### 5. Execute Transitions
 
 ```python
 from fsm.transition_utils import execute_transition
@@ -105,7 +132,7 @@ result = execute_transition(
 )
 ```
 
-### 5. Query States
+### 6. Query States
 
 ```python
 from fsm.state_manager import get_state_manager
@@ -125,6 +152,27 @@ states = StateManager.bulk_get_current_states(orders)
 
 ## Key Features
 
+### Denormalization for Performance
+
+- **Avoid JOINs**: Copy frequently queried fields to state records
+- **Registry-based**: Register denormalizers with state models
+- **Automatic**: Fields are populated during state transitions
+- **Flexible**: Use registry decorator or built-in class method
+
+```python
+# Using registry decorator
+@register_state_model('task', denormalizer=lambda t: {'project_id': t.project_id})
+class TaskState(BaseState):
+    project_id = models.IntegerField(db_index=True)
+    # ...
+
+# Using built-in method
+class TaskState(BaseState):
+    @classmethod
+    def get_denormalized_fields(cls, entity):
+        return {'project_id': entity.project_id}
+```
+
 ### UUID7 Performance Optimization
 
 - **Natural Time Ordering**: UUID7 provides chronological ordering without separate timestamp indexes
@@ -137,7 +185,7 @@ states = StateManager.bulk_get_current_states(orders)
 - **Composable Logic**: Reusable transition classes with inheritance
 - **Hooks System**: Pre/post transition hooks for custom logic
 
-### Advanced Querying
+### Advanced State Manager Features
 
 ```python
 # Time-range queries using UUID7
@@ -147,33 +195,56 @@ recent_states = StateManager.get_states_since(
     since=datetime.now() - timedelta(hours=24)
 )
 
-# Bulk operations
-orders = Order.objects.filter(status='active')
-current_states = StateManager.bulk_get_current_states(orders)
+# Get current state object (not just string)
+current_state_obj = StateManager.get_current_state_object(order)
+if current_state_obj:
+    print(f"State: {current_state_obj.state}")
+    print(f"Since: {current_state_obj.created_at}")
+    print(f"By: {current_state_obj.triggered_by}")
+
+# Get state history with full objects
+history = StateManager.get_state_history(order, limit=10)
+for state in history:
+    print(f"{state.state} at {state.created_at}")
+
+# Cache management
+StateManager.invalidate_cache(order)  # Clear cache for entity
+StateManager.warm_cache([order1, order2, order3])  # Pre-populate cache
 ```
 
-### API Integration
+### Registry System
 
-The framework provides generic REST endpoints:
-
-```
-GET /api/fsm/{entity_type}/{entity_id}/current/     # Current state
-GET /api/fsm/{entity_type}/{entity_id}/history/     # State history  
-POST /api/fsm/{entity_type}/{entity_id}/transition/ # Execute transition
-```
-
-Extend the base viewset
+The FSM uses a flexible registry pattern for decoupling:
 
 ```python
-from fsm.api import FSMViewSet
+from fsm.registry import (
+    state_model_registry,
+    state_choices_registry,
+    transition_registry,
+    register_state_model,
+    register_state_choices,
+    register_transition,
+)
 
-class MyFSMViewSet(FSMViewSet):
-    def _get_entity_model(self, entity_type: str):
-        entity_mapping = {
-            'order': 'shop.Order',
-            'ticket': 'support.Ticket',
-        }
-        # ... implementation
+# Register state choices
+@register_state_choices('task')
+class TaskStateChoices(models.TextChoices):
+    # ...
+
+# Register state model with denormalizer
+@register_state_model('task', denormalizer=denormalize_task)
+class TaskState(BaseState):
+    # ...
+
+# Register transitions
+@register_transition('task', 'start_task')
+class StartTaskTransition(BaseTransition):
+    # ...
+
+# Access registries directly
+model = state_model_registry.get_model('task')
+choices = state_choices_registry.get_choices('task')
+transition = transition_registry.get_transition('task', 'start_task')
 ```
 
 ## Performance Characteristics
@@ -183,6 +254,72 @@ class MyFSMViewSet(FSMViewSet):
 - **Bulk Operations**: Efficient batch processing for thousands of entities
 - **Cache Integration**: Intelligent caching with automatic invalidation
 - **Memory Efficiency**: Minimal memory footprint for state objects
+
+## Transition System Features
+
+### Transition Context
+
+```python
+from fsm.transitions import TransitionContext
+
+# Context provides rich information during transitions
+context = TransitionContext(
+    entity=task,
+    current_user=user,
+    current_state='CREATED',
+    target_state='IN_PROGRESS',
+    organization_id=org_id,
+    metadata={'source': 'api', 'priority': 'high'}
+)
+
+# Context properties
+if context.is_initial_transition:
+    # First state for this entity
+    pass
+if context.has_current_state:
+    # Entity has existing state
+    pass
+```
+
+### Transition Utilities
+
+```python
+from fsm.transition_utils import (
+    execute_transition,
+    get_available_transitions,
+    get_transition_schema,
+    validate_transition_data,
+    TransitionBuilder,
+)
+
+# Execute a registered transition
+result = execute_transition(
+    entity=task,
+    transition_name='start_task',
+    transition_data={'assigned_user_id': 123},
+    user=request.user
+)
+
+# Get available transitions for an entity
+available = get_available_transitions(task)
+
+# Get JSON schema for transition (useful for APIs)
+schema = get_transition_schema(StartTaskTransition)
+
+# Validate transition data before execution
+errors = validate_transition_data(StartTaskTransition, data)
+
+# Use TransitionBuilder for fluent API
+builder = (TransitionBuilder(task)
+    .transition('start_task')
+    .with_data(assigned_user_id=123)
+    .by_user(user)
+    .with_context(source='api'))
+
+errors = builder.validate()
+if not errors:
+    state = builder.execute()
+```
 
 ## Extension Points
 
