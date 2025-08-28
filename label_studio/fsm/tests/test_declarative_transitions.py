@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.test import TestCase
 from django.utils.translation import gettext_lazy as _
-from fsm.registry import register_transition, transition_registry
+from fsm.registry import register_state_transition, transition_registry
 from fsm.transition_utils import (
     TransitionBuilder,
     get_available_transitions,
@@ -67,7 +67,7 @@ class CoreFrameworkTests(TestCase):
     def test_base_transition_class(self):
         """Test BaseTransition abstract functionality"""
 
-        @register_transition('test_entity', 'test_transition')
+        @register_state_transition('test_entity', 'test_transition')
         class TestTransition(BaseTransition):
             test_field: str = Field('default', description='Test field')
 
@@ -120,7 +120,7 @@ class CoreFrameworkTests(TestCase):
     def test_transition_registry(self):
         """Test transition registration and retrieval"""
 
-        @register_transition('test_entity', 'test_transition')
+        @register_state_transition('test_entity', 'test_transition')
         class TestTransition(BaseTransition):
             @property
             def target_state(self) -> str:
@@ -141,7 +141,7 @@ class CoreFrameworkTests(TestCase):
     def test_pydantic_validation(self):
         """Test Pydantic validation in transitions"""
 
-        @register_transition('test_entity', 'validated_transition')
+        @register_state_transition('test_entity', 'validated_transition')
         class ValidatedTransition(BaseTransition):
             required_field: str = Field(..., description='Required field')
             optional_field: int = Field(42, description='Optional field')
@@ -165,7 +165,7 @@ class CoreFrameworkTests(TestCase):
     def test_transition_execution(self):
         """Test transition execution logic"""
 
-        @register_transition('test_entity', 'execution_test')
+        @register_state_transition('test_entity', 'execution_test')
         class ExecutionTestTransition(BaseTransition):
             value: str = Field('test', description='Test value')
 
@@ -203,7 +203,7 @@ class CoreFrameworkTests(TestCase):
     def test_validation_error_handling(self):
         """Test transition validation error handling"""
 
-        @register_transition('test_entity', 'validation_test')
+        @register_state_transition('test_entity', 'validation_test')
         class ValidationTestTransition(BaseTransition):
             @property
             def target_state(self) -> str:
@@ -237,7 +237,7 @@ class CoreFrameworkTests(TestCase):
     def test_transition_builder_basic(self):
         """Test TransitionBuilder basic functionality"""
 
-        @register_transition('test_entity', 'builder_test')
+        @register_state_transition('test_entity', 'builder_test')
         class BuilderTestTransition(BaseTransition):
             value: str = Field('default', description='Test value')
 
@@ -262,7 +262,7 @@ class CoreFrameworkTests(TestCase):
     def test_get_available_transitions(self):
         """Test get_available_transitions utility"""
 
-        @register_transition('test_entity', 'available_test')
+        @register_state_transition('test_entity', 'available_test')
         class AvailableTestTransition(BaseTransition):
             @property
             def target_state(self) -> str:
@@ -280,7 +280,7 @@ class CoreFrameworkTests(TestCase):
 
         hook_calls = []
 
-        @register_transition('test_entity', 'hook_test')
+        @register_state_transition('test_entity', 'hook_test')
         class HookTestTransition(BaseTransition):
             @property
             def target_state(self) -> str:
@@ -327,7 +327,7 @@ class TransitionUtilsTests(TestCase):
     def test_get_available_transitions(self):
         """Test getting available transitions for an entity"""
 
-        @register_transition('test_entity', 'util_test_1')
+        @register_state_transition('test_entity', 'util_test_1')
         class UtilTestTransition1(BaseTransition):
             @property
             def target_state(self) -> str:
@@ -336,7 +336,7 @@ class TransitionUtilsTests(TestCase):
             def transition(self, context: TransitionContext) -> Dict[str, Any]:
                 return {}
 
-        @register_transition('test_entity', 'util_test_2')
+        @register_state_transition('test_entity', 'util_test_2')
         class UtilTestTransition2(BaseTransition):
             @property
             def target_state(self) -> str:
