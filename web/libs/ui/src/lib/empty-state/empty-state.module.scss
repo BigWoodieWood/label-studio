@@ -4,7 +4,7 @@
 }
 
 .icon {
-    @apply aspect-square;
+    @apply aspect-square p-tight;
 }
 
 .title {
@@ -15,18 +15,14 @@
 
 /* Large Size - Data Manager style */
 .size-large {
-  @apply p-wide gap-tight;
+  @apply gap-tight;
 
   .icon {
-    @apply p-tight mb-tight;
+    @apply mb-tight;
   }
 
   .description {
     @apply max-w-xl mb-tight;
-  }
-
-  .additional {
-    @apply mb-tight;
   }
 
   .actions {
@@ -34,24 +30,24 @@
   }
 
   .footer {
-    @apply mt-wide;
+    @apply mt-base;
   }
 }
 
 /* Medium Size - Home page style */
 .size-medium {
-  @apply p-wide gap-tight;
+  @apply gap-tight;
 
   .icon {
-    @apply w-12 h-12 mb-tight;
+    @apply mb-tight;
   }
 
   .description {
-    @apply max-w-md mb-base;
+    @apply max-w-md;
   }
 
   .additional {
-    @apply mb-tight;
+    @apply mt-base mb-tight;
   }
 
   .actions {
@@ -59,16 +55,16 @@
   }
 
   .footer {
-    @apply mt-wide;
+    @apply mt-base;
   }
 }
 
 /* Small Size - Sidepanel style */
 .size-small {
-  @apply p-wide gap-tighter;
+  @apply gap-tighter;
 
   .icon {
-    @apply p-tight;
+    @apply mb-tighter;
   }
 
   .description {

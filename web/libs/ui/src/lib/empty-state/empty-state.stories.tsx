@@ -78,6 +78,14 @@ export const Default: Story = {
     icon: <IconInbox />,
     title: "Add your first items",
     description: "Start building your collection by adding new items",
+    footer: (
+      <Typography variant="label" size="small" className="text-primary-link">
+        <a href="/docs/labeling-interface" className="inline-flex items-center gap-1 hover:underline">
+          Learn more
+          <IconExternal width={16} height={16} />
+        </a>
+      </Typography>
+    ),
   },
 };
 
