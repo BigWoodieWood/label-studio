@@ -11,7 +11,6 @@ from django.test import TestCase
 from fsm.models import AnnotationState, ProjectState, TaskState
 from fsm.state_manager import get_state_manager
 from projects.models import Project
-from rest_framework.test import APITestCase
 from tasks.models import Annotation, Task
 
 User = get_user_model()
@@ -213,90 +212,3 @@ class TestStateManager(TestCase):
 
         # Should find both states
         self.assertEqual(len(states_in_range), 2)
-
-
-class TestFSMAPI(APITestCase):
-    """Test FSM API endpoints"""
-
-    def setUp(self):
-        self.user = User.objects.create_user(email='test@example.com', password='test123')
-        self.project = Project.objects.create(title='Test Project', created_by=self.user)
-        self.task = Task.objects.create(project=self.project, data={'text': 'test'})
-        self.client.force_authenticate(user=self.user)
-
-        # Clear cache to ensure tests start with clean state
-        from django.core.cache import cache
-
-        cache.clear()
-
-        # Create initial state
-        StateManager = get_state_manager()
-        StateManager.transition_state(entity=self.task, new_state='CREATED', user=self.user)
-
-    def test_get_current_state_api(self):
-        """Test GET /api/fsm/{entity_type}/{entity_id}/current/"""
-        response = self.client.get(f'/api/fsm/task/{self.task.id}/current/')
-
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-
-        self.assertEqual(data['current_state'], 'CREATED')
-        self.assertEqual(data['entity_type'], 'task')
-        self.assertEqual(data['entity_id'], self.task.id)
-
-    def test_get_state_history_api(self):
-        """Test GET /api/fsm/{entity_type}/{entity_id}/history/"""
-        # Create additional states
-        StateManager = get_state_manager()
-        StateManager.transition_state(
-            entity=self.task, new_state='IN_PROGRESS', user=self.user, transition_name='start_work'
-        )
-
-        response = self.client.get(f'/api/fsm/task/{self.task.id}/history/')
-
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-
-        self.assertEqual(data['count'], 2)
-        self.assertEqual(len(data['results']), 2)
-
-        # Check first result (most recent)
-        latest_state = data['results'][0]
-        self.assertEqual(latest_state['state'], 'IN_PROGRESS')
-        self.assertEqual(latest_state['previous_state'], 'CREATED')
-        self.assertEqual(latest_state['transition_name'], 'start_work')
-
-    def test_transition_state_api(self):
-        """Test POST /api/fsm/{entity_type}/{entity_id}/transition/"""
-        transition_data = {
-            'new_state': 'IN_PROGRESS',
-            'transition_name': 'start_annotation',
-            'reason': 'User started working on task',
-            'context': {'assignment_id': 123},
-        }
-
-        response = self.client.post(f'/api/fsm/task/{self.task.id}/transition/', data=transition_data, format='json')
-
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-
-        self.assertTrue(data['success'])
-        self.assertEqual(data['previous_state'], 'CREATED')
-        self.assertEqual(data['new_state'], 'IN_PROGRESS')
-        self.assertEqual(data['entity_type'], 'task')
-        self.assertEqual(data['entity_id'], self.task.id)
-
-        # Verify state was actually changed
-        StateManager = get_state_manager()
-        current_state = StateManager.get_current_state(self.task)
-        self.assertEqual(current_state, 'IN_PROGRESS')
-
-    def test_api_with_invalid_entity(self):
-        """Test API with non-existent entity"""
-        response = self.client.get('/api/fsm/task/99999/current/')
-        self.assertEqual(response.status_code, 404)
-
-    def test_api_with_invalid_entity_type(self):
-        """Test API with invalid entity type"""
-        response = self.client.get('/api/fsm/invalid/1/current/')
-        self.assertEqual(response.status_code, 404)

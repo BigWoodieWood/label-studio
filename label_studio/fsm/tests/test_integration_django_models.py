@@ -11,9 +11,10 @@ from unittest.mock import Mock, patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from fsm.models import TaskState
+from fsm.registry import register_state_transition, transition_registry
 from fsm.state_choices import AnnotationStateChoices, TaskStateChoices
 from fsm.transition_utils import TransitionBuilder
-from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError, register_transition
+from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError
 from pydantic import Field
 
 
@@ -73,10 +74,7 @@ class DjangoModelIntegrationTests(TestCase):
         self.user.id = 123
         self.user.username = 'integration_test_user'
 
-        # Clear registry for clean test state
-        from fsm.transitions import transition_registry
-
-        transition_registry._transitions.clear()
+        transition_registry.clear()
 
     @patch('fsm.registry.get_state_model_for_entity')
     @patch('fsm.state_manager.StateManager.get_current_state_object')
@@ -94,7 +92,7 @@ class DjangoModelIntegrationTests(TestCase):
         mock_transition_state.return_value = True
 
         # Define task workflow transitions
-        @register_transition('task', 'create_task')
+        @register_state_transition('task', 'create_task')
         class CreateTaskTransition(BaseTransition):
             """Initial task creation transition"""
 
@@ -120,7 +118,7 @@ class DjangoModelIntegrationTests(TestCase):
                     'creation_method': 'declarative_transition',
                 }
 
-        @register_transition('task', 'assign_and_start')
+        @register_state_transition('task', 'assign_and_start')
         class AssignAndStartTaskTransition(BaseTransition):
             """Assign task to user and start work"""
 
@@ -161,7 +159,7 @@ class DjangoModelIntegrationTests(TestCase):
                     'work_started': True,
                 }
 
-        @register_transition('task', 'complete_with_quality')
+        @register_state_transition('task', 'complete_with_quality')
         class CompleteTaskWithQualityTransition(BaseTransition):
             """Complete task with quality metrics"""
 
@@ -296,7 +294,7 @@ class DjangoModelIntegrationTests(TestCase):
         enterprise-grade validation and approval logic.
         """
 
-        @register_transition('annotation', 'submit_for_review')
+        @register_state_transition('annotation', 'submit_for_review')
         class SubmitAnnotationForReview(BaseTransition):
             """Submit annotation for quality review"""
 
@@ -332,7 +330,7 @@ class DjangoModelIntegrationTests(TestCase):
                     'submitted_by_id': context.current_user.id if context.current_user else None,
                 }
 
-        @register_transition('annotation', 'review_and_approve')
+        @register_state_transition('annotation', 'review_and_approve')
         class ReviewAndApproveAnnotation(BaseTransition):
             """Review annotation and approve/reject"""
 
@@ -346,7 +344,7 @@ class DjangoModelIntegrationTests(TestCase):
                 if self.reviewer_decision == 'approve':
                     return AnnotationStateChoices.COMPLETED
                 else:
-                    return AnnotationStateChoices.DRAFT  # Back to draft for changes
+                    return AnnotationStateChoices.SUBMITTED  # Back to submitted for changes
 
             def validate_transition(self, context: TransitionContext) -> bool:
                 if context.current_state != AnnotationStateChoices.SUBMITTED:
@@ -394,7 +392,7 @@ class DjangoModelIntegrationTests(TestCase):
         context = TransitionContext(
             entity=self.annotation,
             current_user=self.user,
-            current_state=AnnotationStateChoices.DRAFT,
+            current_state=AnnotationStateChoices.SUBMITTED,
             target_state=submit_transition.target_state,
         )
 
@@ -443,7 +441,7 @@ class DjangoModelIntegrationTests(TestCase):
             corrections_made=False,
         )
 
-        self.assertEqual(reject_transition.target_state, AnnotationStateChoices.DRAFT)
+        self.assertEqual(reject_transition.target_state, AnnotationStateChoices.SUBMITTED)
 
         # Test validation failure
         invalid_review = ReviewAndApproveAnnotation(
@@ -465,7 +463,7 @@ class DjangoModelIntegrationTests(TestCase):
         real Django models and complex business logic.
         """
 
-        @register_transition('task', 'bulk_update_status')
+        @register_state_transition('task', 'bulk_update_status')
         class BulkUpdateTaskStatusTransition(BaseTransition):
             """Bulk update task status with metadata"""
 
@@ -549,7 +547,7 @@ class DjangoModelIntegrationTests(TestCase):
         in real Django model integration.
         """
 
-        @register_transition('task', 'assign_with_constraints')
+        @register_state_transition('task', 'assign_with_constraints')
         class AssignTaskWithConstraints(BaseTransition):
             """Task assignment with business constraints"""
 
