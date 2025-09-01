@@ -1,5 +1,5 @@
 ---
-title: Audio
+title: Chat
 type: tags
 order: 302
 meta_title: Chat Tag for Conversational Transcripts
