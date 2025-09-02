@@ -397,6 +397,14 @@ class AudioViewHelper extends withMedia(
     }
 
     /**
+     * Wait a couple of animation frames based on the requestAnimationFrame pattern
+     */
+    waitForStableState() {
+      // This ensures React has completed its render cycle
+      cy.waitForFrames(2);
+    }
+
+    /**
      * Waits for canvas rendering to stabilize by checking that pixel colors remain consistent
      * @param x relative x coordinate to monitor
      * @param y relative y coordinate to monitor

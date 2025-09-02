@@ -2,7 +2,7 @@ import { AudioView, LabelStudio } from "@humansignal/frontend-test/helpers/LSF";
 
 const config = `
 <View>
-  <Video name="video" value="$url" sync="v1" />
+  <Video name="video" value="$url" sync="v1" framerate="29.970628" />
   <Audio name="audio" value="$url" hotkey="space" sync="v1" />
   <Header value="Sentiment"/>
   <ParagraphLabels name="label" toName="text">
@@ -182,6 +182,10 @@ describe("Sync: Video Paragraphs", () => {
       });
     });
 
+    // Get more time to ckeck play/pause before the end of the file
+    AudioView.clickAt(100, 0);
+    AudioView.waitForStableState();
+
     AudioView.playButton.click();
     AudioView.waitForPlayState(true, 8000, true); // true = check both audio and video
     AudioView.pauseButton.click();
@@ -226,7 +230,7 @@ describe("Sync: Video Paragraphs", () => {
 
     // Let it play for a short time at 1.5x speed, then change back
     cy.then(() => {
-      return new Cypress.Promise((resolve) => setTimeout(resolve, 100));
+      return new Cypress.Promise((resolve) => setTimeout(resolve, 50));
     });
     AudioView.setPlaybackSpeedInput(1, true); // true = check both audio and video
 
@@ -238,7 +242,6 @@ describe("Sync: Video Paragraphs", () => {
       });
     });
 
-    AudioView.pauseButton.click();
     cy.log("Audio, video and paragraph audio played to the same time");
     cy.get("audio").then(([audio]) => {
       cy.get("video").then(([video]) => {
