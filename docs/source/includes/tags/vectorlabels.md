@@ -14,6 +14,14 @@
 | [pointSize] | <code>small</code> \| <code>medium</code> \| <code>large</code> | <code>medium</code> | Size of vector handle points |
 | [pointStyle] | <code>rectangle</code> \| <code>circle</code> | <code>rectangle</code> | Style of points |
 | [snap] | <code>pixel</code> \| <code>none</code> | <code>none</code> | Snap vector to image pixels |
+| [closable] | <code>boolean</code> | <code>false</code> | Allow closed shapes |
+| [curves] | <code>boolean</code> | <code>false</code> | Allow Bezier curves |
+| [skeleton] | <code>boolean</code> | <code>false</code> | Enables skeleton mode to allow branch paths |
+| [minPoints] | <code>number</code> \| <code>none</code> | <code>none</code> | Minimum allowed number of points |
+| [maxPoints] | <code>number</code> \| <code>none</code> | <code>none</code> | Maximum allowed number of points |
+| [constrainToBounds] | <code>boolean</code> | <code>false</code> | Whether to keep shapes inside image bounds |
+| [pointnSizeEnabled] | <code>number</code> | <code>5</code> | Size of a point in pixels when shape is selected |
+| [pointnSizeDisabled] | <code>number</code> | <code>5</code> | Size of a point in pixels when shape is not selected |
 
 ### Result parameters
 

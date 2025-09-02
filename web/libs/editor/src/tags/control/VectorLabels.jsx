@@ -38,14 +38,14 @@ import ControlBase from "./Base";
  * @param {small|medium|large} [pointSize=medium]   - Size of vector handle points
  * @param {rectangle|circle} [pointStyle=rectangle] - Style of points
  * @param {pixel|none} [snap=none]                  - Snap vector to image pixels
- * @params {boolean} [closable=false]               - Allow closed shapes
- * @params {boolean} [curves=false]                 - Allow Bezier curves
- * @params {boolean} [skeleton=false]               - Enables skeleton mode to allow branch paths
- * @params {number|none} [minPoints=none]           - Minimum allowed number of points
- * @params {number|none} [maxPoints=none]           - Maximum allowed number of points
- * @params {boolean} [constrainToBounds=false]      - Whether to keep shapes inside image bounds
- * @params {number} [pointnSizeEnabled=5]           - Size of a point in pixels when shape is selected
- * @params {number} [pointnSizeDisabled=5]          - Size of a point in pixels when shape is not selected
+ * @param {boolean} [closable=false]               - Allow closed shapes
+ * @param {boolean} [curves=false]                 - Allow Bezier curves
+ * @param {boolean} [skeleton=false]               - Enables skeleton mode to allow branch paths
+ * @param {number|none} [minPoints=none]           - Minimum allowed number of points
+ * @param {number|none} [maxPoints=none]           - Maximum allowed number of points
+ * @param {boolean} [constrainToBounds=false]      - Whether to keep shapes inside image bounds
+ * @param {number} [pointnSizeEnabled=5]           - Size of a point in pixels when shape is selected
+ * @param {number} [pointnSizeDisabled=5]          - Size of a point in pixels when shape is not selected
  */
 
 const Validation = types.model({

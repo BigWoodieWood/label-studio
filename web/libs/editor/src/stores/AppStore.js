@@ -466,8 +466,12 @@ export default types
 
       hotkeys.addNamed("region:exit", () => {
         const c = self.annotationStore.selected;
+        const managers = ToolsManager.allInstances();
+        const tools = managers.map((m) => m.findSelectedTool()).filter((t) => t.isDrawingTool);
 
-        if (c && c.isLinkingMode) {
+        if (tools.some((t) => t.mode === "drawing")) {
+          tools.forEach((t) => t.complete?.());
+        } else if (c && c.isLinkingMode) {
           c.stopLinkingMode();
         } else if (!c.isDrawing) {
           c.unselectAll();

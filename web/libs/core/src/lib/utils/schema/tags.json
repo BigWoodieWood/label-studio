@@ -2781,6 +2781,62 @@
         "type": ["pixel", "none"],
         "required": false,
         "default": "none"
+      },
+      "closable": {
+        "name": "closable",
+        "description": "Allow closed shapes",
+        "type": ["true", "false"],
+        "required": false,
+        "default": false
+      },
+      "curves": {
+        "name": "curves",
+        "description": "Allow Bezier curves",
+        "type": ["true", "false"],
+        "required": false,
+        "default": false
+      },
+      "skeleton": {
+        "name": "skeleton",
+        "description": "Enables skeleton mode to allow branch paths",
+        "type": ["true", "false"],
+        "required": false,
+        "default": false
+      },
+      "minPoints": {
+        "name": "minPoints",
+        "description": "Minimum allowed number of points",
+        "type": ["number", "none"],
+        "required": false,
+        "default": "none"
+      },
+      "maxPoints": {
+        "name": "maxPoints",
+        "description": "Maximum allowed number of points",
+        "type": ["number", "none"],
+        "required": false,
+        "default": "none"
+      },
+      "constrainToBounds": {
+        "name": "constrainToBounds",
+        "description": "Whether to keep shapes inside image bounds",
+        "type": ["true", "false"],
+        "required": false,
+        "default": false
+      },
+      "pointnSizeEnabled": {
+        "name": "pointnSizeEnabled",
+        "description": "Size of a point in pixels when shape is selected",
+        "type": "number",
+        "required": false,
+        "default": 5
+      },
+      "pointnSizeDisabled": {
+        "name": "pointnSizeDisabled",
+        "description": "Size of a point in pixels when shape is not selected",
+        "type": "number",
+        "required": false,
+        "default": 5
       }
     }
   },
