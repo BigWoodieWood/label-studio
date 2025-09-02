@@ -62,6 +62,7 @@ Evaluate assistant responses
           <Text name="_1" value="Rate the response" />
           <Rating name="response_rating" toName="chat" perRegion="true" />
         </View>
+      </View>
       <!-- Evaluate the whole conversation -->
       <View style="margin-top:auto;height:130px">
         <Header size="4">Overall quality of this conversation</Header>
