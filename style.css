@@ -1,0 +1,45 @@
+
+#titre::first-letter {
+    font-size: 200%;
+    color: red;
+}
+
+
+body {
+    font-family: "Georgia", serif;
+}
+
+
+h1 {
+    text-align: center;
+}
+
+
+body {
+    background-image: url("https://static.vecteezy.com/ti/vecteur-libre/p1/6029969-bleu-ciel-skyscape-fond-concept-vectoriel.jpg");
+    background-size: cover;
+}
+
+
+ol li:nth-child(2) {
+    opacity: 0.8;
+}
+
+
+ol li:nth-child(4) ul li {
+    border: 1px solid #444;
+    padding: 5px;
+    margin: 3px;
+}
+
+#titre:hover {
+    color: blue;
+    font-size: 250%;
+}
+
+
+
+
+
+
+
