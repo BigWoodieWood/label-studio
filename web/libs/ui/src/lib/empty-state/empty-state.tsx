@@ -292,8 +292,8 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         {actions && (
           <div className={cn("empty-state__actions", styles.actions)}>
             {(() => {
-              // Flatten children and filter out null/false values to count actual rendered elements
-              const flattenedActions = React.Children.toArray(actions).flat().filter(Boolean);
+              // Filter out null/false values to count actual rendered elements
+              const flattenedActions = React.Children.toArray(actions).filter(Boolean);
               const actualActionCount = flattenedActions.length;
               const isSingleAction = actualActionCount === 1;
 
