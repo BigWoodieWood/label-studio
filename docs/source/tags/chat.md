@@ -30,7 +30,7 @@ Message object format (task data):
 Allow composing both user and assistant messages; auto-reply using an LLM model
 
 ```html
- <View>
+<View>
   <Chat
     name="conversation" value="$dialog"
     messageroles="user,assistant" llm="openai/gpt-5"
