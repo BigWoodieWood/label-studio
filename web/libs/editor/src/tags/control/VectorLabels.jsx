@@ -17,8 +17,8 @@ import ControlBase from "./Base";
  * ## Key Features
  *
  * ### Point Management
- * - **Add Points**: Click in drawing mode, Shift+click on path segments
- * - **Edit Points**: Drag to reposition, Alt+click to convert regular ↔ bezier
+ * - **Add Points**: Click on empty space, Shift+click on path segments
+ * - **Edit Points**: Drag to reposition, Shift+click to convert regular ↔ bezier
  * - **Delete Points**: Alt+click on existing points
  * - **Multi-Selection**: Select multiple points for batch transformations
  * - **Break Closed Path**: Alt+click on any segment of a closed path to break it at that specific segment
@@ -28,20 +28,14 @@ import ControlBase from "./Base";
  * - **Edit**: Drag control points, disconnect/reconnect control handles
  * - **Control**: `curves` prop to enable/disable bezier functionality
  *
- * ### Interaction Modes
- * - **Drawing Mode**: `isDrawingMode={true}` - Click to add points, drag for bezier curves
- * - **Edit Mode**: `isDrawingMode={false}` - Select, drag, and transform existing points
- * - **Skeleton Mode**: `skeleton={true}` - Connect points to active point instead of last point
- * - **Disabled Mode**: Point selection still works for keypoint annotation
- *
  * ## Keyboard Shortcuts & Hotkeys
  *
  * ### Point Creation & Editing
  * - **Click**: Add new point in drawing mode
- * - **Shift + Click**: Add point on path segment (insert between existing points)
+ * - **Shift + Click** on a segment: Add point on path segment (insert between existing points)
  * - **Shift + Drag**: Create bezier point with control handles
- * - **Alt + Click**: Convert point between regular ↔ bezier or delete existing point
- * - **Alt + Click on segment**: Break closed path at segment (when path is closed)
+ * - **Shift + Click** on a point: Convert point between regular ↔ bezier or delete existing point
+ * - **Alt + Click** on a segment: Break closed path at segment (when path is closed)
  *
  * ### Point Selection
  * - **Click**: Select single point
@@ -61,7 +55,7 @@ import ControlBase from "./Base";
  * ### Multi-Selection & Transformation
  * - **Select multiple points**: Use Cmd/Ctrl + Click to build selection
  * - **Transform selection**: Use transformer handles for rotation, scaling, and translation
- * - **Clear selection**: Click outside or use programmatic methods
+ * - **Clear selection**: Click on any point
  *
  * ## Usage Examples
  *
