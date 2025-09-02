@@ -130,7 +130,6 @@ const Model = types
       return false;
     },
     get atMaxLength() {
-      console.log(self.maxPoints, self.vertices.length);
       return self.maxPoints && self.vertices.length === self.maxPoints;
     },
 
