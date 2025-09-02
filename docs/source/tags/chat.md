@@ -15,6 +15,8 @@ Use with the following data types: JSON array of message objects.
 !!! error Enterprise
     This tag is only available for Label Studio Enterprise users. 
 
+![Screenshot](/images/tags/chat.png)
+
 ### Use with an LLM
 
 Optionally, the tag can request automatic replies from an LLM. 
