@@ -6,6 +6,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">  
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> 
+    <script
+        src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+        crossorigin="anonymous">
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/justgage@1.7.0/justgage.min.js"></script>
     <h1 id="titre">Menu du jour</h1>
 
     <ol>
@@ -40,6 +51,46 @@
             </ul>
         </li>
     </ol>
+    <div id="g1"></div>
+    <div class="d-flex justify-content-center">
+        <div class="btn-group">
+            <button type="button" id="btnPlus" class="btn btn-primary btn-lg">+</button>
+            <button type="button" id="btnMinus" class="btn btn-primary btn-lg">-</button>
+        </div>
+    </div>
+    <script>
+        var g1 = new JustGage({
+        id: 'g1',
+        title: 'Max is 100.',
+        value:  5,
+        min: 0,
+        max: 10,
+        decimals: 0,
+        gaugeWidthScale: 0.6,
+        startAnimationTime: 1,
+        startAnimationType: "linear",
+        refreshAnimationTime: 1,
+        refreshAnimationType: "linear"   
+        });
+        document.getElementById("btnPlus").addEventListener("click", function () {
+            let newVal = g1.config.value + 1;
+            if (newVal <= g1.config.max) {
+            g1.refresh(newVal);
+            }else {
+
+            }
+        });
+
+        document.getElementById("btnMinus").addEventListener("click", function () {
+            let newVal = g1.config.value - 1;
+            if (newVal >= g1.config.min) {
+            g1.refresh(newVal);
+            }else {
+
+            }
+        });
+    </script>
+    
 
     <p><a href="page2.html">Voir les recettes détaillées</a></p>
 
