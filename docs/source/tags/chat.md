@@ -15,7 +15,7 @@ Use with the following data types: JSON array of message objects.
 !!! error Enterprise
     This tag is only available for Label Studio Enterprise users. 
 
-#### Use with an LLM
+### Use with an LLM
 
 Optionally, the tag can request automatic replies from an LLM. 
 
@@ -32,7 +32,7 @@ To use an LLM, you need to do two things:
 
     The `llm` attribute must use the format `<provider>/<model>`. For example, `llm="openai/gpt-5"`. 
 
-#### Editing messages
+### Editing messages
 
 You can allow annotators to edit the messages that they enter and, if applicable, responses from the LLM. 
 
@@ -43,6 +43,8 @@ Annotators cannot edit messages from the imported task data.
 ![Screenshot](/images/tags/chat-edit.png)
 
 {% insertmd includes/tags/chat.md %}
+
+## Examples
 
 ### Example `<Chat>` tag
 
