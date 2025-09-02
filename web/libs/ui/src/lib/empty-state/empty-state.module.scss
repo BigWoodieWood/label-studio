@@ -51,11 +51,11 @@
   }
 
   .actions {
-    @apply mt-tight;
+    @apply mt-base;
   }
 
   .footer {
-    @apply mt-base;
+    @apply mt-wide;
   }
 }
 
@@ -81,7 +81,7 @@
   }
 
   .actions {
-    @apply pt-tight mt-tight;
+    @apply mt-base;
   }
 
   .footer {

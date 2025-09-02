@@ -13,6 +13,7 @@ import {
   IconCloudProviderAzure,
   IconCloudProviderRedis,
   IconExternal,
+  IconRelationLink,
 } from "@humansignal/icons";
 import { Typography } from "../typography/typography";
 import { Tooltip } from "../Tooltip/Tooltip";
@@ -442,6 +443,22 @@ export const WithAccessibility: Story = {
     actions: (
       <Button variant="primary" look="filled">
         Add First Item
+      </Button>
+    ),
+  },
+};
+
+// Relations Panel Example
+export const RelationsPanel: Story = {
+  args: {
+    size: "small",
+    variant: "primary",
+    icon: <IconRelationLink />,
+    title: "Create relations between labels",
+    description: "Add relations to establish connections between labeled regions",
+    actions: (
+      <Button variant="primary" look="outlined" size="small">
+        Add Relation
       </Button>
     ),
   },

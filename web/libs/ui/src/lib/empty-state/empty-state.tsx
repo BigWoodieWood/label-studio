@@ -229,8 +229,20 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
     const descriptionConfig = descriptionVariants[size];
 
     // Generate unique IDs for accessibility
-    const titleElementId = `empty-state-title-${Math.random().toString(36).substr(2, 9)}`;
-    const descriptionElementId = `empty-state-desc-${Math.random().toString(36).substr(2, 9)}`;
+    const titleElementId = `empty-state-title-${Math.random().toString(36).slice(2, 11)}`;
+    const descriptionElementId = `empty-state-desc-${Math.random().toString(36).slice(2, 11)}`;
+
+    // Calculate action layout
+    const actionLayout = actions
+      ? (() => {
+          // Filter out null/false values to count actual rendered elements
+          const flattenedActions = React.Children.toArray(actions).filter(Boolean);
+          const actualActionCount = flattenedActions.length;
+          const isSingleAction = actualActionCount === 1;
+
+          return cn("flex gap-base w-full", isSingleAction ? "justify-center" : "", styles[`actions-${size}`]);
+        })()
+      : "";
 
     return (
       <div
@@ -291,24 +303,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         {/* Actions */}
         {actions && (
           <div className={cn("empty-state__actions", styles.actions)}>
-            {(() => {
-              // Filter out null/false values to count actual rendered elements
-              const flattenedActions = React.Children.toArray(actions).filter(Boolean);
-              const actualActionCount = flattenedActions.length;
-              const isSingleAction = actualActionCount === 1;
-
-              return (
-                <div
-                  className={cn(
-                    "flex gap-base w-full",
-                    isSingleAction ? "justify-center" : "",
-                    styles[`actions-${size}`],
-                  )}
-                >
-                  {actions}
-                </div>
-              );
-            })()}
+            <div className={actionLayout}>{actions}</div>
           </div>
         )}
 
