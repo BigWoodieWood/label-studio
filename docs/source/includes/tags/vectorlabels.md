@@ -23,37 +23,3 @@
 | [pointnSizeEnabled] | <code>number</code> | <code>5</code> | Size of a point in pixels when shape is selected |
 | [pointnSizeDisabled] | <code>number</code> | <code>5</code> | Size of a point in pixels when shape is not selected |
 
-### Result parameters
-
-**Kind**: global typedef  
-**Returns**: [<code>VectorRegionResult</code>](#VectorRegionResult) - The serialized vector region data in Label Studio format  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| original_width | <code>number</code> | width of the original image (px) |
-| original_height | <code>number</code> | height of the original image (px) |
-| image_rotation | <code>number</code> | rotation degree of the image (deg) |
-| value | <code>Object</code> |  |
-| value.vertices | <code>Array.&lt;Object&gt;</code> | array of point objects with coordinates, bezier curve information, and point relationships |
-| value.closed | <code>boolean</code> | whether the vector is closed (polygon) or open (polyline) |
-| value.vectorlabels | <code>Array.&lt;string&gt;</code> | array of label names assigned to this vector |
-
-### Example JSON
-```json
-{
-  "original_width": 1920,
-  "original_height": 1280,
-  "image_rotation": 0,
-  "value": {
-    "vertices": [
-      { "id": "point-1", "x": 25.0, "y": 30.0, "prevPointId": null, "isBezier": false },
-      { "id": "point-2", "x": 75.0, "y": 70.0, "prevPointId": "point-1", "isBezier": true,
-        "controlPoint1": {"x": 50.0, "y": 40.0}, "controlPoint2": {"x": 60.0, "y": 60.0} }
-    ],
-    "closed": false,
-    "vectorlabels": ["Road"]
-  }
-}
-```
-
