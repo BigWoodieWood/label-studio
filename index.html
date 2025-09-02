@@ -20,10 +20,10 @@
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="Bootstrap.html">Accueil</a>
+        <a class="nav-link" href="index.html">Accueil</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="https://progsys.ca/HTML_chap12">Blog</a>
+        <a class="nav-link" target="_blank" href="https://progsys.ca/HTML_chap12">Blog</a>
       </li>
 
       
@@ -32,8 +32,9 @@
           Mes liens
         </a>
         <div class="dropdown-menu">
-          <a class="dropdown-item" href="http//monlienici">Lien 1</a>
-          <a class="dropdown-item" href="http//monlienici">lien 2</a>
+            
+          <a class="dropdown-item" target="_blank" href="page2.html">recettes</a>
+          <a class="dropdown-item" target="_blank" href="https://poulet-rouge.ca/">Restau suggeré</a>
           <a class="dropdown-item" href="http//monlienici">lien 3</a>
         </div>
       </li>
@@ -43,51 +44,52 @@
 
     <h1 id="titre">Menu du jour</h1>
 
-    <ol>
-        <li>Choix d'entrées
-            <ul>
-                <li>Salade du chef</li>
-                <li>Soupe de légumes</li>
-                <li>Bouchées surprises</li>
-            </ul>
-        </li>
 
-        <li>Plats principaux
-            <ul>
-                <li><a href="https://odelices.ouest-france.fr/recette/poulet-fermier-label-rouge-st-sever-au-foin-de-nos-prairies-r4889/" target="_blank">Volaille de nos prairies</a></li>
-                <li><a href="page2.html#peche">Pêche du jour</a></li>
-                <li>Bruschetta du jardin</li>
-            </ul>
-        </li>
+        
+    <div class="row row-cols-2">
+        <div class="col">
+            Choix d'entrées
+                    <div class="col">Salade du chef</div>
+                    <div class="col">Soupe de légumes</div>
+                    <div class="col">Bouchées surprises</div>
+        </div>
+        <div class="col">
+            Plats principaux
+                <div class="col"><a href="https://odelices.ouest-france.fr/recette/poulet-fermier-label-rouge-st-sever-au-foin-de-nos-prairies-r4889/" target="_blank">Volaille de nos prairies</a></div>
+                <div class="col"><a href="page2.html#peche">Pêche du jour</a></div>
+                <div class="col">Bruschetta du jardin</div>
+        </div>
+        <div class="col">
+            Fromages
+                <div class="col">Assiette du pays</div>
+                <div class="col">Choix du chef</div>
+        </div>
+        <div class="col">
+            Desserts
+                <div class="col">Profiteroles</div>
+                <div class="col">Délices aux agrumes</div>
+                <div class="col"><a href="page2.html#ileflottante">Île flottante</a></div>
+                <div class="col">Savoureux au chocolat</div>
+        </div>
+    </div>         
 
-        <li>Fromages
-            <ul>
-                <li>Assiette du pays</li>
-            </ul>
-        </li>
-
-        <li>Desserts
-            <ul>
-                <li>Profiteroles</li>
-                <li>Délices aux agrumes</li>
-                <li><a href="page2.html#ileflottante">Île flottante</a></li>
-                <li>Savoureux au chocolat</li>
-            </ul>
-        </li>
-    </ol>
     <style>
-  #g1 {
-    width: 50%;   /* adjust width */
-    height: 50%;  /* adjust height */
-    margin: auto;   /* centers it horizontally */
-  }
-</style>
+        #g1 {
+            width: 50%;   /* adjust width */
+            height: 50%;  /* adjust height */
+            margin: auto;   /* centers it horizontally */
+        }
+    </style>
     <div id="g1"></div>
     <div class="d-flex justify-content-center">
         <div class="btn-group">
             <button type="button" id="btnPlus" class="btn btn-primary btn-lg">+</button>
             <button type="button" id="btnMinus" class="btn btn-primary btn-lg">-</button>
         </div>
+    </div>
+    <div class="progress">
+    <div id="myBar" class="progress-bar" style="width:70%"></div>
+
     </div>
     <script>
         var g1 = new JustGage({
@@ -107,18 +109,22 @@
         refreshAnimationType: "linear"   
         });
         document.getElementById("btnPlus").addEventListener("click", function () {
+            let bar = document.getElementById("myBar");
             let newVal = g1.config.value + 1;
             if (newVal <= g1.config.max) {
             g1.refresh(newVal);
+            bar.style.width = (newVal * 10) +"%";
             }else {
                 alert("Valeure Maximale atteinte");
             }
         });
 
         document.getElementById("btnMinus").addEventListener("click", function () {
+            let bar = document.getElementById("myBar");
             let newVal = g1.config.value - 1;
             if (newVal >= g1.config.min) {
             g1.refresh(newVal);
+            bar.style.width = (newVal * 10) +"%";
             }else {
                 alert("Valeure Minimale atteinte");
             }
@@ -126,20 +132,15 @@
     </script>
     
 
-    <p><a href="page2.html">Voir les recettes détaillées</a></p>
 
-    <p>
-        <a href="https://poulet-rouge.ca/" target="_blank" title="123 rue Principale, Montréal">
-            Mon restau preferer
-        </a>
-    </p>
 
-    <a href="https://blog.boeufleclair.com/boeufstory-content/uploads/2016/01/Fotolia_93091049_M.jpg" target="_blank">
-        <img src="https://blog.boeufleclair.com/boeufstory-content/uploads/2016/01/Fotolia_93091049_M.jpg" alt="Volaille miniature" width="100">
+    <a href="https://blog.boeufleclair.com/boeufstory-content/uploads/2016/01/Fotolia_93091049_M.jpg" target="_blank" >
+        <img src="https://blog.boeufleclair.com/boeufstory-content/uploads/2016/01/Fotolia_93091049_M.jpg" class="mx-auto d-block rounded-circle" alt="Volaille miniature" width="150">
     </a>
 
-    <footer>
+    <footer style="text-align: center;">
         <p>Restau Le Grand — 16 rue du Cegep, Blainville</p>
+        <a href="mailto:elliot.waterpolo@outlook.com">Me contacter !</a></p>
     </footer>
 </body>
 </html>
