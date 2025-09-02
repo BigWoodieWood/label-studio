@@ -107,18 +107,6 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
    * to reference the title element for accessibility.
    */
   "aria-label"?: string;
-
-  /**
-   * ID for the title element (for aria-labelledby).
-   * If not provided, a unique ID will be automatically generated.
-   */
-  titleId?: string;
-
-  /**
-   * ID for the description element (for aria-describedby).
-   * If not provided, a unique ID will be automatically generated.
-   */
-  descriptionId?: string;
 }
 
 /**
@@ -150,31 +138,20 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
  * ```
  *
  * @example
- * Advanced accessibility with custom IDs:
+ * Multiple actions:
  * ```tsx
- * // When you need to reference these elements from other components
- * // or create specific relationships for screen readers
  * <EmptyState
  *   size="medium"
  *   variant="neutral"
  *   icon={<IconDatabase />}
  *   title="No data available"
  *   description="There are no records to display at this time"
- *   titleId="projects-empty-title"
- *   descriptionId="projects-empty-description"
  *   actions={
  *     <div>
- *       <Button
- *         onClick={onCreate}
- *         aria-describedby="projects-empty-description"
- *       >
+ *       <Button onClick={onCreate}>
  *         Create New Project
  *       </Button>
- *       <Button
- *         variant="secondary"
- *         onClick={onImport}
- *         aria-describedby="projects-empty-description"
- *       >
+ *       <Button variant="secondary" onClick={onImport}>
  *         Import Project
  *       </Button>
  *     </div>
@@ -183,43 +160,32 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
  * ```
  *
  * @example
- * Accessibility in forms and dialogs:
+ * Warning states:
  * ```tsx
- * // In a form where the empty state explains validation or requirements
- * <form aria-labelledby="upload-form-title" aria-describedby="upload-form-description">
- *   <EmptyState
- *     size="small"
- *     variant="warning"
- *     icon={<IconAlert />}
- *     title="File format not supported"
- *     description="Please upload a CSV, JSON, or XML file"
- *     titleId="upload-form-title"
- *     descriptionId="upload-form-description"
- *     actions={
- *       <Button onClick={onSelectFile}>Choose Different File</Button>
- *     }
- *   />
- * </form>
+ * <EmptyState
+ *   size="small"
+ *   variant="warning"
+ *   icon={<IconAlert />}
+ *   title="File format not supported"
+ *   description="Please upload a CSV, JSON, or XML file"
+ *   actions={
+ *     <Button onClick={onSelectFile}>Choose Different File</Button>
+ *   }
+ * />
  * ```
  *
  * @example
- * Error states with accessible announcements:
+ * Error states with custom aria-label:
  * ```tsx
- * // For error states that need to be announced to screen readers
  * <EmptyState
  *   size="medium"
  *   variant="negative"
  *   icon={<IconError />}
  *   title="Failed to load data"
  *   description="Unable to connect to the server. Please check your internet connection."
- *   titleId="error-title"
- *   descriptionId="error-description"
  *   aria-label="Error occurred while loading data"
  *   actions={
- *     <Button
- *       onClick={onRetry}
- *       aria-describedby="error-description"
- *     >
+ *     <Button onClick={onRetry}>
  *       Try Again
  *     </Button>
  *   }
@@ -227,12 +193,11 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
  * ```
  *
  * Accessibility Notes:
- * - titleId and descriptionId are automatically generated if not provided
- * - The component uses aria-labelledby to reference the title element
- * - The component uses aria-describedby to reference the description element
- * - Custom IDs allow you to create relationships with other UI elements
- * - Use aria-label on the container when you need a different accessible name than the title
- * - Reference these IDs in action buttons when they relate to the empty state message
+ * - Component automatically generates unique IDs for title and description elements
+ * - Uses aria-labelledby to reference the title element for screen readers
+ * - Uses aria-describedby to reference the description element for context
+ * - Provide aria-label when you need a different accessible name than the title
+ * - Perfect accessibility out of the box - no manual configuration needed
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
   (
@@ -248,8 +213,6 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
       className,
       "data-testid": testId,
       "aria-label": ariaLabel,
-      titleId,
-      descriptionId,
       ...rest
     },
     ref,
@@ -265,9 +228,9 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
     const titleConfig = titleVariants[size];
     const descriptionConfig = descriptionVariants[size];
 
-    // Generate unique IDs if not provided
-    const generatedTitleId = titleId || `empty-state-title-${Math.random().toString(36).substr(2, 9)}`;
-    const generatedDescriptionId = descriptionId || `empty-state-desc-${Math.random().toString(36).substr(2, 9)}`;
+    // Generate unique IDs for accessibility
+    const titleElementId = `empty-state-title-${Math.random().toString(36).substr(2, 9)}`;
+    const descriptionElementId = `empty-state-desc-${Math.random().toString(36).substr(2, 9)}`;
 
     return (
       <div
@@ -275,8 +238,8 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         className={cn("empty-state", styles.base, sizes[size], variants[variant], className)}
         data-testid={testId}
         aria-label={ariaLabel}
-        aria-labelledby={!ariaLabel ? generatedTitleId : undefined}
-        aria-describedby={generatedDescriptionId}
+        aria-labelledby={!ariaLabel ? titleElementId : undefined}
+        aria-describedby={descriptionElementId}
         {...rest}
       >
         {/* Icon */}
@@ -290,7 +253,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
             <Typography
               {...titleConfig}
               className={cn("empty-state__title", styles.title, "text-neutral-content")}
-              id={generatedTitleId}
+              id={titleElementId}
             >
               {title}
             </Typography>
@@ -298,7 +261,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
             <Typography
               {...descriptionConfig}
               className={cn("empty-state__description", styles.description, "text-neutral-content-subtler")}
-              id={generatedDescriptionId}
+              id={descriptionElementId}
             >
               {description}
             </Typography>
@@ -306,14 +269,14 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         ) : (
           <>
             {/* Standard layout for large and medium */}
-            <Typography {...titleConfig} className={cn("empty-state__title", styles.title)} id={generatedTitleId}>
+            <Typography {...titleConfig} className={cn("empty-state__title", styles.title)} id={titleElementId}>
               {title}
             </Typography>
 
             <Typography
               {...descriptionConfig}
               className={cn("empty-state__description", styles.description, "text-neutral-content-subtler")}
-              id={generatedDescriptionId}
+              id={descriptionElementId}
             >
               {description}
             </Typography>
