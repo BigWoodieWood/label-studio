@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF -8">
+    <meta charset="UTF-8">
     <title>Recettes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,16 +17,59 @@
     <p>Battez des blancs en neige, pochez-les dans du lait chaud sucré, servez sur une crème anglaise et nappez de caramel.</p>
     <img src="https://tse1.mm.bing.net/th/id/OIP.fBLkKN_yXA3T-HIhc04M-AHaFE?cb=thfvnext&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Île flottante" width="300"> <!-- image externe -->
 
-    <footer>
-        <p>Restau Le Grand — 16 rue du Cegep, Blainville</p>
-    </footer>
     <h3>Ingrédients : Île flottante</h3>
-<table>
-    <tr><th>Ingrédient</th><th>Quantité</th></tr>
-    <tr><td>Haricots mungo secs</td><td>200 g</td></tr>
-    <tr><td>Sucre blanc</td><td>150 ml</td></tr>
-    <tr><td> Noix de coco râpée</td><td>100 g</td></tr>
-    <tr><td>  Graines de sésame</td><td>150 g</td></tr>
-</table>
+    <table class="table table-hover table-bordered table-striped">
+        <thead class="table-dark"> 
+            <tr>
+                <th>Ingrédient</th>
+                <th>Quantité</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Haricots mungo secs</td>
+                <td>200 g</td>
+            </tr>
+            <tr>
+                <td>Sucre blanc</td>
+                <td>150 ml</td>
+            </tr>
+            <tr>
+                <td> Noix de coco râpée</td>
+                <td>100 g</td>
+            </tr>
+            <tr>
+                <td>  Graines de sésame</td>
+                <td>150 g</td>
+            </tr>
+        </tbody>
+    </table>
+    <footer style="text-align: center; margin-top: 30px;">
+        <p>
+            <a href="#"
+               class="popover-link"
+               data-bs-toggle="popover"
+               data-bs-placement="left"
+               title="Adresse"
+               data-bs-content="16 rue du Cegep, Blainville">
+               Restau Le Grand
+            </a>
+        </p>
+        <p><a href="mailto:elliot.waterpolo@outlook.com">Me contacter !</a></p>
+    </footer>
+
+    <!-- ✅ Bootstrap JS (no need for jQuery in v5) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Activate popovers
+        document.addEventListener("DOMContentLoaded", function () {
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+            popoverTriggerList.forEach(function (popoverTriggerEl) {
+                new bootstrap.Popover(popoverTriggerEl, {
+                    trigger: 'hover'
+                })
+            })
+        });
+    </script>
 </body>
 </html>

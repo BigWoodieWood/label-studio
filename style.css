@@ -1,4 +1,8 @@
-
+#g1 {
+    width: 50%;   /* adjust width */
+    height: 50%;  /* adjust height */
+    margin: auto;   /* centers it horizontally */
+}
 #titre::first-letter {
     font-size: 200%;
     color: red;
