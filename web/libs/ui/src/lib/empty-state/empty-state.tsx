@@ -237,8 +237,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
       ? (() => {
           // Filter out null/false values to count actual rendered elements
           const flattenedActions = React.Children.toArray(actions).filter(Boolean);
-          const actualActionCount = flattenedActions.length;
-          const isSingleAction = actualActionCount === 1;
+          const isSingleAction = flattenedActions.length === 1;
 
           return cn("flex gap-base w-full", isSingleAction ? "justify-center" : "", styles[`actions-${size}`]);
         })()
