@@ -1,39 +1,30 @@
-#g1 {
-    width: 50%;   /* adjust width */
-    height: 50%;  /* adjust height */
-    margin: auto;   /* centers it horizontally */
-}
-#titre::first-letter {
-    font-size: 200%;
-    color: red;
-}
+/*
+  @file style.css
+  @author Elliot Wood
+  @version 1.0
+  @date 2025-09-02
+  @brief Feuille de style principale pour la mise en page et les effets visuels.
+*/
 
-
+/* ============================= */
+/* Section : Mise en forme générale */
+/* ============================= */
 body {
     font-family: "Georgia", serif;
-}
-
-
-h1 {
-    text-align: center;
-}
-
-
-body {
     background-image: url("https://static.vecteezy.com/ti/vecteur-libre/p1/6029969-bleu-ciel-skyscape-fond-concept-vectoriel.jpg");
     background-size: cover;
 }
 
-
-ol li:nth-child(2) {
-    opacity: 0.8;
+/* ============================= */
+/* Section : Titres */
+/* ============================= */
+h1 {
+    text-align: center;
 }
 
-
-ol li:nth-child(4) ul li {
-    border: 1px solid #444;
-    padding: 5px;
-    margin: 3px;
+#titre::first-letter {
+    font-size: 200%;
+    color: red;
 }
 
 #titre:hover {
@@ -41,9 +32,24 @@ ol li:nth-child(4) ul li {
     font-size: 250%;
 }
 
+/* ============================= */
+/* Section : Conteneur principal */
+/* ============================= */
+#g1 {
+    width: 50%;
+    height: 50%;
+    margin: auto;
+}
 
+/* ============================= */
+/* Section : Listes ordonnées */
+/* ============================= */
+ol li:nth-child(2) {
+    opacity: 0.8;
+}
 
-
-
-
-
+ol li:nth-child(4) ul li {
+    border: 1px solid #444;
+    padding: 5px;
+    margin: 3px;
+}

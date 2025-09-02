@@ -1,22 +1,48 @@
+<!--
+  @file page2.html
+  @author Elliot Wood
+  @version 1.0
+  @date 2025-09-02
+  @brief Page détaillant certaines recettes du menu :
+         "Pêche du jour" et "Île flottante", avec
+         ingrédients et popover d’adresse.
+-->
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Recettes</title>
+
+    <!-- Feuilles de style externes -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Titre principal -->
     <h1>Recettes en détail</h1>
 
+    <!-- Recette 1 : Pêche du jour -->
     <h2 id="peche">Recette : Pêche du jour</h2>
-    <p>Tremper les filets de poisson dans le lait écrémé ou le blanc d'oeuf. Mélanger la farine, le sel et le poivre et bien enrober chaque filet de ce mélange.</p>
-    <img src="https://tse3.mm.bing.net/th/id/OIP.L-Jabfk-T9ouUV5o8hqcGAHaHa?cb=thfvnext&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Pêche du jour" width="300"> 
+    <p>
+        Tremper les filets de poisson dans le lait écrémé ou le blanc d'œuf.
+        Mélanger la farine, le sel et le poivre et bien enrober chaque filet de ce mélange.
+    </p>
+    <img src="https://tse3.mm.bing.net/th/id/OIP.L-Jabfk-T9ouUV5o8hqcGAHaHa?cb=thfvnext&rs=1&pid=ImgDetMain&o=7&rm=3"
+         alt="Pêche du jour"
+         width="300"> 
 
+    <!-- Recette 2 : Île flottante -->
     <h2 id="ileflottante">Recette : Île flottante</h2>
-    <p>Battez des blancs en neige, pochez-les dans du lait chaud sucré, servez sur une crème anglaise et nappez de caramel.</p>
-    <img src="https://tse1.mm.bing.net/th/id/OIP.fBLkKN_yXA3T-HIhc04M-AHaFE?cb=thfvnext&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Île flottante" width="300"> <!-- image externe -->
+    <p>
+        Battez des blancs en neige, pochez-les dans du lait chaud sucré,
+        servez sur une crème anglaise et nappez de caramel.
+    </p>
+    <img src="https://tse1.mm.bing.net/th/id/OIP.fBLkKN_yXA3T-HIhc04M-AHaFE?cb=thfvnext&rs=1&pid=ImgDetMain&o=7&rm=3"
+         alt="Île flottante"
+         width="300"> 
 
+    <!-- Tableau d’ingrédients -->
     <h3>Ingrédients : Île flottante</h3>
     <table class="table table-hover table-bordered table-striped">
         <thead class="table-dark"> 
@@ -26,24 +52,14 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>Haricots mungo secs</td>
-                <td>200 g</td>
-            </tr>
-            <tr>
-                <td>Sucre blanc</td>
-                <td>150 ml</td>
-            </tr>
-            <tr>
-                <td> Noix de coco râpée</td>
-                <td>100 g</td>
-            </tr>
-            <tr>
-                <td>  Graines de sésame</td>
-                <td>150 g</td>
-            </tr>
+            <tr><td>Haricots mungo secs</td><td>200 g</td></tr>
+            <tr><td>Sucre blanc</td><td>150 ml</td></tr>
+            <tr><td>Noix de coco râpée</td><td>100 g</td></tr>
+            <tr><td>Graines de sésame</td><td>150 g</td></tr>
         </tbody>
     </table>
+
+    <!-- Footer avec popover -->
     <footer style="text-align: center; margin-top: 30px;">
         <p>
             <a href="#"
@@ -58,10 +74,14 @@
         <p><a href="mailto:elliot.waterpolo@outlook.com">Me contacter !</a></p>
     </footer>
 
-    <!-- ✅ Bootstrap JS (no need for jQuery in v5) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // Activate popovers
+        /*
+          @brief Active les popovers au survol des éléments marqués.
+          @details Utilise Bootstrap 5 sans dépendance à jQuery.
+          @return {void}
+        */
         document.addEventListener("DOMContentLoaded", function () {
             var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
             popoverTriggerList.forEach(function (popoverTriggerEl) {
