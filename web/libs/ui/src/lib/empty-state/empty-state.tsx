@@ -102,17 +102,21 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   "data-testid"?: string;
 
   /**
-   * ARIA label for the empty state
+   * ARIA label for the empty state.
+   * If not provided, the component automatically uses aria-labelledby
+   * to reference the title element for accessibility.
    */
   "aria-label"?: string;
 
   /**
-   * ID for the title element (for aria-labelledby)
+   * ID for the title element (for aria-labelledby).
+   * If not provided, a unique ID will be automatically generated.
    */
   titleId?: string;
 
   /**
-   * ID for the description element (for aria-describedby)
+   * ID for the description element (for aria-describedby).
+   * If not provided, a unique ID will be automatically generated.
    */
   descriptionId?: string;
 }
@@ -131,6 +135,7 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
  * - Consistent spacing and typography
  *
  * @example
+ * Basic usage:
  * ```tsx
  * <EmptyState
  *   size="large"
@@ -143,6 +148,91 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
  *   }
  * />
  * ```
+ *
+ * @example
+ * Advanced accessibility with custom IDs:
+ * ```tsx
+ * // When you need to reference these elements from other components
+ * // or create specific relationships for screen readers
+ * <EmptyState
+ *   size="medium"
+ *   variant="neutral"
+ *   icon={<IconDatabase />}
+ *   title="No data available"
+ *   description="There are no records to display at this time"
+ *   titleId="projects-empty-title"
+ *   descriptionId="projects-empty-description"
+ *   actions={
+ *     <div>
+ *       <Button
+ *         onClick={onCreate}
+ *         aria-describedby="projects-empty-description"
+ *       >
+ *         Create New Project
+ *       </Button>
+ *       <Button
+ *         variant="secondary"
+ *         onClick={onImport}
+ *         aria-describedby="projects-empty-description"
+ *       >
+ *         Import Project
+ *       </Button>
+ *     </div>
+ *   }
+ * />
+ * ```
+ *
+ * @example
+ * Accessibility in forms and dialogs:
+ * ```tsx
+ * // In a form where the empty state explains validation or requirements
+ * <form aria-labelledby="upload-form-title" aria-describedby="upload-form-description">
+ *   <EmptyState
+ *     size="small"
+ *     variant="warning"
+ *     icon={<IconAlert />}
+ *     title="File format not supported"
+ *     description="Please upload a CSV, JSON, or XML file"
+ *     titleId="upload-form-title"
+ *     descriptionId="upload-form-description"
+ *     actions={
+ *       <Button onClick={onSelectFile}>Choose Different File</Button>
+ *     }
+ *   />
+ * </form>
+ * ```
+ *
+ * @example
+ * Error states with accessible announcements:
+ * ```tsx
+ * // For error states that need to be announced to screen readers
+ * <EmptyState
+ *   size="medium"
+ *   variant="negative"
+ *   icon={<IconError />}
+ *   title="Failed to load data"
+ *   description="Unable to connect to the server. Please check your internet connection."
+ *   titleId="error-title"
+ *   descriptionId="error-description"
+ *   aria-label="Error occurred while loading data"
+ *   actions={
+ *     <Button
+ *       onClick={onRetry}
+ *       aria-describedby="error-description"
+ *     >
+ *       Try Again
+ *     </Button>
+ *   }
+ * />
+ * ```
+ *
+ * Accessibility Notes:
+ * - titleId and descriptionId are automatically generated if not provided
+ * - The component uses aria-labelledby to reference the title element
+ * - The component uses aria-describedby to reference the description element
+ * - Custom IDs allow you to create relationships with other UI elements
+ * - Use aria-label on the container when you need a different accessible name than the title
+ * - Reference these IDs in action buttons when they relate to the empty state message
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
   (
