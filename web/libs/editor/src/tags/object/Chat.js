@@ -49,7 +49,7 @@
  *
  * @param {string} name                 Name of the element
  * @param {string} value                Data field containing an array of chat messages or empty array
- * @param {string} [messageroles]       Comma-separated list of roles allowed to compose (default: "user" if `llm` is set and "user,assistant" if not)
+ * @param {string} [messageroles]       Comma-separated list of roles that the user can create and send messages on behalf of. Default is "user" if the `llm` parameter is set; default is "user,assistant" if not.
  * @param {boolean|string} [editable]   Whether messages are editable. Use true/false, or a comma-separated list of roles that are editable
  * @param {string|number} [minmessages] Minimum total number of messages required to submit
  * @param {string|number} [maxmessages] Maximum total number of messages allowed
