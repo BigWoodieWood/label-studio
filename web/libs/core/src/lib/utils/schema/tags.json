@@ -213,7 +213,7 @@
       },
       "messageroles": {
         "name": "messageroles",
-        "description": "Comma-separated list of roles allowed to compose (default: \"user\" if `llm` is set and \"user,assistant\" if not)",
+        "description": "Comma-separated list of roles that the user can create and send messages on behalf of. Default is \"user\" if the `llm` parameter is set; default is \"user,assistant\" if not.",
         "type": "string",
         "required": false
       },
