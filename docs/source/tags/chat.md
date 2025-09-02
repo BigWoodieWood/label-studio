@@ -29,7 +29,7 @@ Message object format (task data):
 
 Allow composing both user and assistant messages; auto-reply using an LLM model
 
-```xml
+```html
  <View>
   <Chat
     name="conversation" value="$dialog"
@@ -43,7 +43,7 @@ Allow composing both user and assistant messages; auto-reply using an LLM model
 
 Evaluate assistant responses
 
-```xml
+```html
 <View>
   <Style>
     .htx-chat{flex-grow:1}
