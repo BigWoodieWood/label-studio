@@ -53,3 +53,8 @@ ol li:nth-child(4) ul li {
     padding: 5px;
     margin: 3px;
 }
+.progress-bar {
+  transition: width 0.5s ease !important;
+}
+
+
